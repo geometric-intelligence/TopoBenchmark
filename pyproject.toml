@@ -1,0 +1,121 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "TopoBenchmarkX"
+version = "0.0.1"
+authors = [
+    {name = "PyT-Team Authors", email = "tlscabinet@gmail.com"}
+]
+readme = "README.md"
+description = "Topological Deep Learning"
+license = {file = "LICENSE.txt"}
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Scientific/Engineering :: Mathematics",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Natural Language :: English",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11"
+]
+requires-python = ">= 3.10"
+dependencies=[
+    "tqdm",
+    "numpy",
+    "scipy",
+    "requests",
+    "scikit-learn",
+    "matplotlib",
+    "networkx",
+    "gudhi",
+    "pandas",
+    "pyg-nightly",
+    "toponetx @ git+https://github.com/pyt-team/TopoNetX.git",
+    "topomodelx @ git+https://github.com/pyt-team/TopoModelX.git",
+]
+
+[project.optional-dependencies]
+doc = [
+    "jupyter",
+    "nbsphinx",
+    "nbsphinx_link",
+    "sphinx",
+    "sphinx_gallery",
+    "pydata-sphinx-theme"
+]
+lint = [
+    "black",
+    "black[jupyter]",
+    "flake8",
+    "flake8-docstrings",
+    "Flake8-pyproject",
+    "isort",
+    "pre-commit"
+]
+test = [
+    "pytest",
+    "pytest-cov",
+    "coverage",
+    "jupyter",
+    "mypy"
+]
+
+dev = ["TopoBenchmarkX[test, lint]"]
+all = ["TopoBenchmarkX[dev, doc]"]
+
+[project.urls]
+homepage="https://github.com/pyt-team/TopoBenchmarkX"
+repository="https://github.com/pyt-team/TopoBenchmarkX"
+
+[tool.setuptools.dynamic]
+version = {attr = "topobenchmarkx.__version__"}
+
+[tool.setuptools.packages.find]
+include = [
+    "topobenchmarkx",
+    "topobenchmarkx.*"
+]
+
+[tool.mypy]
+warn_redundant_casts = true
+warn_unused_ignores = true
+show_error_codes = true
+plugins = "numpy.typing.mypy_plugin"
+
+[[tool.mypy.overrides]]
+module = [
+    "torch_cluster.*","networkx.*","scipy.spatial","scipy.sparse","toponetx.classes.simplicial_complex"
+]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+addopts = "--capture=no"
+
+[tool.black]
+line-length = 88
+
+[tool.isort]
+line_length = 88
+multi_line_output = 3
+include_trailing_comma = true
+skip = [".gitignore", "__init__.py"]
+
+[tool.flake8]
+max-line-length = 88
+application_import_names = "topobenchmarkx"
+docstring-convention = "numpy"
+exclude = [
+    "topobenchmarkx/__init__.py",
+    "docs/conf.py"
+]
+
+import_order_style = "smarkets"
+extend-ignore = ["E501", "E203"]
+per-file-ignores = [
+    "*/__init__.py: D104, F401",
+]

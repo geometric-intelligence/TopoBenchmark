@@ -6,7 +6,7 @@
 
 ```bash
 # Navigate to the TopoModelX directory
-cd /path/to/TopoModelX
+cd /path/to/TopoBenchmarkX
 
 # Build the Docker image
 docker build -t topobenchmark:new .

@@ -1,9 +1,16 @@
 _target_: topobenchmarkx.data.load.loaders.HypergraphLoader
+
 # Data definition
 data_domain: hypergraph
 data_type: coauthorship
 data_name: cora
 data_dir: ${paths.data_dir}${data.data_domain}/${data.data_type}/${data.data_name}
+
+# Dataset parameters
+num_features: 1433
+num_classes: 7
+task_level: node
+
 # Dataloader parameters
 batch_size: 128 # Needs to be divisible by the number of devices (e.g., if in a distributed setup)
 train_val_test_split: [55_000, 5_000, 10_000]

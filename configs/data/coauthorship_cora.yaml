@@ -9,7 +9,11 @@ data_dir: ${paths.data_dir}${data.data_domain}/${data.data_type}/${data.data_nam
 # Dataset parameters
 num_features: 1433
 num_classes: 7
+task: classification
 task_level: node
+
+
+# Metric
 
 # Dataloader parameters
 batch_size: 128 # Needs to be divisible by the number of devices (e.g., if in a distributed setup)

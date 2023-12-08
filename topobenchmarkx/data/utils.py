@@ -7,21 +7,23 @@ from torch_geometric.data import Data
 from torch_sparse import coalesce
 
 
-def load_citation_dataset(cfg):
+def load_hypergraph_coauthorhip_dataset(cfg):
     """
     this will read the citation dataset from HyperGCN, and convert it edge_list to
-    [[ -V- | -E- ]
-     [ -E- | -V- ]]
+    [[ -V- ]]
+     [ -E- ]]
     """
-    print(f"Loading hypergraph dataset from hyperGCN: {dataset}")
+    data_dir = cfg["data_dir"]
+    print(f"Loading {cfg['data_domain']} dataset name: {cfg['data_name']}")
 
-    # first load node features:
-    with open(osp.join(path, dataset, "features.pickle"), "rb") as f:
+    # Load node features:
+
+    with open(osp.join(data_dir, "features.pickle"), "rb") as f:
         features = pickle.load(f)
         features = features.todense()
 
-    # then load node labels:
-    with open(osp.join(path, dataset, "labels.pickle"), "rb") as f:
+    # Load node labels:
+    with open(osp.join(data_dir, "labels.pickle"), "rb") as f:
         labels = pickle.load(f)
 
     num_nodes, feature_dim = features.shape
@@ -31,9 +33,9 @@ def load_citation_dataset(cfg):
     features = torch.FloatTensor(features)
     labels = torch.LongTensor(labels)
 
-    # The last, load hypergraph.
-    with open(osp.join(path, dataset, "hypergraph.pickle"), "rb") as f:
-        # hypergraph in hyperGCN is in the form of a dictionary.
+    # Load hypergraph.
+    with open(osp.join(data_dir, "hypergraph.pickle"), "rb") as f:
+        # Hypergraph in hyperGCN is in the form of a dictionary.
         # { hyperedge: [list of nodes in the he], ...}
         hypergraph = pickle.load(f)
 
@@ -51,7 +53,7 @@ def load_citation_dataset(cfg):
 
         edge_idx += 1
 
-    edge_index = np.array([node_list + edge_list, edge_list + node_list], dtype=np.int)
+    edge_index = np.array([node_list, edge_list], dtype=int)
     edge_index = torch.LongTensor(edge_index)
 
     data = Data(x=features, edge_index=edge_index, y=labels)
@@ -65,16 +67,17 @@ def load_citation_dataset(cfg):
         data.edge_index, None, total_num_node_id_he_id, total_num_node_id_he_id
     )
 
+    data.edge_index = torch.sparse_coo_tensor(
+        data.edge_index,
+        values=torch.ones(data.edge_index.shape[1]),
+        size=(data.num_nodes, data.num_edges),
+    )
+
     n_x = num_nodes
-    #     n_x = n_expanded
     num_class = len(np.unique(labels.numpy()))
-    val_lb = int(n_x * train_percent)
-    percls_trn = int(round(train_percent * n_x / num_class))
-    # data = random_planetoid_splits(data, num_class, percls_trn, val_lb)
+
+    # Add parameters to attribute
     data.n_x = n_x
-    # add parameters to attribute
-
-    data.train_percent = train_percent
     data.num_hyperedges = len(hypergraph)
-
+    data.num_class = num_class
     return data

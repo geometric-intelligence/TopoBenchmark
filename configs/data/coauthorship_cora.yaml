@@ -1,4 +1,4 @@
-_target_: src.data.mnist_datamodule.MNISTDataModule
+_target_: topobenchmarkx.data.load.loaders.HypergraphLoader
 # Data definition
 data_domain: hypergraph
 data_type: coauthorship

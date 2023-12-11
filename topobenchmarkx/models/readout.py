@@ -18,7 +18,8 @@ class ReadOut(torch.nn.Module):
         assert pooling_type in ["max", "sum", "mean"], "Invalid pooling_type"
         self.pooling_type = pooling_type
 
-    def forward(self, x: torch.Tensor):
+    def forward(self, model_out: dict):
+        x = model_out["x_0"]
         if self.task_level == "graph":
             if self.pooling_type == "max":
                 x = torch.max(x, dim=0)[0]
@@ -29,4 +30,5 @@ class ReadOut(torch.nn.Module):
             elif self.pooling_type == "sum":
                 x = torch.sum(x, dim=0)[0]
 
-        return self.linear(x)
+        model_out["logits"] = self.linear(x)
+        return model_out

@@ -8,6 +8,11 @@ from lightning import Callback, LightningDataModule, LightningModule, Trainer
 from lightning.pytorch.loggers import Logger
 from omegaconf import DictConfig
 
+from topobenchmarkx.data.dataloader_fullbatch import FullBatchDataModule
+
+# Inputs to load data
+from topobenchmarkx.data.load.loaders import HypergraphLoader
+
 rootutils.setup_root(__file__, indicator=".project-root", pythonpath=True)
 # ------------------------------------------------------------------------------------ #
 # the setup_root above is equivalent to:
@@ -26,7 +31,7 @@ rootutils.setup_root(__file__, indicator=".project-root", pythonpath=True)
 # more info: https://github.com/ashleve/rootutils
 # ------------------------------------------------------------------------------------ #
 
-from src.utils import (
+from topobenchmarkx.utils import (
     RankedLogger,
     extras,
     get_metric_value,
@@ -56,7 +61,10 @@ def train(cfg: DictConfig) -> Tuple[Dict[str, Any], Dict[str, Any]]:
 
     # Data
     log.info(f"Instantiating datamodule <{cfg.data._target_}>")
-    datamodule: LightningDataModule = hydra.utils.instantiate(cfg.data)
+    # datamodule: LightningDataModule = hydra.utils.instantiate(cfg.data)
+    data_loader = HypergraphLoader(cfg)
+    data = data_loader.load()
+    datamodule = FullBatchDataModule(data=data)
 
     # Model for us is Network + logic: inputs backbone, readout, losses
     log.info(f"Instantiating model <{cfg.model._target_}>")

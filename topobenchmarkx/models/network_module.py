@@ -22,6 +22,7 @@ class NetowrkModule(LightningModule):
         backbone: torch.nn.Module,
         readout: torch.nn.Module,
         loss: torch.nn.Module,
+        # evaluator,
         optimizer: torch.optim.Optimizer,
         scheduler: torch.optim.lr_scheduler,
         compile: bool,
@@ -47,10 +48,11 @@ class NetowrkModule(LightningModule):
         self.criterion = loss
         # self.criterion = torch.nn.CrossEntropyLoss()
 
-        # metric objects for calculating and averaging accuracy across batches
-        self.train_acc = Accuracy(task="multiclass", num_classes=10)
-        self.val_acc = Accuracy(task="multiclass", num_classes=10)
-        self.test_acc = Accuracy(task="multiclass", num_classes=10)
+        # self.evaluator = evaluator
+        # # metric objects for calculating and averaging accuracy across batches
+        self.train_acc = Accuracy(task="multiclass", num_classes=7)
+        self.val_acc = Accuracy(task="multiclass", num_classes=7)
+        self.test_acc = Accuracy(task="multiclass", num_classes=7)
 
         # for averaging loss across batches
         self.train_loss = MeanMetric()
@@ -60,13 +62,13 @@ class NetowrkModule(LightningModule):
         # for tracking best so far validation accuracy
         self.val_acc_best = MaxMetric()
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
+    def forward(self, x: torch.Tensor, edge_index: torch.Tensor) -> torch.Tensor:
         """Perform a forward pass through the model `self.backbone`.
 
         :param x: A tensor of images.
         :return: A tensor of logits.
         """
-        return self.backbone(x)
+        return self.backbone(x, edge_index)
 
     def on_train_start(self) -> None:
         """Lightning hook that is called when training begins."""
@@ -76,7 +78,7 @@ class NetowrkModule(LightningModule):
         self.val_acc.reset()
         self.val_acc_best.reset()
 
-    def model_step(self, data) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+    def model_step(self, batch) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         """Perform a single model step on a batch of data.
 
         :param batch: A batch of data (a tuple) containing the input tensor of images and target labels.
@@ -86,14 +88,18 @@ class NetowrkModule(LightningModule):
             - A tensor of predictions.
             - A tensor of target labels.
         """
+        model_out = {}
+        x_0, x_1 = self.forward(batch.x, batch.edge_index)
+        model_out["x_0"] = x_0
+        model_out["hyperedge"] = x_1
+        model_out["labels"] = batch.y
 
-        model_out = self.forward(data)
         model_out = self.readout(model_out)
         model_out = self.criterion(model_out)
 
         return model_out
 
-    def training_step(self, data, batch_idx: int) -> torch.Tensor:
+    def training_step(self, batch, batch_idx: int) -> torch.Tensor:
         """Perform a single training step on a batch of data from the training set.
 
         :param batch: A batch of data (a tuple) containing the input tensor of images and target
@@ -101,20 +107,26 @@ class NetowrkModule(LightningModule):
         :param batch_idx: The index of the current batch.
         :return: A tensor of losses between model predictions and targets.
         """
-        model_out = self.model_step(data)
+
+        model_out = self.model_step(batch)
+
+        # Criterion
+        self.criterion(model_out)
+
+        # Evaluation
+        # self.evaluator(model_out)
 
         # update and log metrics
-        self.train_loss(loss)
-        self.train_acc(preds, targets)
+        self.train_acc(model_out["logits"].argmax(1), model_out["labels"])
         self.log(
-            "train/loss", self.train_loss, on_step=False, on_epoch=True, prog_bar=True
+            "train/loss", model_out["loss"], on_step=False, on_epoch=True, prog_bar=True
         )
         self.log(
             "train/acc", self.train_acc, on_step=False, on_epoch=True, prog_bar=True
         )
 
         # return loss or backpropagation will fail
-        return loss
+        return model_out["loss"]
 
     def on_train_epoch_end(self) -> None:
         "Lightning hook that is called when a training epoch ends."
@@ -129,20 +141,26 @@ class NetowrkModule(LightningModule):
             labels.
         :param batch_idx: The index of the current batch.
         """
-        loss, preds, targets = self.model_step(batch)
+        model_out = self.model_step(batch)
 
         # update and log metrics
-        self.val_loss(loss)
-        self.val_acc(preds, targets)
-        self.log("val/loss", self.val_loss, on_step=False, on_epoch=True, prog_bar=True)
+        self.criterion(model_out)
+        # self.val_loss(loss)
+
+        self.val_acc(model_out["logits"].argmax(1), model_out["labels"])
+        self.log(
+            "val/loss", model_out["loss"], on_step=False, on_epoch=True, prog_bar=True
+        )
         self.log("val/acc", self.val_acc, on_step=False, on_epoch=True, prog_bar=True)
 
     def on_validation_epoch_end(self) -> None:
         "Lightning hook that is called when a validation epoch ends."
         acc = self.val_acc.compute()  # get current val acc
         self.val_acc_best(acc)  # update best so far val acc
+
         # log `val_acc_best` as a value through `.compute()` method, instead of as a metric object
         # otherwise metric would be reset by lightning after each epoch
+
         self.log(
             "val/acc_best", self.val_acc_best.compute(), sync_dist=True, prog_bar=True
         )
@@ -156,13 +174,14 @@ class NetowrkModule(LightningModule):
             labels.
         :param batch_idx: The index of the current batch.
         """
-        loss, preds, targets = self.model_step(batch)
+        model_out = self.model_step(batch)
+        self.criterion(model_out)
 
         # update and log metrics
-        self.test_loss(loss)
-        self.test_acc(preds, targets)
+        # self.test_loss(loss)
+        self.test_acc(model_out["logits"].argmax(1), model_out["labels"])
         self.log(
-            "test/loss", self.test_loss, on_step=False, on_epoch=True, prog_bar=True
+            "test/loss", model_out["loss"], on_step=False, on_epoch=True, prog_bar=True
         )
         self.log("test/acc", self.test_acc, on_step=False, on_epoch=True, prog_bar=True)
 
@@ -207,4 +226,4 @@ class NetowrkModule(LightningModule):
 
 
 if __name__ == "__main__":
-    _ = MNISTLitModule(None, None, None, None)
+    _ = NetowrkModule(None, None, None, None)

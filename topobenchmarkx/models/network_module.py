@@ -6,7 +6,7 @@ from torchmetrics import MaxMetric, MeanMetric
 from torchmetrics.classification.accuracy import Accuracy
 
 
-class NetowrkModule(LightningModule):
+class NetworkModule(LightningModule):
     """Example of a `LightningModule` for MNIST classification.
 
     A `LightningModule` implements 8 key methods:
@@ -27,7 +27,7 @@ class NetowrkModule(LightningModule):
         scheduler: torch.optim.lr_scheduler,
         compile: bool,
     ) -> None:
-        """Initialize a `NetowrkModule`.
+        """Initialize a `NetworkModule`.
 
         :param backbone: The backbone model to train.
         :param readout: The readout class.

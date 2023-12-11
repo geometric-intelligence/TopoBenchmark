@@ -1,4 +1,4 @@
-_target_: topobenchmark.models.network_module.NetowrkModule
+_target_: topobenchmark.models.network_module.NetworkModule
 
 backbone:
   _target_: topomodelx.nn.hypergraph.allset_transformer.AllSetTransformer

@@ -3,7 +3,8 @@ from importlib.util import find_spec
 from typing import Any, Callable, Dict, Optional, Tuple
 
 from omegaconf import DictConfig
-from src.utils import pylogger, rich_utils
+
+from topobenchmarkx.utils import pylogger, rich_utils
 
 log = pylogger.RankedLogger(__name__, rank_zero_only=True)
 

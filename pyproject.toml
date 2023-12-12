@@ -32,11 +32,12 @@ dependencies=[
     "scikit-learn",
     "matplotlib",
     "networkx",
-    "gudhi",
     "pandas",
     "pyg-nightly",
-    "toponetx @ git+https://github.com/pyt-team/TopoNetX.git",
-    "topomodelx @ git+https://github.com/pyt-team/TopoModelX.git",
+    "decorator",
+    "hypernetx < 2.0.0",
+    "trimesh",
+    "spharapy",
     "hydra-core==1.3.2",
     "hydra-colorlog==1.2.0",
     "hydra-optuna-sweeper==1.2.0",
@@ -44,6 +45,8 @@ dependencies=[
     "rich",
     "rootutils",
     "pytest",
+    "toponetx @ git+https://github.com/pyt-team/TopoNetX.git",
+    "topomodelx @ git+https://github.com/pyt-team/TopoModelX.git",
 
 ]
 

@@ -1,6 +1,6 @@
 //devcontainer.json
 {
-    "name": "TopoBenchmarkX",
+    "name": "TopoBenchmarkX:new",
     "dockerFile": "./Dockerfile",
     "customizations": {
         "vscode": {

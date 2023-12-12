@@ -1,0 +1,38 @@
+_target_: topobenchmark.models.network_module.NetworkModule
+
+backbone:
+  _target_: topomodelx.nn.hypergraph.allset_transformer.AllSetTransformer
+  in_channels: ${data.num_features}
+  hidden_channels: 64
+  n_layers: 1
+  heads: 4
+  dropout: 0.2
+  mlp_num_layers: 2
+  mlp_dropout: 0.2
+
+
+loss:
+  _target_: topobenchmarkx.models.losses.loss.DefaultLoss
+  task: ${data.task}
+
+readout:
+  _target_: topobenchmarkx.models.readouts.NodeLevelReadOut
+  task_level: ${data.task_level}
+  in_channels: ${model.backbone.hidden_channels}
+  out_channels: ${data.num_classes}
+
+optimizer:
+  _target_: torch.optim.Adam
+  _partial_: true
+  lr: 0.001
+  weight_decay: 0.0
+
+scheduler:
+  _target_: torch.optim.lr_scheduler.ReduceLROnPlateau
+  _partial_: true
+  mode: min
+  factor: 0.1
+  patience: 10
+
+# compile model for faster training with pytorch 2.0
+compile: false

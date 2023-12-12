@@ -1,0 +1,15 @@
+//devcontainer.json
+{
+    "name": "TopoBenchmarkX:new",
+    "dockerFile": "./Dockerfile",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-python.python",
+                "ms-python.isort",
+                "ms-python.vscode-pylance",
+                "ms-toolsai.jupyter"
+            ]
+        }
+    }
+}

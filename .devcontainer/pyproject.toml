@@ -41,12 +41,9 @@ dependencies=[
     "hydra-core==1.3.2",
     "hydra-colorlog==1.2.0",
     "hydra-optuna-sweeper==1.2.0",
-    "lightning>=2.0.0",
     "rich",
     "rootutils",
     "pytest",
-    "toponetx @ git+https://github.com/pyt-team/TopoNetX.git",
-    "topomodelx @ git+https://github.com/pyt-team/TopoModelX.git",
 
 ]
 

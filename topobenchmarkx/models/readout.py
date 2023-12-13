@@ -1,34 +1,21 @@
+from abc import ABC, abstractmethod
+
 import torch
 
-
-class ReadOut(torch.nn.Module):
-    def __init__(
-        self,
-        in_channels: int,
-        out_channels: int,
-        task_level: str,
-        pooling_type: str = "sum",
-    ):
-        super().__init__()
-        self.linear = torch.nn.Linear(in_channels, out_channels)
-
-        assert task_level in ["graph", "node"], "Invalid task_level"
-        self.task_level = task_level
-
-        assert pooling_type in ["max", "sum", "mean"], "Invalid pooling_type"
-        self.pooling_type = pooling_type
-
-    def forward(self, model_out: dict):
-        x = model_out["x_0"]
-        if self.task_level == "graph":
-            if self.pooling_type == "max":
-                x = torch.max(x, dim=0)[0]
-
-            elif self.pooling_type == "mean":
-                x = torch.mean(x, dim=0)[0]
-
-            elif self.pooling_type == "sum":
-                x = torch.sum(x, dim=0)[0]
-
-        model_out["logits"] = self.linear(x)
-        return model_out
+class AbstractReadOut(torch.nn.Module):
+    """abstract class that provides an interface to define a custom readout"""
+    
+    def __init__(self):
+        return
+    
+    @abstractmethod
+    def forward(self, model_out: dict) -> dict:
+        """Forward pass of the readout model
+        
+        Parameters:
+            :model_out: Dictionary with results from the network
+            
+        Returns:
+            :model_out: Dictionary updated with "logits" field
+            
+        """

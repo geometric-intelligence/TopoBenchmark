@@ -6,7 +6,7 @@ from torchmetrics import MaxMetric, MeanMetric
 from torchmetrics.classification.accuracy import Accuracy
 
 
-class NetowrkModule(LightningModule):
+class NetworkModule(LightningModule):
     """Example of a `LightningModule` for MNIST classification.
 
     A `LightningModule` implements 8 key methods:
@@ -20,6 +20,7 @@ class NetowrkModule(LightningModule):
     def __init__(
         self,
         backbone: torch.nn.Module,
+        readout_workaround: torch.nn.Module,
         readout: torch.nn.Module,
         loss: torch.nn.Module,
         # evaluator,
@@ -27,7 +28,7 @@ class NetowrkModule(LightningModule):
         scheduler: torch.optim.lr_scheduler,
         compile: bool,
     ) -> None:
-        """Initialize a `NetowrkModule`.
+        """Initialize a `NetworkModule`.
 
         :param backbone: The backbone model to train.
         :param readout: The readout class.
@@ -42,6 +43,7 @@ class NetowrkModule(LightningModule):
         self.save_hyperparameters(logger=False)
 
         self.backbone = backbone
+        self.readout_workaround = readout_workaround
         self.readout = readout
 
         # loss function
@@ -68,7 +70,7 @@ class NetowrkModule(LightningModule):
         :param x: A tensor of images.
         :return: A tensor of logits.
         """
-        return self.backbone(x, edge_index)
+        return self.readout_workaround(self.backbone(x, edge_index))
 
     def on_train_start(self) -> None:
         """Lightning hook that is called when training begins."""
@@ -226,4 +228,4 @@ class NetowrkModule(LightningModule):
 
 
 if __name__ == "__main__":
-    _ = NetowrkModule(None, None, None, None)
+    _ = NetworkModule(None, None, None, None)

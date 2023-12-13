@@ -12,9 +12,6 @@ num_classes: 7
 task: classification
 task_level: node
 
-
-# Metric
-
 # Dataloader parameters
 batch_size: 128 # Needs to be divisible by the number of devices (e.g., if in a distributed setup)
 train_val_test_split: [55_000, 5_000, 10_000]

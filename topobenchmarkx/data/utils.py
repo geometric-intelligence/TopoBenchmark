@@ -4,6 +4,7 @@ import pickle
 import numpy as np
 import torch
 from torch_geometric.data import Data
+import torch_geometric
 from torch_sparse import coalesce
 
 
@@ -80,4 +81,12 @@ def load_hypergraph_coauthorhip_dataset(cfg):
     data.n_x = n_x
     data.num_hyperedges = len(hypergraph)
     data.num_class = num_class
+    return data
+
+
+def get_cora(cfg):
+    data_dir = cfg["data_dir"]
+    print(f"Loading {cfg['data_domain']} dataset name: {cfg['data_name']}")
+    
+    data = torch_geometric.datasets.Planetoid(data_dir, "Cora")
     return data

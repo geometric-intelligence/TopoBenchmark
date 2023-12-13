@@ -1,19 +1,22 @@
-_target_: topobenchmark.models.network_module.NetowrkModule
+_target_: topobenchmarkx.models.network_module.NetowrkModule
 
 backbone:
   _target_: topomodelx.nn.hypergraph.allset_transformer.AllSetTransformer
   in_channels: ${data.num_features}
-  hidden_channels: 64
+  hidden_channels: 128
   n_layers: 1
   heads: 4
   dropout: 0.2
-  mlp_num_layers: 2
+  mlp_num_layers: 1
   mlp_dropout: 0.2
-
 
 loss:
   _target_: topobenchmarkx.models.losses.loss.DefaultLoss
   task: ${data.task}
+
+# evaluator:
+#   _target_: topobenchmarkx.evaluators.evaluator.Evaluator
+#   metrics: [acc, rocauc]
 
 readout:
   _target_: topobenchmarkx.models.readout.ReadOut

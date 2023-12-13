@@ -1,0 +1,1 @@
+unzip /TopoBenchmarkX/data/hypergraph.zip -d /TopoBenchmarkX/data/

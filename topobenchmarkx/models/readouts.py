@@ -2,6 +2,7 @@ import torch
 
 from topobenchmarkx.models.readout import AbstractReadOut
 
+
 class NodeLevelReadOut(AbstractReadOut):
     def __init__(
         self,

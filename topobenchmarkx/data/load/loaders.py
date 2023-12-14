@@ -2,7 +2,7 @@ import hydra
 from omegaconf import DictConfig
 
 from topobenchmarkx.data.load.loader import AbstractLoader
-from topobenchmarkx.data.utils import load_hypergraph_coauthorhip_dataset
+from topobenchmarkx.data.utils import load_hypergraph_pickle_dataset, load_split
 
 
 class HypergraphLoader(AbstractLoader):
@@ -12,5 +12,10 @@ class HypergraphLoader(AbstractLoader):
     def load(
         self,
     ):
-        data = load_hypergraph_coauthorhip_dataset(self.cfg.data)
+        data = load_hypergraph_pickle_dataset(self.cfg.data)
+        data = load_split(data, self.cfg.data)
+
+        # We need to add checks that:
+        # All nodes belong to some edge, in case some not, create selfedge
+
         return data

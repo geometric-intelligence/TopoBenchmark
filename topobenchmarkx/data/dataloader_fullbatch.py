@@ -23,6 +23,9 @@ class CustomDataset(Dataset):
             self.data.n_x,
             self.data.num_hyperedges,
             self.data.num_class,
+            self.data.train_mask,
+            self.data.val_mask,
+            self.data.test_mask,
         )
 
 
@@ -42,6 +45,9 @@ def collate_fn(batch):
     n_x = batch[0][3]
     num_hyperedges = batch[0][4]
     num_class = batch[0][5]
+    train_mask = batch[0][6]
+    val_mask = batch[0][7]
+    test_mask = batch[0][8]
 
     return Data(
         x=x,
@@ -50,6 +56,9 @@ def collate_fn(batch):
         num_hyperedges=num_hyperedges,
         num_class=num_class,
         y=y,
+        train_mask=train_mask,
+        val_mask=val_mask,
+        test_mask=test_mask,
     )
 
 

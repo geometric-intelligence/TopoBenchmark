@@ -1,3 +1,4 @@
+import os
 from typing import Any, Dict, List, Optional, Tuple
 
 import hydra
@@ -12,6 +13,8 @@ from topobenchmarkx.data.dataloader_fullbatch import FullBatchDataModule
 
 # Inputs to load data
 from topobenchmarkx.data.load.loaders import HypergraphLoader
+
+os.environ["CUDA_VISIBLE_DEVICES"] = "2"
 
 rootutils.setup_root(__file__, indicator=".project-root", pythonpath=True)
 # ------------------------------------------------------------------------------------ #

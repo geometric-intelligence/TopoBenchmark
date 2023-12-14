@@ -70,7 +70,7 @@ class NetworkModule(LightningModule):
         :param x: A tensor of images.
         :return: A tensor of logits.
         """
-        return self.readout_workaround(self.backbone(x, edge_index))
+        return self.backbone(x, edge_index)
 
     def on_train_start(self) -> None:
         """Lightning hook that is called when training begins."""
@@ -90,11 +90,10 @@ class NetworkModule(LightningModule):
             - A tensor of predictions.
             - A tensor of target labels.
         """
-        model_out = {}
+        model_out = {"labels": batch.y}
         x_0, x_1 = self.forward(batch.x, batch.edge_index)
         model_out["x_0"] = x_0
         model_out["hyperedge"] = x_1
-        model_out["labels"] = batch.y
 
         model_out = self.readout(model_out)
         model_out = self.criterion(model_out)
@@ -112,6 +111,10 @@ class NetworkModule(LightningModule):
 
         model_out = self.model_step(batch)
 
+        # Keep only train data points
+        for key, val in model_out.items():
+            if key not in ["loss"]:
+                model_out[key] = val[batch.train_mask]
         # Criterion
         self.criterion(model_out)
 
@@ -145,10 +148,14 @@ class NetworkModule(LightningModule):
         """
         model_out = self.model_step(batch)
 
+        # Keep only train data points
+        for key, val in model_out.items():
+            if key not in ["loss"]:
+                model_out[key] = val[batch.val_mask]
+
         # update and log metrics
         self.criterion(model_out)
         # self.val_loss(loss)
-
         self.val_acc(model_out["logits"].argmax(1), model_out["labels"])
         self.log(
             "val/loss", model_out["loss"], on_step=False, on_epoch=True, prog_bar=True
@@ -176,7 +183,14 @@ class NetworkModule(LightningModule):
             labels.
         :param batch_idx: The index of the current batch.
         """
+
         model_out = self.model_step(batch)
+
+        # Keep only train data points
+        for key, val in model_out.items():
+            if key not in ["loss"]:
+                model_out[key] = val[batch.test_mask]
+
         self.criterion(model_out)
 
         # update and log metrics
@@ -212,7 +226,10 @@ class NetworkModule(LightningModule):
 
         :return: A dict containing the configured optimizers and learning-rate schedulers to be used for training.
         """
-        optimizer = self.hparams.optimizer(params=self.trainer.model.parameters())
+        optimizer = self.hparams.optimizer(
+            params=list(self.trainer.model.parameters())
+            + list(self.readout.parameters())
+        )
         if self.hparams.scheduler is not None:
             scheduler = self.hparams.scheduler(optimizer=optimizer)
             return {

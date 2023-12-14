@@ -8,7 +8,7 @@ from torch_geometric.data import Data
 from torch_sparse import coalesce
 
 
-def load_hypergraph_coauthorhip_dataset(cfg):
+def load_hypergraph_pickle_dataset(cfg):
     """
     this will read the citation dataset from HyperGCN, and convert it edge_list to
     [[ -V- ]]
@@ -81,6 +81,24 @@ def load_hypergraph_coauthorhip_dataset(cfg):
     data.n_x = n_x
     data.num_hyperedges = len(hypergraph)
     data.num_class = num_class
+    return data
+
+
+def load_split(data, cfg):
+    data_dir = cfg["data_split_dir"]
+    load_path = f"{data_dir}/split_{cfg['data_seed']}.npz"
+    splits = np.load(load_path, allow_pickle=True)
+    data.train_mask = torch.from_numpy(splits["train"])
+    data.val_mask = torch.from_numpy(splits["valid"])
+    data.test_mask = torch.from_numpy(splits["test"])
+
+    # check that all nodes belong to splits
+    assert (
+        torch.unique(
+            torch.concat([data.train_mask, data.val_mask, data.test_mask])
+        ).shape[0]
+        == data.num_nodes
+    ), "Not all nodes within splits"
     return data
 
 

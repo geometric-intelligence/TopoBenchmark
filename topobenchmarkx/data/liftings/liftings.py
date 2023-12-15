@@ -32,7 +32,7 @@ class KHopLifting(AbstractLifting):
 class KNearestNeighborsLifting(AbstractLifting):
     def __init__(self, k=1):
         super().__init__()
-        self.transform = torch_geometric.transforms.KNNGraph(k)
+        self.transform = torch_geometric.transforms.KNNGraph(k, force_undirected=True)
         self.added_fields = ["hyperedges"]
 
     def forward(self, batch: torch_geometric.data.Batch) -> torch_geometric.data.Batch:

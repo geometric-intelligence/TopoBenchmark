@@ -67,9 +67,12 @@ def train(cfg: DictConfig) -> Tuple[Dict[str, Any], Dict[str, Any]]:
     # datamodule: LightningDataModule = hydra.utils.instantiate(cfg.data)
     data_loader = HypergraphLoader(cfg)
     data = data_loader.load()
-    datamodule = FullBatchDataModule(data=data)
 
     # Transforms
+    # transforms = hydra.utils.instantiate(cfg.transforms)
+    # transforms(data)
+
+    datamodule = FullBatchDataModule(data=data)
 
     # Model for us is Network + logic: inputs backbone, readout, losses
     log.info(f"Instantiating model <{cfg.model._target_}>")

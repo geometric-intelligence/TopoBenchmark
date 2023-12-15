@@ -1,4 +1,5 @@
 import hydra
+import torch
 from omegaconf import DictConfig
 
 from topobenchmarkx.data.load.loader import AbstractLoader

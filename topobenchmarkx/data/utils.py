@@ -42,7 +42,7 @@ def load_hypergraph_pickle_dataset(cfg):
 
     print(f"number of hyperedges: {len(hypergraph)}")
 
-    edge_idx = num_nodes
+    edge_idx = 0  # num_nodes
     node_list = []
     edge_list = []
     for he in hypergraph.keys():
@@ -53,6 +53,17 @@ def load_hypergraph_pickle_dataset(cfg):
         edge_list += [edge_idx] * cur_size
 
         edge_idx += 1
+
+    # check that every node is in some hyperedge
+    if len(np.unique(node_list)) != num_nodes:
+        # add self hyperedges to isolated nodes
+        isolated_nodes = np.setdiff1d(np.arange(num_nodes), np.unique(node_list))
+
+        for node in isolated_nodes:
+            node_list += [node]
+            edge_list += [edge_idx]
+            edge_idx += 1
+            hypergraph[f"Unique_additonal_he_{edge_idx}"] = [node]
 
     edge_index = np.array([node_list, edge_list], dtype=int)
     edge_index = torch.LongTensor(edge_index)
@@ -68,12 +79,6 @@ def load_hypergraph_pickle_dataset(cfg):
         data.edge_index, None, total_num_node_id_he_id, total_num_node_id_he_id
     )
 
-    data.edge_index = torch.sparse_coo_tensor(
-        data.edge_index,
-        values=torch.ones(data.edge_index.shape[1]),
-        size=(data.num_nodes, data.num_edges),
-    )
-
     n_x = num_nodes
     num_class = len(np.unique(labels.numpy()))
 
@@ -81,7 +86,43 @@ def load_hypergraph_pickle_dataset(cfg):
     data.n_x = n_x
     data.num_hyperedges = len(hypergraph)
     data.num_class = num_class
+
+    data.edge_index = torch.sparse_coo_tensor(
+        data.edge_index,
+        values=torch.ones(data.edge_index.shape[1]),
+        size=(data.num_nodes, data.num_hyperedges),
+    )
+
+    # Print some info
+    print("Final num_hyperedges", data.num_hyperedges)
+    print("Final num_nodes", data.num_nodes)
+    print("Final num_class", data.num_class)
+
     return data
+
+
+# def add_selfhe(data):
+#     # Add self hyperedge in case there is totaly isolated nodes
+#     incidence_1 = data.edge_index
+
+#     incidence_1 = torch.sparse_coo_tensor(
+#         incidence_1,
+#         values=torch.ones(incidence_1.shape[1]),
+#         size=(data.num_nodes, data.num_hyperedges),
+#     )
+
+#     incidence_1 = incidence_1.to_dense()
+#     node_idx = torch.where(torch.sum(incidence_1, dim=1)==0)[0]
+
+#     max_he_idx = data.num_hyperedges + data.num_nodes - 1
+#     he_idx = torch.arange(max_he_idx + 1,
+#                 max_he_idx + len(node_idx) + 1)
+#     data.edge_index = torch.cat([data.edge_index,
+#                     torch.stack([node_idx, he_idx])], dim=1)
+
+#     data.num_hyperedges = data.num_hyperedges + len(node_idx)
+
+#     return data
 
 
 def load_split(data, cfg):

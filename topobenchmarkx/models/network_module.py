@@ -108,12 +108,14 @@ class NetworkModule(LightningModule):
         :param batch_idx: The index of the current batch.
         :return: A tensor of losses between model predictions and targets.
         """
+        # if data_transform == True:
+        #     batch = data_transform(batch)
 
         model_out = self.model_step(batch)
 
         # Keep only train data points
         for key, val in model_out.items():
-            if key not in ["loss"]:
+            if key not in ["loss", "hyperedge"]:
                 model_out[key] = val[batch.train_mask]
         # Criterion
         self.criterion(model_out)
@@ -150,7 +152,7 @@ class NetworkModule(LightningModule):
 
         # Keep only train data points
         for key, val in model_out.items():
-            if key not in ["loss"]:
+            if key not in ["loss", "hyperedge"]:
                 model_out[key] = val[batch.val_mask]
 
         # update and log metrics
@@ -188,7 +190,7 @@ class NetworkModule(LightningModule):
 
         # Keep only train data points
         for key, val in model_out.items():
-            if key not in ["loss"]:
+            if key not in ["loss", "hyperedge"]:
                 model_out[key] = val[batch.test_mask]
 
         self.criterion(model_out)

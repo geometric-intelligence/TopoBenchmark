@@ -15,10 +15,5 @@ class AbstractLifting(torch_geometric.transforms.BaseTransform):
         """Forward pass of the lifting
         """
         
-    def __call__(self, batch: torch_geometric.data.Batch, batch_idx):
-        if batch_idx in self.cache:
-            return self.cache[batch_idx]
-        
-        lifted = self.forward(batch)
-        self.cache[batch_idx] = lifted
-        return lifted
+    def __call__(self, data):
+        self.forward(data)

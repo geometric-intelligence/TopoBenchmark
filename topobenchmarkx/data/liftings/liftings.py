@@ -77,9 +77,6 @@ class SimplicialNeighborhoodLifting(torch_geometric.transforms.BaseTransform):
                     
         for i in range(self.complex_dim+1):
             simplices[i] = list(simplices[i])
-            print(len(simplices[i]))
-            print(simplices[i])
-            print("-----------------------------")
         incidences = [torch.zeros(len(simplices[i]), len(simplices[i+1])) for i in range(self.complex_dim)]
         laplacians_up = [torch.zeros(len(simplices[i]), len(simplices[i])) for i in range(self.complex_dim)]
         laplacians_down = [torch.zeros(len(simplices[i+1]), len(simplices[i+1])) for i in range(self.complex_dim)]
@@ -101,3 +98,4 @@ class SimplicialNeighborhoodLifting(torch_geometric.transforms.BaseTransform):
             if i%3==2:
                 results[field] = laplacians_down[int(i/3)]
         return results
+    

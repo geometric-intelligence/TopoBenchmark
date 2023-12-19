@@ -78,9 +78,7 @@ class SimplicialNeighborhoodLifting(torch_geometric.transforms.BaseTransform):
 
         for i in range(self.complex_dim + 1):
             simplices[i] = list(simplices[i])
-            print(len(simplices[i]))
-            print(simplices[i])
-            print("-----------------------------")
+
         incidences = [
             torch.zeros(len(simplices[i]), len(simplices[i + 1]))
             for i in range(self.complex_dim)

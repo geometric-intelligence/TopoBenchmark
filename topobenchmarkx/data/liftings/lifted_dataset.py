@@ -2,32 +2,23 @@ import copy
 
 import torch_geometric
 
+class Transform():
+    def __init__(self, lift):
+        self.lift = lift
+        
+    def transform(self, list_of_data):
+        data_lifted = []
+        for i in range(len(list_of_data)):
+            list_of_data[i] = self.lift(list_of_data[i])
+        return list_of_data
 
 class LiftedDataset(torch_geometric.data.Dataset):
-    def __init__(self, data, lift):
+    def __init__(self, list_of_data):
         super().__init__()
-        self.data = copy.copy(data)
-        self.fields = lift.added_fields
-        self.lift = lift
-        self.lifted_data = self.apply_lift(data)
+        self.list_of_data = list_of_data
         
-    def apply_lift(self, data):
-        lifting = {}
-        for field in self.fields:
-            lifting[field] = []
-            
-        for i in range(len(data)):
-            d = data.get(i)
-            d_lifted = self.lift(d)
-            for field in self.fields:
-                lifting[field].append(d_lifted[field])
-        return lifting
-    
     def get(self, idx):
-        data = self.data[idx]
-        for field in self.fields:
-            data[field] = self.lifted_data[field][idx]
-        return data
+        return self.list_of_data[idx]
     
     def len(self):
-        return len(self.data)
+        return len(self.list_of_data)

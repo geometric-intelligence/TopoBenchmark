@@ -10,7 +10,7 @@ import torch_geometric
 from topobenchmarkx.data.liftings.lifting import AbstractLifting
 
 
-class KHopLifting(torch_geometric.transforms.BaseTransform):
+class HypergraphKHopLifting(torch_geometric.transforms.BaseTransform):
     def __init__(self, k=1):
         super().__init__()
         self.k = k
@@ -31,7 +31,7 @@ class KHopLifting(torch_geometric.transforms.BaseTransform):
         return results
     
     
-class KNearestNeighborsLifting(torch_geometric.transforms.BaseTransform):
+class HypergraphKNearestNeighborsLifting(torch_geometric.transforms.BaseTransform):
     def __init__(self, k=1):
         super().__init__()
         self.transform = torch_geometric.transforms.KNNGraph(k)
@@ -50,7 +50,7 @@ class KNearestNeighborsLifting(torch_geometric.transforms.BaseTransform):
         return results
     
 
-class CliqueComplexLifting(torch_geometric.transforms.BaseTransform):
+class SimplicialNeighborhoodLifting(torch_geometric.transforms.BaseTransform):
     def __init__(self, complex_dim=2):
         super().__init__()
         self.complex_dim = complex_dim

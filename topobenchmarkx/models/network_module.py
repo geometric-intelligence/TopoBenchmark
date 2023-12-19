@@ -5,6 +5,10 @@ from lightning import LightningModule
 from torchmetrics import MaxMetric, MeanMetric
 from torchmetrics.classification.accuracy import Accuracy
 
+from topobenchmarkx.models.wrappers.default_wrapper import HypergraphWrapper, SANWrapper
+
+# import topomodelx
+
 
 class NetworkModule(LightningModule):
     """Example of a `LightningModule` for MNIST classification.
@@ -23,7 +27,6 @@ class NetworkModule(LightningModule):
         readout_workaround: torch.nn.Module,
         readout: torch.nn.Module,
         loss: torch.nn.Module,
-        # evaluator,
         optimizer: torch.optim.Optimizer,
         scheduler: torch.optim.lr_scheduler,
         compile: bool,
@@ -42,42 +45,41 @@ class NetworkModule(LightningModule):
         # also ensures init params will be stored in ckpt
         self.save_hyperparameters(logger=False)
 
-        self.backbone = backbone
+        if str(backbone.__class__) in [
+            "<class 'topomodelx.nn.hypergraph.unigcnii.UniGCNII'>",
+            "<class 'topomodelx.nn.hypergraph.allset_transformer.AllSetTransformer'>",
+        ]:
+            self.backbone = HypergraphWrapper(backbone)
+
+        elif str(backbone.__class__) in ["<class 'topomodelx.nn.san.san.SAN'>"]:
+            self.backbone = SANWrapper(backbone)
+        else:
+            raise NotImplementedError(f"Backbone {backbone.__class__} not implemented")
+
         self.readout_workaround = readout_workaround
         self.readout = readout
+        self.evaluator = None
 
         # loss function
         self.criterion = loss
-        # self.criterion = torch.nn.CrossEntropyLoss()
-
-        # self.evaluator = evaluator
-        # # metric objects for calculating and averaging accuracy across batches
-        self.train_acc = Accuracy(task="multiclass", num_classes=7)
-        self.val_acc = Accuracy(task="multiclass", num_classes=7)
-        self.test_acc = Accuracy(task="multiclass", num_classes=7)
-
-        # for averaging loss across batches
-        self.train_loss = MeanMetric()
-        self.val_loss = MeanMetric()
-        self.test_loss = MeanMetric()
 
         # for tracking best so far validation accuracy
         self.val_acc_best = MaxMetric()
 
-    def forward(self, x: torch.Tensor, edge_index: torch.Tensor) -> torch.Tensor:
+    def forward(self, batch) -> dict:
         """Perform a forward pass through the model `self.backbone`.
 
         :param x: A tensor of images.
         :return: A tensor of logits.
         """
-        return self.backbone(x, edge_index)
+        return self.backbone(batch)  # self.backbone(x, edge_index)
 
     def on_train_start(self) -> None:
         """Lightning hook that is called when training begins."""
         # by default lightning executes validation step sanity checks before training starts,
         # so it's worth to make sure validation metrics don't store results from these checks
-        self.val_loss.reset()
-        self.val_acc.reset()
+        # self.val_loss.reset()
+        # self.val_acc.reset()
         self.val_acc_best.reset()
 
     def model_step(self, batch) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
@@ -90,11 +92,11 @@ class NetworkModule(LightningModule):
             - A tensor of predictions.
             - A tensor of target labels.
         """
-        model_out = {"labels": batch.y}
-        x_0, x_1 = self.forward(batch.x, batch.edge_index)
-        model_out["x_0"] = x_0
-        model_out["hyperedge"] = x_1
-
+        # model_out = {"labels": batch.y}
+        # x_0, x_1 = self.forward(batch.x, batch.edge_index)
+        # model_out["x_0"] = x_0
+        # model_out["hyperedge"] = x_1
+        model_out = self.forward(batch)
         model_out = self.readout(model_out)
         model_out = self.criterion(model_out)
 
@@ -121,16 +123,22 @@ class NetworkModule(LightningModule):
         self.criterion(model_out)
 
         # Evaluation
-        # self.evaluator(model_out)
+        self.evaluator.eval(model_out)
 
         # update and log metrics
-        self.train_acc(model_out["logits"].argmax(1), model_out["labels"])
+        # self.train_acc(model_out["logits"].argmax(1), model_out["labels"])
         self.log(
             "train/loss", model_out["loss"], on_step=False, on_epoch=True, prog_bar=True
         )
-        self.log(
-            "train/acc", self.train_acc, on_step=False, on_epoch=True, prog_bar=True
-        )
+
+        for key in model_out["metrics"].keys():
+            self.log(
+                f"train/{key}",
+                model_out["metrics"][key],
+                on_step=False,
+                on_epoch=True,
+                prog_bar=True,
+            )
 
         # return loss or backpropagation will fail
         return model_out["loss"]
@@ -157,17 +165,31 @@ class NetworkModule(LightningModule):
 
         # update and log metrics
         self.criterion(model_out)
-        # self.val_loss(loss)
-        self.val_acc(model_out["logits"].argmax(1), model_out["labels"])
+
+        # Evaluation
+        self.evaluator.eval(model_out)
+
         self.log(
             "val/loss", model_out["loss"], on_step=False, on_epoch=True, prog_bar=True
         )
-        self.log("val/acc", self.val_acc, on_step=False, on_epoch=True, prog_bar=True)
+
+        for key in model_out["metrics"].keys():
+            self.log(
+                f"val/{key}",
+                model_out["metrics"][key],
+                on_step=False,
+                on_epoch=True,
+                prog_bar=True,
+            )
+
+        # To track best so far validation accuracy (to be changed in future)
+        self.val_acc_best(model_out["metrics"]["acc"])
+        # self.log("val/acc", self.val_acc, on_step=False, on_epoch=True, prog_bar=True)
 
     def on_validation_epoch_end(self) -> None:
         "Lightning hook that is called when a validation epoch ends."
-        acc = self.val_acc.compute()  # get current val acc
-        self.val_acc_best(acc)  # update best so far val acc
+        # acc = self.val_acc.compute()  # get current val acc
+        # self.val_acc_best(acc)  # update best so far val acc
 
         # log `val_acc_best` as a value through `.compute()` method, instead of as a metric object
         # otherwise metric would be reset by lightning after each epoch
@@ -195,13 +217,24 @@ class NetworkModule(LightningModule):
 
         self.criterion(model_out)
 
+        # Evaluation
+        self.evaluator.eval(model_out)
+
         # update and log metrics
         # self.test_loss(loss)
-        self.test_acc(model_out["logits"].argmax(1), model_out["labels"])
+        # self.test_acc(model_out["logits"].argmax(1), model_out["labels"])
         self.log(
             "test/loss", model_out["loss"], on_step=False, on_epoch=True, prog_bar=True
         )
-        self.log("test/acc", self.test_acc, on_step=False, on_epoch=True, prog_bar=True)
+        for key in model_out["metrics"].keys():
+            self.log(
+                f"test/{key}",
+                model_out["metrics"][key],
+                on_step=False,
+                on_epoch=True,
+                prog_bar=True,
+            )
+        # self.log("test/acc", self.test_acc, on_step=False, on_epoch=True, prog_bar=True)
 
     def on_test_epoch_end(self) -> None:
         """Lightning hook that is called when a test epoch ends."""
@@ -245,6 +278,19 @@ class NetworkModule(LightningModule):
             }
         return {"optimizer": optimizer}
 
+
+# self.criterion = torch.nn.CrossEntropyLoss()
+
+# self.evaluator = evaluator
+# # metric objects for calculating and averaging accuracy across batches
+# self.train_acc = Accuracy(task="multiclass", num_classes=7)
+# self.val_acc = Accuracy(task="multiclass", num_classes=7)
+# self.test_acc = Accuracy(task="multiclass", num_classes=7)
+
+# for averaging loss across batches
+# self.train_loss = MeanMetric()
+# self.val_loss = MeanMetric()
+# self.test_loss = MeanMetric()
 
 if __name__ == "__main__":
     _ = NetworkModule(None, None, None, None)

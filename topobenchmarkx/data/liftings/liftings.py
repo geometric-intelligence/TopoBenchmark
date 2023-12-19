@@ -16,7 +16,6 @@ class HypergraphKHopLifting(torch_geometric.transforms.BaseTransform):
         self.added_fields = ["hyperedges"]
 
     def forward(self, data: torch_geometric.data.Data) -> dict:
-        results = {}
         n_nodes = data.x.shape[0]
         incidence_1 = torch.zeros(n_nodes, n_nodes)
         edge_index = torch_geometric.utils.to_undirected(data.edge_index)
@@ -26,8 +25,8 @@ class HypergraphKHopLifting(torch_geometric.transforms.BaseTransform):
             )
             incidence_1[n, neighbors] = 1
         incidence_1 = torch.Tensor(incidence_1).to_sparse_coo()
-        results[self.added_fields[0]] = incidence_1
-        return results
+        data.__setitem__(self.added_fields[0], incidence_1)
+        return data
 
 
 class HypergraphKNearestNeighborsLifting(torch_geometric.transforms.BaseTransform):
@@ -37,7 +36,6 @@ class HypergraphKNearestNeighborsLifting(torch_geometric.transforms.BaseTransfor
         self.added_fields = ["hyperedges"]
 
     def forward(self, data: torch_geometric.data.Data) -> dict:
-        results = {}
         data_lifted = copy.copy(data)
         data_lifted.pos = data_lifted.x
         n_nodes = data.x.shape[0]
@@ -45,8 +43,8 @@ class HypergraphKNearestNeighborsLifting(torch_geometric.transforms.BaseTransfor
         data_lifted = self.transform(data_lifted)
         incidence_1[data_lifted.edge_index[0], data_lifted.edge_index[1]] = 1
         incidence_1 = torch.Tensor(incidence_1).to_sparse_coo()
-        results[self.added_fields[0]] = incidence_1
-        return results
+        data.__setitem__(self.added_fields[0], incidence_1)
+        return data
 
 
 class SimplicialNeighborhoodLifting(torch_geometric.transforms.BaseTransform):
@@ -97,11 +95,9 @@ class SimplicialNeighborhoodLifting(torch_geometric.transforms.BaseTransform):
 
         for i, field in enumerate(self.added_fields):
             if i % 3 == 0:
-                results[field] = incidences[int(i / 3)]
+                data.__setitem__(self.added_fields[0], incidences[int(i / 3)])
             if i % 3 == 1:
-                results[field] = laplacians_up[int(i / 3)]
+                data.__setitem__(self.added_fields[0], laplacians_up[int(i / 3)])
             if i % 3 == 2:
-                results[field] = laplacians_down[int(i / 3)]
-        return results
-    
-
+                data.__setitem__(self.added_fields[0], laplacians_down[int(i / 3)])
+        return data

@@ -10,11 +10,13 @@ from torch_geometric.data import Data
 class AbstractLoader(ABC):
     """Abstract class that provides an interface to load signals (audio)"""
 
-    def __init__(self, cfg: DictConfig):
-        self.cfg = cfg
+    def __init__(self, parameters: DictConfig):
+        self.cfg = parameters
 
     @abstractmethod
-    def load(self, file: str, label) -> Data:
+    def load(
+        self,
+    ) -> Data:
         """Load data into Data.
 
         Parameters:

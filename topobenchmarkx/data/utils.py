@@ -101,28 +101,20 @@ def load_hypergraph_pickle_dataset(cfg):
     return data
 
 
-# def add_selfhe(data):
-#     # Add self hyperedge in case there is totaly isolated nodes
-#     incidence_1 = data.edge_index
+def get_Planetoid_pyg(cfg):
+    data_dir, data_name = cfg["data_dir"], cfg["data_name"]
+    dataset = torch_geometric.datasets.Planetoid(data_dir, data_name)
+    data = dataset.data
+    data.num_nodes = data.x.shape[0]
 
-#     incidence_1 = torch.sparse_coo_tensor(
-#         incidence_1,
-#         values=torch.ones(incidence_1.shape[1]),
-#         size=(data.num_nodes, data.num_hyperedges),
-#     )
+    return data
 
-#     incidence_1 = incidence_1.to_dense()
-#     node_idx = torch.where(torch.sum(incidence_1, dim=1)==0)[0]
 
-#     max_he_idx = data.num_hyperedges + data.num_nodes - 1
-#     he_idx = torch.arange(max_he_idx + 1,
-#                 max_he_idx + len(node_idx) + 1)
-#     data.edge_index = torch.cat([data.edge_index,
-#                     torch.stack([node_idx, he_idx])], dim=1)
-
-#     data.num_hyperedges = data.num_hyperedges + len(node_idx)
-
-#     return data
+def get_TUDataset_pyg(cfg):
+    data_dir, data_name = cfg["data_dir"], cfg["data_name"]
+    dataset = torch_geometric.datasets.TUDataset(root=data_dir, name=data_name)
+    data_lst = [data for data in dataset]
+    return data_lst
 
 
 def load_split(data, cfg):
@@ -140,12 +132,4 @@ def load_split(data, cfg):
         ).shape[0]
         == data.num_nodes
     ), "Not all nodes within splits"
-    return data
-
-
-def get_cora(cfg):
-    data_dir = cfg["data_dir"]
-    print(f"Loading {cfg['data_domain']} dataset name: {cfg['data_name']}")
-
-    data = torch_geometric.datasets.Planetoid(data_dir, "Cora")
     return data

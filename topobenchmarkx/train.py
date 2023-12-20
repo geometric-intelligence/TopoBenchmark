@@ -12,7 +12,8 @@ from omegaconf import DictConfig
 from topobenchmarkx.data.dataloader_fullbatch import FullBatchDataModule
 
 # Inputs to load data
-from topobenchmarkx.data.load.loaders import HypergraphLoader
+# from topobenchmarkx.data.load.loaders import HypergraphLoader
+from topobenchmarkx.data.datasets import CustomDataset
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "2"
 
@@ -65,14 +66,16 @@ def train(cfg: DictConfig) -> Tuple[Dict[str, Any], Dict[str, Any]]:
     # Data
     log.info(f"Instantiating datamodule <{cfg.data._target_}>")
     # datamodule: LightningDataModule = hydra.utils.instantiate(cfg.data)
-    data_loader = HypergraphLoader(cfg)
-    data = data_loader.load()
+    data_lst = hydra.utils.instantiate(cfg.data).load()
 
     # Transforms
     # transforms = hydra.utils.instantiate(cfg.transforms)
     # transforms(data)
 
-    datamodule = FullBatchDataModule(data=data)
+    # Create dataset
+    dataset = CustomDataset(data_lst)
+
+    datamodule = FullBatchDataModule(dataset=dataset)
 
     # Model for us is Network + logic: inputs backbone, readout, losses
     log.info(f"Instantiating model <{cfg.model._target_}>")

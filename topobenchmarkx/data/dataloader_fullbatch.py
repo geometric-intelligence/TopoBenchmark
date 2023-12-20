@@ -1,65 +1,76 @@
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Dict, Optional
 
-import torch
 from lightning import LightningDataModule
-from torch.utils.data import ConcatDataset, DataLoader, Dataset, random_split
 
-# from torchvision.transforms import transforms
-from torch_geometric.data import Data
+# from torch.utils.data import DataLoader, Dataset
+from torch_geometric.loader import DataLoader
 
-
-class CustomDataset(Dataset):
-    def __init__(self, data):
-        self.data = data
-
-    def __len__(self):
-        return 1
-
-    def __getitem__(self, idx):
-        return (
-            self.data.x,
-            self.data.edge_index,
-            self.data.y,
-            self.data.n_x,
-            self.data.num_hyperedges,
-            self.data.num_class,
-            self.data.train_mask,
-            self.data.val_mask,
-            self.data.test_mask,
-        )
+# import torch_geometric
 
 
-def collate_fn(batch):
-    """
-    args:
-        batch - list of (tensor, label)
+# class CustomDataset(torch_geometric.data.Dataset):
+#     def __init__(self, data_lst):
+#         super().__init__()
+#         self.data_lst = data_lst
 
-    reutrn:
-        xs - a tensor of all examples in 'batch' after padding
-        ys - a LongTensor of all labels in batch
-    """
-    # Find longest sequence
-    x = batch[0][0]
-    edge_index = batch[0][1]
-    y = batch[0][2]
-    n_x = batch[0][3]
-    num_hyperedges = batch[0][4]
-    num_class = batch[0][5]
-    train_mask = batch[0][6]
-    val_mask = batch[0][7]
-    test_mask = batch[0][8]
+#     def get(self, idx):
+#         data = self.data[idx]
+#         return data
 
-    return Data(
-        x=x,
-        edge_index=edge_index,
-        n_x=n_x,
-        num_hyperedges=num_hyperedges,
-        num_class=num_class,
-        y=y,
-        train_mask=train_mask,
-        val_mask=val_mask,
-        test_mask=test_mask,
-    )
+#     def len(self):
+#         return len(self.data)
+# class CustomDataset(Dataset):
+#     def __init__(self, data):
+#         self.data = data
+
+#     def __len__(self):
+#         return 1
+
+#     def __getitem__(self, idx):
+#         return (
+#             self.data.x,
+#             self.data.edge_index,
+#             self.data.y,
+#             self.data.n_x,
+#             self.data.num_hyperedges,
+#             self.data.num_class,
+#             self.data.train_mask,
+#             self.data.val_mask,
+#             self.data.test_mask,
+#         )
+
+
+# def collate_fn(batch):
+#     """
+#     args:
+#         batch - list of (tensor, label)
+
+#     reutrn:
+#         xs - a tensor of all examples in 'batch' after padding
+#         ys - a LongTensor of all labels in batch
+#     """
+#     # Find longest sequence
+#     x = batch[0][0]
+#     edge_index = batch[0][1]
+#     y = batch[0][2]
+#     n_x = batch[0][3]
+#     num_hyperedges = batch[0][4]
+#     num_class = batch[0][5]
+#     train_mask = batch[0][6]
+#     val_mask = batch[0][7]
+#     test_mask = batch[0][8]
+
+#     return Data(
+#         x=x,
+#         edge_index=edge_index,
+#         n_x=n_x,
+#         num_hyperedges=num_hyperedges,
+#         num_class=num_class,
+#         y=y,
+#         train_mask=train_mask,
+#         val_mask=val_mask,
+#         test_mask=test_mask,
+#     )
 
 
 class FullBatchDataModule(LightningDataModule):
@@ -85,7 +96,7 @@ class FullBatchDataModule(LightningDataModule):
 
     def __init__(
         self,
-        data,
+        dataset,
         num_workers: int = 0,
         pin_memory: bool = False,
     ) -> None:
@@ -103,13 +114,12 @@ class FullBatchDataModule(LightningDataModule):
         # also ensures init params will be stored in ckpt
         self.save_hyperparameters(logger=False)
 
-        self.data = data
-        self.dataset = CustomDataset(self.data)
-        self.data_train: Optional[Dataset] = None
-        self.data_val: Optional[Dataset] = None
-        self.data_test: Optional[Dataset] = None
+        self.dataset = dataset
+        # self.data_train: Optional[Dataset] = None
+        # self.data_val: Optional[Dataset] = None
+        # self.data_test: Optional[Dataset] = None
 
-    def train_dataloader(self) -> DataLoader[Any]:
+    def train_dataloader(self) -> DataLoader:
         """Create and return the train dataloader.
 
         :return: The train dataloader.
@@ -120,10 +130,10 @@ class FullBatchDataModule(LightningDataModule):
             num_workers=self.hparams.num_workers,
             pin_memory=self.hparams.pin_memory,
             shuffle=True,
-            collate_fn=collate_fn,
+            # collate_fn=collate_fn,
         )
 
-    def val_dataloader(self) -> DataLoader[Any]:
+    def val_dataloader(self) -> DataLoader:
         """Create and return the validation dataloader.
 
         :return: The validation dataloader.
@@ -134,10 +144,10 @@ class FullBatchDataModule(LightningDataModule):
             num_workers=self.hparams.num_workers,
             pin_memory=self.hparams.pin_memory,
             shuffle=False,
-            collate_fn=collate_fn,
+            # collate_fn=collate_fn,
         )
 
-    def test_dataloader(self) -> DataLoader[Any]:
+    def test_dataloader(self) -> DataLoader:
         """Create and return the test dataloader.
 
         :return: The test dataloader.
@@ -148,7 +158,7 @@ class FullBatchDataModule(LightningDataModule):
             num_workers=self.hparams.num_workers,
             pin_memory=self.hparams.pin_memory,
             shuffle=False,
-            collate_fn=collate_fn,
+            # collate_fn=collate_fn,
         )
 
     def teardown(self, stage: Optional[str] = None) -> None:
@@ -174,42 +184,3 @@ class FullBatchDataModule(LightningDataModule):
         :param state_dict: The datamodule state returned by `self.state_dict()`.
         """
         pass
-
-    # def setup(self, stage: Optional[str] = None) -> None:
-    #     """Load data. Set variables: `self.data_train`, `self.data_val`, `self.data_test`.
-
-    #     This method is called by Lightning before `trainer.fit()`, `trainer.validate()`, `trainer.test()`, and
-    #     `trainer.predict()`, so be careful not to execute things like random split twice! Also, it is called after
-    #     `self.prepare_data()` and there is a barrier in between which ensures that all the processes proceed to
-    #     `self.setup()` once the data is prepared and available for use.
-
-    #     :param stage: The stage to setup. Either `"fit"`, `"validate"`, `"test"`, or `"predict"`. Defaults to ``None``.
-    #     """
-    #     # # Divide batch size by the number of devices.
-    #     # if self.trainer is not None:
-    #     #     if self.hparams.batch_size % self.trainer.world_size != 0:
-    #     #         raise RuntimeError(
-    #     #             f"Batch size ({self.hparams.batch_size}) is not divisible by the number of devices ({self.trainer.world_size})."
-    #     #         )
-    #     #     self.batch_size_per_device = (
-    #     #         self.hparams.batch_size // self.trainer.world_size
-    #     #     )
-
-    #     # load and split datasets only if not loaded already
-    #     if not self.data_train and not self.data_val and not self.data_test:
-    #         trainset = MNIST(
-    #             self.hparams.data_dir, train=True, transform=self.transforms
-    #         )
-    #         testset = MNIST(
-    #             self.hparams.data_dir, train=False, transform=self.transforms
-    #         )
-    #         dataset = ConcatDataset(datasets=[trainset, testset])
-    #         self.data_train, self.data_val, self.data_test = random_split(
-    #             dataset=dataset,
-    #             lengths=self.hparams.train_val_test_split,
-    #             generator=torch.Generator().manual_seed(42),
-    #         )
-
-
-if __name__ == "__main__":
-    _ = FullBatchDataModule()

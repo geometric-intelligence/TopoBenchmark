@@ -111,4 +111,8 @@ class SimplicialNeighborhoodLifting(torch_geometric.transforms.BaseTransform):
                 results[field] = laplacians_up[int(i / 3)]
             if i % 3 == 2:
                 results[field] = laplacians_down[int(i / 3)]
+
+        # add to data
+        for i, field in enumerate(self.added_fields):
+            data[field] = results[field]
         return results

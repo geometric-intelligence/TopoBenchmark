@@ -2,19 +2,37 @@ import copy
 import random
 from itertools import combinations
 
+import networkx as nx
 import numpy as np
 import torch
 import torch_geometric
 from scipy.optimize import minimize
-import networkx as nx
 
-from topobenchmarkx.data.liftings.lifting import AbstractLifting
+# from topobenchmarkx.data.liftings.lifting import LiftingTransform
+
+__all__ = [
+    "IdentityLifting",
+    "HypergraphKHopLifting",
+    "HypergraphKNearestNeighborsLifting",
+    "SimplicialNeighborhoodLifting",
+    "CellCyclesLifting",
+    "SimplicialCliqueLifting",
+]
+
+
+class IdentityLifting(torch_geometric.transforms.BaseTransform):
+    def __init__(self, **kwargs):
+        super().__init__()
+        self.added_fields = []
+
+    def forward(self, data: torch_geometric.data.Data) -> dict:
+        return data
 
 
 class HypergraphKHopLifting(torch_geometric.transforms.BaseTransform):
-    def __init__(self, k=1):
+    def __init__(self, k_value=1, **kwargs):
         super().__init__()
-        self.k = k
+        self.k = k_value
         self.added_fields = ["hyperedges"]
 
     def forward(self, data: torch_geometric.data.Data) -> dict:
@@ -32,9 +50,9 @@ class HypergraphKHopLifting(torch_geometric.transforms.BaseTransform):
 
 
 class HypergraphKNearestNeighborsLifting(torch_geometric.transforms.BaseTransform):
-    def __init__(self, k=1):
+    def __init__(self, k_value=1, **kwargs):
         super().__init__()
-        self.transform = torch_geometric.transforms.KNNGraph(k)
+        self.transform = torch_geometric.transforms.KNNGraph(k_value)
         self.added_fields = ["hyperedges"]
 
     def forward(self, data: torch_geometric.data.Data) -> dict:
@@ -50,7 +68,7 @@ class HypergraphKNearestNeighborsLifting(torch_geometric.transforms.BaseTransfor
 
 
 class SimplicialNeighborhoodLifting(torch_geometric.transforms.BaseTransform):
-    def __init__(self, complex_dim=2, max_triangles=10000):
+    def __init__(self, complex_dim=2, max_triangles=10000, **kwargs):
         super().__init__()
         self.complex_dim = complex_dim
         self.max_triangles = max_triangles
@@ -80,12 +98,21 @@ class SimplicialNeighborhoodLifting(torch_geometric.transforms.BaseTransform):
             simplices[i] = list(simplices[i])
             if i == 0:
                 simplices[i].sort()
-            if i == 2 and len(simplices[i])>self.max_triangles:
+            if i == 2 and len(simplices[i]) > self.max_triangles:
                 random.shuffle(simplices[i])
-                simplices[i] = simplices[i][:self.max_triangles]
-        incidences = [torch.zeros(len(simplices[i]), len(simplices[i+1])) for i in range(self.complex_dim)]
-        laplacians_up = [torch.zeros(len(simplices[i]), len(simplices[i])) for i in range(self.complex_dim)]
-        laplacians_down = [torch.zeros(len(simplices[i+1]), len(simplices[i+1])) for i in range(self.complex_dim)]
+                simplices[i] = simplices[i][: self.max_triangles]
+        incidences = [
+            torch.zeros(len(simplices[i]), len(simplices[i + 1]))
+            for i in range(self.complex_dim)
+        ]
+        laplacians_up = [
+            torch.zeros(len(simplices[i]), len(simplices[i]))
+            for i in range(self.complex_dim)
+        ]
+        laplacians_down = [
+            torch.zeros(len(simplices[i + 1]), len(simplices[i + 1]))
+            for i in range(self.complex_dim)
+        ]
         for i in range(self.complex_dim):
             for idx_i, s_i in enumerate(simplices[i]):
                 for idx_i_1, s_i_1 in enumerate(simplices[i + 1]):
@@ -108,26 +135,31 @@ class SimplicialNeighborhoodLifting(torch_geometric.transforms.BaseTransform):
             if i % 3 == 2:
                 data.__setitem__(field, laplacians_down[int(i / 3)].to_sparse_coo())
         return data
-    
+
+
 class CellCyclesLifting(torch_geometric.transforms.BaseTransform):
-    def __init__(self, aggregation="sum"):
+    def __init__(self, aggregation_method="sum", **kwargs):
         super().__init__()
         self.added_fields = []
-        if not aggregation in ["sum"]:
+        if not aggregation_method in ["sum"]:
             raise NotImplementedError
-        self.aggregation = aggregation
-        self.added_fields = ["x_1", 
-                             "incidence_1", 
-                             "laplacian_down_1", 
-                             "laplacian_up_1",
-                             "incidence_2", 
-                             "laplacian_down_2", 
-                             "laplacian_up_2"]
+        self.aggregation = aggregation_method
+        self.added_fields = [
+            "x_1",
+            "incidence_1",
+            "laplacian_down_1",
+            "laplacian_up_1",
+            "incidence_2",
+            "laplacian_down_2",
+            "laplacian_up_2",
+        ]
 
     def forward(self, data: torch_geometric.data.Data) -> dict:
         n_nodes = data.x.shape[0]
         # edge_index = torch_geometric.utils.to_undirected(data.edge_index)
-        edges = [(i.item(),j.item()) for i, j in zip(data.edge_index[0], data.edge_index[1])]
+        edges = [
+            (i.item(), j.item()) for i, j in zip(data.edge_index[0], data.edge_index[1])
+        ]
         G = nx.Graph()
         G.add_edges_from(edges)
         cycles = nx.cycle_basis(G)
@@ -140,10 +172,10 @@ class CellCyclesLifting(torch_geometric.transforms.BaseTransform):
             incidence_1[list(edge), i] = 1
         for i, cycle in enumerate(cycles):
             for j in range(len(cycle)):
-                if j==len(cycle)-1:
-                    edge = {cycle[j],cycle[0]}
+                if j == len(cycle) - 1:
+                    edge = {cycle[j], cycle[0]}
                 else:
-                    edge = {cycle[j],cycle[j+1]}
+                    edge = {cycle[j], cycle[j + 1]}
                 incidence_2[edges.index(edge), i] = 1
         degree = torch.diag(torch.sum(incidence_1, dim=1))
         laplacian_down_1 = 2 * degree - torch.mm(
@@ -161,23 +193,23 @@ class CellCyclesLifting(torch_geometric.transforms.BaseTransform):
         laplacian_up_2 = 2 * degree - torch.mm(
             torch.transpose(incidence_2, 1, 0), incidence_2
         )
-        
-        if self.aggregation=="sum":
-            x_1 = torch.mm(torch.transpose(incidence_1,1,0),data.x)
-                
-        data.__setitem__("incidence_1",incidence_1.to_sparse_coo())
-        data.__setitem__("incidence_2",incidence_2.to_sparse_coo())
-        data.__setitem__("laplacian_up_1",laplacian_up_1.to_sparse_coo())
-        data.__setitem__("laplacian_up_2",laplacian_up_2.to_sparse_coo())
-        data.__setitem__("laplacian_down_2",laplacian_down_2.to_sparse_coo())
-        data.__setitem__("laplacian_down_1",laplacian_down_1.to_sparse_coo())
+
+        if self.aggregation == "sum":
+            x_1 = torch.mm(torch.transpose(incidence_1, 1, 0), data.x)
+
+        data.__setitem__("incidence_1", incidence_1.to_sparse_coo())
+        data.__setitem__("incidence_2", incidence_2.to_sparse_coo())
+        data.__setitem__("laplacian_up_1", laplacian_up_1.to_sparse_coo())
+        data.__setitem__("laplacian_up_2", laplacian_up_2.to_sparse_coo())
+        data.__setitem__("laplacian_down_2", laplacian_down_2.to_sparse_coo())
+        data.__setitem__("laplacian_down_1", laplacian_down_1.to_sparse_coo())
         data.__setitem__("x_1", x_1)
-        
+
         return data
-    
-    
+
+
 class SimplicialCliqueLifting(torch_geometric.transforms.BaseTransform):
-    def __init__(self, complex_dim=2):
+    def __init__(self, complex_dim=2, **kwargs):
         super().__init__()
         self.complex_dim = complex_dim
         self.added_fields = []
@@ -190,7 +222,9 @@ class SimplicialCliqueLifting(torch_geometric.transforms.BaseTransform):
 
     def forward(self, data: torch_geometric.data.Data) -> dict:
         n_nodes = data.x.shape[0]
-        edges = [(i.item(),j.item()) for i, j in zip(data.edge_index[0], data.edge_index[1])]
+        edges = [
+            (i.item(), j.item()) for i, j in zip(data.edge_index[0], data.edge_index[1])
+        ]
         G = nx.Graph()
         G.add_edges_from(edges)
         cliques = nx.find_cliques(G)
@@ -204,9 +238,18 @@ class SimplicialCliqueLifting(torch_geometric.transforms.BaseTransform):
             simplices[i] = list(simplices[i])
             if i == 0:
                 simplices[i].sort()
-        incidences = [torch.zeros(len(simplices[i]), len(simplices[i+1])) for i in range(self.complex_dim)]
-        laplacians_up = [torch.zeros(len(simplices[i]), len(simplices[i])) for i in range(self.complex_dim)]
-        laplacians_down = [torch.zeros(len(simplices[i+1]), len(simplices[i+1])) for i in range(self.complex_dim)]
+        incidences = [
+            torch.zeros(len(simplices[i]), len(simplices[i + 1]))
+            for i in range(self.complex_dim)
+        ]
+        laplacians_up = [
+            torch.zeros(len(simplices[i]), len(simplices[i]))
+            for i in range(self.complex_dim)
+        ]
+        laplacians_down = [
+            torch.zeros(len(simplices[i + 1]), len(simplices[i + 1]))
+            for i in range(self.complex_dim)
+        ]
         for i in range(self.complex_dim):
             for idx_i, s_i in enumerate(simplices[i]):
                 for idx_i_1, s_i_1 in enumerate(simplices[i + 1]):

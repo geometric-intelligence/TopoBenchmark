@@ -5,6 +5,7 @@
 defaults:
   - _self_
   - data: coauthorship_cora
+  - lifting: default
   - model: allsettransformer
   - evaluator: default
   - callbacks: default

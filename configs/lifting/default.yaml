@@ -1,0 +1,6 @@
+_target_: topobenchmarkx.data.liftings.lifting.LiftingTransform
+lifting: "SimplicialNeighborhoodLifting"
+k_value: 1
+complex_dim: 2
+max_triangles: 6
+aggregation_method: 6

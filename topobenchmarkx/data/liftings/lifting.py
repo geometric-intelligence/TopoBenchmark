@@ -18,7 +18,7 @@ LIFTINGS = {
 }
 
 
-class LiftingTransform(torch_geometric.transforms.BaseTransform):
+class DataLiftingTransform(torch_geometric.transforms.BaseTransform):
     """abstract class that provides an interface to define a custom lifting"""
 
     def __init__(self, lifting, **kwargs):

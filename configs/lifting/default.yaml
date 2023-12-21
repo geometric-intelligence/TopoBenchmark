@@ -1,4 +1,4 @@
-_target_: topobenchmarkx.data.liftings.lifting.LiftingTransform
+_target_: topobenchmarkx.data.liftings.lifting.DataLiftingTransform
 lifting: "SimplicialNeighborhoodLifting"
 k_value: 1
 complex_dim: 2

@@ -13,8 +13,8 @@ class HypergraphLoader(AbstractLoader):
     def load(
         self,
     ):
-        data = load_hypergraph_pickle_dataset(self.cfg.data)
-        data = load_split(data, self.cfg.data)
+        data = load_hypergraph_pickle_dataset(self.cfg.dataset)
+        data = load_split(data, self.cfg.dataset)
 
         # We need to add checks that:
         # All nodes belong to some edge, in case some not, create selfedge

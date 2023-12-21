@@ -63,8 +63,8 @@ def train(cfg: DictConfig) -> Tuple[Dict[str, Any], Dict[str, Any]]:
         L.seed_everything(cfg.seed, workers=True)
 
     # Data
-    log.info(f"Instantiating datamodule <{cfg.data._target_}>")
-    # datamodule: LightningDataModule = hydra.utils.instantiate(cfg.data)
+    log.info(f"Instantiating datamodule <{cfg.dataset._target_}>")
+    # datamodule: LightningDataModule = hydra.utils.instantiate(cfg.dataset)
     data_loader = HypergraphLoader(cfg)
     data = data_loader.load()
 

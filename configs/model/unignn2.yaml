@@ -2,7 +2,7 @@ _target_: topobenchmarkx.models.network_module.NetworkModule
 
 backbone:
   _target_: topomodelx.nn.hypergraph.unigcnii.UniGCNII
-  in_channels: ${data.num_features}
+  in_channels: ${data.parameters.num_features}
   hidden_channels: 256
   n_layers: 1
   alpha: 0.5
@@ -13,16 +13,16 @@ backbone:
 
 loss:
   _target_: topobenchmarkx.models.losses.loss.DefaultLoss
-  task: ${data.task}
+  task: ${data.parameters.task}
 # evaluator:
 #   _target_: topobenchmarkx.evaluators.evaluator.Evaluator
 #   metrics: [acc, rocauc]
 
 readout:
   _target_: topobenchmarkx.models.readouts.NodeLevelReadOut
-  task_level: ${data.task_level}
+  task_level: ${data.parameters.task_level}
   in_channels: ${model.backbone.hidden_channels}
-  out_channels: ${data.num_classes}
+  out_channels: ${data.parameters.num_classes}
 
 readout_workaround:
   _target_: topobenchmarkx.models.readout_workaround.ReadOutWorkaround

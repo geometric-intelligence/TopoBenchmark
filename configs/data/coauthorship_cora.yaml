@@ -1,21 +1,22 @@
 _target_: topobenchmarkx.data.load.loaders.HypergraphLoader
 
 # Data definition
-data_domain: hypergraph
-data_type: coauthorship
-data_name: cora
-data_dir: ${paths.data_dir}${data.data_domain}/${data.data_type}/${data.data_name}
-data_split_dir: ${paths.data_dir}/data_splits/${data.data_name}/train_prop=0.5
+parameters:
+  data_domain: hypergraph
+  data_type: coauthorship
+  data_name: Cora
+  data_dir: ${paths.data_dir}${data.parameters.data_domain}/${data.parameters.data_type}/${data.parameters.data_name}
+  data_split_dir: ${paths.data_dir}/data_splits/${data.parameters.data_name}/train_prop=0.5
 
-# Dataset parameters
-num_features: 1433
-num_classes: 7
-task: classification
-task_level: node
-data_seed: 0
+  # Dataset parameters
+  num_features: 1433
+  num_classes: 7
+  task: classification
+  task_level: node
+  data_seed: 0
 
-# Dataloader parameters
-batch_size: 128 # Needs to be divisible by the number of devices (e.g., if in a distributed setup)
-train_val_test_split: [55_000, 5_000, 10_000]
-num_workers: 0
-pin_memory: False
+  # Dataloader parameters
+  batch_size: 128 # Needs to be divisible by the number of devices (e.g., if in a distributed setup)
+  # train_val_test_split: [55_000, 5_000, 10_000]
+  num_workers: 0
+  pin_memory: False

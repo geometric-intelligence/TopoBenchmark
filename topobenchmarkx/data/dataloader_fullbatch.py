@@ -1,9 +1,8 @@
 from typing import Any, Dict, Optional
 
 from lightning import LightningDataModule
-
-# from torch.utils.data import DataLoader, Dataset
-from torch_geometric.loader import DataLoader
+from torch.utils.data import DataLoader, Dataset
+from torch_geometric.data import Data
 
 # import torch_geometric
 
@@ -40,37 +39,48 @@ from torch_geometric.loader import DataLoader
 #         )
 
 
-# def collate_fn(batch):
-#     """
-#     args:
-#         batch - list of (tensor, label)
+def collate_fn(batch):
+    """
+    args:
+        batch - list of (tensor, label)
 
-#     reutrn:
-#         xs - a tensor of all examples in 'batch' after padding
-#         ys - a LongTensor of all labels in batch
-#     """
-#     # Find longest sequence
-#     x = batch[0][0]
-#     edge_index = batch[0][1]
-#     y = batch[0][2]
-#     n_x = batch[0][3]
-#     num_hyperedges = batch[0][4]
-#     num_class = batch[0][5]
-#     train_mask = batch[0][6]
-#     val_mask = batch[0][7]
-#     test_mask = batch[0][8]
+    reutrn:
+        xs - a tensor of all examples in 'batch' after padding
+        ys - a LongTensor of all labels in batch
+    """
+    return_batch = []
+    for b in batch:
+        values, keys = b[0], b[1]
+        data = Data()
+        for key, value in zip(keys, values):
+            data[key] = value
 
-#     return Data(
-#         x=x,
-#         edge_index=edge_index,
-#         n_x=n_x,
-#         num_hyperedges=num_hyperedges,
-#         num_class=num_class,
-#         y=y,
-#         train_mask=train_mask,
-#         val_mask=val_mask,
-#         test_mask=test_mask,
-#     )
+        return_batch.append(data)
+
+    return return_batch
+
+    # # Find longest sequence
+    # x = batch[0][0]
+    # edge_index = batch[0][1]
+    # y = batch[0][2]
+    # n_x = batch[0][3]
+    # num_hyperedges = batch[0][4]
+    # num_class = batch[0][5]
+    # train_mask = batch[0][6]
+    # val_mask = batch[0][7]
+    # test_mask = batch[0][8]
+
+    # return Data(
+    #     x=x,
+    #     edge_index=edge_index,
+    #     n_x=n_x,
+    #     num_hyperedges=num_hyperedges,
+    #     num_class=num_class,
+    #     y=y,
+    #     train_mask=train_mask,
+    #     val_mask=val_mask,
+    #     test_mask=test_mask,
+    # )
 
 
 class FullBatchDataModule(LightningDataModule):
@@ -130,7 +140,7 @@ class FullBatchDataModule(LightningDataModule):
             num_workers=self.hparams.num_workers,
             pin_memory=self.hparams.pin_memory,
             shuffle=True,
-            # collate_fn=collate_fn,
+            collate_fn=collate_fn,
         )
 
     def val_dataloader(self) -> DataLoader:
@@ -144,7 +154,7 @@ class FullBatchDataModule(LightningDataModule):
             num_workers=self.hparams.num_workers,
             pin_memory=self.hparams.pin_memory,
             shuffle=False,
-            # collate_fn=collate_fn,
+            collate_fn=collate_fn,
         )
 
     def test_dataloader(self) -> DataLoader:
@@ -158,7 +168,7 @@ class FullBatchDataModule(LightningDataModule):
             num_workers=self.hparams.num_workers,
             pin_memory=self.hparams.pin_memory,
             shuffle=False,
-            # collate_fn=collate_fn,
+            collate_fn=collate_fn,
         )
 
     def teardown(self, stage: Optional[str] = None) -> None:

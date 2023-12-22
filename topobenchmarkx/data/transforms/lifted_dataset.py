@@ -1,17 +1,16 @@
-import copy
+# import copy
 
 import torch_geometric
 
+# class Transform:
+#     def __init__(self, lift):
+#         self.lift = lift
 
-class Transform:
-    def __init__(self, lift):
-        self.lift = lift
-
-    def transform(self, list_of_data):
-        data_lifted = []
-        for i in range(len(list_of_data)):
-            list_of_data[i] = self.lift(list_of_data[i])
-        return list_of_data
+#     def transform(self, list_of_data):
+#         data_lifted = []
+#         for i in range(len(list_of_data)):
+#             list_of_data[i] = self.lift(list_of_data[i])
+#         return list_of_data
 
 
 class LiftedDataset(torch_geometric.data.Dataset):

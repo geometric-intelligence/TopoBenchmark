@@ -32,6 +32,7 @@ class HypergraphLoader(AbstractLoader):
 class PYGLoader(AbstractLoader):
     def __init__(self, parameters: DictConfig):
         super().__init__(parameters)
+        self.parameters = parameters
 
     def load(self):
         if (
@@ -44,7 +45,7 @@ class PYGLoader(AbstractLoader):
 
         elif self.parameters.data_name == ["MUTAG", "ENZYMES", "PROTEINS", "COLLAB"]:
             data_lst = get_TUDataset_pyg(cfg=self.parameters)
-            dataset = CustomDataset([data_lst])
+            dataset = CustomDataset(data_lst)
         else:
             raise NotImplementedError(
                 f"Dataset {self.parameters.data_name} not implemented"

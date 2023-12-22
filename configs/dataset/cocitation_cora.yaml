@@ -7,13 +7,6 @@ parameters:
   data_name: Cora
   data_dir: ${paths.data_dir}${dataset.parameters.data_domain}/${dataset.parameters.data_type}/${dataset.parameters.data_name}/${dataset.parameters.transform.lifting}
   data_split_dir: ${paths.data_dir}/data_splits/${dataset.parameters.data_name}/train_prop=0.5
-  transform:
-    _target_: topobenchmarkx.data.transforms.lifting.DataLiftingTransform
-    lifting: null
-    k_value: 1
-    complex_dim: 2
-    max_triangles: 6
-    aggregation_method: "sum"
 
   # Dataset parameters
   num_features: 1433
@@ -27,3 +20,11 @@ parameters:
   train_val_test_split: [55_000, 5_000, 10_000]
   num_workers: 0
   pin_memory: False
+
+  transform:
+    _target_: topobenchmarkx.data.transforms.lifting.DataLiftingTransform
+    lifting: null
+    k_value: 1
+    complex_dim: 2
+    max_triangles: 6
+    aggregation_method: "sum"

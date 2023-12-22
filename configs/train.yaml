@@ -5,7 +5,7 @@
 defaults:
   - _self_
   - dataset: coauthorship_cora
-  - transform: default
+  - transform: hypergraph_khop
   - model: allsettransformer
   - evaluator: default
   - callbacks: default

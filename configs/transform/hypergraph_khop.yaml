@@ -1,0 +1,6 @@
+_target_: topobenchmarkx.data.transforms.lifting.DataLiftingTransform
+lifting: "HypergraphKHopLifting"
+k_value: 1
+complex_dim: None
+max_triangles: None
+aggregation_method: None

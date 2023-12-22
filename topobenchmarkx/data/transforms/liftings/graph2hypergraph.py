@@ -21,6 +21,7 @@ class Graph2HypergraphLifting(torch_geometric.transforms.BaseTransform):
     ) -> dict:
         features = {}
         features["x"] = features["x_0"] = data.x
+        features["y"] = data.y
         # TODO: Projection of the features
         features["x_hyperedges"] = torch.zeros(num_hyperedges, data.x.shape[1])
         return features

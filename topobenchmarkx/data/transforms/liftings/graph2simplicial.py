@@ -23,6 +23,7 @@ class Graph2SimplicialLifting(torch_geometric.transforms.BaseTransform):
     def lift_features(self, data: torch_geometric.data.Data, lifted_topology) -> dict:
         features = {}
         features["x"] = features["x_0"] = data.x
+        features["y"] = data.y
         # TODO: Projection of the features
         for i in range(self.complex_dim):
             features[f"x_{i + 1}"] = torch.zeros(

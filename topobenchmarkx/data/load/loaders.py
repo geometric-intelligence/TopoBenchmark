@@ -1,6 +1,8 @@
 import hydra
 import torch
+import torch_geometric
 from omegaconf import DictConfig
+from torch_geometric.data import Data
 
 from topobenchmarkx.data.load.loader import AbstractLoader
 from topobenchmarkx.data.utils import (
@@ -45,3 +47,24 @@ class PYGLoader(AbstractLoader):
             raise NotImplementedError(f"Dataset {self.cfg.data_name} not implemented")
 
         return data_lst
+
+
+class GraphLoader(AbstractLoader):
+    def __init__(self, parameters: DictConfig):
+        super().__init__(parameters)
+
+    def load(self):
+        transform = hydra.utils.instantiate(self.cfg["transform"])
+        if (
+            self.cfg.data_name in ["Cora", "CiteSeer", "PubMed"]
+            and self.cfg.data_type == "cocitation"
+        ):
+            dataset = torch_geometric.datasets.Planetoid(
+                root=self.cfg["data_dir"],
+                name=self.cfg["data_name"],
+                pre_transform=transform,
+            )
+        else:
+            raise NotImplementedError(f"Dataset {self.cfg.data_name} not implemented")
+
+        return dataset

@@ -18,6 +18,7 @@ class Graph2SimplicialLifting(torch_geometric.transforms.BaseTransform):
     def __init__(self, complex_dim=2, **kwargs):
         super().__init__()
         self.complex_dim = complex_dim
+        self.type = "graph2simplicial"
 
     def lift_features(self, data: torch_geometric.data.Data, lifted_topology) -> dict:
         features = {}

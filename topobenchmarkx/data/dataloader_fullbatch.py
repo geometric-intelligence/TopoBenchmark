@@ -1,10 +1,10 @@
 from typing import Any, Dict, Optional
 
 from lightning import LightningDataModule
-from torch.utils.data import DataLoader, Dataset
+from torch.utils.data import DataLoader
 from torch_geometric.data import Data
 
-# import torch_geometric
+# from torch_geometric.loader import DataLoader
 
 
 # class CustomDataset(torch_geometric.data.Dataset):
@@ -48,16 +48,14 @@ def collate_fn(batch):
         xs - a tensor of all examples in 'batch' after padding
         ys - a LongTensor of all labels in batch
     """
-    return_batch = []
+
     for b in batch:
         values, keys = b[0], b[1]
         data = Data()
         for key, value in zip(keys, values):
             data[key] = value
 
-        return_batch.append(data)
-
-    return return_batch
+    return data
 
     # # Find longest sequence
     # x = batch[0][0]
@@ -125,9 +123,6 @@ class FullBatchDataModule(LightningDataModule):
         self.save_hyperparameters(logger=False)
 
         self.dataset = dataset
-        # self.data_train: Optional[Dataset] = None
-        # self.data_val: Optional[Dataset] = None
-        # self.data_test: Optional[Dataset] = None
 
     def train_dataloader(self) -> DataLoader:
         """Create and return the train dataloader.

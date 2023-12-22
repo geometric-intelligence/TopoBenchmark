@@ -10,6 +10,7 @@ __all__ = [
 ]
 
 
+# base
 class Graph2CellLifting(torch_geometric.transforms.BaseTransform):
     def __init__(self, complex_dim=2, **kwargs):
         super().__init__()

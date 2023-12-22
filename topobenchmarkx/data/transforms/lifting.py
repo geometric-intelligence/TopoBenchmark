@@ -29,11 +29,15 @@ class DataLiftingTransform(torch_geometric.transforms.BaseTransform):
 
     def __init__(self, lifting, **kwargs):
         super().__init__()
-        self.lifting = LIFTINGS[lifting](**kwargs) if lifting is not None else None
+        self.lifting = lifting
+        self.lifting_transform = (
+            LIFTINGS[lifting](**kwargs) if lifting is not None else None
+        )
+        self.lifting_type = self.lifting_transform.type if lifting is not None else None
 
     def forward(self, data: torch_geometric.data.Data) -> torch_geometric.data.Data:
         """Forward pass of the lifting"""
-        lifted_data = self.lifting(data) if self.lifting is not None else data
+        lifted_data = self.lifting_transform(data) if self.lifting is not None else data
         return lifted_data
 
     def __call__(self, data):

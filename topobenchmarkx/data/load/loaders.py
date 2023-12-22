@@ -56,12 +56,12 @@ class PYGLoader(AbstractLoader):
 
 
 class GraphLoader(AbstractLoader):
-    def __init__(self, parameters: DictConfig):
+    def __init__(self, parameters: DictConfig, transform):
         super().__init__(parameters)
         self.parameters = parameters
+        self.transform = transform
 
     def load(self):
-        transform = hydra.utils.instantiate(self.parameters["transform"])
         if (
             self.parameters.data_name in ["Cora", "CiteSeer", "PubMed"]
             and self.parameters.data_type == "cocitation"
@@ -69,8 +69,11 @@ class GraphLoader(AbstractLoader):
             dataset = torch_geometric.datasets.Planetoid(
                 root=self.parameters["data_dir"],
                 name=self.parameters["data_name"],
-                pre_transform=transform,
+                pre_transform=self.transform,
             )
+            data = dataset.data
+            data = load_split(data, self.parameters)
+            dataset = CustomDataset([data])
         else:
             raise NotImplementedError(
                 f"Dataset {self.parameters .data_name} not implemented"

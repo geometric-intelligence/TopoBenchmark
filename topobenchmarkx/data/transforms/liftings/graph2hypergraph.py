@@ -14,6 +14,7 @@ class Graph2HypergraphLifting(torch_geometric.transforms.BaseTransform):
     def __init__(self, **kwargs):
         super().__init__()
         self.added_fields = ["hyperedges"]
+        self.type = "graph2hypergraph"
 
     def lift_features(
         self, data: torch_geometric.data.Data, num_hyperedges: int

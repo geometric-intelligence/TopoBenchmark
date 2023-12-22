@@ -106,7 +106,6 @@ def get_Planetoid_pyg(cfg):
     dataset = torch_geometric.datasets.Planetoid(data_dir, data_name)
     data = dataset.data
     data.num_nodes = data.x.shape[0]
-
     return data
 
 

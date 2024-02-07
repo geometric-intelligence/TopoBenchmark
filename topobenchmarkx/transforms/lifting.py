@@ -31,6 +31,9 @@ class DataLiftingTransform(torch_geometric.transforms.BaseTransform):
 
     def __init__(self, lifting, **kwargs):
         super().__init__()
+
+        self.preserve_parameters(lifting, **kwargs)
+
         self.lifting = lifting
         if self.lifting == "Identity":
             self.lifting = None
@@ -49,6 +52,10 @@ class DataLiftingTransform(torch_geometric.transforms.BaseTransform):
 
     def __call__(self, data):
         return self.forward(data)
+
+    def preserve_parameters(self, lifting, **kwargs):
+        kwargs["lifting"] = lifting
+        self.parameters = kwargs
 
 
 if __name__ == "__main__":

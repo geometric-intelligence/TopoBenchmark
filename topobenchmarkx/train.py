@@ -59,15 +59,16 @@ def train(cfg: DictConfig) -> Tuple[Dict[str, Any], Dict[str, Any]]:
     :param cfg: A DictConfig configuration composed by Hydra.
     :return: A tuple with metrics and dict with all instantiated objects.
     """
-    # set seed for random number generators in pytorch, numpy and python.random
+    # Set seed for random number generators in pytorch, numpy and python.random
     if cfg.get("seed"):
         L.seed_everything(cfg.seed, workers=True)
 
     # Instantiate loading transforms that will be used during loading
-    load_transforms = hydra.utils.instantiate(cfg.transforms).load()
+    load_transforms = hydra.utils.instantiate(cfg.transforms)
 
-    # Dataset
-    dataset = hydra.utils.instantiate(cfg.dataset, transforms=load_transforms).load()
+    # Instantiate and load dataset
+    dataset = hydra.utils.instantiate(cfg.dataset)
+    dataset = dataset.load(transforms=load_transforms)
     log.info(f"Instantiating datamodule <{cfg.dataset._target_}>")
 
     # Transforms

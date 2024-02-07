@@ -48,6 +48,8 @@ class FullBatchDataModule(LightningDataModule):
     def __init__(
         self,
         dataset,
+        num_workers: int = 0,
+        pin_memory: bool = False,
     ) -> None:
         """Initialize a `MNISTDataModule`.
 

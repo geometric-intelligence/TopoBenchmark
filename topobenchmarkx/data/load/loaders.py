@@ -1,4 +1,5 @@
 import copy
+import hashlib
 import json
 import os
 
@@ -24,18 +25,23 @@ def make_hash(o):
     only other hashable types (including any lists, tuples, sets, and
     dictionaries).
     """
+    sha1 = hashlib.sha1()
+    sha1.update(str.encode(str(o)))
+    hash_as_hex = sha1.hexdigest()
+    # convert the hex back to int and restrict it to the relevant int range
+    seed = int(hash_as_hex, 16) % 4294967295
+    return seed
+    # if isinstance(o, (set, tuple, list)):
+    #     return tuple([make_hash(e) for e in o])
 
-    if isinstance(o, (set, tuple, list)):
-        return tuple([make_hash(e) for e in o])
+    # elif not isinstance(o, dict):
+    #     return hash(o)
 
-    elif not isinstance(o, dict):
-        return hash(o)
+    # new_o = copy.deepcopy(o)
+    # for k, v in new_o.items():
+    #     new_o[k] = make_hash(v)
 
-    new_o = copy.deepcopy(o)
-    for k, v in new_o.items():
-        new_o[k] = make_hash(v)
-
-    return hash(tuple(frozenset(sorted(new_o.items()))))
+    # return hash(tuple(frozenset(sorted(new_o.items()))))
 
 
 class HypergraphLoader(AbstractLoader):
@@ -56,14 +62,20 @@ class HypergraphLoader(AbstractLoader):
 
 
 class GraphLoader(AbstractLoader):
-    def __init__(self, parameters: DictConfig, transform_parameters=None):
+    def __init__(self, parameters: DictConfig):
         super().__init__(parameters)
         self.parameters = parameters
-        self.transform_parameters = transform_parameters
 
     def load(self, transforms=None):
         # Use self.transform_parameters to define unique save/load path for each transform parameters
-        params_hash = make_hash(self.transform_parameters)
+        if transforms is not None:
+            transform_parameters = transforms.parameters
+        else:
+            raise ValueError(
+                "In case you dont want to provide transforms, use `Identity transform' "
+            )
+
+        params_hash = make_hash(transform_parameters)
         data_dir = os.path.join(self.parameters["data_dir"], f"{params_hash}")
         if (
             self.parameters.data_name in ["Cora", "CiteSeer", "PubMed"]
@@ -98,13 +110,13 @@ class GraphLoader(AbstractLoader):
         )
         if not os.path.exists(path_transform_parameters):
             with open(path_transform_parameters, "w") as f:
-                json.dump(self.transform_parameters, f)
+                json.dump(transform_parameters, f)
         else:
             # If path_transform_parameters exists, check if the transform_parameters are the same
             with open(path_transform_parameters, "r") as f:
                 saved_transform_parameters = json.load(f)
 
-            if saved_transform_parameters != self.transform_parameters:
+            if saved_transform_parameters != transform_parameters:
                 raise ValueError("Different transform parameters for the same data_dir")
             else:
                 print(

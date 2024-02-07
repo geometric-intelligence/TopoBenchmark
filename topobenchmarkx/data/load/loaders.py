@@ -31,37 +31,13 @@ class HypergraphLoader(AbstractLoader):
         return dataset
 
 
-class PYGLoader(AbstractLoader):
+class GraphLoader(AbstractLoader):
     def __init__(self, parameters: DictConfig):
         super().__init__(parameters)
         self.parameters = parameters
+        # self.transforms = transforms
 
-    def load(self):
-        if (
-            self.parameters.data_name in ["Cora", "CiteSeer", "PubMed"]
-            and self.parameters.data_type == "cocitation"
-        ):
-            data = get_Planetoid_pyg(cfg=self.parameters)
-            data = load_split(data, self.parameters)
-            dataset = CustomDataset([data])
-        elif self.parameters.data_name == ["MUTAG", "ENZYMES", "PROTEINS", "COLLAB"]:
-            data_lst = get_TUDataset_pyg(cfg=self.parameters)
-            dataset = CustomDataset(data_lst)
-        else:
-            raise NotImplementedError(
-                f"Dataset {self.parameters.data_name} not implemented"
-            )
-
-        return dataset
-
-
-class GraphLoader(AbstractLoader):
-    def __init__(self, parameters: DictConfig, transform):
-        super().__init__(parameters)
-        self.parameters = parameters
-        self.transform = transform
-
-    def load(self):
+    def load(self, transforms=None):
         if (
             self.parameters.data_name in ["Cora", "CiteSeer", "PubMed"]
             and self.parameters.data_type == "cocitation"
@@ -69,14 +45,50 @@ class GraphLoader(AbstractLoader):
             dataset = torch_geometric.datasets.Planetoid(
                 root=self.parameters["data_dir"],
                 name=self.parameters["data_name"],
-                pre_transform=self.transform,
+                pre_transform=transforms,
             )
             data = dataset.data
             data = load_split(data, self.parameters)
             dataset = CustomDataset([data])
+
+        elif self.parameters.data_name in ["MUTAG", "ENZYMES", "PROTEINS", "COLLAB"]:
+            dataset = torch_geometric.datasets.TUDataset(
+                root=self.parameters["data_dir"],
+                name=self.parameters["data_name"],
+                pre_transform=transforms,
+            )
+            data_lst = [dataset[i] for i in range(len(dataset))]
+            dataset = CustomDataset(data_lst)
+
         else:
             raise NotImplementedError(
                 f"Dataset {self.parameters .data_name} not implemented"
             )
 
         return dataset
+
+
+# class PYGLoader(AbstractLoader):
+#     def __init__(self, parameters: DictConfig):
+#         super().__init__(parameters)
+#         self.parameters = parameters
+
+#     def load(self):
+#         if (
+#             self.parameters.data_name in ["Cora", "CiteSeer", "PubMed"]
+#             and self.parameters.data_type == "cocitation"
+#         ):
+#             data = get_Planetoid_pyg(cfg=self.parameters)
+#             data = load_split(data, self.parameters)
+#             dataset = CustomDataset([data])
+
+#         elif self.parameters.data_name == ["MUTAG", "ENZYMES", "PROTEINS", "COLLAB"]:
+#             data_lst = get_TUDataset_pyg(cfg=self.parameters)
+#             dataset = CustomDataset(data_lst)
+
+#         else:
+#             raise NotImplementedError(
+#                 f"Dataset {self.parameters.data_name} not implemented"
+#             )
+
+#         return dataset

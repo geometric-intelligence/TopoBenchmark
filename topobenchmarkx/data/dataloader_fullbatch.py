@@ -4,40 +4,6 @@ from lightning import LightningDataModule
 from torch.utils.data import DataLoader
 from torch_geometric.data import Data
 
-# from torch_geometric.loader import DataLoader
-
-
-# class CustomDataset(torch_geometric.data.Dataset):
-#     def __init__(self, data_lst):
-#         super().__init__()
-#         self.data_lst = data_lst
-
-#     def get(self, idx):
-#         data = self.data[idx]
-#         return data
-
-#     def len(self):
-#         return len(self.data)
-# class CustomDataset(Dataset):
-#     def __init__(self, data):
-#         self.data = data
-
-#     def __len__(self):
-#         return 1
-
-#     def __getitem__(self, idx):
-#         return (
-#             self.data.x,
-#             self.data.edge_index,
-#             self.data.y,
-#             self.data.n_x,
-#             self.data.num_hyperedges,
-#             self.data.num_class,
-#             self.data.train_mask,
-#             self.data.val_mask,
-#             self.data.test_mask,
-#         )
-
 
 def collate_fn(batch):
     """
@@ -56,29 +22,6 @@ def collate_fn(batch):
             data[key] = value
 
     return data
-
-    # # Find longest sequence
-    # x = batch[0][0]
-    # edge_index = batch[0][1]
-    # y = batch[0][2]
-    # n_x = batch[0][3]
-    # num_hyperedges = batch[0][4]
-    # num_class = batch[0][5]
-    # train_mask = batch[0][6]
-    # val_mask = batch[0][7]
-    # test_mask = batch[0][8]
-
-    # return Data(
-    #     x=x,
-    #     edge_index=edge_index,
-    #     n_x=n_x,
-    #     num_hyperedges=num_hyperedges,
-    #     num_class=num_class,
-    #     y=y,
-    #     train_mask=train_mask,
-    #     val_mask=val_mask,
-    #     test_mask=test_mask,
-    # )
 
 
 class FullBatchDataModule(LightningDataModule):
@@ -105,8 +48,6 @@ class FullBatchDataModule(LightningDataModule):
     def __init__(
         self,
         dataset,
-        num_workers: int = 0,
-        pin_memory: bool = False,
     ) -> None:
         """Initialize a `MNISTDataModule`.
 

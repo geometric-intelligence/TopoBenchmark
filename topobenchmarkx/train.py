@@ -13,9 +13,9 @@ from topobenchmarkx.data.dataloader_fullbatch import FullBatchDataModule
 
 # Inputs to load data
 # from topobenchmarkx.data.load.loaders import HypergraphLoader
-from topobenchmarkx.data.datasets import CustomDataset
+# from topobenchmarkx.data.datasets import CustomDataset
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "2"
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 
 rootutils.setup_root(__file__, indicator=".project-root", pythonpath=True)
 # ------------------------------------------------------------------------------------ #
@@ -63,8 +63,11 @@ def train(cfg: DictConfig) -> Tuple[Dict[str, Any], Dict[str, Any]]:
     if cfg.get("seed"):
         L.seed_everything(cfg.seed, workers=True)
 
+    # Instantiate loading transforms that will be used during loading
+    load_transforms = hydra.utils.instantiate(cfg.transforms).load()
+
     # Dataset
-    dataset = hydra.utils.instantiate(cfg.dataset).load()
+    dataset = hydra.utils.instantiate(cfg.dataset, transforms=load_transforms).load()
     log.info(f"Instantiating datamodule <{cfg.dataset._target_}>")
 
     # Transforms

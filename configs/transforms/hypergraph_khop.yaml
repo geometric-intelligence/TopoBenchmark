@@ -1,4 +1,4 @@
-_target_: topobenchmarkx.data.transforms.lifting.DataLiftingTransform
+_target_: topobenchmarkx.transforms.lifting.DataLiftingTransform
 lifting: "HypergraphKHopLifting"
 k_value: 1
 complex_dim: None

@@ -45,7 +45,7 @@ def make_hash(o):
 
 
 class HypergraphLoader(AbstractLoader):
-    def __init__(self, parameters: DictConfig):
+    def __init__(self, parameters: DictConfig, transforms_config=None):
         super().__init__(parameters)
         self.parameters = parameters
 
@@ -62,18 +62,22 @@ class HypergraphLoader(AbstractLoader):
 
 
 class GraphLoader(AbstractLoader):
-    def __init__(self, parameters: DictConfig):
+    def __init__(self, parameters: DictConfig, transforms_config=None):
         super().__init__(parameters)
         self.parameters = parameters
+        self.transforms_config = transforms_config
 
     def load(self, transforms=None):
         # Use self.transform_parameters to define unique save/load path for each transform parameters
-        if transforms is not None:
-            transform_parameters = transforms.parameters
+        if (
+            self.transforms_config is None
+            or self.transforms_config.lifting == "Identity"
+        ):
+            transform_parameters = {"lifting": "Identity"}
+            lifting = None
         else:
-            raise ValueError(
-                "In case you dont want to provide transforms, use `Identity transform' "
-            )
+            lifting = hydra.utils.instantiate(self.transforms_config)
+            transform_parameters = lifting.parameters
 
         params_hash = make_hash(transform_parameters)
         data_dir = os.path.join(self.parameters["data_dir"], f"{params_hash}")
@@ -84,20 +88,20 @@ class GraphLoader(AbstractLoader):
             dataset = torch_geometric.datasets.Planetoid(
                 root=data_dir,  # self.parameters["data_dir"],
                 name=self.parameters["data_name"],
-                pre_transform=transforms,
+                pre_transform=lifting,
             )
-            data = dataset.data
-            data = load_split(data, self.parameters)
-            dataset = CustomDataset([data])
+            dataset = dataset.data
+            # data = load_split(data, self.parameters)
+            # dataset = CustomDataset([data])
 
         elif self.parameters.data_name in ["MUTAG", "ENZYMES", "PROTEINS", "COLLAB"]:
             dataset = torch_geometric.datasets.TUDataset(
                 root=data_dir,  # self.parameters["data_dir"],
                 name=self.parameters["data_name"],
-                pre_transform=transforms,
+                pre_transform=lifting,
             )
-            data_lst = [dataset[i] for i in range(len(dataset))]
-            dataset = CustomDataset(data_lst)
+            # data_lst = [dataset[i] for i in range(len(dataset))]
+            # dataset = CustomDataset(data_lst)
 
         else:
             raise NotImplementedError(

@@ -1,5 +1,5 @@
 _target_: topobenchmarkx.transforms.lifting.DataLiftingTransform
-# lifting: "CellCyclesLifting"
+lifting: "Identity"
 # k_value: 1
 # complex_dim: 2
 # max_triangles: 6

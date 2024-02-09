@@ -5,6 +5,8 @@ class TransformChain:
     """Class that applies multiple transforms sequentially to a data."""
 
     def __init__(self, **kwargs):
+        # Due to nested configs I need to unravel first level manually
+        kwargs = kwargs["transforms"]
         # Make kwargs to a list to preserve the order of the transforms
         self.transforms = list(kwargs.values())
         self.names = list(kwargs.keys())

@@ -95,7 +95,11 @@ class GraphLoader(AbstractLoader):
             transform_parameters = lifting.parameters
 
         params_hash = make_hash(transform_parameters)
-        data_dir = os.path.join(self.parameters["data_dir"], f"{params_hash}")
+        data_dir = os.path.join(
+            os.path.join(self.parameters["data_dir"], transform_parameters["lifting"]),
+            f"{params_hash}",
+        )
+
         if (
             self.parameters.data_name in ["Cora", "CiteSeer", "PubMed"]
             and self.parameters.data_type == "cocitation"

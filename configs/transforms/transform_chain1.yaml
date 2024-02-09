@@ -1,12 +1,16 @@
 _target_: topobenchmarkx.transforms.transformchain.TransformChain
 
-transform1:
-  _target_: topobenchmarkx.transforms.lifting.DataLiftingTransform
-  type: "Null Lifting (Identity)"
-  lifting: "Identity"
+defaults:
+ - /transforms/identity/identity
+ - /transforms/graph2hypergraph/hypergraph_khop
+
+# transform1:
+#   _target_: topobenchmarkx.transforms.lifting.DataLiftingTransform
+#   type: "Null Lifting (Identity)"
+#   lifting: "Identity"
 
 
-transform2:
-  _target_: topobenchmarkx.transforms.lifting.DataLiftingTransform
-  lifting: "HypergraphKHopLifting"
-  k_value: 1
+# transform2:
+#   _target_: topobenchmarkx.transforms.lifting.DataLiftingTransform
+#   lifting: "HypergraphKHopLifting"
+#   k_value: 1

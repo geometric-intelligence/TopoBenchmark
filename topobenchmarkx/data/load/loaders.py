@@ -7,7 +7,7 @@ import hydra
 import toponetx.datasets.graph as graph
 import torch
 import torch_geometric
-from omegaconf import DictConfig
+from omegaconf import DictConfig, OmegaConf
 from torch_geometric.data import Data
 
 from topobenchmarkx.data.datasets import CustomDataset
@@ -76,12 +76,11 @@ class HypergraphLoader(AbstractLoader):
 
 
 class GraphLoader(AbstractLoader):
-    def __init__(self, dataset_config: DictConfig):
-        super().__init__(dataset_config.parameters)
-        self.parameters = dataset_config.parameters
-        self.transforms_config = (
-            dataset_config.transforms if "transforms" in dataset_config else None
-        )
+    def __init__(self, parameters: DictConfig, transforms=None):
+        super().__init__(parameters)
+        self.parameters = parameters
+        # Still not instantiated
+        self.transforms_config = transforms
 
     def load(self):
         # Use self.transform_parameters to define unique save/load path for each transform parameters
@@ -106,9 +105,10 @@ class GraphLoader(AbstractLoader):
                 name=self.parameters["data_name"],
                 pre_transform=lifting,
             )
-            dataset = dataset.data
-            # data = load_split(data, self.parameters)
-            # dataset = CustomDataset([data])
+            data = dataset.data
+
+            data = load_split(data, self.parameters)
+            dataset = CustomDataset([data])
 
         elif self.parameters.data_name in ["MUTAG", "ENZYMES", "PROTEINS", "COLLAB"]:
             dataset = torch_geometric.datasets.TUDataset(

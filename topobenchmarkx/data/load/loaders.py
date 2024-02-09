@@ -1,14 +1,14 @@
-import copy
+# import copy
 import hashlib
 import json
 import os
 
 import hydra
 import toponetx.datasets.graph as graph
-import torch
+
+# import torch
 import torch_geometric
-from omegaconf import DictConfig, OmegaConf
-from torch_geometric.data import Data
+from omegaconf import DictConfig
 
 from topobenchmarkx.data.datasets import CustomDataset
 from topobenchmarkx.data.load.loader import AbstractLoader
@@ -19,6 +19,8 @@ from topobenchmarkx.data.utils import (
     load_simplicial_dataset,
     load_split,
 )
+
+# from torch_geometric.data import Data
 
 
 def make_hash(o):
@@ -86,18 +88,23 @@ class GraphLoader(AbstractLoader):
     def load(self):
         # Use self.transform_parameters to define unique save/load path for each transform parameters
         if (
-            self.transforms_config is None
-            or self.transforms_config.lifting == "Identity"
+            self.transforms_config
+            is None
+            # or self.transforms_config.lifting == "Identity"
         ):
-            transform_parameters = {"lifting": "Identity"}
-            lifting = None
+            transform_parameters = {"transform1": "Identity"}
+            pre_transforms = None
+            repo_name = "Identity"
         else:
-            lifting = hydra.utils.instantiate(self.transforms_config)
-            transform_parameters = lifting.parameters
+            pre_transforms = hydra.utils.instantiate(self.transforms_config)
 
+            transform_parameters = pre_transforms.parameters
+            repo_name = pre_transforms.repo_name
+
+        # Prepare the data directory name
         params_hash = make_hash(transform_parameters)
         data_dir = os.path.join(
-            os.path.join(self.parameters["data_dir"], transform_parameters["lifting"]),
+            os.path.join(self.parameters["data_dir"], repo_name),
             f"{params_hash}",
         )
 
@@ -108,7 +115,7 @@ class GraphLoader(AbstractLoader):
             dataset = torch_geometric.datasets.Planetoid(
                 root=data_dir,  # self.parameters["data_dir"],
                 name=self.parameters["data_name"],
-                pre_transform=lifting,
+                pre_transform=pre_transforms,
             )
             data = dataset.data
 
@@ -119,7 +126,7 @@ class GraphLoader(AbstractLoader):
             dataset = torch_geometric.datasets.TUDataset(
                 root=data_dir,  # self.parameters["data_dir"],
                 name=self.parameters["data_name"],
-                pre_transform=lifting,
+                pre_transform=pre_transforms,
             )
             # data_lst = [dataset[i] for i in range(len(dataset))]
             # dataset = CustomDataset(data_lst)

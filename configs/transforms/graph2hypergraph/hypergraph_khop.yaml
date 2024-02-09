@@ -1,3 +1,3 @@
 _target_: topobenchmarkx.transforms.lifting.DataLiftingTransform
 lifting: "HypergraphKHopLifting"
-k_value: 2
+k_value: 1

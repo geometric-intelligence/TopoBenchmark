@@ -2,7 +2,7 @@ _target_: topobenchmarkx.data.load.loaders.GraphLoader
 
 
 defaults:
-  - /transforms/hypergraph_khop
+  - /transforms/transform_chain1
 
 # Data definition
 parameters:

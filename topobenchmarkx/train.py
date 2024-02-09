@@ -63,8 +63,8 @@ def train(cfg: DictConfig) -> Tuple[Dict[str, Any], Dict[str, Any]]:
     if cfg.get("seed"):
         L.seed_everything(cfg.seed, workers=True)
 
-    # Instantiate and load dataset, passing the loading transforms
-    dataset = hydra.utils.instantiate(cfg.dataset, cfg.transforms)
+    # Instantiate and load dataset
+    dataset = hydra.utils.instantiate(cfg.dataset)
     dataset = dataset.load()
     log.info(f"Instantiating datamodule <{cfg.dataset._target_}>")
 

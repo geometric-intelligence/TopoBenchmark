@@ -51,7 +51,7 @@ class NetworkModule(LightningModule):
         ]:
             self.backbone = HypergraphWrapper(backbone)
 
-        elif str(backbone.__class__) in ["<class 'topomodelx.nn.san.san.SAN'>"]:
+        elif str(backbone.__class__) in ["<class 'topomodelx.nn.simplicial.san.SAN'>"]:
             self.backbone = SANWrapper(backbone)
         else:
             raise NotImplementedError(f"Backbone {backbone.__class__} not implemented")

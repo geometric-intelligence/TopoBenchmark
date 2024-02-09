@@ -16,6 +16,7 @@ from topobenchmarkx.data.utils import (
     get_Planetoid_pyg,
     get_TUDataset_pyg,
     load_hypergraph_pickle_dataset,
+    load_simplicial_dataset,
     load_split,
 )
 
@@ -46,20 +47,20 @@ def make_hash(o):
 
 
 class SimplicialLoader(AbstractLoader):
-    def __init__(self, parameters: DictConfig, transforms_config=None):
+    def __init__(self, parameters: DictConfig):
         super().__init__(parameters)
         self.parameters = parameters
 
     def load(
         self,
     ):
-        data = graph.karate_club(complex_type="simplicial", feat_dim=2)
-
-        return data
+        data = load_simplicial_dataset(self.parameters)
+        dataset = CustomDataset([data])
+        return dataset
 
 
 class HypergraphLoader(AbstractLoader):
-    def __init__(self, parameters: DictConfig, transforms_config=None):
+    def __init__(self, parameters: DictConfig):
         super().__init__(parameters)
         self.parameters = parameters
 

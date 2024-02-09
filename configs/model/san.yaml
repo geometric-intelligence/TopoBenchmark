@@ -1,0 +1,45 @@
+_target_: topobenchmarkx.models.network_module.NetworkModule
+
+backbone:
+  _target_: topomodelx.nn.simplicial.san.SAN
+  in_channels: ${dataset.parameters.num_features}
+  hidden_channels: 16
+  out_channels: 16
+  n_filters: 2
+  n_layers: 1
+  order_harmonic: 5
+  epsilon_harmonic: 1e-1
+
+loss:
+  _target_: topobenchmarkx.models.losses.loss.DefaultLoss
+  task: ${dataset.parameters.task}
+
+# evaluator:
+#   _target_: topobenchmarkx.evaluators.evaluator.Evaluator
+#   metrics: [acc, rocauc]
+
+readout:
+  _target_: topobenchmarkx.models.readouts.NodeLevelReadOut
+  task_level: ${dataset.parameters.task_level}
+  in_channels: ${model.backbone.hidden_channels}
+  out_channels: ${dataset.parameters.num_classes}
+
+readout_workaround:
+  _target_: topobenchmarkx.models.readout_workaround.ReadOutWorkaround
+  backbone_outputs: ["x_0"]
+
+optimizer:
+  _target_: torch.optim.Adam
+  _partial_: true
+  lr: 0.1
+  weight_decay: 0.0
+
+scheduler:
+  _target_: torch.optim.lr_scheduler.ReduceLROnPlateau
+  _partial_: true
+  mode: min
+  factor: 0.1
+  patience: 10
+
+# compile model for faster training with pytorch 2.0
+compile: false

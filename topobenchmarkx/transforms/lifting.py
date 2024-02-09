@@ -12,6 +12,20 @@ from topobenchmarkx.transforms.liftings.graph2simplicial import (
     SimplicialNeighborhoodLifting,
 )
 
+
+class IdentityTransform:
+    def __init__(self, **kwargs):
+        super().__init__()
+        self.type = "domain2domain"
+        self.parameters = kwargs
+
+    def forward(self, data: torch_geometric.data.Data) -> dict:
+        return data
+
+    def __call__(self, data):
+        return self.forward(data)
+
+
 LIFTINGS = {
     # Graph -> Hypergraph
     "HypergraphKHopLifting": HypergraphKHopLifting,
@@ -22,7 +36,7 @@ LIFTINGS = {
     # Graph -> Cell Complex
     "CellCyclesLifting": CellCyclesLifting,
     # Identity
-    "Identity": None,
+    "Identity": IdentityTransform,
 }
 
 
@@ -35,8 +49,8 @@ class DataLiftingTransform(torch_geometric.transforms.BaseTransform):
         self.preserve_parameters(lifting, **kwargs)
 
         self.lifting = lifting
-        if self.lifting == "Identity":
-            self.lifting = None
+        # if self.lifting == "Identity":
+        #     self.lifting = None
 
         self.lifting_transform = (
             LIFTINGS[self.lifting](**kwargs) if self.lifting is not None else None
@@ -47,7 +61,9 @@ class DataLiftingTransform(torch_geometric.transforms.BaseTransform):
 
     def forward(self, data: torch_geometric.data.Data) -> torch_geometric.data.Data:
         """Forward pass of the lifting"""
-        lifted_data = self.lifting_transform(data) if self.lifting is not None else data
+        lifted_data = self.lifting_transform(
+            data
+        )  # if self.lifting is not None else data
         return lifted_data
 
     def __call__(self, data):

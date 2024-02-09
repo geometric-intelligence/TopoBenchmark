@@ -8,6 +8,10 @@ from torch_geometric.data import Data
 from torch_sparse import coalesce
 
 
+def load_simplicial_dataset(cfg):
+    pass  # dataset = graph.karate_club(complex_type="simplicial", feat_dim=2)
+
+
 def load_hypergraph_pickle_dataset(cfg):
     """
     this will read the citation dataset from HyperGCN, and convert it edge_list to

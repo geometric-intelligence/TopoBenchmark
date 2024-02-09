@@ -1,6 +1,7 @@
 _target_: topobenchmarkx.transforms.lifting.DataLiftingTransform
 lifting: "Identity"
-# k_value: 1
-# complex_dim: 2
-# max_triangles: 6
-# aggregation_method: "sum"
+
+  # k_value: 1
+  # complex_dim: 2
+  # max_triangles: 6
+  # aggregation_method: "sum"

@@ -4,6 +4,7 @@ import json
 import os
 
 import hydra
+import toponetx.datasets.graph as graph
 import torch
 import torch_geometric
 from omegaconf import DictConfig
@@ -44,6 +45,19 @@ def make_hash(o):
     # return hash(tuple(frozenset(sorted(new_o.items()))))
 
 
+class SimplicialLoader(AbstractLoader):
+    def __init__(self, parameters: DictConfig, transforms_config=None):
+        super().__init__(parameters)
+        self.parameters = parameters
+
+    def load(
+        self,
+    ):
+        data = graph.karate_club(complex_type="simplicial", feat_dim=2)
+
+        return data
+
+
 class HypergraphLoader(AbstractLoader):
     def __init__(self, parameters: DictConfig, transforms_config=None):
         super().__init__(parameters)
@@ -62,12 +76,14 @@ class HypergraphLoader(AbstractLoader):
 
 
 class GraphLoader(AbstractLoader):
-    def __init__(self, parameters: DictConfig, transforms_config=None):
-        super().__init__(parameters)
-        self.parameters = parameters
-        self.transforms_config = transforms_config
+    def __init__(self, dataset_config: DictConfig):
+        super().__init__(dataset_config.parameters)
+        self.parameters = dataset_config.parameters
+        self.transforms_config = (
+            dataset_config.transforms if "transforms" in dataset_config else None
+        )
 
-    def load(self, transforms=None):
+    def load(self):
         # Use self.transform_parameters to define unique save/load path for each transform parameters
         if (
             self.transforms_config is None

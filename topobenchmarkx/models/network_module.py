@@ -49,6 +49,7 @@ class NetworkModule(LightningModule):
         self.evaluator = None
 
         # loss function
+        self.task_level = self.hparams["readout"].task_level
         self.criterion = loss
 
         # for tracking best so far validation accuracy
@@ -103,10 +104,11 @@ class NetworkModule(LightningModule):
 
         model_out = self.model_step(batch)
 
-        # Keep only train data points
-        for key, val in model_out.items():
-            if key not in ["loss", "hyperedge"]:
-                model_out[key] = val[batch.train_mask]
+        if self.task_level == "node":
+            # Keep only train data points
+            for key, val in model_out.items():
+                if key not in ["loss", "hyperedge"]:
+                    model_out[key] = val[batch.train_mask]
         # Criterion
         self.criterion(model_out)
 
@@ -146,12 +148,14 @@ class NetworkModule(LightningModule):
         """
         model_out = self.model_step(batch)
 
-        # Keep only train data points
-        for key, val in model_out.items():
-            if key not in ["loss", "hyperedge"]:
-                model_out[key] = val[batch.val_mask]
+        # Keep only validation data points
+        if self.task_level == "node":
+            for key, val in model_out.items():
+                if key not in ["loss", "hyperedge"]:
+                    model_out[key] = val[batch.val_mask]
 
-        # update and log metrics
+        # if self.task_level=='node' or (self.task_level=='graph' and batch.val_mask==1):
+        # Update and log metrics
         self.criterion(model_out)
 
         # Evaluation
@@ -172,6 +176,7 @@ class NetworkModule(LightningModule):
 
         # To track best so far validation accuracy (to be changed in future)
         self.val_acc_best(model_out["metrics"]["acc"])
+
         # self.log("val/acc", self.val_acc, on_step=False, on_epoch=True, prog_bar=True)
 
     def on_validation_epoch_end(self) -> None:
@@ -198,10 +203,11 @@ class NetworkModule(LightningModule):
 
         model_out = self.model_step(batch)
 
-        # Keep only train data points
-        for key, val in model_out.items():
-            if key not in ["loss", "hyperedge"]:
-                model_out[key] = val[batch.test_mask]
+        if self.task_level == "node":
+            # Keep only test data points
+            for key, val in model_out.items():
+                if key not in ["loss", "hyperedge"]:
+                    model_out[key] = val[batch.test_mask]
 
         self.criterion(model_out)
 

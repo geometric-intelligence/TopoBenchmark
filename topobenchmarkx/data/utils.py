@@ -112,11 +112,16 @@ def load_simplicial_dataset(cfg):
         connectivity.update({"laplacian_up_{}".format(rank_idx): laplacian_up})
         connectivity.update({"adjacency_{}".format(rank_idx): adjacency})
     connectivity.update({"shape": data.shape})
-    dataset = torch_geometric.data.Data(**connectivity, **features)
-    dataset = torch_geometric.transforms.random_node_split.RandomNodeSplit(
+    data = torch_geometric.data.Data(**connectivity, **features)
+
+    # Project node-level features to edge-level (WHY DO WE NEED IT, data already has x_1)
+    data.x_1 = data.x_1 + torch.mm(data.incidence_1.to_dense().T, data.x_0)
+
+    # TODO: Fix the splits
+    data = torch_geometric.transforms.random_node_split.RandomNodeSplit(
         num_val=4, num_test=4
-    )(dataset)
-    return dataset
+    )(data)
+    return data
 
 
 def load_hypergraph_pickle_dataset(cfg):

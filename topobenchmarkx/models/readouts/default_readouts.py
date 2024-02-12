@@ -1,6 +1,6 @@
 import torch
 
-from topobenchmarkx.models.readout import AbstractReadOut
+from topobenchmarkx.models.abstractions.readout import AbstractReadOut
 
 
 class NodeLevelReadOut(AbstractReadOut):

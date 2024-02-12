@@ -1,4 +1,4 @@
-from typing import Any, Dict, Tuple
+from typing import Any, Dict, Tuple, Union
 
 import torch
 from lightning import LightningModule
@@ -11,11 +11,7 @@ from topobenchmarkx.models.wrappers.default_wrapper import HypergraphWrapper, SA
 
 
 class NetworkModule(LightningModule):
-    """Example of a `LightningModule` for MNIST classification.
-
-    A `LightningModule` implements 8 key methods:
-
-
+    """A `LightningModule` implements 8 key methods:
 
     Docs:
         https://lightning.ai/docs/pytorch/latest/common/lightning_module.html
@@ -24,12 +20,14 @@ class NetworkModule(LightningModule):
     def __init__(
         self,
         backbone: torch.nn.Module,
-        readout_workaround: torch.nn.Module,
         readout: torch.nn.Module,
         loss: torch.nn.Module,
-        optimizer: torch.optim.Optimizer,
-        scheduler: torch.optim.lr_scheduler,
-        compile: bool,
+        backbone_wrapper: torch.nn.Module,
+        feature_encoder: Union[torch.nn.Module, None] = None,
+        **kwargs
+        # optimizer: torch.optim.Optimizer,
+        # scheduler: torch.optim.lr_scheduler,
+        # compile: bool,
     ) -> None:
         """Initialize a `NetworkModule`.
 
@@ -45,18 +43,8 @@ class NetworkModule(LightningModule):
         # also ensures init params will be stored in ckpt
         self.save_hyperparameters(logger=False)
 
-        if str(backbone.__class__) in [
-            "<class 'topomodelx.nn.hypergraph.unigcnii.UniGCNII'>",
-            "<class 'topomodelx.nn.hypergraph.allset_transformer.AllSetTransformer'>",
-        ]:
-            self.backbone = HypergraphWrapper(backbone)
-
-        elif str(backbone.__class__) in ["<class 'topomodelx.nn.simplicial.san.SAN'>"]:
-            self.backbone = SANWrapper(backbone)
-        else:
-            raise NotImplementedError(f"Backbone {backbone.__class__} not implemented")
-
-        self.readout_workaround = readout_workaround
+        self.feature_encoder = feature_encoder
+        self.backbone = backbone_wrapper(backbone)
         self.readout = readout
         self.evaluator = None
 
@@ -92,10 +80,10 @@ class NetworkModule(LightningModule):
             - A tensor of predictions.
             - A tensor of target labels.
         """
-        # model_out = {"labels": batch.y}
-        # x_0, x_1 = self.forward(batch.x, batch.edge_index)
-        # model_out["x_0"] = x_0
-        # model_out["hyperedge"] = x_1
+
+        if self.feature_encoder:
+            batch = self.feature_encoder(batch)
+
         model_out = self.forward(batch)
         model_out = self.readout(model_out)
         model_out = self.criterion(model_out)

@@ -19,14 +19,14 @@ loss:
 #   metrics: [acc, rocauc]
 
 readout:
-  _target_: topobenchmarkx.models.readouts.NodeLevelReadOut
+  _target_: topobenchmarkx.models.readouts.default_readouts.NodeLevelReadOut
   task_level: ${data.task_level}
   in_channels: ${model.backbone.hidden_channels}
   out_channels: ${data.num_classes}
 
-readout_workaround:
-  _target_: topobenchmarkx.models.readout_workaround.ReadOutWorkaround
-  backbone_outputs: ["x_0, x_1"]
+backbone_wrapper:
+  _target_: topobenchmarkx.models.wrappers.default_wrapper.HypergraphWrapper
+  _partial_: true
 
 optimizer:
   _target_: torch.optim.Adam

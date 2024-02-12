@@ -43,7 +43,7 @@ class HypergraphKHopLifting(Graph2HypergraphLifting):
 
     def lift_topology(self, data: torch_geometric.data.Data) -> dict:
         num_nodes = data.x.shape[0]
-        num_hyperedges = num_nodes
+
         incidence_1 = torch.zeros(num_nodes, num_nodes)
         edge_index = torch_geometric.utils.to_undirected(data.edge_index)
         for n in range(num_nodes):
@@ -51,6 +51,8 @@ class HypergraphKHopLifting(Graph2HypergraphLifting):
                 n, self.k, edge_index
             )
             incidence_1[n, neighbors] = 1
+
+        num_hyperedges = incidence_1.shape[1]
         incidence_1 = torch.Tensor(incidence_1).to_sparse_coo()
         return {"incidence_1": incidence_1, "num_hyperedges": num_hyperedges}
 

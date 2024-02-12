@@ -1,5 +1,4 @@
 # import copy
-import hashlib
 import json
 import os
 
@@ -15,37 +14,25 @@ from topobenchmarkx.data.load.loader import AbstractLoader
 from topobenchmarkx.data.utils import (
     get_Planetoid_pyg,
     get_TUDataset_pyg,
+    load_cell_complex_dataset,
     load_hypergraph_pickle_dataset,
     load_simplicial_dataset,
     load_split,
+    make_hash,
 )
 
-# from torch_geometric.data import Data
 
+class CellComplexLoader(AbstractLoader):
+    def __init__(self, parameters: DictConfig):
+        super().__init__(parameters)
+        self.parameters = parameters
 
-def make_hash(o):
-    """
-    Makes a hash from a dictionary, list, tuple or set to any level, that contains
-    only other hashable types (including any lists, tuples, sets, and
-    dictionaries).
-    """
-    sha1 = hashlib.sha1()
-    sha1.update(str.encode(str(o)))
-    hash_as_hex = sha1.hexdigest()
-    # convert the hex back to int and restrict it to the relevant int range
-    seed = int(hash_as_hex, 16) % 4294967295
-    return seed
-    # if isinstance(o, (set, tuple, list)):
-    #     return tuple([make_hash(e) for e in o])
-
-    # elif not isinstance(o, dict):
-    #     return hash(o)
-
-    # new_o = copy.deepcopy(o)
-    # for k, v in new_o.items():
-    #     new_o[k] = make_hash(v)
-
-    # return hash(tuple(frozenset(sorted(new_o.items()))))
+    def load(
+        self,
+    ):
+        data = load_cell_complex_dataset(self.parameters)
+        dataset = CustomDataset([data])
+        return dataset
 
 
 class SimplicialLoader(AbstractLoader):
@@ -133,7 +120,7 @@ class GraphLoader(AbstractLoader):
 
         else:
             raise NotImplementedError(
-                f"Dataset {self.parameters .data_name} not implemented"
+                f"Dataset {self.parameters.data_name} not implemented"
             )
 
         # Check if root/params_dict.json exists, if not, save it

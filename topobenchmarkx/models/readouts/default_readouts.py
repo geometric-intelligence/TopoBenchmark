@@ -24,13 +24,13 @@ class NodeLevelReadOut(AbstractReadOut):
         x = model_out["x_0"]
         if self.task_level == "graph":
             if self.pooling_type == "max":
-                x = torch.max(x, dim=0)[0]
+                x = torch.max(x, dim=0, keepdim=True)
 
             elif self.pooling_type == "mean":
-                x = torch.mean(x, dim=0)[0]
+                x = torch.mean(x, dim=0, keepdim=True)
 
             elif self.pooling_type == "sum":
-                x = torch.sum(x, dim=0)[0]
+                x = torch.sum(x, dim=0, keepdim=True)
 
         model_out["logits"] = self.linear(x)
         return model_out

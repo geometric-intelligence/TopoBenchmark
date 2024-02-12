@@ -1,11 +1,13 @@
 _target_: topobenchmarkx.data.load.loaders.GraphLoader
 
+defaults:
+  - /transforms/transform_chain1
 # Data definition
 parameters:
   data_domain: graph
   data_type: TUDataset
   data_name: MUTAG
-  data_dir: ${paths.data_dir}${dataset.parameters.data_domain}/${dataset.parameters.data_type}/${dataset.parameters.data_name}/${transforms.lifting}
+  data_dir: ${paths.data_dir}${dataset.parameters.data_domain}/${dataset.parameters.data_type}/${dataset.parameters.data_name}
   data_split_dir: ${paths.data_dir}/data_splits/${dataset.parameters.data_name}/train_prop=0.5
 
   # Dataset parameters

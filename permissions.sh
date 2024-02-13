@@ -1,1 +1,1 @@
-chmod -R a+rwx /TopoBenchmarkX
+chmod -R a+rwx .

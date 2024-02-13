@@ -86,7 +86,7 @@ class GraphLoader(AbstractLoader):
             pre_transforms = hydra.utils.instantiate(self.transforms_config)
 
             transform_parameters = pre_transforms.parameters
-            repo_name = pre_transforms.repo_name
+            repo_name = pre_transforms.lifting
 
         # Prepare the data directory name
         params_hash = make_hash(transform_parameters)

@@ -6,7 +6,7 @@ import torch_geometric
 from scipy.optimize import minimize
 from toponetx.classes import CellComplex
 
-from topobenchmarkx.data.utils import get_complex_connectivity
+from topobenchmarkx.io.load.utils import get_complex_connectivity
 
 __all__ = [
     "CellCyclesLifting",

@@ -10,8 +10,8 @@ import torch_geometric
 from omegaconf import DictConfig
 
 from topobenchmarkx.data.datasets import CustomDataset
-from topobenchmarkx.data.load.loader import AbstractLoader
-from topobenchmarkx.data.utils import (
+from topobenchmarkx.io.load.loader import AbstractLoader
+from topobenchmarkx.io.load.utils import (
     get_Planetoid_pyg,
     get_TUDataset_pyg,
     load_cell_complex_dataset,

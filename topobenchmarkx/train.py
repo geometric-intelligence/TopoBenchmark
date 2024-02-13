@@ -146,6 +146,25 @@ def train(cfg: DictConfig) -> Tuple[Dict[str, Any], Dict[str, Any]]:
     return metric_dict, object_dict
 
 
+def count_number_of_parameters(
+    model: torch.nn.Module, only_trainable: bool = True
+) -> int:
+    """
+    Counts the number of trainable params. If all params, specify only_trainable = False.
+
+    Ref:
+        - https://discuss.pytorch.org/t/how-do-i-check-the-number-of-parameters-of-a-model/4325/9?u=brando_miranda
+        - https://stackoverflow.com/questions/49201236/check-the-total-number-of-parameters-in-a-pytorch-model/62764464#62764464
+    :return:
+    """
+    if only_trainable:
+        num_params: int = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    else:  # counts trainable and none-traibale
+        num_params: int = sum(p.numel() for p in model.parameters() if p)
+    assert num_params > 0, f"Err: {num_params=}"
+    return int(num_params)
+
+
 @hydra.main(version_base="1.3", config_path="../configs", config_name="train.yaml")
 def main(cfg: DictConfig) -> Optional[float]:
     """Main entry point for training.

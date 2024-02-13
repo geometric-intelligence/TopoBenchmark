@@ -142,10 +142,12 @@ class SimplicialCliqueLifting(Graph2SimplicialLifting):
             if i == 0:
                 simplices[i].sort()
             lifted_topology[f"num_simplices_{i}"] = len(simplices[i])
+
         incidences = [
             torch.zeros(len(simplices[i]), len(simplices[i + 1]))
             for i in range(self.complex_dim)
         ]
+
         laplacians_up = [
             torch.zeros(len(simplices[i]), len(simplices[i]))
             for i in range(self.complex_dim)
@@ -159,10 +161,12 @@ class SimplicialCliqueLifting(Graph2SimplicialLifting):
                 for idx_i_1, s_i_1 in enumerate(simplices[i + 1]):
                     if all(e in s_i_1 for e in s_i):
                         incidences[i][idx_i][idx_i_1] = 1
+
             degree = torch.diag(torch.sum(incidences[i], dim=1))
             laplacians_down[i] = 2 * degree - torch.mm(
                 incidences[i], torch.transpose(incidences[i], 1, 0)
             )
+
             degree = torch.diag(torch.sum(incidences[i], dim=0))
             laplacians_up[i] = 2 * degree - torch.mm(
                 torch.transpose(incidences[i], 1, 0), incidences[i]

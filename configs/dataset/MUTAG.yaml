@@ -1,4 +1,4 @@
-_target_: topobenchmarkx.data.load.loaders.GraphLoader
+_target_: topobenchmarkx.io.load.loaders.GraphLoader
 
 defaults:
   - /transforms/cell_cycles_lifting

@@ -1,5 +1,8 @@
+# READ THIS TO UNDERSTAND THE CONFIGURATION FORMAT: https://hydra.cc/docs/advanced/overriding_packages/#using-a-config-group-more-than-once
 _target_: topobenchmarkx.transforms.transformchain.TransformChain
 
 defaults:
- - /transforms/identity/identity
- - /transforms/graph2simplicial/simplicial_clique
+ - data_manipulations@first_time_call_DM: identity
+ - graph2simplicial: simplicial_clique
+ # - data_manipulations@second_time_call_DM: data_fields_to_dense
+ #- /transforms/data_manipulations@data_fields_to_dense/data_fields_to_dense

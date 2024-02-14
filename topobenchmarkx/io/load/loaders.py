@@ -82,7 +82,7 @@ class GraphLoader(AbstractLoader):
             pre_transforms = hydra.utils.instantiate(self.transforms_config)
 
             transform_parameters = pre_transforms.parameters
-            repo_name = transform_parameters["transform_name"]
+            repo_name = pre_transforms.repo_name
 
         # Prepare the data directory name
         params_hash = make_hash(transform_parameters)
@@ -118,6 +118,7 @@ class GraphLoader(AbstractLoader):
             data_train_lst, data_val_lst, data_test_lst = [], [], []
             for i in range(len(dataset)):
                 graph = dataset[i]
+
                 if i in split_idx["train"]:
                     graph.train_mask = torch.Tensor([1]).long()
                     graph.val_mask = torch.Tensor([0]).long()
@@ -138,6 +139,7 @@ class GraphLoader(AbstractLoader):
 
             # data_lst = [dataset[i] for i in range(len(dataset))]
             # REWRITE LATER
+
             dataset = [
                 CustomDataset(data_train_lst),
                 CustomDataset(data_val_lst),

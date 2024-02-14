@@ -1,7 +1,7 @@
 _target_: topobenchmarkx.transforms.transformchain.TransformChain
 
 defaults:
- - /transforms/identity/identity
+ - /transforms/data_manipulations/identity
  - /transforms/graph2hypergraph/hypergraph_khop
 
 # transform1:

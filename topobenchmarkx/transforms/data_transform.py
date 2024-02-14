@@ -2,6 +2,10 @@
 
 import torch_geometric
 
+from topobenchmarkx.transforms.data_manipulations.manipulations import (
+    DataFieldsToDense,
+    IdentityTransform,
+)
 from topobenchmarkx.transforms.liftings.graph2cell import CellCyclesLifting
 from topobenchmarkx.transforms.liftings.graph2hypergraph import (
     HypergraphKHopLifting,
@@ -11,20 +15,6 @@ from topobenchmarkx.transforms.liftings.graph2simplicial import (
     SimplicialCliqueLifting,
     SimplicialNeighborhoodLifting,
 )
-
-
-class IdentityTransform:
-    def __init__(self, **kwargs):
-        super().__init__()
-        self.type = "domain2domain"
-        self.parameters = kwargs
-
-    def forward(self, data: torch_geometric.data.Data) -> dict:
-        return data
-
-    def __call__(self, data):
-        return self.forward(data)
-
 
 TRANSFORMS = {
     ###
@@ -38,6 +28,8 @@ TRANSFORMS = {
     "CellCyclesLifting": CellCyclesLifting,
     # Identity
     "Identity": IdentityTransform,
+    # Data Manipulations
+    "DataFieldsToDense": DataFieldsToDense,
 }
 
 

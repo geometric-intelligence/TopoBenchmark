@@ -11,6 +11,56 @@ from torch_geometric.data import Data
 from torch_sparse import coalesce
 
 
+def get_complex_connectivity(complex, max_rank):
+    connectivity = {}
+    connectivity.update(
+        {
+            "laplacian_up_{}".format(0): from_sparse(
+                complex.up_laplacian_matrix(rank=0)
+            ),
+            "adjacency_{}".format(0): from_sparse(complex.adjacency_matrix(rank=0)),
+            "hodge_laplacian_{}".format(0): from_sparse(
+                complex.hodge_laplacian_matrix(rank=0)
+            ),
+        }
+    )
+    for rank_idx in range(1, max_rank):
+        connectivity.update(
+            {
+                "incidence_{}".format(rank_idx): from_sparse(
+                    complex.incidence_matrix(rank=rank_idx)
+                ),
+                "laplacian_down_{}".format(rank_idx): from_sparse(
+                    complex.down_laplacian_matrix(rank=rank_idx)
+                ),
+                "laplacian_up_{}".format(rank_idx): from_sparse(
+                    complex.up_laplacian_matrix(rank=rank_idx)
+                ),
+                "adjacency_{}".format(rank_idx): from_sparse(
+                    complex.adjacency_matrix(rank=rank_idx)
+                ),
+                "hodge_laplacian_{}".format(rank_idx): from_sparse(
+                    complex.hodge_laplacian_matrix(rank=rank_idx)
+                ),
+            }
+        )
+    connectivity.update(
+        {
+            "incidence_{}".format(max_rank): from_sparse(
+                complex.incidence_matrix(rank=max_rank)
+            ),
+            "laplacian_down_{}".format(max_rank): from_sparse(
+                complex.down_laplacian_matrix(rank=max_rank)
+            ),
+            "hodge_laplacian_{}".format(max_rank): from_sparse(
+                complex.hodge_laplacian_matrix(rank=max_rank)
+            ),
+        }
+    )
+    connectivity.update({"shape": complex.shape})
+    return connectivity
+
+
 def load_cell_complex_dataset(cfg):
     pass
 
@@ -82,41 +132,7 @@ def load_simplicial_dataset(cfg):
     )
     # features['num_nodes'] = data.shape[0]
     features["x"] = features["x_0"]
-    connectivity = {}
-    connectivity.update(
-        {
-            "incidence_{}".format(rank_idx): from_sparse(
-                data.incidence_matrix(rank_idx)
-            )
-            for rank_idx in range(1, max_rank)
-        }
-    )
-    for rank_idx in range(max_rank + 1):
-        self_adjacency = 0
-        try:
-            laplacian_down = from_sparse(data.down_laplacian_matrix(rank=rank_idx))
-            self_adjacency += 1
-        except ValueError:
-            laplacian_down = torch.zeros(
-                (data.shape[rank_idx], data.shape[rank_idx])
-            ).to_sparse()
-        # Up laplacian
-        try:
-            laplacian_up = from_sparse(data.up_laplacian_matrix(rank=rank_idx))
-            self_adjacency += 1
-        except ValueError:
-            laplacian_up = torch.zeros(
-                (data.shape[rank_idx], data.shape[rank_idx])
-            ).to_sparse()
-        adjacency = (
-            laplacian_down
-            + laplacian_up
-            + self_adjacency * torch.eye(data.shape[rank_idx]).to_sparse()
-        )
-        connectivity.update({"laplacian_down_{}".format(rank_idx): laplacian_down})
-        connectivity.update({"laplacian_up_{}".format(rank_idx): laplacian_up})
-        connectivity.update({"adjacency_{}".format(rank_idx): adjacency})
-    connectivity.update({"shape": data.shape})
+    connectivity = get_complex_connectivity(data, max_rank)
     data = torch_geometric.data.Data(**connectivity, **features)
 
     # Project node-level features to edge-level (WHY DO WE NEED IT, data already has x_1)

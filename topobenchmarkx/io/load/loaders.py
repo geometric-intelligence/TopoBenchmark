@@ -74,11 +74,7 @@ class GraphLoader(AbstractLoader):
 
     def load(self):
         # Use self.transform_parameters to define unique save/load path for each transform parameters
-        if (
-            self.transforms_config
-            is None
-            # or self.transforms_config.lifting == "Identity"
-        ):
+        if self.transforms_config is None:
             transform_parameters = {"transform1": "Identity"}
             pre_transforms = None
             repo_name = "Identity"
@@ -86,7 +82,7 @@ class GraphLoader(AbstractLoader):
             pre_transforms = hydra.utils.instantiate(self.transforms_config)
 
             transform_parameters = pre_transforms.parameters
-            repo_name = pre_transforms.repo_name
+            repo_name = transform_parameters["transform_name"]
 
         # Prepare the data directory name
         params_hash = make_hash(transform_parameters)

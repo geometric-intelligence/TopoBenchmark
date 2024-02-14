@@ -26,7 +26,8 @@ class IdentityTransform:
         return self.forward(data)
 
 
-LIFTINGS = {
+TRANSFORMS = {
+    ###
     # Graph -> Hypergraph
     "HypergraphKHopLifting": HypergraphKHopLifting,
     "HypergraphKNearestNeighborsLifting": HypergraphKNearestNeighborsLifting,
@@ -40,37 +41,33 @@ LIFTINGS = {
 }
 
 
-class DataLiftingTransform(torch_geometric.transforms.BaseTransform):
+class DataTransform(torch_geometric.transforms.BaseTransform):
     """Abstract class that provides an interface to define a custom data lifting"""
 
-    def __init__(self, lifting, **kwargs):
+    def __init__(self, transform_name, **kwargs):
         super().__init__()
 
-        self.preserve_parameters(lifting, **kwargs)
+        self.preserve_parameters(transform_name, **kwargs)
 
-        self.lifting = lifting
-        # if self.lifting == "Identity":
-        #     self.lifting = None
+        # self.lifting = lifting
 
-        self.lifting_transform = (
-            LIFTINGS[self.lifting](**kwargs) if self.lifting is not None else None
+        self.transform = (
+            TRANSFORMS[transform_name](**kwargs) if transform_name is not None else None
         )
-        self.lifting_type = (
-            self.lifting_transform.type if self.lifting is not None else None
-        )
+        # self.transform_name = (
+        #     self.transform.type if self.lifting is not None else None
+        # )
 
     def forward(self, data: torch_geometric.data.Data) -> torch_geometric.data.Data:
         """Forward pass of the lifting"""
-        lifted_data = self.lifting_transform(
-            data
-        )  # if self.lifting is not None else data
-        return lifted_data
+        transformed_data = self.transform(data)  # if self.lifting is not None else data
+        return transformed_data
 
     def __call__(self, data):
         return self.forward(data)
 
-    def preserve_parameters(self, lifting, **kwargs):
-        kwargs["lifting"] = lifting
+    def preserve_parameters(self, transform_name, **kwargs):
+        kwargs["transform_name"] = transform_name
         self.parameters = kwargs
 
 

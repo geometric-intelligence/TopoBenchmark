@@ -1,3 +1,4 @@
-_target_: topobenchmarkx.transforms.lifting.DataLiftingTransform
-lifting: "SimplicialCliqueLifting"
+_target_: topobenchmarkx.transforms.data_transform.DataTransform
+transform_type: 'lifting'
+transform_name: "SimplicialCliqueLifting"
 

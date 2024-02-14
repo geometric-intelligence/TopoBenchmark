@@ -1,4 +1,4 @@
-import copy
+# import copy
 import random
 from itertools import combinations
 
@@ -6,7 +6,8 @@ import networkx as nx
 import numpy as np
 import torch
 import torch_geometric
-from scipy.optimize import minimize
+
+# from scipy.optimize import minimize
 
 __all__ = [
     "SimplicialNeighborhoodLifting",
@@ -42,6 +43,8 @@ class Graph2SimplicialLifting(torch_geometric.transforms.BaseTransform):
 
 
 class SimplicialNeighborhoodLifting(Graph2SimplicialLifting):
+    """ """
+
     def __init__(self, max_triangles=10000, **kwargs):
         super().__init__(**kwargs)
         self.max_triangles = max_triangles
@@ -50,7 +53,7 @@ class SimplicialNeighborhoodLifting(Graph2SimplicialLifting):
             self.added_fields += [
                 f"incidence_{i}",
                 f"laplacian_down_{i}",
-                f"laplacian_up_{i}",
+                f"laplacian_up_{i-1}",
             ]
 
     def lift_topology(self, data: torch_geometric.data.Data) -> dict:
@@ -119,7 +122,7 @@ class SimplicialCliqueLifting(Graph2SimplicialLifting):
             self.added_fields += [
                 f"incidence_{i}",
                 f"laplacian_down_{i}",
-                f"laplacian_up_{i}",
+                f"laplacian_up_{i-1}",
             ]
 
     def lift_topology(self, data: torch_geometric.data.Data) -> dict:

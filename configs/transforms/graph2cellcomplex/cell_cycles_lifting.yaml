@@ -1,5 +1,6 @@
 _target_: topobenchmarkx.transforms.lifting.DataLiftingTransform
-lifting: "CellCyclesLifting"
+transform_type: 'lifting'
+transform_name: "CellCyclesLifting"
 k_value: 1
 complex_dim: 2
 max_triangles: 6

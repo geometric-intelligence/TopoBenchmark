@@ -49,14 +49,9 @@ class DataTransform(torch_geometric.transforms.BaseTransform):
 
         self.preserve_parameters(transform_name, **kwargs)
 
-        # self.lifting = lifting
-
         self.transform = (
             TRANSFORMS[transform_name](**kwargs) if transform_name is not None else None
         )
-        # self.transform_name = (
-        #     self.transform.type if self.lifting is not None else None
-        # )
 
     def forward(self, data: torch_geometric.data.Data) -> torch_geometric.data.Data:
         """Forward pass of the lifting"""
@@ -72,4 +67,4 @@ class DataTransform(torch_geometric.transforms.BaseTransform):
 
 
 if __name__ == "__main__":
-    _ = DataLiftingTransform()
+    _ = DataTransform()

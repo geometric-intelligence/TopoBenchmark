@@ -1,2 +1,2 @@
 _target_: topobenchmarkx.evaluators.evaluator.Evaluator
-metrics: [acc, pre, rec, f1]
+metrics: [acc] #pre, rec, f1

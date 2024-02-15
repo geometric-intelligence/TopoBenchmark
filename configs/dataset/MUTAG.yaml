@@ -1,7 +1,8 @@
 _target_: topobenchmarkx.io.load.loaders.GraphLoader
 
 defaults:
-  - /transforms/transform_chain2(g2s)
+  #- /transforms/transform_chain2(g2s)
+  - /transforms/transform_chain1
 
 # Data definition
 parameters:

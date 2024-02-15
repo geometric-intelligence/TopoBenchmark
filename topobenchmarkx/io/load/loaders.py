@@ -147,29 +147,22 @@ class GraphLoader(AbstractLoader):
                     graph.test_mask = torch.Tensor([0]).long()
                     data_val_lst.append(graph)
                     assigned = True
-                if self.parameters.split_type=='test': 
-                    if i in split_idx["test"]:
-                        graph.train_mask = torch.Tensor([0]).long()
-                        graph.val_mask = torch.Tensor([0]).long()
-                        graph.test_mask = torch.Tensor([1]).long()
-                        data_test_lst.append(graph)
-                        assigned = True
+                if i in split_idx["test"]:
+                    graph.train_mask = torch.Tensor([0]).long()
+                    graph.val_mask = torch.Tensor([0]).long()
+                    graph.test_mask = torch.Tensor([1]).long()
+                    data_test_lst.append(graph)
+                    assigned = True
                 if not assigned:
                     raise ValueError("Graph not in any split")
 
             # data_lst = [dataset[i] for i in range(len(dataset))]
             # REWRITE LATER
-            if self.parameters.split_type=='test':
-                dataset = [
-                    CustomDataset(data_train_lst),
-                    CustomDataset(data_val_lst),
-                    CustomDataset(data_test_lst),
-                ]
-            else:
-                dataset = [
-                    CustomDataset(data_train_lst),
-                    CustomDataset(data_val_lst)
-                ]
+            dataset = [
+                CustomDataset(data_train_lst),
+                CustomDataset(data_val_lst),
+                CustomDataset(data_test_lst),
+            ]
         else:
             raise NotImplementedError(
                 f"Dataset {self.parameters.data_name} not implemented"
@@ -269,7 +262,7 @@ def k_fold_split(dataset, data_dir, parameters, ignore_negative=True):
     torch.manual_seed(0)
     np.random.seed(0)
     
-    split_dir = os.path.join(data_dir,f"split_k{k}")
+    split_dir = os.path.join(data_dir,f"{k}-fold")
     if not os.path.isdir(split_dir):
         os.mkdir(split_dir)
     split_path = os.path.join(split_dir,f"{fold}.npz")
@@ -296,17 +289,22 @@ def k_fold_split(dataset, data_dir, parameters, ignore_negative=True):
         valid_num = int(n / k)
 
         perm = torch.as_tensor(np.random.permutation(n))
+        for fold_n in range(k):
+            train_indices = torch.cat([perm[:valid_num*fold_n],perm[valid_num*(fold_n+1):]],dim=0)
+            val_indices = perm[valid_num*fold_n:valid_num*(fold_n+1)]
+            
+            if not ignore_negative:
+                return train_indices, val_indices
 
-        train_indices = torch.cat([perm[:valid_num*fold],perm[valid_num*(fold+1):]],dim=0)
-        val_indices = perm[valid_num*fold:valid_num*(fold+1)]
-        
-        if not ignore_negative:
-            return train_indices, val_indices
+            train_idx = labeled_nodes[train_indices]
+            valid_idx = labeled_nodes[val_indices]
 
-        train_idx = labeled_nodes[train_indices]
-        valid_idx = labeled_nodes[val_indices]
-
-        split_idx = {"train": train_idx, "valid": valid_idx}
+            split_idx = {"train": train_idx, "valid": valid_idx, "test": valid_idx}
+            assert len(list(set(split_idx["train"].tolist()+split_idx["valid"].tolist()+split_idx["test"].tolist())))==len(labels), "Not every sample has been loaded."
+            
+            split_path = os.path.join(split_dir,f"{fold_n}.npz")
+            np.savez(split_path, **split_idx)
     
-    np.savez(split_path, **split_idx)          
+    split_path = os.path.join(split_dir,f"{fold}.npz")
+    split_idx = np.load(split_path)
     return split_idx

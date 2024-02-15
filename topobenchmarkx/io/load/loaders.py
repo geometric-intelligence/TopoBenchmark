@@ -304,15 +304,16 @@ def k_fold_split(dataset, data_dir, parameters, ignore_negative=True):
             valid_idx = labeled_nodes[val_indices]
 
             split_idx = {"train": train_idx, "valid": valid_idx, "test": valid_idx}
-            assert len(
-                list(
-                    set(
+            assert np.all(
+                np.sort(
+                    np.array(
                         split_idx["train"].tolist()
                         + split_idx["valid"].tolist()
                         + split_idx["test"].tolist()
                     )
                 )
-            ) == len(labels), "Not every sample has been loaded."
+                == np.sort(np.arange(len(labels)))
+            ), "Not every sample has been loaded."
 
             split_path = os.path.join(split_dir, f"{fold_n}.npz")
             np.savez(split_path, **split_idx)

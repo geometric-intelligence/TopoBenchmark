@@ -26,11 +26,14 @@ class Graph2SimplicialLifting(Graph2Domain):
     def lift_features(self, data: torch_geometric.data.Data, lifted_topology) -> dict:
         features = {}
         features["x_0"] = data.x
-        # TODO: Projection of the features
+        # TODO: Check if that is correct
         for i in range(self.complex_dim):
-            features[f"x_{i + 1}"] = torch.zeros(
-                lifted_topology[f"num_simplices_{i + 1}"], data.x.shape[1]
+            features[f"x_{i + 1}"] = torch.matmul(
+                lifted_topology[f"incidence_{i + 1}"].t(), features[f"x_{i}"]
             )
+            # features[f"x_{i + 1}"] = torch.zeros(
+            #     lifted_topology[f"num_simplices_{i + 1}"], data.x.shape[1]
+            # )
         return features
 
 

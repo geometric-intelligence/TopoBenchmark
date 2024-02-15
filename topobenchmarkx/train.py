@@ -86,13 +86,8 @@ def train(cfg: DictConfig) -> Tuple[Dict[str, Any], Dict[str, Any]]:
         datamodule = FullBatchDataModule(dataset=dataset)
 
     elif cfg.dataset.parameters.task_level == "graph":
-        if cfg.dataset.parameters.split_type == "test":
-            datamodule = GraphFullBatchDataModule(
-                dataset_train=dataset[0], dataset_val=dataset[1], dataset_test=dataset[2]
-            )
-        elif cfg.dataset.parameters.split_type == "k-fold":
-            datamodule = GraphFullBatchDataModule(
-                dataset_train=dataset[0], dataset_val=dataset[1]
+       datamodule = GraphFullBatchDataModule(
+            dataset_train=dataset[0], dataset_val=dataset[1], dataset_test=dataset[2]
             )
     else:
         raise ValueError("Invalid task_level")
@@ -128,7 +123,7 @@ def train(cfg: DictConfig) -> Tuple[Dict[str, Any], Dict[str, Any]]:
 
     train_metrics = trainer.callback_metrics
 
-    if cfg.get("test") and cfg.dataset.parameters.split_type=="test":
+    if cfg.get("test"):
         log.info("Starting testing!")
         ckpt_path = trainer.checkpoint_callback.best_model_path
         if ckpt_path == "":

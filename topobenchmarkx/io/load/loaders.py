@@ -12,6 +12,7 @@ from omegaconf import DictConfig
 from topobenchmarkx.data.datasets import CustomDataset
 from topobenchmarkx.io.load.loader import AbstractLoader
 from topobenchmarkx.io.load.utils import (
+    ensure_serializable,
     get_Planetoid_pyg,
     get_TUDataset_pyg,
     load_cell_complex_dataset,
@@ -155,6 +156,7 @@ class GraphLoader(AbstractLoader):
         path_transform_parameters = os.path.join(
             data_dir, "path_transform_parameters_dict.json"
         )
+        transform_parameters = ensure_serializable(transform_parameters)
         if not os.path.exists(path_transform_parameters):
             with open(path_transform_parameters, "w") as f:
                 json.dump(transform_parameters, f)

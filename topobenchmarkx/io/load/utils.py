@@ -3,6 +3,7 @@ import os.path as osp
 import pickle
 
 import numpy as np
+import omegaconf
 import toponetx.datasets.graph as graph
 import torch
 import torch_geometric
@@ -269,6 +270,23 @@ def load_split(data, cfg):
         == data.num_nodes
     ), "Not all nodes within splits"
     return data
+
+
+def ensure_serializable(obj):
+    if isinstance(obj, dict):
+        for key, value in obj.items():
+            obj[key] = ensure_serializable(value)
+        return obj
+    elif isinstance(obj, (list, tuple)):
+        return [ensure_serializable(item) for item in obj]
+    elif isinstance(obj, set):
+        return {ensure_serializable(item) for item in obj}
+    elif isinstance(obj, (str, int, float, bool, type(None))):
+        return obj
+    elif isinstance(obj, omegaconf.dictconfig.DictConfig):
+        return dict(obj)
+    else:
+        return None
 
 
 def make_hash(o):

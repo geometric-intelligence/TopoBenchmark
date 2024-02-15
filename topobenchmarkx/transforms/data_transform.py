@@ -4,8 +4,8 @@ import torch_geometric
 
 from topobenchmarkx.transforms.data_manipulations.manipulations import (
     DataFieldsToDense,
-    GraphNodeDegrees,
     IdentityTransform,
+    NodeDegrees,
 )
 from topobenchmarkx.transforms.liftings.graph2cell import CellCyclesLifting
 from topobenchmarkx.transforms.liftings.graph2hypergraph import (
@@ -31,7 +31,7 @@ TRANSFORMS = {
     "Identity": IdentityTransform,
     # Data Manipulations
     "DataFieldsToDense": DataFieldsToDense,
-    "GraphNodeDegrees": GraphNodeDegrees,
+    "NodeDegrees": NodeDegrees,
 }
 
 

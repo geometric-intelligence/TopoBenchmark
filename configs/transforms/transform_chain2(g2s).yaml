@@ -3,6 +3,6 @@ _target_: topobenchmarkx.transforms.transformchain.TransformChain
 
 defaults:
  - data_manipulations@first_time_call_DM: identity
- - data_manipulations@second_time_call_DM: graph_node_degrees
  - graph2simplicial: simplicial_clique
+ - data_manipulations@second_time_call_DM: node_degrees
  #- /transforms/data_manipulations@data_fields_to_dense/data_fields_to_dense

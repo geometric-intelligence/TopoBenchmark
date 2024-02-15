@@ -111,6 +111,7 @@ class GraphLoader(AbstractLoader):
                 root=data_dir,  # self.parameters["data_dir"],
                 name=self.parameters["data_name"],
                 pre_transform=pre_transforms,
+                use_node_attr=False,
             )
 
             labels = dataset.y

@@ -2,7 +2,7 @@ _target_: topobenchmarkx.io.load.loaders.GraphLoader
 
 
 defaults:
-  - /transforms/transform_chain1
+  - /transforms/transform_chain2(g2s)
 
 # Data definition
 parameters:
@@ -18,7 +18,9 @@ parameters:
   task: classification
   task_level: node
   data_seed: 0
-
+  split_type: 'k-fold' # either k-fold or test
+  k: 10 # for k-Fold Cross-Validation
+  
   # Dataloader parameters
   batch_size: 128 # Needs to be divisible by the number of devices (e.g., if in a distributed setup)
   num_workers: 0

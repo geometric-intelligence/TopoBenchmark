@@ -6,6 +6,7 @@ from topobenchmarkx.transforms.data_manipulations.manipulations import (
     DataFieldsToDense,
     IdentityTransform,
     NodeDegrees,
+    RemoveExtraFeatureFromProteins,
 )
 from topobenchmarkx.transforms.liftings.graph2cell import CellCyclesLifting
 from topobenchmarkx.transforms.liftings.graph2hypergraph import (
@@ -32,6 +33,7 @@ TRANSFORMS = {
     # Data Manipulations
     "DataFieldsToDense": DataFieldsToDense,
     "NodeDegrees": NodeDegrees,
+    "RemoveExtraFeatureFromProteins": RemoveExtraFeatureFromProteins,
 }
 
 

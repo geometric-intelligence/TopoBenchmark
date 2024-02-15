@@ -97,3 +97,38 @@ class KeepSelectedDataFields(torch_geometric.transforms.BaseTransform):
 
     def __call__(self, data):
         return self.forward(data)
+
+
+import re
+
+
+class RemoveExtraFeatureFromProteins(torch_geometric.transforms.BaseTransform):
+    """Remove extra features from the proteins dataset
+
+    While loading with pretransform, the proteins dataset has extra features
+    that are not present in the original dataset. This transform removes the
+    extra features.
+    The extra features is supposed to be added when use_node_attr=True, but
+    even with use_node_attr=False and passed pre_transforms, the extra features
+    are removed from data.x after pre_transforms are applied.
+
+    HardCoded solution
+    """
+
+    def __init__(self, **kwargs):
+        super().__init__()
+        self.type = "remove_extra_features_from_proteins"
+        self.parameters = kwargs
+
+    def forward(self, data: torch_geometric.data.Data) -> dict:
+        dim_slice = self.parameters["remove_first_n_features"]
+        search_field = self.parameters["search_field"]
+        # Find all the fields that contain the search_field
+        fields = [key for key in data.keys() if search_field in key and len(key) == 3]
+
+        for field in fields:
+            data[field] = data[field][:, dim_slice:]
+        return data
+
+    def __call__(self, data):
+        return self.forward(data)

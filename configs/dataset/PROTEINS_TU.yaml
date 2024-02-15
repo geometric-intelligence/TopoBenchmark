@@ -1,18 +1,18 @@
 _target_: topobenchmarkx.io.load.loaders.GraphLoader
 
 defaults:
-  - /transforms/transform_chain2(g2s)
+  - /transforms/transform_chain_proteins(g2s)
 
 # Data definition
 parameters:
   data_domain: graph
   data_type: TUDataset
-  data_name: MUTAG
+  data_name: PROTEINS
   data_dir: ${paths.data_dir}${dataset.parameters.data_domain}/${dataset.parameters.data_type}/${dataset.parameters.data_name}
   # data_split_dir: ${paths.data_dir}/data_splits/${dataset.parameters.data_name}/train_prop=0.5
 
   # Dataset parameters
-  num_features: 7 # here basically I specify the initial num features in mutang at x aka x_0
+  num_features: 3 # here basically I specify the initial num features in mutang at x aka x_0
   num_classes: 2
   task: classification
   task_level: graph

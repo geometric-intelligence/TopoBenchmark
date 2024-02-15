@@ -226,29 +226,3 @@ def rand_train_test_idx(
     # Save splits to disk
 
     return split_idx
-
-
-# class PYGLoader(AbstractLoader):
-#     def __init__(self, parameters: DictConfig):
-#         super().__init__(parameters)
-#         self.parameters = parameters
-
-#     def load(self):
-#         if (
-#             self.parameters.data_name in ["Cora", "CiteSeer", "PubMed"]
-#             and self.parameters.data_type == "cocitation"
-#         ):
-#             data = get_Planetoid_pyg(cfg=self.parameters)
-#             data = load_split(data, self.parameters)
-#             dataset = CustomDataset([data])
-
-#         elif self.parameters.data_name == ["MUTAG", "ENZYMES", "PROTEINS", "COLLAB"]:
-#             data_lst = get_TUDataset_pyg(cfg=self.parameters)
-#             dataset = CustomDataset(data_lst)
-
-#         else:
-#             raise NotImplementedError(
-#                 f"Dataset {self.parameters.data_name} not implemented"
-#             )
-
-#         return dataset

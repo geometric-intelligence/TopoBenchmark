@@ -306,11 +306,7 @@ def k_fold_split(dataset, data_dir, parameters, ignore_negative=True):
             split_idx = {"train": train_idx, "valid": valid_idx, "test": valid_idx}
             assert np.all(
                 np.sort(
-                    np.array(
-                        split_idx["train"].tolist()
-                        + split_idx["valid"].tolist()
-                        + split_idx["test"].tolist()
-                    )
+                    np.array(split_idx["train"].tolist() + split_idx["valid"].tolist())
                 )
                 == np.sort(np.arange(len(labels)))
             ), "Not every sample has been loaded."

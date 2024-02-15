@@ -13,7 +13,7 @@ from omegaconf import DictConfig
 # from topobenchmarkx.data.load.loaders import HypergraphLoader
 # from topobenchmarkx.data.datasets import CustomDataset
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 rootutils.setup_root(__file__, indicator=".project-root", pythonpath=True)
 from topobenchmarkx.data.dataloader_fullbatch import (
@@ -76,19 +76,12 @@ def train(cfg: DictConfig) -> Tuple[Dict[str, Any], Dict[str, Any]]:
     trainer: Trainer = hydra.utils.instantiate(
         cfg.trainer, callbacks=callbacks, logger=logger
     )
-    torch.set_default_device(trainer.strategy.root_device)
 
     # Instantiate and load dataset
     dataset = hydra.utils.instantiate(cfg.dataset, _recursive_=False)
     dataset = dataset.load()
     log.info(f"Instantiating datamodule <{cfg.dataset._target_}>")
 
-    # Transforms
-    # transforms = hydra.utils.instantiate(cfg.transforms)
-    # transforms(data)
-
-    # Create dataset
-    # dataset = CustomDataset(data_lst)
     if cfg.dataset.parameters.task_level == "node":
         datamodule = FullBatchDataModule(dataset=dataset)
 

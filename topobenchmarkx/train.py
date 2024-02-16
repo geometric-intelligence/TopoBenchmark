@@ -66,17 +66,6 @@ def train(cfg: DictConfig) -> Tuple[Dict[str, Any], Dict[str, Any]]:
     if cfg.get("seed"):
         L.seed_everything(cfg.seed, workers=True)
 
-    log.info("Instantiating callbacks...")
-    callbacks: List[Callback] = instantiate_callbacks(cfg.get("callbacks"))
-
-    log.info("Instantiating loggers...")
-    logger: List[Logger] = instantiate_loggers(cfg.get("logger"))
-
-    log.info(f"Instantiating trainer <{cfg.trainer._target_}>")
-    trainer: Trainer = hydra.utils.instantiate(
-        cfg.trainer, callbacks=callbacks, logger=logger
-    )
-
     # Instantiate and load dataset
     dataset = hydra.utils.instantiate(cfg.dataset, _recursive_=False)
     dataset = dataset.load()
@@ -86,9 +75,9 @@ def train(cfg: DictConfig) -> Tuple[Dict[str, Any], Dict[str, Any]]:
         datamodule = FullBatchDataModule(dataset=dataset)
 
     elif cfg.dataset.parameters.task_level == "graph":
-       datamodule = GraphFullBatchDataModule(
+        datamodule = GraphFullBatchDataModule(
             dataset_train=dataset[0], dataset_val=dataset[1], dataset_test=dataset[2]
-            )
+        )
     else:
         raise ValueError("Invalid task_level")
 
@@ -103,6 +92,17 @@ def train(cfg: DictConfig) -> Tuple[Dict[str, Any], Dict[str, Any]]:
 
     # Assign evaluator to model
     model.evaluator = hydra.utils.instantiate(cfg.evaluator)
+
+    log.info("Instantiating callbacks...")
+    callbacks: List[Callback] = instantiate_callbacks(cfg.get("callbacks"))
+
+    log.info("Instantiating loggers...")
+    logger: List[Logger] = instantiate_loggers(cfg.get("logger"))
+
+    log.info(f"Instantiating trainer <{cfg.trainer._target_}>")
+    trainer: Trainer = hydra.utils.instantiate(
+        cfg.trainer, callbacks=callbacks, logger=logger
+    )
 
     object_dict = {
         "cfg": cfg,

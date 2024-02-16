@@ -1,5 +1,6 @@
 from typing import Any, Dict, Tuple, Union
 
+import numpy as np
 import torch
 from lightning import LightningModule
 from torchmetrics import MaxMetric, MeanMetric
@@ -52,8 +53,9 @@ class NetworkModule(LightningModule):
         self.task_level = self.hparams["readout"].task_level
         self.criterion = loss
 
-        # for tracking best so far validation accuracy
-        self.val_acc_best = MaxMetric()
+        # Tracking best so far validation accuracy
+        self.val_acc_best = MeanMetric()
+        self.metric_collector = []
 
     def forward(self, batch) -> dict:
         """Perform a forward pass through the model `self.backbone`.
@@ -61,15 +63,7 @@ class NetworkModule(LightningModule):
         :param x: A tensor of images.
         :return: A tensor of logits.
         """
-        return self.backbone(batch)  # self.backbone(x, edge_index)
-
-    def on_train_start(self) -> None:
-        """Lightning hook that is called when training begins."""
-        # by default lightning executes validation step sanity checks before training starts,
-        # so it's worth to make sure validation metrics don't store results from these checks
-        # self.val_loss.reset()
-        # self.val_acc.reset()
-        self.val_acc_best.reset()
+        return self.backbone(batch)
 
     def model_step(self, batch) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         """Perform a single model step on a batch of data.
@@ -113,29 +107,20 @@ class NetworkModule(LightningModule):
         self.criterion(model_out)
 
         # Evaluation
-        self.evaluator.eval(model_out)
+        self.evaluator.update(model_out)
 
-        # update and log metrics
-        # self.train_acc(model_out["logits"].argmax(1), model_out["labels"])
+        # Update and log metrics
         self.log(
-            "train/loss", model_out["loss"], on_step=False, on_epoch=True, prog_bar=True
+            "train/loss",
+            model_out["loss"],
+            on_step=False,
+            on_epoch=True,
+            prog_bar=True,
+            batch_size=1,
         )
 
-        for key in model_out["metrics"].keys():
-            self.log(
-                f"train/{key}",
-                model_out["metrics"][key],
-                on_step=False,
-                on_epoch=True,
-                prog_bar=True,
-            )
-
-        # return loss or backpropagation will fail
+        # Return loss for backpropagation step
         return model_out["loss"]
-
-    def on_train_epoch_end(self) -> None:
-        "Lightning hook that is called when a training epoch ends."
-        pass
 
     def validation_step(
         self, batch: Tuple[torch.Tensor, torch.Tensor], batch_idx: int
@@ -154,41 +139,20 @@ class NetworkModule(LightningModule):
                 if key not in ["loss", "hyperedge"]:
                     model_out[key] = val[batch.val_mask]
 
-        # if self.task_level=='node' or (self.task_level=='graph' and batch.val_mask==1):
         # Update and log metrics
         self.criterion(model_out)
 
         # Evaluation
-        self.evaluator.eval(model_out)
+        self.evaluator.update(model_out)
 
+        # Log Loss
         self.log(
-            "val/loss", model_out["loss"], on_step=False, on_epoch=True, prog_bar=True
-        )
-
-        for key in model_out["metrics"].keys():
-            self.log(
-                f"val/{key}",
-                model_out["metrics"][key],
-                on_step=False,
-                on_epoch=True,
-                prog_bar=True,
-            )
-
-        # To track best so far validation accuracy (to be changed in future)
-        self.val_acc_best(model_out["metrics"]["acc"])
-
-        # self.log("val/acc", self.val_acc, on_step=False, on_epoch=True, prog_bar=True)
-
-    def on_validation_epoch_end(self) -> None:
-        "Lightning hook that is called when a validation epoch ends."
-        # acc = self.val_acc.compute()  # get current val acc
-        # self.val_acc_best(acc)  # update best so far val acc
-
-        # log `val_acc_best` as a value through `.compute()` method, instead of as a metric object
-        # otherwise metric would be reset by lightning after each epoch
-
-        self.log(
-            "val/acc_best", self.val_acc_best.compute(), sync_dist=True, prog_bar=True
+            "val/loss",
+            model_out["loss"],
+            on_step=False,
+            on_epoch=True,
+            prog_bar=True,
+            batch_size=1,
         )
 
     def test_step(
@@ -208,31 +172,59 @@ class NetworkModule(LightningModule):
             for key, val in model_out.items():
                 if key not in ["loss", "hyperedge"]:
                     model_out[key] = val[batch.test_mask]
-
+        # Calculate loss
         self.criterion(model_out)
 
-        # Evaluation
-        self.evaluator.eval(model_out)
-
-        # update and log metrics
-        # self.test_loss(loss)
-        # self.test_acc(model_out["logits"].argmax(1), model_out["labels"])
+        # Log loss
         self.log(
-            "test/loss", model_out["loss"], on_step=False, on_epoch=True, prog_bar=True
+            "test/loss",
+            model_out["loss"],
+            on_step=False,
+            on_epoch=True,
+            prog_bar=True,
+            batch_size=1,
         )
-        for key in model_out["metrics"].keys():
-            self.log(
-                f"test/{key}",
-                model_out["metrics"][key],
-                on_step=False,
-                on_epoch=True,
-                prog_bar=True,
-            )
-        # self.log("test/acc", self.test_acc, on_step=False, on_epoch=True, prog_bar=True)
+
+        # Evaluation
+        self.evaluator.update(model_out)
+
+    def on_train_epoch_end(self) -> None:
+        """Lightning hook that is called when a test epoch ends."""
+        self.log_metrics(mode="train")
+
+    def on_validation_epoch_end(self) -> None:
+        """Lightning hook that is called when a test epoch ends."""
+        self.log_metrics(mode="val")
 
     def on_test_epoch_end(self) -> None:
         """Lightning hook that is called when a test epoch ends."""
-        pass
+        self.log_metrics(mode="test")
+
+    def on_train_epoch_start(self) -> None:
+        """Lightning hook that is called when a test epoch ends."""
+        self.evaluator.reset()
+
+    def on_val_epoch_start(self) -> None:
+        """Lightning hook that is called when a test epoch ends."""
+        self.evaluator.reset()
+
+    def on_test_epoch_start(self) -> None:
+        """Lightning hook that is called when a test epoch ends."""
+        self.evaluator.reset()
+
+    def log_metrics(self, mode=None):
+        """Log metrics."""
+        metrics_dict = self.evaluator.compute(mode)
+        for key in metrics_dict.keys():
+            self.log(
+                f"{mode}/{key}",
+                metrics_dict[key],
+                prog_bar=True,
+                on_step=False,
+            )
+
+        # Reset evaluator for next epoch
+        self.evaluator.reset()
 
     def setup(self, stage: str) -> None:
         """Lightning hook that is called at the beginning of fit (train + validate), validate,
@@ -273,6 +265,23 @@ class NetworkModule(LightningModule):
         return {"optimizer": optimizer}
 
 
+# Collect validation statistics
+# self.val_acc_best.update(model_out["metrics"]["acc"])
+# self.metric_collector.append(model_out["metrics"]["acc"])
+
+
+# def on_train_start(self) -> None:
+#     """Lightning hook that is called when training begins."""
+#     # by default lightning executes validation step sanity checks before training starts,
+#     # so it's worth to make sure validation metrics don't store results from these checks
+#     # self.val_loss.reset()
+#     # self.val_acc.reset()
+#     self.val_acc_best.reset()
+
+
+# def on_validation_epoch_end(self) -> None:
+#     "Lightning hook that is called when a validation epoch ends."
+#     pass
 # self.criterion = torch.nn.CrossEntropyLoss()
 
 # self.evaluator = evaluator

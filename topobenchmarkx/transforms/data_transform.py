@@ -8,6 +8,9 @@ from topobenchmarkx.transforms.data_manipulations.manipulations import (
     NodeDegrees,
     RemoveExtraFeatureFromProteins,
 )
+from topobenchmarkx.transforms.feature_liftings.feature_liftings import (
+    BaseTopologyLifting,
+)
 from topobenchmarkx.transforms.liftings.graph2cell import CellCyclesLifting
 from topobenchmarkx.transforms.liftings.graph2hypergraph import (
     HypergraphKHopLifting,
@@ -28,9 +31,10 @@ TRANSFORMS = {
     "SimplicialCliqueLifting": SimplicialCliqueLifting,
     # Graph -> Cell Complex
     "CellCyclesLifting": CellCyclesLifting,
-    # Identity
-    "Identity": IdentityTransform,
+    # Feature Liftings
+    "BaseTopologyLifting": BaseTopologyLifting,
     # Data Manipulations
+    "Identity": IdentityTransform,
     "DataFieldsToDense": DataFieldsToDense,
     "NodeDegrees": NodeDegrees,
     "RemoveExtraFeatureFromProteins": RemoveExtraFeatureFromProteins,

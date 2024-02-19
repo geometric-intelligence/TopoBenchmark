@@ -192,6 +192,20 @@ class NetworkModule(LightningModule):
         self.evaluator.update(model_out)
         self.metric_collector_test.append((model_out["logits"], model_out["labels"]))
 
+    def log_metrics(self, mode=None):
+        """Log metrics."""
+        metrics_dict = self.evaluator.compute(mode)
+        for key in metrics_dict.keys():
+            self.log(
+                f"{mode}/{key}",
+                metrics_dict[key],
+                prog_bar=True,
+                on_step=False,
+            )
+
+        # Reset evaluator for next epoch
+        self.evaluator.reset()
+
     def on_train_epoch_end(self) -> None:
         """Lightning hook that is called when a test epoch ends."""
         self.log_metrics(mode="train")
@@ -217,20 +231,6 @@ class NetworkModule(LightningModule):
 
     def on_test_epoch_start(self) -> None:
         """Lightning hook that is called when a test epoch ends."""
-        self.evaluator.reset()
-
-    def log_metrics(self, mode=None):
-        """Log metrics."""
-        metrics_dict = self.evaluator.compute(mode)
-        for key in metrics_dict.keys():
-            self.log(
-                f"{mode}/{key}",
-                metrics_dict[key],
-                prog_bar=True,
-                on_step=False,
-            )
-
-        # Reset evaluator for next epoch
         self.evaluator.reset()
 
     def setup(self, stage: str) -> None:

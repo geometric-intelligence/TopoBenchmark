@@ -157,6 +157,8 @@ class SimplicialCliqueLifting(Graph2SimplicialLifting):
         edges = [
             (i.item(), j.item()) for i, j in zip(data.edge_index[0], data.edge_index[1])
         ]
+        self_edges = [(i,i) for i in range(n_nodes)]
+        edges = set(edges + self_edges
         G = nx.Graph()
         G.add_edges_from(edges)
         cliques = nx.find_cliques(G)

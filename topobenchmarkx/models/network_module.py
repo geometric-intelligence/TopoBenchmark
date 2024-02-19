@@ -55,7 +55,9 @@ class NetworkModule(LightningModule):
 
         # Tracking best so far validation accuracy
         self.val_acc_best = MeanMetric()
-        self.metric_collector = []
+        self.metric_collector_val = []
+        self.metric_collector_val2 = []
+        self.metric_collector_test = []
 
     def forward(self, batch) -> dict:
         """Perform a forward pass through the model `self.backbone`.
@@ -104,7 +106,7 @@ class NetworkModule(LightningModule):
                 if key not in ["loss", "hyperedge"]:
                     model_out[key] = val[batch.train_mask]
         # Criterion
-        self.criterion(model_out)
+        # self.criterion(model_out)
 
         # Evaluation
         self.evaluator.update(model_out)
@@ -140,10 +142,11 @@ class NetworkModule(LightningModule):
                     model_out[key] = val[batch.val_mask]
 
         # Update and log metrics
-        self.criterion(model_out)
+        # self.criterion(model_out)
 
         # Evaluation
         self.evaluator.update(model_out)
+        self.metric_collector_val.append((model_out["logits"], model_out["labels"]))
 
         # Log Loss
         self.log(
@@ -173,7 +176,7 @@ class NetworkModule(LightningModule):
                 if key not in ["loss", "hyperedge"]:
                     model_out[key] = val[batch.test_mask]
         # Calculate loss
-        self.criterion(model_out)
+        # self.criterion(model_out)
 
         # Log loss
         self.log(
@@ -187,6 +190,7 @@ class NetworkModule(LightningModule):
 
         # Evaluation
         self.evaluator.update(model_out)
+        self.metric_collector_test.append((model_out["logits"], model_out["labels"]))
 
     def on_train_epoch_end(self) -> None:
         """Lightning hook that is called when a test epoch ends."""
@@ -195,10 +199,13 @@ class NetworkModule(LightningModule):
     def on_validation_epoch_end(self) -> None:
         """Lightning hook that is called when a test epoch ends."""
         self.log_metrics(mode="val")
+        self.metric_collector_val2 = self.metric_collector_val.copy()
+        self.metric_collector_val = []
 
     def on_test_epoch_end(self) -> None:
         """Lightning hook that is called when a test epoch ends."""
         self.log_metrics(mode="test")
+        print()
 
     def on_train_epoch_start(self) -> None:
         """Lightning hook that is called when a test epoch ends."""

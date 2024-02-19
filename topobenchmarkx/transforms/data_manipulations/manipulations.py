@@ -99,9 +99,6 @@ class KeepSelectedDataFields(torch_geometric.transforms.BaseTransform):
         return self.forward(data)
 
 
-import re
-
-
 class RemoveExtraFeatureFromProteins(torch_geometric.transforms.BaseTransform):
     """Remove extra features from the proteins dataset
 

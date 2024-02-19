@@ -85,11 +85,6 @@ def train(cfg: DictConfig) -> Tuple[Dict[str, Any], Dict[str, Any]]:
     log.info(f"Instantiating model <{cfg.model._target_}>")
     model: LightningModule = hydra.utils.instantiate(cfg.model)
 
-    if cfg.model["backbone"]["_target_"] == "topomodelx.nn.simplicial.san.SAN":
-        model.backbone.backbone.layers = torch.nn.ModuleList(
-            model.backbone.backbone.layers
-        )
-
     # Assign evaluator to model
     model.evaluator = hydra.utils.instantiate(cfg.evaluator)
 

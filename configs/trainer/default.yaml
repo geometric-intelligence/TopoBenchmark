@@ -3,7 +3,7 @@ _target_: lightning.pytorch.trainer.Trainer
 default_root_dir: ${paths.output_dir}
 
 min_epochs: 1 # prevents early stopping
-max_epochs: 30
+max_epochs: 10
 accumulate_grad_batches: 1 #${dataset.parameters.batch_size}
 
 accelerator: gpu
@@ -21,4 +21,4 @@ deterministic: False
 
 # inference mode: Whether to use :func:`torch.inference_mode` or :func:`torch.no_grad`
 # during evaluation (``validate``/``test``/``predict``).
-inference_mode: False
+inference_mode: True

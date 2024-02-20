@@ -206,15 +206,22 @@ class NetworkModule(LightningModule):
         # Reset evaluator for next epoch
         self.evaluator.reset()
 
-    def on_train_epoch_end(self) -> None:
-        """Lightning hook that is called when a test epoch ends."""
+    def on_validation_epoch_start(self) -> None:
+        """According pytorch lightning documentation, this hook is called at the beginning of the validation epoch.
+
+        https://lightning.ai/docs/pytorch/stable/common/lightning_module.html#hooks
+
+        Note that the validation step is within the train epoch. Hence here we have to log the train metrics
+        before we reset the evaluator to start the validation loop.
+        """
+
+        # Log train metrics and reset evaluator
         self.log_metrics(mode="train")
 
     def on_validation_epoch_end(self) -> None:
         """Lightning hook that is called when a test epoch ends."""
+        # Log validation metrics and reset evaluator
         self.log_metrics(mode="val")
-        self.metric_collector_val2 = self.metric_collector_val.copy()
-        self.metric_collector_val = []
 
     def on_test_epoch_end(self) -> None:
         """Lightning hook that is called when a test epoch ends."""

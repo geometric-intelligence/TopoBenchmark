@@ -7,7 +7,7 @@ import rootutils
 import torch
 from lightning import Callback, LightningDataModule, LightningModule, Trainer
 from lightning.pytorch.loggers import Logger
-from omegaconf import DictConfig
+from omegaconf import DictConfig, OmegaConf
 
 # Inputs to load data
 # from topobenchmarkx.data.load.loaders import HypergraphLoader
@@ -48,6 +48,7 @@ from topobenchmarkx.utils import (
 # ------------------------------------------------------------------------------------ #
 
 
+torch.set_num_threads(1)
 log = RankedLogger(__name__, rank_zero_only=True)
 
 
@@ -62,6 +63,7 @@ def train(cfg: DictConfig) -> Tuple[Dict[str, Any], Dict[str, Any]]:
     :param cfg: A DictConfig configuration composed by Hydra.
     :return: A tuple with metrics and dict with all instantiated objects.
     """
+
     # Set seed for random number generators in pytorch, numpy and python.random
     if cfg.get("seed"):
         L.seed_everything(cfg.seed, workers=True)

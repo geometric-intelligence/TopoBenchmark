@@ -7,7 +7,6 @@ class BaseTopologyLifting(torch_geometric.transforms.BaseTransform):
         super().__init__()
 
     def lift_features(self, data: torch_geometric.data.Data) -> dict:
-        features = {}
         data["x_0"] = data.x
 
         # TODO: Check if that is correct

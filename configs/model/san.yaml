@@ -3,8 +3,8 @@ _target_: topobenchmarkx.models.network_module.NetworkModule
 backbone:
   _target_: topomodelx.nn.simplicial.san.SAN
   in_channels: ${dataset.parameters.num_features}
-  hidden_channels: 16
-  out_channels: 16
+  hidden_channels: 32
+  #out_channels: 16
   n_filters: 2
   n_layers: 1
   order_harmonic: 5
@@ -36,7 +36,7 @@ backbone_wrapper:
 optimizer:
   _target_: torch.optim.Adam
   _partial_: true
-  lr: 0.1
+  lr: 0.01
   weight_decay: 0.0
 
 scheduler:

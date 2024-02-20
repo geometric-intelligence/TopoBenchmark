@@ -121,10 +121,15 @@ class RemoveExtraFeatureFromProteins(torch_geometric.transforms.BaseTransform):
         dim_slice = self.parameters["remove_first_n_features"]
         search_field = self.parameters["search_field"]
         # Find all the fields that contain the search_field
-        fields = [key for key in data.keys() if search_field in key and len(key) == 3]
+        fields = [key for key in data.keys() if "x" in key and len(key) == 1]
 
         for field in fields:
+            assert (
+                self.parameters["expected_number_of_features"]
+                == data[field][:, dim_slice:].shape[1]
+            ), "The expected number of features does not match the number of features in the data"
             data[field] = data[field][:, dim_slice:]
+
         return data
 
     def __call__(self, data):

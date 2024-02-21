@@ -25,7 +25,7 @@ class HypergraphWrapper(DefaultWrapper):
     def __call__(self, batch):
         """Define logic for forward pass"""
         model_out = {"labels": batch.y}
-        x_0, x_1 = self.backbone(batch.x, batch.incidence_1)
+        x_0, x_1 = self.backbone(batch.x_0, batch.incidence_1)
         model_out["x_0"] = x_0
         model_out["hyperedge"] = x_1
         return model_out

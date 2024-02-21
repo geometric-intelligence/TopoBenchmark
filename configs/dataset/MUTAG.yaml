@@ -1,8 +1,10 @@
 _target_: topobenchmarkx.io.load.loaders.GraphLoader
 
 defaults:
-  #- /transforms/graph2cellcomplex/cell_cicles_lifting
-  - /transforms/transform_chain2(g2s)
+  - /transforms/graph2hypergraph/hypergraph_khop
+  #- /transforms/graph2simplicial/simplicial_clique
+  #- /transforms/graph2cellcomplex/cell_cycles_lifting
+  #- /transforms/transform_chain2(g2s)
   #- /transforms/transform_chain1
 
 # Data definition

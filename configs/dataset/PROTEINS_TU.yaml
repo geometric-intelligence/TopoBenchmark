@@ -1,6 +1,8 @@
 _target_: topobenchmarkx.io.load.loaders.GraphLoader
 
 defaults:
+  #- /transforms/graph2simplicial/simplicial_clique
+  #- /transforms/graph2hypergraph/hypergraph_khop
   - /transforms/transform_chain_proteins_g2hp
 
 # Data definition
@@ -12,7 +14,7 @@ parameters:
   # data_split_dir: ${paths.data_dir}/data_splits/${dataset.parameters.data_name}/train_prop=0.5
 
   # Dataset parameters
-  num_features: 3 # here basically I specify the initial num features in mutang at x aka x_0
+  num_features: 3 # here basically I specify the initial num features in PROTEINS at x aka x_0
   num_classes: 2
   task: classification
   task_level: graph

@@ -81,9 +81,13 @@ class GraphLoader(AbstractLoader):
             repo_name = "Identity"
         else:
             pre_transforms = hydra.utils.instantiate(self.transforms_config)
-
-            transform_parameters = pre_transforms.parameters
-            repo_name = pre_transforms.repo_name
+            if hasattr(pre_transforms, "parameters"):
+                transform_parameters = pre_transforms.parameters
+                repo_name = pre_transforms.repo_name
+            else:
+                pre_transforms = [*pre_transforms.values()][0]
+                transform_parameters = pre_transforms.parameters
+                repo_name = transform_parameters["transform_name"]
 
         # Prepare the data directory name
         params_hash = make_hash(transform_parameters)

@@ -5,8 +5,8 @@
 defaults:
   - _self_
   - dataset: PROTEINS_TU #PROTEINS_TU #MUTAG # karate_club
-  # - transforms: hypergraph_khop
-  - model: san #unignn2 # san
+  # - pre_transforms: hypergraph_khop
+  - model: unignn2 #unignn2 # san
   - evaluator: torchevaluator
   - callbacks: default
   - logger: wandb # set logger here or use command line (e.g. `python train.py logger=tensorboard`)

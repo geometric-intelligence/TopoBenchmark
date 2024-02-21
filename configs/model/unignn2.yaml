@@ -1,13 +1,15 @@
 _target_: topobenchmarkx.models.network_module.NetworkModule
 
+model_name: unignn2
+
 feature_encoder:
   _target_: topobenchmarkx.models.encoders.default_encoders.BaseNodeFeatureEncoder
   in_channels: ${dataset.parameters.num_features}
-  out_channels: 256
+  out_channels: ${model.backbone.hidden_channels}
 
 backbone:
   _target_: topomodelx.nn.hypergraph.unigcnii.UniGCNII
-  in_channels: 256  # ${dataset.parameters.num_features}
+  in_channels: ${model.backbone.hidden_channels}  # ${dataset.parameters.num_features}
   hidden_channels: 256
   n_layers: 1
   alpha: 0.5

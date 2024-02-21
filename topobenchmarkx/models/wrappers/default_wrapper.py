@@ -60,9 +60,9 @@ class CANWrapper(DefaultWrapper):
         x_0 = self.backbone(
             batch.x,
             batch.x_1,
-            batch.adjacency_0,
-            batch.laplacian_down_1,
-            batch.laplacian_up_1,
+            batch.adjacency_0.coalesce(),
+            batch.laplacian_down_1.coalesce(),
+            batch.laplacian_up_1.coalesce(),
         )
-        model_out["x_graph"] = x_0
+        model_out["x_0"] = x_0
         return model_out

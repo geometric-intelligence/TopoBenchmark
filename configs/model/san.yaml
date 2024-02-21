@@ -1,8 +1,13 @@
 _target_: topobenchmarkx.models.network_module.NetworkModule
 
+feature_encoder:
+  _target_: topobenchmarkx.models.encoders.default_encoders.BaseEdgeFeatureEncoder
+  in_channels: ${dataset.parameters.num_features}
+  out_channels: ${model.backbone.hidden_channels}
+
 backbone:
   _target_: topomodelx.nn.simplicial.san.SAN
-  in_channels: ${dataset.parameters.num_features}
+  in_channels: ${model.backbone.hidden_channels}
   hidden_channels: 32
   #out_channels: 16
   n_filters: 2

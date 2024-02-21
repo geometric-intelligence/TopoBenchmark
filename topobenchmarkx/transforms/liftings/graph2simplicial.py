@@ -17,55 +17,57 @@ __all__ = [
 ]
 
 
-class Graph2SimplicialLifting(Graph2Domain):
+# class Graph2SimplicialLifting(Graph2Domain):
+#    def __init__(self, complex_dim=2, **kwargs):#
+#        super().__init__()
+#        self.complex_dim = complex_dim
+#        self.type = "graph2simplicial"
+
+# def lift_features(self, data: torch_geometric.data.Data, lifted_topology) -> dict:
+#     features = {}
+#     features["x_0"] = data.x
+#     # TODO: Check if that is correct
+#     for i in range(self.complex_dim):
+#         features[f"x_{i + 1}"] = torch.matmul(
+#             lifted_topology[f"incidence_{i + 1}"].t(), features[f"x_{i}"]
+#         )
+#     return features
+
+
+class Graph2SimplicialLifting(torch_geometric.transforms.BaseTransform):
     def __init__(self, complex_dim=2, **kwargs):
         super().__init__()
         self.complex_dim = complex_dim
         self.type = "graph2simplicial"
 
-    # def lift_features(self, data: torch_geometric.data.Data, lifted_topology) -> dict:
-    #     features = {}
-    #     features["x_0"] = data.x
-    #     # TODO: Check if that is correct
-    #     for i in range(self.complex_dim):
-    #         features[f"x_{i + 1}"] = torch.matmul(
-    #             lifted_topology[f"incidence_{i + 1}"].t(), features[f"x_{i}"]
-    #         )
-    #     return features
+    def preserve_fields(self, data: torch_geometric.data.Data) -> dict:
+        preserved_fields = {}
+        for key, value in data.items():
+            preserved_fields[key] = value
+        return preserved_fields
 
+    def lift_features(self, data: torch_geometric.data.Data, lifted_topology) -> dict:
+        features = {}
+        features["x_0"] = data.x
+        # TODO: Projection of the features
+        for i in range(self.complex_dim):
+            features[f"x_{i + 1}"] = torch.zeros(
+                lifted_topology[f"num_simplices_{i + 1}"], data.x.shape[1]
+            )
+        return features
 
-# class Graph2SimplicialLifting(torch_geometric.transforms.BaseTransform):
-#     def __init__(self, complex_dim=2, **kwargs):
-#         super().__init__()
-#         self.complex_dim = complex_dim
-#         self.type = "graph2simplicial"
+    @abstractmethod
+    def lift_topology(self, data: torch_geometric.data.Data) -> dict:
+        raise NotImplementedError
 
-#     def preserve_fields(self, data: torch_geometric.data.Data) -> dict:
-#         preserved_fields = {}
-#         for key, value in data.items():
-#             preserved_fields[key] = value
-#         return preserved_fields
-
-#     def lift_features(self, data: torch_geometric.data.Data, lifted_topology) -> dict:
-#         features = {}
-#         features["x_0"] = data.x
-#         # TODO: Projection of the features
-#         for i in range(self.complex_dim):
-#             features[f"x_{i + 1}"] = torch.zeros(
-#                 lifted_topology[f"num_simplices_{i + 1}"], data.x.shape[1]
-#             )
-#         return features
-
-#     @abstractmethod
-#     def lift_topology(self, data: torch_geometric.data.Data) -> dict:
-#         raise NotImplementedError
-
-#     def forward(self, data: torch_geometric.data.Data) -> torch_geometric.data.Data:
-#         initial_data = self.preserve_fields(data)
-#         lifted_topology = self.lift_topology(data)
-#         lifted_features = self.lift_features(data, lifted_topology)
-#         lifted_data = torch_geometric.data.Data(**initial_data, **lifted_topology, **lifted_features)
-#         return lifted_data
+    def forward(self, data: torch_geometric.data.Data) -> torch_geometric.data.Data:
+        initial_data = self.preserve_fields(data)
+        lifted_topology = self.lift_topology(data)
+        lifted_features = self.lift_features(data, lifted_topology)
+        lifted_data = torch_geometric.data.Data(
+            **initial_data, **lifted_topology, **lifted_features
+        )
+        return lifted_data
 
 
 class SimplicialNeighborhoodLifting(Graph2SimplicialLifting):

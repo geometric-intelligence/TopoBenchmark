@@ -61,8 +61,8 @@ class CANWrapper(DefaultWrapper):
             batch.x,
             batch.x_1,
             batch.adjacency_0,
-            batch.down_laplacian_1,
-            batch.up_laplacian_1,
+            batch.laplacian_down_1,
+            batch.laplacian_up_1,
         )
         model_out["x_graph"] = x_0
         return model_out

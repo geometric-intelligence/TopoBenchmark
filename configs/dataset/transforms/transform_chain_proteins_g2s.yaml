@@ -1,0 +1,9 @@
+# READ THIS TO UNDERSTAND THE CONFIGURATION FORMAT: https://hydra.cc/docs/advanced/overriding_packages/#using-a-config-group-more-than-once
+_target_: topobenchmarkx.transforms.transformchain.TransformChain
+
+defaults:
+ - graph2simplicial: simplicial_clique
+ - data_manipulations@second_time_call_DM: node_degrees
+ - data_manipulations@third_time_call_DM: remove_extra_feature
+ - feature_liftings@fourth_time_call_DM: base_lifting
+

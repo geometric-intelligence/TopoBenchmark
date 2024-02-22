@@ -1,7 +1,0 @@
-_target_: topobenchmarkx.transforms.transformchain.TransformChain
-
-defaults:
- - graph2hypergraph: hypergraph_khop
- - data_manipulations@second_time_call_DM: node_degrees
- - data_manipulations@third_time_call_DM: remove_extra_feature
- - feature_liftings@fourth_time_call_DM: base_lifting

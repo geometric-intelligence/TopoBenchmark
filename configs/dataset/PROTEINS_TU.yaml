@@ -1,9 +1,11 @@
 _target_: topobenchmarkx.io.load.loaders.GraphLoader
 
 defaults:
+  #- transforms: graph2hypergraph/hypergraph_khop
+  - transforms: transform_chain_proteins_g2hp
   #- /transforms/graph2simplicial/simplicial_clique
   #- /transforms/graph2hypergraph/hypergraph_khop
-  - /transforms/transform_chain_proteins_g2hp
+  #- /transforms/transform_chain_proteins_g2hp
 
 # Data definition
 parameters:

@@ -83,7 +83,11 @@ class GraphLoader(AbstractLoader):
             pre_transforms = hydra.utils.instantiate(self.transforms_config)
             if hasattr(pre_transforms, "parameters"):
                 transform_parameters = pre_transforms.parameters
-                repo_name = pre_transforms.repo_name
+                repo_name = (
+                    pre_transforms.repo_name
+                    if hasattr(pre_transforms, "repo_name")
+                    else transform_parameters["transform_name"]
+                )
             else:
                 pre_transforms = [*pre_transforms.values()][0]
                 transform_parameters = pre_transforms.parameters

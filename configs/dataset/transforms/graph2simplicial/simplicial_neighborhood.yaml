@@ -1,0 +1,4 @@
+_target_: topobenchmarkx.transforms.data_transform.DataTransform
+transform_type: 'lifting'
+transform_name: "SimplicialNeighborhoodLifting"
+max_triangles: 1000

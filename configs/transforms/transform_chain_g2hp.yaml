@@ -1,8 +1,8 @@
 _target_: topobenchmarkx.transforms.transformchain.TransformChain
 
 defaults:
- - data_manipulations: identity
  - graph2hypergraph: hypergraph_khop
+ - feature_liftings@fourth_time_call_DM: base_lifting
 
 # transform1:
 #   _target_: topobenchmarkx.transforms.lifting.DataLiftingTransform

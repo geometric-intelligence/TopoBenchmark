@@ -4,13 +4,13 @@ backbone:
   _target_: topomodelx.nn.cell.can.CAN
   in_channels_0: ${dataset.parameters.num_features}
   in_channels_1: ${dataset.parameters.num_features}
-  out_channels: 16
+  out_channels: 7
   dropout: 0.5
   heads: 3
   concat: True
   skip_connection: True
   n_layers: 2
-  att_lift: True
+  att_lift: False
 
 loss:
   _target_: topobenchmarkx.models.losses.loss.DefaultLoss
@@ -23,7 +23,7 @@ loss:
 readout:
   _target_: topobenchmarkx.models.readouts.default_readouts.NodeLevelReadOut
   task_level: ${dataset.parameters.task_level}
-  in_channels: ${model.backbone.out_channels}
+  in_channels: 21
   out_channels: ${dataset.parameters.num_classes}
 
 # readout_workaround:

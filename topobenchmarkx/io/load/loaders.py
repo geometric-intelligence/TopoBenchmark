@@ -80,10 +80,15 @@ class GraphLoader(AbstractLoader):
             pre_transforms = None
             repo_name = "Identity"
         else:
-            pre_transforms = hydra.utils.instantiate(self.transforms_config)
-
-            transform_parameters = pre_transforms.parameters
-            repo_name = pre_transforms.repo_name
+            pre_transforms_list = hydra.utils.instantiate(self.transforms_config)
+            pre_transforms = torch_geometric.transforms.Compose(
+                list(pre_transforms_list.values())
+            )
+            repo_name = "_".join(list(self.transforms_config.keys()))
+            transform_parameters = {
+                transform_name: transform.parameters
+                for transform_name, transform in pre_transforms_list.items()
+            }
 
         # Prepare the data directory name
         params_hash = make_hash(transform_parameters)

@@ -48,16 +48,43 @@ class SimplicialLoader(AbstractLoader):
 
 
 class HypergraphLoader(AbstractLoader):
-    def __init__(self, parameters: DictConfig):
+    def __init__(self, parameters: DictConfig, transforms=None):
         super().__init__(parameters)
         self.parameters = parameters
+        self.transforms_config = transforms
 
     def load(
         self,
     ):
         data = load_hypergraph_pickle_dataset(self.parameters)
         data = load_split(data, self.parameters)
+
+        data.incidence_1 = data.edge_index
         dataset = CustomDataset([data])
+
+        # pre_transforms_dict = hydra.utils.instantiate(self.transforms_config)
+
+        # pre_transforms_dict = hydra.utils.instantiate(self.transforms_config)
+        # pre_transforms = torch_geometric.transforms.Compose(
+        #     list(pre_transforms_dict.values())
+        # )
+        # repo_name = "_".join(list(self.transforms_config.keys()))
+        # transform_parameters = {
+        #     transform_name: transform.parameters
+        #     for transform_name, transform in pre_transforms_dict.items()
+        # }
+        # # Prepare the data directory name
+        # params_hash = make_hash(transform_parameters)
+        # data_dir = os.path.join(
+        #     os.path.join(
+        #         os.path.join(self.parameters["data_dir"], self.parameters["data_name"]),
+        #         repo_name,
+        #     ),
+        #     f"{params_hash}",
+        # )
+
+        # if pre_transforms is not None:
+        #     dataset = PreprocessedDataset(data_dir, dataset, pre_transforms)
         # We need to add checks that:
         # All nodes belong to some edge, in case some not, create selfedge
 
@@ -73,6 +100,7 @@ class GraphLoader(AbstractLoader):
 
     def load(self):
         # Use self.transform_parameters to define unique save/load path for each transform parameters
+        # TODO: avoid this mess
         if self.transforms_config is None:
             transform_parameters = {"transform": "Identity"}
             pre_transforms = None
@@ -97,10 +125,11 @@ class GraphLoader(AbstractLoader):
             ),
             f"{params_hash}",
         )
-        data_raw_dir = self.parameters["data_dir"]
+        # data_raw_dir = self.parameters["data_dir"]
+        # make the string lowercase
 
         if (
-            self.parameters.data_name in ["Cora", "CiteSeer", "PubMed"]
+            self.parameters.data_name.lower() in ["cora", "citeseer", "pubmed"]
             and self.parameters.data_type == "cocitation"
         ):
             dataset = torch_geometric.datasets.Planetoid(
@@ -142,6 +171,7 @@ class GraphLoader(AbstractLoader):
                     f"split_type {self.parameters.split_type} not valid. Choose either 'test' or 'k-fold'"
                 )
 
+            # TODO: make the splits loader
             data_train_lst, data_val_lst, data_test_lst = [], [], []
             for i in range(len(dataset)):
                 graph = dataset[i]
@@ -167,8 +197,6 @@ class GraphLoader(AbstractLoader):
                 if not assigned:
                     raise ValueError("Graph not in any split")
 
-            # data_lst = [dataset[i] for i in range(len(dataset))]
-            # REWRITE LATER
             dataset = [
                 CustomDataset(data_train_lst),
                 CustomDataset(data_val_lst),

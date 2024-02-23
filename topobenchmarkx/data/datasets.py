@@ -22,6 +22,7 @@ class PreprocessedDataset(torch_geometric.data.InMemoryDataset):
         elif isinstance(data_list, torch_geometric.data.Data):
             data_list = [data_list]
         self.data_list = data_list
+        # The self.pocess is called in the super().__init__
         super().__init__(root, None, pre_transform)
         self.load(self.processed_paths[0])
 

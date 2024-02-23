@@ -12,13 +12,13 @@
             "console": "integratedTerminal",
             "justMyCode": false
         },
-        // {
-        //     "name": "Python: Train",
-        //     "type": "python",
-        //     "request": "launch",
-        //     "program": "${workspaceFolder}/topobenchmarkx/train.py",
-        //     "console": "integratedTerminal",
-        //     "justMyCode": false
-        // }
+        {
+            "name": "Python: Train",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/topobenchmarkx/train.py",
+            "console": "integratedTerminal",
+            "justMyCode": false
+        }
     ]
 }

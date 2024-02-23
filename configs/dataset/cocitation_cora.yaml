@@ -3,6 +3,7 @@ _target_: topobenchmarkx.io.load.loaders.GraphLoader
 
 defaults:
   - transforms/graph2hypergraph: hypergraph_khop
+  - transforms/feature_liftings: base_lifting
 
 # Data definition
 parameters:
@@ -17,8 +18,8 @@ parameters:
   num_classes: 7
   task: classification
   task_level: node
-  data_seed: 0
-  split_type: 'k-fold' # either k-fold or test
+  data_seed: 4
+  split_type: 'test' # either k-fold or test
   k: 10 # for k-Fold Cross-Validation
 
   # Dataloader parameters

@@ -1,55 +1,10 @@
-import hashlib
 import json
 import os
 
 import hydra
-import omegaconf
 import torch_geometric
 
-
-def make_hash(o):
-    """
-    Makes a hash from a dictionary, list, tuple or set to any level, that contains
-    only other hashable types (including any lists, tuples, sets, and
-    dictionaries).
-    """
-    sha1 = hashlib.sha1()
-    sha1.update(str.encode(str(o)))
-    hash_as_hex = sha1.hexdigest()
-    # convert the hex back to int and restrict it to the relevant int range
-    seed = int(hash_as_hex, 16) % 4294967295
-    return seed
-
-
-def ensure_serializable(obj):
-    if isinstance(obj, dict):
-        for key, value in obj.items():
-            obj[key] = ensure_serializable(value)
-        return obj
-    elif isinstance(obj, (list, tuple)):
-        return [ensure_serializable(item) for item in obj]
-    elif isinstance(obj, set):
-        return {ensure_serializable(item) for item in obj}
-    elif isinstance(obj, (str, int, float, bool, type(None))):
-        return obj
-    elif isinstance(obj, omegaconf.dictconfig.DictConfig):
-        return dict(obj)
-    else:
-        return None
-
-
-class CustomDataset(torch_geometric.data.Dataset):
-    def __init__(self, data_lst):
-        super().__init__()
-        self.data_lst = data_lst
-
-    def get(self, idx):
-        data = self.data_lst[idx]
-        keys = list(data.keys())
-        return ([data[key] for key in keys], keys)
-
-    def len(self):
-        return len(self.data_lst)
+from topobenchmarkx.io.load.utils import ensure_serializable, make_hash
 
 
 class Preprocessor(torch_geometric.data.InMemoryDataset):

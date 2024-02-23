@@ -8,7 +8,7 @@ feature_encoder:
 backbone:
   _target_: topomodelx.nn.simplicial.san.SAN
   in_channels: ${model.backbone.hidden_channels}
-  hidden_channels: 32
+  hidden_channels: 128
   #out_channels: 16
   n_filters: 2
   n_layers: 1
@@ -41,7 +41,7 @@ backbone_wrapper:
 optimizer:
   _target_: torch.optim.Adam
   _partial_: true
-  lr: 0.01
+  lr: 0.001 #0.01
   weight_decay: 0.0
 
 scheduler:

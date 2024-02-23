@@ -18,7 +18,7 @@ backbone:
   layer_drop: 0.2
 
 loss:
-  _target_: topobenchmarkx.models.losses.loss.DefaultLoss
+  _target_: topobenchmarkx.models.losses.loss.NodeTaskLoss
   task: ${dataset.parameters.task}
 # evaluator:
 #   _target_: topobenchmarkx.evaluators.evaluator.Evaluator

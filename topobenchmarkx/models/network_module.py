@@ -83,7 +83,7 @@ class NetworkModule(LightningModule):
 
         model_out = self.forward(batch)
         model_out = self.readout(model_out)
-        model_out = self.criterion(model_out)
+        # model_out = self.criterion(model_out)
 
         return model_out
 
@@ -105,8 +105,9 @@ class NetworkModule(LightningModule):
             for key, val in model_out.items():
                 if key not in ["loss", "hyperedge"]:
                     model_out[key] = val[batch.train_mask]
+
         # Criterion
-        # self.criterion(model_out)
+        model_out = self.criterion(model_out)
 
         # Evaluation
         self.evaluator.update(model_out)
@@ -141,8 +142,8 @@ class NetworkModule(LightningModule):
                 if key not in ["loss", "hyperedge"]:
                     model_out[key] = val[batch.val_mask]
 
-        # Update and log metrics
-        # self.criterion(model_out)
+        # Criterion
+        model_out = self.criterion(model_out)
 
         # Evaluation
         self.evaluator.update(model_out)
@@ -175,8 +176,9 @@ class NetworkModule(LightningModule):
             for key, val in model_out.items():
                 if key not in ["loss", "hyperedge"]:
                     model_out[key] = val[batch.test_mask]
-        # Calculate loss
-        # self.criterion(model_out)
+
+        # Criterion
+        model_out = self.criterion(model_out)
 
         # Log loss
         self.log(

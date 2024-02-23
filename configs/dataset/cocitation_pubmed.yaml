@@ -1,0 +1,28 @@
+_target_: topobenchmarkx.io.load.loaders.GraphLoader
+
+
+defaults:
+  - transforms/graph2hypergraph: hypergraph_khop
+  - transforms/feature_liftings: base_lifting
+
+# Data definition
+parameters:
+  data_domain: graph
+  data_type: cocitation
+  data_name: PubMed
+  data_dir: ${paths.data_dir}${dataset.parameters.data_domain}/${dataset.parameters.data_type}/${dataset.parameters.data_name}
+  data_split_dir: ${paths.data_dir}data_splits/pubmed/train_prop=0.5
+
+  # Dataset parameters
+  num_features: 500
+  num_classes: 3
+  task: classification
+  task_level: node
+  data_seed: 0
+  split_type: test #'k-fold' # either k-fold or test
+  k: 10 # for k-Fold Cross-Validation
+
+  # Dataloader parameters
+  batch_size: 1 # Needs to be divisible by the number of devices (e.g., if in a distributed setup)
+  num_workers: 0
+  pin_memory: False

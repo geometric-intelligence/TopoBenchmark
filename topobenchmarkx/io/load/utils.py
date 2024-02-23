@@ -25,6 +25,7 @@ def get_complex_connectivity(complex, max_rank):
             ),
         }
     )
+
     for rank_idx in range(1, max_rank):
         connectivity.update(
             {

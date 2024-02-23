@@ -1,0 +1,11 @@
+# READ THIS TO UNDERSTAND THE CONFIGURATION FORMAT: https://hydra.cc/docs/advanced/overriding_packages/#using-a-config-group-more-than-once
+_target_: topobenchmarkx.transforms.transformchain.TransformChain
+
+defaults:
+ # Lift the graph to a simplicial complex
+ - graph2simplicial: simplicial_clique
+ - feature_liftings@fourth_time_call_DM: base_lifting
+ # Calculate node degrees (here is just for example)
+ - data_manipulations@second_time_call_DM: node_degrees
+ # Lift the features to the simplicial complex
+ - feature_liftings@fourth_time_call_DM: base_lifting

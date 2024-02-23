@@ -207,7 +207,13 @@ def load_hypergraph_pickle_dataset(cfg):
     edge_index = np.array([node_list, edge_list], dtype=int)
     edge_index = torch.LongTensor(edge_index)
 
-    data = Data(x=features, x_0=features, edge_index=edge_index, y=labels)
+    data = Data(
+        x=features,
+        x_0=features,
+        edge_index=edge_index,
+        incidence_hyperedges=edge_index,
+        y=labels,
+    )
 
     # data.coalesce()
     # There might be errors if edge_index.max() != num_nodes.
@@ -226,7 +232,7 @@ def load_hypergraph_pickle_dataset(cfg):
     data.num_hyperedges = len(hypergraph)
     data.num_class = num_class
 
-    data.edge_index = torch.sparse_coo_tensor(
+    data.incidence_hyperedges = torch.sparse_coo_tensor(
         data.edge_index,
         values=torch.ones(data.edge_index.shape[1]),
         size=(data.num_nodes, data.num_hyperedges),

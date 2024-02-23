@@ -1,18 +1,25 @@
 _target_: topobenchmarkx.models.network_module.NetworkModule
 
+model_name: allsettransformer
+
+feature_encoder:
+  _target_: topobenchmarkx.models.encoders.default_encoders.BaseNodeFeatureEncoder
+  in_channels: ${dataset.parameters.num_features}
+  out_channels: ${model.backbone.hidden_channels}
+
 backbone:
   _target_: topomodelx.nn.hypergraph.allset_transformer.AllSetTransformer
-  in_channels: ${data.num_features}
-  hidden_channels: 64
+  in_channels: ${model.backbone.hidden_channels}
+  hidden_channels: 96
   n_layers: 1
-  heads: 4
+  heads: 3
   dropout: 0.2
   mlp_num_layers: 1
   mlp_dropout: 0.2
 
 loss:
   _target_: topobenchmarkx.models.losses.loss.DefaultLoss
-  task: ${data.task}
+  task: ${dataset.parameters.task}
 
 # evaluator:
 #   _target_: topobenchmarkx.evaluators.evaluator.Evaluator
@@ -20,9 +27,9 @@ loss:
 
 readout:
   _target_: topobenchmarkx.models.readouts.default_readouts.NodeLevelReadOut
-  task_level: ${data.task_level}
+  task_level: ${dataset.parameters.task_level}
   in_channels: ${model.backbone.hidden_channels}
-  out_channels: ${data.num_classes}
+  out_channels: ${dataset.parameters.num_classes}
 
 backbone_wrapper:
   _target_: topobenchmarkx.models.wrappers.default_wrapper.HypergraphWrapper

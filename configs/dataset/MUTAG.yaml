@@ -1,14 +1,14 @@
 _target_: topobenchmarkx.io.load.loaders.GraphLoader
 
 defaults:
-  - transforms/graph2hypergraph: hypergraph_khop
+  - transforms/graph2simplicial: simplicial_clique
 
 # Data definition
 parameters:
   data_domain: graph
   data_type: TUDataset
   data_name: MUTAG
-  data_dir: ${paths.data_dir}${dataset.parameters.data_domain}/${dataset.parameters.data_type}/${dataset.parameters.data_name}
+  data_dir: ${paths.data_dir}${dataset.parameters.data_domain}/${dataset.parameters.data_type}
   # data_split_dir: ${paths.data_dir}/data_splits/${dataset.parameters.data_name}/train_prop=0.5
 
   # Dataset parameters

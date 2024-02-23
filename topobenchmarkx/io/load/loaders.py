@@ -9,12 +9,10 @@ import torch
 import torch_geometric
 from omegaconf import DictConfig
 
-from topobenchmarkx.data.datasets import CustomDataset
+from topobenchmarkx.data.datasets import CustomDataset, PreprocessedDataset
 from topobenchmarkx.io.load.loader import AbstractLoader
 from topobenchmarkx.io.load.utils import (
     ensure_serializable,
-    get_Planetoid_pyg,
-    get_TUDataset_pyg,
     load_cell_complex_dataset,
     load_hypergraph_pickle_dataset,
     load_simplicial_dataset,
@@ -76,36 +74,41 @@ class GraphLoader(AbstractLoader):
     def load(self):
         # Use self.transform_parameters to define unique save/load path for each transform parameters
         if self.transforms_config is None:
-            transform_parameters = {"transform1": "Identity"}
+            transform_parameters = {"transform": "Identity"}
             pre_transforms = None
             repo_name = "Identity"
         else:
-            pre_transforms_list = hydra.utils.instantiate(self.transforms_config)
+            pre_transforms_dict = hydra.utils.instantiate(self.transforms_config)
             pre_transforms = torch_geometric.transforms.Compose(
-                list(pre_transforms_list.values())
+                list(pre_transforms_dict.values())
             )
             repo_name = "_".join(list(self.transforms_config.keys()))
             transform_parameters = {
                 transform_name: transform.parameters
-                for transform_name, transform in pre_transforms_list.items()
+                for transform_name, transform in pre_transforms_dict.items()
             }
 
         # Prepare the data directory name
         params_hash = make_hash(transform_parameters)
         data_dir = os.path.join(
-            os.path.join(self.parameters["data_dir"], repo_name),
+            os.path.join(
+                os.path.join(self.parameters["data_dir"], self.parameters["data_name"]),
+                repo_name,
+            ),
             f"{params_hash}",
         )
+        data_raw_dir = self.parameters["data_dir"]
 
         if (
             self.parameters.data_name in ["Cora", "CiteSeer", "PubMed"]
             and self.parameters.data_type == "cocitation"
         ):
             dataset = torch_geometric.datasets.Planetoid(
-                root=data_dir,  # self.parameters["data_dir"],
+                root=self.parameters["data_dir"],
                 name=self.parameters["data_name"],
-                pre_transform=pre_transforms,
             )
+            if pre_transforms is not None:
+                dataset = PreprocessedDataset(data_dir, dataset, pre_transforms)
             data = dataset.data
             if self.parameters.split_type == "test":
                 data = load_split(data, self.parameters)
@@ -122,11 +125,13 @@ class GraphLoader(AbstractLoader):
 
         elif self.parameters.data_name in ["MUTAG", "ENZYMES", "PROTEINS", "COLLAB"]:
             dataset = torch_geometric.datasets.TUDataset(
-                root=data_dir,  # self.parameters["data_dir"],
+                root=self.parameters["data_dir"],
                 name=self.parameters["data_name"],
-                pre_transform=pre_transforms,
                 use_node_attr=False,
             )
+            if pre_transforms is not None:
+                dataset = PreprocessedDataset(data_dir, dataset, pre_transforms)
+
             if self.parameters.split_type == "test":
                 labels = dataset.y
                 split_idx = rand_train_test_idx(labels)

@@ -11,47 +11,48 @@ __all__ = [
 ]
 
 
-class Graph2HypergraphLifting(Graph2Domain):
-    def __init__(self, complex_dim=2, **kwargs):
+# class Graph2HypergraphLifting(Graph2Domain):
+#    def __init__(self, complex_dim=2, **kwargs):
+#        super().__init__()
+#        self.complex_dim = complex_dim
+#        self.added_fields = ["hyperedges"]
+#        self.type = "graph2hypergraph"
+
+
+#
+class Graph2HypergraphLifting(torch_geometric.transforms.BaseTransform):
+    def __init__(self, **kwargs):
         super().__init__()
-        self.complex_dim = complex_dim
         self.added_fields = ["hyperedges"]
         self.type = "graph2hypergraph"
 
+    def preserve_fields(self, data: torch_geometric.data.Data) -> dict:
+        preserved_fields = {}
+        for key, value in data.items():
+            preserved_fields[key] = value
+        return preserved_fields
 
-# class Graph2HypergraphLifting(torch_geometric.transforms.BaseTransform):
-#     def __init__(self, **kwargs):
-#         super().__init__()
-#         self.added_fields = ["hyperedges"]
-#         self.type = "graph2hypergraph"
+    def lift_features(
+        self, data: torch_geometric.data.Data, num_hyperedges: int
+    ) -> dict:
+        features = {}
+        features["x_0"] = data.x
+        # TODO: Projection of the features
+        features["x_hyperedges"] = torch.zeros(num_hyperedges, data.x.shape[1])
+        return features
 
-#     def preserve_fields(self, data: torch_geometric.data.Data) -> dict:
-#         preserved_fields = {}
-#         for key, value in data.items():
-#             preserved_fields[key] = value
-#         return preserved_fields
+    @abstractmethod
+    def lift_topology(self, data: torch_geometric.data.Data) -> dict:
+        raise NotImplementedError
 
-#     def lift_features(
-#         self, data: torch_geometric.data.Data, num_hyperedges: int
-#     ) -> dict:
-#         features = {}
-#         features["x_0"] = data.x
-#         # TODO: Projection of the features
-#         features["x_hyperedges"] = torch.zeros(num_hyperedges, data.x.shape[1])
-#         return features
-
-#     @abstractmethod
-#     def lift_topology(self, data: torch_geometric.data.Data) -> dict:
-#         raise NotImplementedError
-
-#     def forward(self, data: torch_geometric.data.Data) -> torch_geometric.data.Data:
-#         initial_data = self.preserve_fields(data)
-#         lifted_topology = self.lift_topology(data)
-#         lifted_features = self.lift_features(data, lifted_topology["num_hyperedges"])
-#         lifted_data = torch_geometric.data.Data(
-#             **initial_data, **lifted_topology, **lifted_features
-#         )
-#         return lifted_data
+    def forward(self, data: torch_geometric.data.Data) -> torch_geometric.data.Data:
+        initial_data = self.preserve_fields(data)
+        lifted_topology = self.lift_topology(data)
+        lifted_features = self.lift_features(data, lifted_topology["num_hyperedges"])
+        lifted_data = torch_geometric.data.Data(
+            **initial_data, **lifted_topology, **lifted_features
+        )
+        return lifted_data
 
 
 class HypergraphKHopLifting(Graph2HypergraphLifting):

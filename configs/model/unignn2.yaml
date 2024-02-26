@@ -10,8 +10,8 @@ feature_encoder:
 backbone:
   _target_: topomodelx.nn.hypergraph.unigcnii.UniGCNII
   in_channels: ${model.backbone.hidden_channels}  # ${dataset.parameters.num_features}
-  hidden_channels: 256
-  n_layers: 1
+  hidden_channels: 128
+  n_layers: 2
   alpha: 0.5
   beta: 0.5
   input_drop: 0.2
@@ -37,7 +37,7 @@ backbone_wrapper:
 optimizer:
   _target_: torch.optim.Adam
   _partial_: true
-  lr: 0.001
+  lr: 0.01
   weight_decay: 0.0
 
 scheduler:

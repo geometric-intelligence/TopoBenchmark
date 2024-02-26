@@ -6,7 +6,10 @@ import torch_geometric
 from scipy.optimize import minimize
 from toponetx.classes import CellComplex
 
-from topobenchmarkx.io.load.utils import get_complex_connectivity
+from topobenchmarkx.io.load.utils import (
+    get_complex_connectivity,
+    get_zero_complex_connectivity,
+)
 
 __all__ = [
     "CellCyclesLifting",
@@ -54,20 +57,45 @@ class CellCyclesLifting(Graph2CellLifting):
     def __init__(self, aggregation_method="sum", **kwargs):
         super().__init__(**kwargs)
         self.complex_dim = 2
+        self.max_cell_lenght = kwargs["max_cell_lenght"]
         self.added_fields = []
         if not aggregation_method in ["sum"]:
             raise NotImplementedError
         self.aggregation = aggregation_method
 
     def lift_topology(self, data: torch_geometric.data.Data) -> dict:
+        n_nodes = data.x.shape[0]
         lifted_topology = {}
         edges = [
             (i.item(), j.item()) for i, j in zip(data.edge_index[0], data.edge_index[1])
         ]
+
+        # Add self edges to avoid not considering isolated nodes without selfloops
+        self_edges = [(i, i) for i in range(n_nodes)]
+        edges = edges + self_edges
+
         G = nx.Graph()
         G.add_edges_from(edges)
         cycles = nx.cycle_basis(G)
         cell_complex = CellComplex(G)
-        cell_complex.add_cells_from(cycles, rank=self.complex_dim)
-        lifted_topology = get_complex_connectivity(cell_complex, self.complex_dim)
+
+        # Eliminate cycles for isolated nodes
+        cycles = [cycle for cycle in cycles if len(cycle) != 1]
+        # Eliminate cycles that are greater than the max_cell_lenght
+        cycles = [cycle for cycle in cycles if len(cycle) <= self.max_cell_lenght]
+        if len(cycles) == 0:
+            lifted_topology = get_zero_complex_connectivity(
+                cell_complex, self.complex_dim
+            )
+            print("Warning: The graph has no cycles")
+        else:
+            # if len([len(cycle)==self.complex_dim for cycle in cycles]) < 3:
+            #     print("Warning: The graph has less than 3 nodes, no cycles can be found")
+            try:
+                cell_complex.add_cells_from(cycles, rank=self.complex_dim)
+            except:
+                print(
+                    "Warning: The graph has less than 3 nodes, no cycles can be found"
+                )
+            lifted_topology = get_complex_connectivity(cell_complex, self.complex_dim)
         return lifted_topology

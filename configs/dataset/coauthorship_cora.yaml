@@ -10,7 +10,7 @@ parameters:
   data_type: coauthorship
   data_name: Cora
   data_dir: ${paths.data_dir}${dataset.parameters.data_domain}/${dataset.parameters.data_type}/${dataset.parameters.data_name}
-  data_split_dir: ${paths.data_dir}/data_splits/${dataset.parameters.data_name}/train_prop=0.5
+  data_split_dir: ${paths.data_dir}/data_splits/${dataset.parameters.data_name}
 
   # Dataset parameters
   num_features: 1433

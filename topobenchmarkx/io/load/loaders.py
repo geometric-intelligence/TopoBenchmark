@@ -111,9 +111,17 @@ class GraphLoader(AbstractLoader):
             )
             if self.transforms_config is not None:
                 dataset = Preprocessor(data_dir, dataset, self.transforms_config)
-            dataset = load_graph_cocitation_split(dataset, data_dir, self.parameters)
+            dataset = load_graph_cocitation_split(dataset, self.parameters)
 
-        elif self.parameters.data_name in ["MUTAG", "ENZYMES", "PROTEINS", "COLLAB"]:
+        elif self.parameters.data_name in [
+            "MUTAG",
+            "ENZYMES",
+            "PROTEINS",
+            "COLLAB",
+            "IMDB-BINARY",
+            "IMDB-MULTI",
+            "REDDIT-BINARY",
+        ]:
             dataset = torch_geometric.datasets.TUDataset(
                 root=self.parameters["data_dir"],
                 name=self.parameters["data_name"],
@@ -121,7 +129,7 @@ class GraphLoader(AbstractLoader):
             )
             if self.transforms_config is not None:
                 dataset = Preprocessor(data_dir, dataset, self.transforms_config)
-            dataset = load_graph_tudataset_split(dataset, data_dir, self.parameters)
+            dataset = load_graph_tudataset_split(dataset, self.parameters)
 
         else:
             raise NotImplementedError(

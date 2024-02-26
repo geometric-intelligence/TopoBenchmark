@@ -66,6 +66,54 @@ def get_complex_connectivity(complex, max_rank):
     return connectivity
 
 
+def get_zero_complex_connectivity(complex, max_rank):
+    connectivity = {}
+    connectivity.update(
+        {
+            "laplacian_up_{}".format(0): from_sparse(
+                complex.up_laplacian_matrix(rank=0)
+            ),
+            "adjacency_{}".format(0): from_sparse(complex.adjacency_matrix(rank=0)),
+            "hodge_laplacian_{}".format(0): from_sparse(
+                complex.hodge_laplacian_matrix(rank=0)
+            ),
+        }
+    )
+    rank_idx = 1
+    connectivity.update(
+        {
+            "incidence_{}".format(rank_idx): from_sparse(
+                complex.incidence_matrix(rank=rank_idx)
+            ),
+            "laplacian_down_{}".format(rank_idx): from_sparse(
+                complex.down_laplacian_matrix(rank=rank_idx)
+            ),
+            "adjacency_{}".format(rank_idx): from_sparse(
+                complex.adjacency_matrix(rank=rank_idx)
+            ),
+            "hodge_laplacian_{}".format(rank_idx): from_sparse(
+                complex.hodge_laplacian_matrix(rank=rank_idx)
+            ),
+            "laplacian_up_{}".format(rank_idx): torch.zeros(
+                (complex.number_of_edges(), complex.number_of_edges())
+            ),
+        }
+    )
+
+    max_rank = 2
+    connectivity.update(
+        {
+            "incidence_{}".format(max_rank): torch.zeros(
+                (complex.number_of_edges(), 1)
+            ),
+            "laplacian_down_{}".format(max_rank): torch.zeros((1, 1)),
+            "hodge_laplacian_{}".format(max_rank): torch.zeros((1, 1)),
+        }
+    )
+    connectivity.update({"shape": complex.shape})
+    return connectivity
+
+
 def load_cell_complex_dataset(cfg):
     pass
 
@@ -265,7 +313,7 @@ def get_TUDataset_pyg(cfg):
 
 
 def load_split(data, cfg):
-    data_dir = cfg["data_split_dir"]
+    data_dir = os.path.join(cfg["data_split_dir"], "train_prop=0.5")
     load_path = f"{data_dir}/split_{cfg['data_seed']}.npz"
     splits = np.load(load_path, allow_pickle=True)
     data.train_mask = torch.from_numpy(splits["train"])
@@ -282,7 +330,7 @@ def load_split(data, cfg):
     return data
 
 
-def k_fold_split(dataset, data_dir, parameters, ignore_negative=True):
+def k_fold_split(dataset, parameters, ignore_negative=True):
     """
     Returns train and valid indices as in K-Fold Cross-Validation. If the split already exists it loads it automatically, otherwise it creates the split file for the subsequent runs.
 
@@ -292,6 +340,7 @@ def k_fold_split(dataset, data_dir, parameters, ignore_negative=True):
     :param ignore_negative: If True the function ignores negative labels. Default True.
     :return split_idx: A dictionary containing "train" and "valid" tensors with the respective indices.
     """
+    data_dir = parameters.data_split_dir
     k = parameters.k
     fold = parameters.data_seed
     assert fold < k, "data_seed needs to be less than k"
@@ -301,7 +350,7 @@ def k_fold_split(dataset, data_dir, parameters, ignore_negative=True):
 
     split_dir = os.path.join(data_dir, f"{k}-fold")
     if not os.path.isdir(split_dir):
-        os.mkdir(split_dir)
+        os.makedirs(split_dir)
     split_path = os.path.join(split_dir, f"{fold}.npz")
     if os.path.isfile(split_path):
         split_idx = np.load(split_path)
@@ -354,13 +403,13 @@ def k_fold_split(dataset, data_dir, parameters, ignore_negative=True):
     return split_idx
 
 
-def load_graph_cocitation_split(dataset, data_dir, cfg):
+def load_graph_cocitation_split(dataset, cfg):
     data = dataset.data
     if cfg.split_type == "test":
         data = load_split(data, cfg)
         return CustomDataset([data])
     elif cfg.split_type == "k-fold":
-        split_idx = k_fold_split(dataset, data_dir, cfg)
+        split_idx = k_fold_split(dataset, cfg)
         data.train_mask = split_idx["train"]
         data.val_mask = split_idx["valid"]
         return CustomDataset([data])
@@ -425,12 +474,12 @@ def rand_train_test_idx(
     return split_idx
 
 
-def load_graph_tudataset_split(dataset, data_dir, cfg):
+def load_graph_tudataset_split(dataset, cfg):
     if cfg.split_type == "test":
         labels = dataset.y
         split_idx = rand_train_test_idx(labels)
     elif cfg.split_type == "k-fold":
-        split_idx = k_fold_split(dataset, data_dir, cfg)
+        split_idx = k_fold_split(dataset, cfg)
     else:
         raise NotImplementedError(
             f"split_type {cfg.split_type} not valid. Choose either 'test' or 'k-fold'"

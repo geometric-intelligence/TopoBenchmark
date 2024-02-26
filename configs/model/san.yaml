@@ -8,7 +8,7 @@ feature_encoder:
 backbone:
   _target_: topomodelx.nn.simplicial.san.SAN
   in_channels: ${model.backbone.hidden_channels}
-  hidden_channels: 128
+  hidden_channels: 32
   #out_channels: 16
   n_filters: 2
   n_layers: 1

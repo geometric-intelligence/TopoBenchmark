@@ -58,8 +58,6 @@ class HypergraphLoader(AbstractLoader):
     ):
         data = load_hypergraph_pickle_dataset(self.parameters)
         data = load_split(data, self.parameters)
-
-        data.incidence_1 = data.edge_index
         dataset = CustomDataset([data])
 
         # pre_transforms_dict = hydra.utils.instantiate(self.transforms_config)

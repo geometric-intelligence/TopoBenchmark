@@ -282,7 +282,7 @@ def load_split(data, cfg):
     return data
 
 
-def k_fold_split(dataset, data_dir, parameters, ignore_negative=True):
+def k_fold_split(data_dir, dataset, parameters, ignore_negative=True):
     """
     Returns train and valid indices as in K-Fold Cross-Validation. If the split already exists it loads it automatically, otherwise it creates the split file for the subsequent runs.
 
@@ -354,13 +354,13 @@ def k_fold_split(dataset, data_dir, parameters, ignore_negative=True):
     return split_idx
 
 
-def load_graph_cocitation_split(dataset, data_dir, cfg):
+def load_node_level_split(data_dir, dataset, cfg):
     data = dataset.data
     if cfg.split_type == "test":
         data = load_split(data, cfg)
         return CustomDataset([data])
     elif cfg.split_type == "k-fold":
-        split_idx = k_fold_split(dataset, data_dir, cfg)
+        split_idx = k_fold_split(data_dir, dataset, cfg)
         data.train_mask = split_idx["train"]
         data.val_mask = split_idx["valid"]
         return CustomDataset([data])
@@ -425,12 +425,12 @@ def rand_train_test_idx(
     return split_idx
 
 
-def load_graph_tudataset_split(dataset, data_dir, cfg):
+def load_graph_level_split(data_dir, dataset, cfg):
     if cfg.split_type == "test":
         labels = dataset.y
         split_idx = rand_train_test_idx(labels)
     elif cfg.split_type == "k-fold":
-        split_idx = k_fold_split(dataset, data_dir, cfg)
+        split_idx = k_fold_split(data_dir, dataset, cfg)
     else:
         raise NotImplementedError(
             f"split_type {cfg.split_type} not valid. Choose either 'test' or 'k-fold'"

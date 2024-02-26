@@ -1,4 +1,5 @@
 import hashlib
+import os
 import os.path as osp
 import pickle
 
@@ -10,6 +11,8 @@ import torch_geometric
 from topomodelx.utils.sparse import from_sparse
 from torch_geometric.data import Data
 from torch_sparse import coalesce
+
+from topobenchmarkx.data.datasets import CustomDataset
 
 
 def get_complex_connectivity(complex, max_rank):
@@ -279,6 +282,195 @@ def load_split(data, cfg):
     return data
 
 
+def k_fold_split(dataset, data_dir, parameters, ignore_negative=True):
+    """
+    Returns train and valid indices as in K-Fold Cross-Validation. If the split already exists it loads it automatically, otherwise it creates the split file for the subsequent runs.
+
+    :param dataset: Dataset object containing either one or multiple graphs
+    :param data_dir: The directory where the data is stored, it will be used to store the splits
+    :param parameters: DictConfig containing the parameters for the dataset
+    :param ignore_negative: If True the function ignores negative labels. Default True.
+    :return split_idx: A dictionary containing "train" and "valid" tensors with the respective indices.
+    """
+    k = parameters.k
+    fold = parameters.data_seed
+    assert fold < k, "data_seed needs to be less than k"
+
+    torch.manual_seed(0)
+    np.random.seed(0)
+
+    split_dir = os.path.join(data_dir, f"{k}-fold")
+    if not os.path.isdir(split_dir):
+        os.mkdir(split_dir)
+    split_path = os.path.join(split_dir, f"{fold}.npz")
+    if os.path.isfile(split_path):
+        split_idx = np.load(split_path)
+        return split_idx
+    else:
+        if parameters.task_level == "graph":
+            labels = dataset.y
+        else:
+            if len(dataset) == 1:
+                labels = dataset.y
+            else:
+                # This is the case of node level task with multiple graphs
+                # Here dataset.y cannot be used to measure the number of elements to associate to the splits
+                labels = torch.ones(len(dataset))
+
+        if ignore_negative:
+            labeled_nodes = torch.where(labels != -1)[0]
+        else:
+            labeled_nodes = labels
+
+        n = labeled_nodes.shape[0]
+        valid_num = int(n / k)
+
+        perm = torch.as_tensor(np.random.permutation(n))
+        for fold_n in range(k):
+            train_indices = torch.cat(
+                [perm[: valid_num * fold_n], perm[valid_num * (fold_n + 1) :]], dim=0
+            )
+            val_indices = perm[valid_num * fold_n : valid_num * (fold_n + 1)]
+
+            if not ignore_negative:
+                return train_indices, val_indices
+
+            train_idx = labeled_nodes[train_indices]
+            valid_idx = labeled_nodes[val_indices]
+
+            split_idx = {"train": train_idx, "valid": valid_idx, "test": valid_idx}
+            assert np.all(
+                np.sort(
+                    np.array(split_idx["train"].tolist() + split_idx["valid"].tolist())
+                )
+                == np.sort(np.arange(len(labels)))
+            ), "Not every sample has been loaded."
+
+            split_path = os.path.join(split_dir, f"{fold_n}.npz")
+            np.savez(split_path, **split_idx)
+
+    split_path = os.path.join(split_dir, f"{fold}.npz")
+    split_idx = np.load(split_path)
+    return split_idx
+
+
+def load_graph_cocitation_split(dataset, data_dir, cfg):
+    data = dataset.data
+    if cfg.split_type == "test":
+        data = load_split(data, cfg)
+        return CustomDataset([data])
+    elif cfg.split_type == "k-fold":
+        split_idx = k_fold_split(dataset, data_dir, cfg)
+        data.train_mask = split_idx["train"]
+        data.val_mask = split_idx["valid"]
+        return CustomDataset([data])
+    else:
+        raise NotImplementedError(
+            f"split_type {cfg.split_type} not valid. Choose either 'test' or 'k-fold'"
+        )
+
+
+def rand_train_test_idx(
+    label, train_prop=0.5, valid_prop=0.25, ignore_negative=True, balance=False, seed=0
+):
+    """Adapted from https://github.com/CUAI/Non-Homophily-Benchmarks"""
+    """ randomly splits label into train/valid/test splits """
+    # set seed
+    torch.manual_seed(seed)
+    np.random.seed(seed)
+
+    if not balance:
+        if ignore_negative:
+            labeled_nodes = torch.where(label != -1)[0]
+        else:
+            labeled_nodes = label
+
+        n = labeled_nodes.shape[0]
+        train_num = int(n * train_prop)
+        valid_num = int(n * valid_prop)
+
+        perm = torch.as_tensor(np.random.permutation(n))
+
+        train_indices = perm[:train_num]
+        val_indices = perm[train_num : train_num + valid_num]
+        test_indices = perm[train_num + valid_num :]
+
+        if not ignore_negative:
+            return train_indices, val_indices, test_indices
+
+        train_idx = labeled_nodes[train_indices]
+        valid_idx = labeled_nodes[val_indices]
+        test_idx = labeled_nodes[test_indices]
+
+        split_idx = {"train": train_idx, "valid": valid_idx, "test": test_idx}
+    else:
+        #         ipdb.set_trace()
+        indices = []
+        for i in range(label.max() + 1):
+            index = torch.where((label == i))[0].view(-1)
+            index = index[torch.randperm(index.size(0))]
+            indices.append(index)
+
+        percls_trn = int(train_prop / (label.max() + 1) * len(label))
+        val_lb = int(valid_prop * len(label))
+        train_idx = torch.cat([i[:percls_trn] for i in indices], dim=0)
+        rest_index = torch.cat([i[percls_trn:] for i in indices], dim=0)
+        rest_index = rest_index[torch.randperm(rest_index.size(0))]
+        valid_idx = rest_index[:val_lb]
+        test_idx = rest_index[val_lb:]
+        split_idx = {"train": train_idx, "valid": valid_idx, "test": test_idx}
+
+    # Save splits to disk
+
+    return split_idx
+
+
+def load_graph_tudataset_split(dataset, data_dir, cfg):
+    if cfg.split_type == "test":
+        labels = dataset.y
+        split_idx = rand_train_test_idx(labels)
+    elif cfg.split_type == "k-fold":
+        split_idx = k_fold_split(dataset, data_dir, cfg)
+    else:
+        raise NotImplementedError(
+            f"split_type {cfg.split_type} not valid. Choose either 'test' or 'k-fold'"
+        )
+
+    data_train_lst, data_val_lst, data_test_lst = [], [], []
+    for i in range(len(dataset)):
+        graph = dataset[i]
+        assigned = False
+        if i in split_idx["train"]:
+            graph.train_mask = torch.Tensor([1]).long()
+            graph.val_mask = torch.Tensor([0]).long()
+            graph.test_mask = torch.Tensor([0]).long()
+            data_train_lst.append(graph)
+            assigned = True
+        elif i in split_idx["valid"]:
+            graph.train_mask = torch.Tensor([0]).long()
+            graph.val_mask = torch.Tensor([1]).long()
+            graph.test_mask = torch.Tensor([0]).long()
+            data_val_lst.append(graph)
+            assigned = True
+        if i in split_idx["test"]:
+            graph.train_mask = torch.Tensor([0]).long()
+            graph.val_mask = torch.Tensor([0]).long()
+            graph.test_mask = torch.Tensor([1]).long()
+            data_test_lst.append(graph)
+            assigned = True
+        if not assigned:
+            raise ValueError("Graph not in any split")
+
+    # data_lst = [dataset[i] for i in range(len(dataset))]
+    # REWRITE LATER
+    dataset = [
+        CustomDataset(data_train_lst),
+        CustomDataset(data_val_lst),
+        CustomDataset(data_test_lst),
+    ]
+    return dataset
+
+
 def ensure_serializable(obj):
     if isinstance(obj, dict):
         for key, value in obj.items():
@@ -308,14 +500,3 @@ def make_hash(o):
     # convert the hex back to int and restrict it to the relevant int range
     seed = int(hash_as_hex, 16) % 4294967295
     return seed
-    # if isinstance(o, (set, tuple, list)):
-    #     return tuple([make_hash(e) for e in o])
-
-    # elif not isinstance(o, dict):
-    #     return hash(o)
-
-    # new_o = copy.deepcopy(o)
-    # for k, v in new_o.items():
-    #     new_o[k] = make_hash(v)
-
-    # return hash(tuple(frozenset(sorted(new_o.items()))))

@@ -14,9 +14,9 @@ from topobenchmarkx.io.load.loader import AbstractLoader
 from topobenchmarkx.io.load.preprocessor import Preprocessor
 from topobenchmarkx.io.load.utils import (
     load_cell_complex_dataset,
-    load_graph_cocitation_split,
-    load_graph_tudataset_split,
+    load_graph_level_split,
     load_hypergraph_pickle_dataset,
+    load_node_level_split,
     load_simplicial_dataset,
     load_split,
 )
@@ -111,7 +111,7 @@ class GraphLoader(AbstractLoader):
             )
             if self.transforms_config is not None:
                 dataset = Preprocessor(data_dir, dataset, self.transforms_config)
-            dataset = load_graph_cocitation_split(dataset, data_dir, self.parameters)
+            dataset = load_node_level_split(data_dir, dataset, self.parameters)
 
         elif self.parameters.data_name in ["MUTAG", "ENZYMES", "PROTEINS", "COLLAB"]:
             dataset = torch_geometric.datasets.TUDataset(
@@ -121,7 +121,7 @@ class GraphLoader(AbstractLoader):
             )
             if self.transforms_config is not None:
                 dataset = Preprocessor(data_dir, dataset, self.transforms_config)
-            dataset = load_graph_tudataset_split(dataset, data_dir, self.parameters)
+            dataset = load_graph_level_split(data_dir, dataset, self.parameters)
 
         else:
             raise NotImplementedError(

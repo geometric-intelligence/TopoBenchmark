@@ -4,8 +4,10 @@ import torch_geometric
 
 from topobenchmarkx.transforms.data_manipulations.manipulations import (
     DataFieldsToDense,
+    EqualGausFeatures,
     IdentityTransform,
     NodeDegrees,
+    OneHotDegreeFeatures,
     RemoveExtraFeatureFromProteins,
 )
 from topobenchmarkx.transforms.feature_liftings.feature_liftings import (
@@ -38,6 +40,8 @@ TRANSFORMS = {
     "DataFieldsToDense": DataFieldsToDense,
     "NodeDegrees": NodeDegrees,
     "RemoveExtraFeatureFromProteins": RemoveExtraFeatureFromProteins,
+    "OneHotDegreeFeatures": OneHotDegreeFeatures,
+    "EqualGausFeatures": EqualGausFeatures,
 }
 
 

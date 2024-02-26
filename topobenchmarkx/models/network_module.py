@@ -42,7 +42,9 @@ class NetworkModule(LightningModule):
 
         # this line allows to access init params with 'self.hparams' attribute
         # also ensures init params will be stored in ckpt
-        self.save_hyperparameters(logger=False)
+        self.save_hyperparameters(
+            logger=False, ignore=["train_dataset", "validation_dataset", "test_dataset"]
+        )
 
         self.feature_encoder = feature_encoder
         self.backbone = backbone_wrapper(backbone)

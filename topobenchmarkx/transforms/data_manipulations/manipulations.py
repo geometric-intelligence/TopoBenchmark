@@ -1,5 +1,6 @@
 import torch
 import torch_geometric
+from torch_geometric.utils import one_hot
 
 
 class IdentityTransform(torch_geometric.transforms.BaseTransform):
@@ -9,6 +10,27 @@ class IdentityTransform(torch_geometric.transforms.BaseTransform):
         self.parameters = kwargs
 
     def forward(self, data: torch_geometric.data.Data) -> dict:
+        return data
+
+    def __call__(self, data):
+        return self.forward(data)
+
+
+class EqualGausFeatures(torch_geometric.transforms.BaseTransform):
+    def __init__(self, **kwargs):
+        super().__init__()
+        self.type = "generate_non_informative_features"
+
+        # Torch generate feature vector from gaus distribution
+        self.mean = kwargs["mean"]
+        self.std = kwargs["std"]
+        self.feature_vector = kwargs["num_features"]
+        self.feature_vector = torch.normal(
+            mean=self.mean, std=self.std, size=(1, self.feature_vector)
+        )
+
+    def forward(self, data: torch_geometric.data.Data) -> dict:
+        data.x = self.feature_vector.expand(data.num_nodes, -1)
         return data
 
     def __call__(self, data):
@@ -82,6 +104,67 @@ class NodeDegrees(torch_geometric.transforms.BaseTransform):
         return self.forward(data)
 
 
+class OneHotDegreeFeatures(torch_geometric.transforms.BaseTransform):
+    def __init__(self, **kwargs):
+        super().__init__()
+        self.type = "one_hot_degree_features"
+        self.deg_field = kwargs["degrees_fields"]
+        self.features_fields = kwargs["features_fields"]
+        self.transform = OneHotDegree(max_degree=kwargs["max_degrees"])
+
+    def forward(self, data: torch_geometric.data.Data) -> dict:
+        data = self.transform.forward(
+            data, degrees_field=self.deg_field, features_field=self.features_fields
+        )
+
+        return data
+
+    def __call__(self, data):
+        return self.forward(data)
+
+
+class OneHotDegree(torch_geometric.transforms.BaseTransform):
+    r"""Adds the node degree as one hot encodings to the node features
+    (functional name: :obj:`one_hot_degree`).
+
+    Args:
+        max_degree (int): Maximum degree.
+        in_degree (bool, optional): If set to :obj:`True`, will compute the
+            in-degree of nodes instead of the out-degree.
+            (default: :obj:`False`)
+        cat (bool, optional): Concat node degrees to node features instead
+            of replacing them. (default: :obj:`True`)
+    """
+
+    def __init__(
+        self,
+        max_degree: int,
+        cat: bool = False,
+    ) -> None:
+        self.max_degree = max_degree
+        self.cat = cat
+
+    def forward(
+        self, data: torch_geometric.data.Data, degrees_field: str, features_field: str
+    ) -> torch_geometric.data.Data:
+        assert data.edge_index is not None
+
+        deg = data[degrees_field].to(torch.long)
+        deg = one_hot(deg, num_classes=self.max_degree + 1)
+
+        if self.cat:
+            x = data[features_field]
+            x = x.view(-1, 1) if x.dim() == 1 else x
+            data[features_field] = torch.cat([x, deg.to(x.dtype)], dim=-1)
+        else:
+            data[features_field] = deg
+
+        return data
+
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}({self.max_degree})"
+
+
 class KeepSelectedDataFields(torch_geometric.transforms.BaseTransform):
     def __init__(self, **kwargs):
         super().__init__()
@@ -90,7 +173,7 @@ class KeepSelectedDataFields(torch_geometric.transforms.BaseTransform):
 
     def forward(self, data: torch_geometric.data.Data) -> dict:
         self.parameters["keep_fields"]
-        for key, value in data.items():
+        for key, _ in data.items():
             if key not in self.parameters["keep_fields"]:
                 del data[key]
         return data

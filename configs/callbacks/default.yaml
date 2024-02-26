@@ -15,8 +15,12 @@ model_checkpoint:
 
 early_stopping:
   monitor: "val/accuracy"
-  patience: 100
+  patience: 10
   mode: "max"
 
 model_summary:
   max_depth: -1
+
+learning_rate_monitor:
+  _target_: lightning.pytorch.callbacks.LearningRateMonitor
+  logging_interval: "epoch"

@@ -5,8 +5,8 @@ backbone:
   in_channels_0: ${dataset.parameters.num_features}
   in_channels_1: ${dataset.parameters.num_features}
   in_channels_2: ${dataset.parameters.num_features}
-  hid_channels: 32
-  n_layers: 2
+  hid_channels: 64
+  n_layers: 1
   #dropout: 0.5
   #heads: 3
   #concat: True
@@ -34,11 +34,10 @@ optimizer:
   weight_decay: 0.0
 
 scheduler:
-  _target_: torch.optim.lr_scheduler.ReduceLROnPlateau
+  _target_: torch.optim.lr_scheduler.PolynomialLR
   _partial_: true
-  mode: min
-  factor: 0.1
-  patience: 10
+  last_epoch: -1
+  total_iters: ${trainer.max_epochs}
 
 # compile model for faster training with pytorch 2.0
 compile: false

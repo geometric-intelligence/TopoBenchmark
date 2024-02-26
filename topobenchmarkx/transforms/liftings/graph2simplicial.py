@@ -159,6 +159,7 @@ class SimplicialCliqueLifting(Graph2SimplicialLifting):
         edges = [
             (i.item(), j.item()) for i, j in zip(data.edge_index[0], data.edge_index[1])
         ]
+        # Add self edges to avoid not considering isolated nodes without selfloops
         self_edges = [(i, i) for i in range(n_nodes)]
         edges = edges + self_edges
         G = nx.Graph()

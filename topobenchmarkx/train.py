@@ -13,7 +13,7 @@ from omegaconf import DictConfig, OmegaConf
 # from topobenchmarkx.data.load.loaders import HypergraphLoader
 # from topobenchmarkx.data.datasets import CustomDataset
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 
 rootutils.setup_root(__file__, indicator=".project-root", pythonpath=True)
 from topobenchmarkx.data.dataloader_fullbatch import (

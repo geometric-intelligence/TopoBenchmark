@@ -61,10 +61,27 @@ class HypergraphKHopLifting(Graph2HypergraphLifting):
         self.k = k_value
 
     def lift_topology(self, data: torch_geometric.data.Data) -> dict:
-        num_nodes = data.x.shape[0]
+        # Check if data has instance x:
+        if hasattr(data, "x") and data.x is not None:
+            num_nodes = data.x.shape[0]
+        else:
+            num_nodes = data.num_nodes
 
         incidence_1 = torch.zeros(num_nodes, num_nodes)
         edge_index = torch_geometric.utils.to_undirected(data.edge_index)
+
+        # Detect isolated nodes
+        isolated_nodes = [i for i in range(num_nodes) if i not in edge_index[0]]
+        if len(isolated_nodes) > 0:
+            # Add completely isolated nodes to the edge_index
+            edge_index = torch.cat(
+                [
+                    edge_index,
+                    torch.tensor([isolated_nodes, isolated_nodes], dtype=torch.long),
+                ],
+                dim=1,
+            )
+
         for n in range(num_nodes):
             neighbors, _, _, _ = torch_geometric.utils.k_hop_subgraph(
                 n, self.k, edge_index

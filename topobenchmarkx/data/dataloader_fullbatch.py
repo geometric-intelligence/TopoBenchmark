@@ -214,7 +214,7 @@ class GraphFullBatchDataModule(LightningDataModule):
 
         :return: The test dataloader.
         """
-        if self.dataset_test==None:
+        if self.dataset_test == None:
             raise ValueError("There is no test dataloader.")
         return DataLoader(
             dataset=self.dataset_test,

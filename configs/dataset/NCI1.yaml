@@ -1,24 +1,19 @@
 _target_: topobenchmarkx.io.load.loaders.GraphLoader
 
 defaults:
-  - transforms/data_manipulations: node_degrees
-  - transforms/data_manipulations@transforms.one_hot_node_degree_features: one_hot_node_degree_features
-  - transforms/graph2cellcomplex: cell_cycles_lifting
-  #- transforms/graph2hypergraph: hypergraph_khop
+  - transforms/graph2hypergraph: hypergraph_khop
   - transforms/feature_liftings: base_lifting
 
 # Data definition
 parameters:
   data_domain: graph
   data_type: TUDataset
-  data_name: IMDB-BINARY
+  data_name: NCI1
   data_dir: ${paths.data_dir}${dataset.parameters.data_domain}/${dataset.parameters.data_type}
   data_split_dir: ${paths.data_dir}/data_splits/${dataset.parameters.data_name}
 
   # Dataset parameters
-  num_features: 136 # In IMDB-BINARY dataset, num_features is equal to maximum node degree among all graphs +1
-  max_node_degree: 135
-  max_x_1_degree: 135
+  num_features: 37
   num_classes: 2
   task: classification
   task_level: graph

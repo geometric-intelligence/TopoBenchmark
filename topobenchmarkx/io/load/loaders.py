@@ -15,9 +15,8 @@ from topobenchmarkx.io.load.preprocessor import Preprocessor
 from topobenchmarkx.io.load.utils import (
     load_cell_complex_dataset,
     load_graph_cocitation_split,
-    load_graph_level_split,
+    load_graph_tudataset_split,
     load_hypergraph_pickle_dataset,
-    load_node_level_split,
     load_simplicial_dataset,
     load_split,
 )
@@ -123,6 +122,8 @@ class GraphLoader(AbstractLoader):
             "IMDB-BINARY",
             "IMDB-MULTI",
             "REDDIT-BINARY",
+            "NCI1",
+            "NCI109",
         ]:
             dataset = torch_geometric.datasets.TUDataset(
                 root=self.parameters["data_dir"],

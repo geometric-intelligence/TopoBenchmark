@@ -1,0 +1,53 @@
+_target_: topobenchmarkx.models.network_module.NetworkModule
+
+feature_encoder:
+  _target_: topobenchmarkx.models.encoders.default_encoders.BaseNodeFeatureEncoder
+  in_channels: ${dataset.parameters.num_features}
+  out_channels: ${model.backbone.hidden_channels}
+
+backbone:
+  _target_: torch_geometric.nn.models.GCN
+  in_channels: ${model.backbone.hidden_channels}
+  hidden_channels: 32
+  num_layers: 3
+  dropout: 0.0
+  act: relu
+
+loss:
+  _target_: topobenchmarkx.models.losses.loss.DefaultLoss
+  task: ${dataset.parameters.task}
+
+# evaluator:
+#   _target_: topobenchmarkx.evaluators.evaluator.Evaluator
+#   metrics: [acc, rocauc]
+
+readout:
+  _target_: topobenchmarkx.models.readouts.default_readouts.NodeLevelReadOut
+  task_level: ${dataset.parameters.task_level}
+  in_channels: ${model.backbone.hidden_channels}
+  out_channels: ${dataset.parameters.num_classes}
+
+# readout_workaround:
+#   _target_: topobenchmarkx.models.readout_workaround.ReadOutWorkaround
+#   backbone_outputs: ["x_0"]
+
+
+backbone_wrapper:
+  _target_: topobenchmarkx.models.wrappers.default_wrapper.GNNWrapper
+  _partial_: true
+
+optimizer:
+  _target_: torch.optim.Adam
+  _partial_: true
+  lr: 0.001 #0.01
+  weight_decay: 0.0
+
+scheduler:
+  _target_: torch.optim.lr_scheduler.ReduceLROnPlateau
+  _partial_: true
+  mode: min
+  factor: 0.1
+  patience: 10
+
+# compile model for faster training with pytorch 2.0
+compile: false

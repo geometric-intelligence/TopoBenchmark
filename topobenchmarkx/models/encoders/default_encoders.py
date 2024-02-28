@@ -10,7 +10,10 @@ class BaseNodeFeatureEncoder(AbstractInitFeaturesEncoder):
         self.linear = torch.nn.Linear(in_channels, out_channels)
 
     def forward(self, data: torch_geometric.data.Data) -> torch_geometric.data.Data:
-        data.x_0 = self.linear(data.x_0)
+        try:
+            data.x_0 = self.linear(data.x_0)
+        except AttributeError:
+            data.x = self.linear(data.x)
         return data
 
 

@@ -11,7 +11,7 @@ backbone:
   hidden_channels: 32
   #out_channels: 16
   n_filters: 2
-  n_layers: 1
+  n_layers: 4
   order_harmonic: 5
   epsilon_harmonic: 1e-1
 
@@ -45,11 +45,10 @@ optimizer:
   weight_decay: 0.0
 
 scheduler:
-  _target_: torch.optim.lr_scheduler.ReduceLROnPlateau
+  _target_: torch.optim.lr_scheduler.PolynomialLR
   _partial_: true
-  mode: min
-  factor: 0.1
-  patience: 10
+  last_epoch: -1
+  total_iters: ${trainer.max_epochs}
 
 # compile model for faster training with pytorch 2.0
 compile: false

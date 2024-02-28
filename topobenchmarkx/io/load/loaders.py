@@ -16,6 +16,7 @@ from topobenchmarkx.io.load.utils import (
     load_cell_complex_dataset,
     load_graph_cocitation_split,
     load_graph_tudataset_split,
+    load_graph_prepared_split,
     load_hypergraph_pickle_dataset,
     load_simplicial_dataset,
     load_split,
@@ -133,7 +134,29 @@ class GraphLoader(AbstractLoader):
             if self.transforms_config is not None:
                 dataset = Preprocessor(data_dir, dataset, self.transforms_config)
             dataset = load_graph_tudataset_split(dataset, self.parameters)
-
+        elif self.parameters.data_name in ["ZINC"]:
+            datasets = []
+            for split in ["train","val","test"]:    
+                datasets.append(torch_geometric.datasets.ZINC(
+                    root = self.parameters["data_dir"],
+                    subset = True,
+                    split = split,
+                ))
+            if self.transforms_config is not None:
+                for i in range(len(datasets)):
+                    datasets[i] = Preprocessor(data_dir, datasets[i], self.transforms_config)
+            dataset = load_graph_prepared_split(datasets, self.parameters)
+        elif self.parameters.data_name in ["AQSOL"]:
+            datasets = []
+            for split in ["train","val","test"]:    
+                datasets.append(torch_geometric.datasets.AQSOL(
+                    root = self.parameters["data_dir"],
+                    split = split,
+                ))
+            if self.transforms_config is not None:
+                for i in range(len(datasets)):
+                    datasets[i] = Preprocessor(data_dir, datasets[i], self.transforms_config)
+            dataset = load_graph_prepared_split(datasets, self.parameters)
         else:
             raise NotImplementedError(
                 f"Dataset {self.parameters.data_name} not implemented"

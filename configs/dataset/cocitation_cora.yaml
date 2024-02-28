@@ -25,5 +25,5 @@ parameters:
 
   # Dataloader parameters
   batch_size: 10 # Needs to be divisible by the number of devices (e.g., if in a distributed setup)
-  num_workers: 0
+  num_workers: 1
   pin_memory: False

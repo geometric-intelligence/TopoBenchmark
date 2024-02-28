@@ -1,8 +1,11 @@
 _target_: topobenchmarkx.io.load.loaders.GraphLoader
 
 defaults:
+  #- transforms/graph2simplicial: simplicial_clique
+  #- transforms/graph2cellcomplex: cell_cycles_lifting
   - transforms/graph2hypergraph: hypergraph_khop
   - transforms/feature_liftings: base_lifting
+
 
 # Data definition
 parameters:
@@ -17,12 +20,12 @@ parameters:
   num_classes: 2
   task: classification
   task_level: graph
-  data_seed: 0
+  data_seed: 5
   split_type: 'k-fold' # either k-fold or test
   k: 10 # for k-Fold Cross-Validation
 
   # Dataloader parameters
-  batch_size: 64 # We have an issue with allowing multiple graphs in a batch due to sparse incidences
+  batch_size: 128 # We have an issue with allowing multiple graphs in a batch due to sparse incidences
   num_workers: 0
   pin_memory: False
 

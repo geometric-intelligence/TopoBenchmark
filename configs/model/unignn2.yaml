@@ -10,7 +10,7 @@ feature_encoder:
 backbone:
   _target_: topomodelx.nn.hypergraph.unigcnii.UniGCNII
   in_channels: ${model.backbone.hidden_channels}  # ${dataset.parameters.num_features}
-  hidden_channels: 128
+  hidden_channels: 64
   n_layers: 2
   alpha: 0.5
   beta: 0.5
@@ -41,11 +41,10 @@ optimizer:
   weight_decay: 0.0
 
 scheduler:
-  _target_: torch.optim.lr_scheduler.ReduceLROnPlateau
+  _target_: torch.optim.lr_scheduler.PolynomialLR
   _partial_: true
-  mode: min
-  factor: 0.1
-  patience: 10
+  last_epoch: -1
+  total_iters: ${trainer.max_epochs}
 
 # compile model for faster training with pytorch 2.0
 compile: false

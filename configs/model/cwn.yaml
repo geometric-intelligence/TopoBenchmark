@@ -5,8 +5,8 @@ backbone:
   in_channels_0: ${dataset.parameters.num_features}
   in_channels_1: ${dataset.parameters.num_features}
   in_channels_2: ${dataset.parameters.num_features}
-  hid_channels: 64
-  n_layers: 1
+  hid_channels: 16
+  n_layers: 4
   #dropout: 0.5
   #heads: 3
   #concat: True
@@ -30,7 +30,7 @@ backbone_wrapper:
 optimizer:
   _target_: torch.optim.Adam
   _partial_: true
-  lr: 0.1
+  lr: 0.001
   weight_decay: 0.0
 
 scheduler:

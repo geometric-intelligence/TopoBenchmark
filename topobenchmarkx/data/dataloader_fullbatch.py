@@ -2,7 +2,41 @@ from typing import Any, Dict, Optional
 
 from lightning import LightningDataModule
 from torch.utils.data import DataLoader
-from torch_geometric.data import Data
+from torch_geometric.data import Data, Batch
+from torch_geometric.utils import is_sparse
+from torch_sparse import SparseTensor
+        
+class MyData(Data):
+    def is_valid(self, string):
+        valid_names = ['adj', 'incidence', 'laplacian']
+        for name in valid_names:
+            if name in string:
+                return True
+        return False
+        
+    def __cat_dim__(self, key: str, value: Any, *args, **kwargs) -> Any:
+        if is_sparse(value) and self.is_valid(key):
+            return (0, 1)
+        elif 'index' in key or key == 'face':
+            return -1
+        else:
+            return 0
+        
+        
+def to_data_list(batch):
+    '''
+    Workaround needed since torch_geometric doesn't work well with torch.sparse
+    '''
+    for key in batch.keys():
+        if batch[key].is_sparse:
+            sparse_data = batch[key].coalesce()
+            batch[key] = SparseTensor.from_torch_sparse_coo_tensor(sparse_data)
+    data_list = batch.to_data_list()
+    for i, data in enumerate(data_list):
+        for key in data.keys():
+            if isinstance(data[key], SparseTensor):
+                data_list[i][key] = data[key].to_torch_sparse_coo_tensor()
+    return data_list
 
 
 def collate_fn(batch):
@@ -14,14 +48,16 @@ def collate_fn(batch):
         xs - a tensor of all examples in 'batch' after padding
         ys - a LongTensor of all labels in batch
     """
-
+    data_list = []
     for b in batch:
         values, keys = b[0], b[1]
-        data = Data()
+        data = MyData()
         for key, value in zip(keys, values):
+            if is_sparse(value):
+                value = value.coalesce()
             data[key] = value
-
-    return data
+        data_list.append(data)
+    return Batch.from_data_list(data_list)
 
 
 class FullBatchDataModule(LightningDataModule):
@@ -163,6 +199,7 @@ class GraphFullBatchDataModule(LightningDataModule):
         dataset_train,
         dataset_val,
         dataset_test=None,
+        batch_size=1,
         num_workers: int = 0,
         pin_memory: bool = False,
     ) -> None:
@@ -183,6 +220,7 @@ class GraphFullBatchDataModule(LightningDataModule):
         self.dataset_train = dataset_train
         self.dataset_val = dataset_val
         self.dataset_test = dataset_test
+        self.batch_size = batch_size
 
     def train_dataloader(self) -> DataLoader:
         """Create and return the train dataloader.
@@ -191,7 +229,7 @@ class GraphFullBatchDataModule(LightningDataModule):
         """
         return DataLoader(
             dataset=self.dataset_train,
-            batch_size=1,
+            batch_size=self.batch_size,
             num_workers=self.hparams.num_workers,
             pin_memory=self.hparams.pin_memory,
             shuffle=True,
@@ -205,7 +243,7 @@ class GraphFullBatchDataModule(LightningDataModule):
         """
         return DataLoader(
             dataset=self.dataset_val,
-            batch_size=1,
+            batch_size=self.batch_size,
             num_workers=self.hparams.num_workers,
             pin_memory=self.hparams.pin_memory,
             shuffle=False,
@@ -221,7 +259,7 @@ class GraphFullBatchDataModule(LightningDataModule):
             raise ValueError("There is no test dataloader.")
         return DataLoader(
             dataset=self.dataset_test,
-            batch_size=1,
+            batch_size=self.batch_size,
             num_workers=self.hparams.num_workers,
             pin_memory=self.hparams.pin_memory,
             shuffle=False,

@@ -548,6 +548,40 @@ def load_graph_tudataset_split(dataset, cfg):
     return dataset
 
 
+def load_graph_prepared_split(datasets, cfg):
+    data_train_lst, data_val_lst, data_test_lst = [], [], []
+    for dataset, split in zip(datasets, ["train", "val", "test"]):
+        for i in range(len(dataset)):
+            graph = dataset[i]
+            graph.x = graph.x.float()
+            # x can have shape [n_nodes] instead of [n_nodes, 1]
+            if len(graph.x.shape) == 1:
+                graph.x = torch.unsqueeze(graph.x, 1)
+            assigned = False
+            if split == "train":
+                graph.train_mask = torch.Tensor([1]).long()
+                graph.val_mask = torch.Tensor([0]).long()
+                graph.test_mask = torch.Tensor([0]).long()
+                data_train_lst.append(graph)
+            if split == "train":
+                graph.train_mask = torch.Tensor([1]).long()
+                graph.val_mask = torch.Tensor([0]).long()
+                graph.test_mask = torch.Tensor([0]).long()
+                data_val_lst.append(graph)
+            if split == "train":
+                graph.train_mask = torch.Tensor([1]).long()
+                graph.val_mask = torch.Tensor([0]).long()
+                graph.test_mask = torch.Tensor([0]).long()
+                data_test_lst.append(graph)
+
+    dataset = [
+        CustomDataset(data_train_lst),
+        CustomDataset(data_val_lst),
+        CustomDataset(data_test_lst),
+    ]
+    return dataset
+
+
 def ensure_serializable(obj):
     if isinstance(obj, dict):
         for key, value in obj.items():

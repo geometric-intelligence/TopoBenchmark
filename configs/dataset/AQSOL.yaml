@@ -1,0 +1,28 @@
+_target_: topobenchmarkx.io.load.loaders.GraphLoader
+
+#defaults:
+  #- transforms/graph2cellcomplex: cell_cycles_lifting
+  #- transforms/feature_liftings: base_lifting
+
+# Data definition
+parameters:
+  data_domain: graph
+  data_type: AQSOL
+  data_name: AQSOL
+  data_dir: ${paths.data_dir}${dataset.parameters.data_domain}/${dataset.parameters.data_type}
+  data_split_dir: ${paths.data_dir}/data_splits/${dataset.parameters.data_name}
+
+  # Dataset parameters
+  num_features: 1 # here basically I specify the initial num features in mutang at x aka x_0
+  num_classes: 1
+  task: classification
+  task_level: graph
+  data_seed: 0
+  split_type: 'k-fold' # either k-fold or test
+  k: 10 # for k-Fold Cross-Validation
+
+  # Dataloader parameters
+  batch_size: 10 # We have an issue with allowing multiple graphs in a batch due to sparse incidences
+  num_workers: 0
+  pin_memory: False
+

@@ -15,9 +15,15 @@ class BaseNodeFeatureEncoder(AbstractInitFeaturesEncoder):
         self.BN2 = BN(out_channels)
 
     def forward(self, data: torch_geometric.data.Data) -> torch_geometric.data.Data:
-        x_0 = self.relu(self.linear1(data.x_0))
-        x_0 = self.relu(self.linear2(self.BN1(x_0)))
-        data.x_0 = self.BN2(x_0)
+        try:
+            x = data.x_0
+        except:
+            x = data.x
+        x = self.relu(self.BN1(self.linear1(x)))
+        x = self.linear2(x)
+
+        data.x = x
+        data.x_0 = x
         return data
 
 

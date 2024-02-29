@@ -5,6 +5,7 @@ import hydra
 import lightning as L
 import rootutils
 import torch
+import torch_geometric
 from lightning import Callback, LightningDataModule, LightningModule, Trainer
 from lightning.pytorch.loggers import Logger
 from omegaconf import DictConfig, OmegaConf
@@ -19,6 +20,7 @@ rootutils.setup_root(__file__, indicator=".project-root", pythonpath=True)
 from topobenchmarkx.data.dataloader_fullbatch import (
     FullBatchDataModule,
     GraphFullBatchDataModule,
+    TorchGeometricBatchDataModule,
 )
 from topobenchmarkx.utils import (
     RankedLogger,
@@ -77,9 +79,19 @@ def train(cfg: DictConfig) -> Tuple[Dict[str, Any], Dict[str, Any]]:
         datamodule = FullBatchDataModule(dataset=dataset)
 
     elif cfg.dataset.parameters.task_level == "graph":
-        datamodule = GraphFullBatchDataModule(
-            dataset_train=dataset[0], dataset_val=dataset[1], dataset_test=dataset[2]
-        )
+        if cfg.dataset.parameters.torch_geometric_dataset:
+            datamodule = TorchGeometricBatchDataModule(
+                dataset_train=dataset[0],
+                dataset_val=dataset[1],
+                dataset_test=dataset[2],
+                batch_size=cfg.dataset.parameters.batch_size,
+            )
+        else:
+            datamodule = GraphFullBatchDataModule(
+                dataset_train=dataset[0],
+                dataset_val=dataset[1],
+                dataset_test=dataset[2],
+            )
     else:
         raise ValueError("Invalid task_level")
 

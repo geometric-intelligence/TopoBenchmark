@@ -3,9 +3,9 @@ _target_: topobenchmarkx.io.load.loaders.GraphLoader
 defaults:
   - transforms/data_manipulations: node_degrees
   - transforms/data_manipulations@transforms.one_hot_node_degree_features: one_hot_node_degree_features
-  - transforms/graph2cellcomplex: cell_cycles_lifting
-  #- transforms/graph2hypergraph: hypergraph_khop
-  - transforms/feature_liftings: base_lifting
+  # - transforms/graph2cellcomplex: cell_cycles_lifting
+  # #- transforms/graph2hypergraph: hypergraph_khop
+  # - transforms/feature_liftings: base_lifting
   # - transforms/data_manipulations: equal_gaus_features
   # - transforms/graph2cellcomplex: cell_cycles_lifting
   #- transforms/graph2simplicial: simplicial_clique
@@ -37,6 +37,7 @@ parameters:
   batch_size: 128 # We have an issue with allowing multiple graphs in a batch due to sparse incidences
   num_workers: 0
   pin_memory: True
+  torch_geometric_dataset: True
 
 
 

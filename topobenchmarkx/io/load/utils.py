@@ -8,11 +8,12 @@ import omegaconf
 import toponetx.datasets.graph as graph
 import torch
 import torch_geometric
+from sklearn.model_selection import StratifiedKFold
 from topomodelx.utils.sparse import from_sparse
 from torch_geometric.data import Data
 from torch_sparse import coalesce
 
-from topobenchmarkx.data.datasets import CustomDataset
+from topobenchmarkx.data.datasets import CustomDataset, TorchGeometricDataset
 
 
 def get_complex_connectivity(complex, max_rank):
@@ -372,31 +373,50 @@ def k_fold_split(dataset, parameters, ignore_negative=True):
             labeled_nodes = labels
 
         n = labeled_nodes.shape[0]
-        valid_num = int(n / k)
 
-        perm = torch.as_tensor(np.random.permutation(n))
-        for fold_n in range(k):
-            train_indices = torch.cat(
-                [perm[: valid_num * fold_n], perm[valid_num * (fold_n + 1) :]], dim=0
-            )
-            val_indices = perm[valid_num * fold_n : valid_num * (fold_n + 1)]
+        x_idx = np.arange(n)
+        y = np.array([data.y.squeeze(0).numpy() for data in dataset])
+        skf = StratifiedKFold(n_splits=k)
 
-            if not ignore_negative:
-                return train_indices, val_indices
-
-            train_idx = labeled_nodes[train_indices]
-            valid_idx = labeled_nodes[val_indices]
-
+        for fold_n, (train_idx, valid_idx) in enumerate(skf.split(x_idx, y)):
             split_idx = {"train": train_idx, "valid": valid_idx, "test": valid_idx}
+
             assert np.all(
                 np.sort(
                     np.array(split_idx["train"].tolist() + split_idx["valid"].tolist())
                 )
                 == np.sort(np.arange(len(labels)))
             ), "Not every sample has been loaded."
-
             split_path = os.path.join(split_dir, f"{fold_n}.npz")
+
             np.savez(split_path, **split_idx)
+
+        # valid_num = int(n / k)
+
+        # perm = torch.as_tensor(np.random.permutation(n))
+
+        # for fold_n in range(k):
+        #     train_indices = torch.cat(
+        #         [perm[: valid_num * fold_n], perm[valid_num * (fold_n + 1) :]], dim=0
+        #     )
+        #     val_indices = perm[valid_num * fold_n : valid_num * (fold_n + 1)]
+
+        #     if not ignore_negative:
+        #         return train_indices, val_indices
+
+        #     train_idx = labeled_nodes[train_indices]
+        #     valid_idx = labeled_nodes[val_indices]
+
+        #     split_idx = {"train": train_idx, "valid": valid_idx, "test": valid_idx}
+        #     assert np.all(
+        #         np.sort(
+        #             np.array(split_idx["train"].tolist() + split_idx["valid"].tolist())
+        #         )
+        #         == np.sort(np.arange(len(labels)))
+        #     ), "Not every sample has been loaded."
+
+        #     split_path = os.path.join(split_dir, f"{fold_n}.npz")
+        #     np.savez(split_path, **split_idx)
 
     split_path = os.path.join(split_dir, f"{fold}.npz")
     split_idx = np.load(split_path)
@@ -512,11 +532,19 @@ def load_graph_tudataset_split(dataset, cfg):
 
     # data_lst = [dataset[i] for i in range(len(dataset))]
     # REWRITE LATER
-    dataset = [
-        CustomDataset(data_train_lst),
-        CustomDataset(data_val_lst),
-        CustomDataset(data_test_lst),
-    ]
+    if cfg.torch_geometric_dataset:
+        dataset = [
+            TorchGeometricDataset(data_train_lst),
+            TorchGeometricDataset(data_val_lst),
+            TorchGeometricDataset(data_test_lst),
+        ]
+
+    else:
+        dataset = [
+            CustomDataset(data_train_lst),
+            CustomDataset(data_val_lst),
+            CustomDataset(data_test_lst),
+        ]
     return dataset
 
 

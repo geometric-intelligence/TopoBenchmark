@@ -8,8 +8,8 @@ feature_encoder:
 backbone:
   _target_: torch_geometric.nn.models.GIN
   in_channels: ${model.backbone.hidden_channels}
-  hidden_channels: 32
-  num_layers: 3
+  hidden_channels: 128
+  num_layers: 2
   dropout: 0.0
   act: relu
 
@@ -22,7 +22,7 @@ loss:
 #   metrics: [acc, rocauc]
 
 readout:
-  _target_: topobenchmarkx.models.readouts.default_readouts.NodeLevelReadOut
+  _target_: topobenchmarkx.models.readouts.default_readouts.GNNBatchReadOut
   task_level: ${dataset.parameters.task_level}
   in_channels: ${model.backbone.hidden_channels}
   out_channels: ${dataset.parameters.num_classes}
@@ -43,11 +43,11 @@ optimizer:
   weight_decay: 0.0
 
 scheduler:
-  _target_: torch.optim.lr_scheduler.ReduceLROnPlateau
+  _target_: torch.optim.lr_scheduler.StepLR
   _partial_: true
-  mode: min
-  factor: 0.1
-  patience: 10
+  step_size: 50
+  gamma: 0.5
+
 
 # compile model for faster training with pytorch 2.0
 compile: false

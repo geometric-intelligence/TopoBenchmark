@@ -27,6 +27,7 @@ class GNNWrapper(DefaultWrapper):
         model_out = {"labels": batch.y}
         x_0 = self.backbone(batch.x, batch.edge_index)
         model_out["x_0"] = x_0
+        model_out["batch"] = batch.batch
         return model_out
 
 
@@ -38,10 +39,11 @@ class HypergraphWrapper(DefaultWrapper):
 
     def __call__(self, batch):
         """Define logic for forward pass"""
-        model_out = {"labels": batch.y}
+        model_out = {"labels": batch.y, "batch": batch.batch}
         x_0, x_1 = self.backbone(batch.x_0, batch.incidence_hyperedges)
         model_out["x_0"] = x_0
         model_out["hyperedge"] = x_1
+        model_out["batch"] = batch.batch
         return model_out
 
 
@@ -53,7 +55,7 @@ class SANWrapper(DefaultWrapper):
 
     def __call__(self, batch):
         """Define logic for forward pass"""
-        model_out = {"labels": batch.y}
+        model_out = {"labels": batch.y, "batch": batch.batch}
 
         x_1 = self.backbone(batch.x_1, batch.laplacian_up_1, batch.laplacian_down_1)
         # Project the edge-level output of the model back to the node-level
@@ -70,7 +72,7 @@ class CANWrapper(DefaultWrapper):
 
     def __call__(self, batch):
         """Define logic for forward pass"""
-        model_out = {"labels": batch.y}
+        model_out = {"labels": batch.y, "batch": batch.batch}
         x_1 = self.backbone(
             batch.x,
             batch.x_1,
@@ -91,7 +93,7 @@ class CWNWrapper(DefaultWrapper):
 
     def __call__(self, batch):
         """Define logic for forward pass"""
-        model_out = {"labels": batch.y}
+        model_out = {"labels": batch.y, "batch": batch.batch}
         x_0, x_1, x_2 = self.backbone(
             x_0=batch.x_0,
             x_1=batch.x_1,
@@ -114,7 +116,7 @@ class CCXNWrapper(DefaultWrapper):
 
     def __call__(self, batch):
         """Define logic for forward pass"""
-        model_out = {"labels": batch.y}
+        model_out = {"labels": batch.y, "batch": batch.batch}
         x_0, x_1, x_2 = self.backbone(
             x_0=batch.x_0,
             x_1=batch.x_1,

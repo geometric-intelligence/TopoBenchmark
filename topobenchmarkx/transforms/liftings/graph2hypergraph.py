@@ -23,7 +23,6 @@ __all__ = [
 class Graph2HypergraphLifting(torch_geometric.transforms.BaseTransform):
     def __init__(self, **kwargs):
         super().__init__()
-        self.added_fields = ["hyperedges"]
         self.type = "graph2hypergraph"
 
     def preserve_fields(self, data: torch_geometric.data.Data) -> dict:

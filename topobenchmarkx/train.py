@@ -9,6 +9,23 @@ from lightning import Callback, LightningDataModule, LightningModule, Trainer
 from lightning.pytorch.loggers import Logger
 from omegaconf import DictConfig, OmegaConf
 
+
+def get_default_transform(data_domain, model):
+    model_domain = model.split("/")[0]
+    if data_domain == model_domain:
+        return "identity"
+    elif data_domain == "graph" and model_domain != "combinatorial":
+        return f"graph2{model_domain}_default"
+    else:
+        raise ValueError(
+            f"Invalid combination of data_domain={data_domain} and model_domain={model_domain}"
+        )
+
+
+OmegaConf.register_new_resolver(
+    "get_default_transform", get_default_transform
+)  # lambda x: x.split('/')[0])
+
 # Inputs to load data
 # from topobenchmarkx.data.load.loaders import HypergraphLoader
 # from topobenchmarkx.data.datasets import CustomDataset

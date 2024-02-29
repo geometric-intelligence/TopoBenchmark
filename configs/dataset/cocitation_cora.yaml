@@ -2,9 +2,8 @@ _target_: topobenchmarkx.io.load.loaders.GraphLoader
 
 
 defaults:
-  - transforms/graph2hypergraph: hypergraph_khop
-  #- transforms/graph2simplicial: simplicial_clique
-  - transforms/feature_liftings: base_lifting
+  - transforms: ${get_default_transform:graph,${model}}
+
 
 # Data definition
 parameters:

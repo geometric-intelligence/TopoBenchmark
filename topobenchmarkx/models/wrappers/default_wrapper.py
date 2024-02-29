@@ -16,6 +16,21 @@ class DefaultWrapper(ABC, torch.nn.Module):
         pass
 
 
+class GNNWrapper(DefaultWrapper):
+    """Abstract class that provides an interface to loss logic within network"""
+
+    def __init__(self, backbone):
+        super().__init__(backbone)
+
+    def __call__(self, batch):
+        """Define logic for forward pass"""
+        model_out = {"labels": batch.y}
+        x_0 = self.backbone(batch.x, batch.edge_index)
+        model_out["x_0"] = x_0
+        model_out["batch"] = batch.batch
+        return model_out
+
+
 class HypergraphWrapper(DefaultWrapper):
     """Abstract class that provides an interface to loss logic within network"""
 

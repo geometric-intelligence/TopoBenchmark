@@ -20,9 +20,10 @@ parameters:
   data_seed: 0
   split_type: 'k-fold' # either k-fold or test
   k: 10 # for k-Fold Cross-Validation
+  torch_geometric_dataset: True # whether to use torch_geometric or not
 
   # Dataloader parameters
-  batch_size: 64 # We have an issue with allowing multiple graphs in a batch due to sparse incidences
+  batch_size: 128 # We have an issue with allowing multiple graphs in a batch due to sparse incidences
   num_workers: 0
   pin_memory: False
 

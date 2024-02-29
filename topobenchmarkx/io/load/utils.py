@@ -95,8 +95,9 @@ def get_zero_complex_connectivity(complex, max_rank):
             "hodge_laplacian_{}".format(rank_idx): from_sparse(
                 complex.hodge_laplacian_matrix(rank=rank_idx)
             ),
-            "laplacian_up_{}".format(rank_idx): torch.zeros(
-                (complex.number_of_edges(), complex.number_of_edges())
+            # torch.zeros((complex.number_of_edges(), complex.number_of_edges())
+            "laplacian_up_{}".format(rank_idx): generate_zero_sparse_connectivity(
+                m=complex.number_of_edges(), n=complex.number_of_edges()
             ),
         }
     )
@@ -104,15 +105,28 @@ def get_zero_complex_connectivity(complex, max_rank):
     max_rank = 2
     connectivity.update(
         {
-            "incidence_{}".format(max_rank): torch.zeros(
-                (complex.number_of_edges(), 1)
+            "incidence_{}".format(max_rank): generate_zero_sparse_connectivity(
+                m=complex.number_of_edges(), n=1
             ),
-            "laplacian_down_{}".format(max_rank): torch.zeros((1, 1)),
-            "hodge_laplacian_{}".format(max_rank): torch.zeros((1, 1)),
+            # torch.zeros(
+            #     (complex.number_of_edges(), 1)
+            # ),
+            "laplacian_down_{}".format(max_rank): generate_zero_sparse_connectivity(
+                m=1, n=1
+            ),  # torch.zeros((1, 1)),
+            "hodge_laplacian_{}".format(max_rank): generate_zero_sparse_connectivity(
+                m=1, n=1
+            ),  # torch.zeros((1, 1)),
         }
     )
     connectivity.update({"shape": complex.shape})
     return connectivity
+
+
+def generate_zero_sparse_connectivity(m, n):
+    # indices = torch.vstack([torch.arange(m*n).long(), torch.arange(m*n).long()])
+    # values = torch.zeros(m*n)
+    return torch.sparse_coo_tensor((m, n)).coalesce()
 
 
 def load_cell_complex_dataset(cfg):

@@ -18,7 +18,7 @@ loss:
   task: ${dataset.parameters.task}
 
 readout:
-  _target_: topobenchmarkx.models.readouts.default_readouts.NodeLevelReadOut
+  _target_: topobenchmarkx.models.readouts.default_readouts.GNNBatchReadOut
   task_level: ${dataset.parameters.task_level}
   in_channels: ${model.backbone.hid_channels}
   out_channels: ${dataset.parameters.num_classes}

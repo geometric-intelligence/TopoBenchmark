@@ -11,8 +11,8 @@ backbone:
   hidden_channels: 32
   #out_channels: 16
   n_filters: 2
-  n_layers: 4
-  order_harmonic: 5
+  n_layers: 1
+  order_harmonic: 1
   epsilon_harmonic: 1e-1
 
 loss:
@@ -24,7 +24,7 @@ loss:
 #   metrics: [acc, rocauc]
 
 readout:
-  _target_: topobenchmarkx.models.readouts.default_readouts.NodeLevelReadOut
+  _target_: topobenchmarkx.models.readouts.default_readouts.GNNBatchReadOut
   task_level: ${dataset.parameters.task_level}
   in_channels: ${model.backbone.hidden_channels}
   out_channels: ${dataset.parameters.num_classes}

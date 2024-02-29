@@ -3,6 +3,7 @@ from typing import Any, Dict, Optional
 from lightning import LightningDataModule
 from torch.utils.data import DataLoader
 from torch_geometric.data import Batch, Data
+from torch_geometric.data import DataLoader as PyGDataLoader
 from torch_geometric.utils import is_sparse
 from torch_sparse import SparseTensor
 
@@ -85,6 +86,7 @@ class FullBatchDataModule(LightningDataModule):
     def __init__(
         self,
         dataset,
+        batch_size: int = 64,
         num_workers: int = 0,
         pin_memory: bool = False,
     ) -> None:
@@ -103,6 +105,7 @@ class FullBatchDataModule(LightningDataModule):
         self.save_hyperparameters(logger=False)
 
         self.dataset = dataset
+        self.batch_size = batch_size
 
     def train_dataloader(self) -> DataLoader:
         """Create and return the train dataloader.
@@ -200,7 +203,7 @@ class GraphFullBatchDataModule(LightningDataModule):
         dataset_train,
         dataset_val,
         dataset_test=None,
-        batch_size=1,
+        batch_size=64,
         num_workers: int = 0,
         pin_memory: bool = False,
     ) -> None:

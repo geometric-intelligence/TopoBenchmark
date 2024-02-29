@@ -113,7 +113,7 @@ class FullBatchDataModule(LightningDataModule):
             batch_size=1,
             num_workers=self.hparams.num_workers,
             pin_memory=self.hparams.pin_memory,
-            persistent_workers=True,
+            # persistent_workers=True,
             shuffle=True,
             collate_fn=collate_fn,
         )
@@ -128,7 +128,7 @@ class FullBatchDataModule(LightningDataModule):
             batch_size=1,
             num_workers=self.hparams.num_workers,
             pin_memory=self.hparams.pin_memory,
-            persistent_workers=True,
+            # persistent_workers=True,
             shuffle=False,
             collate_fn=collate_fn,
         )
@@ -143,7 +143,7 @@ class FullBatchDataModule(LightningDataModule):
             batch_size=1,
             num_workers=self.hparams.num_workers,
             pin_memory=self.hparams.pin_memory,
-            persistent_workers=True,
+            # persistent_workers=True,
             shuffle=False,
             collate_fn=collate_fn,
         )

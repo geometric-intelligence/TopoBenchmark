@@ -1,8 +1,7 @@
 _target_: topobenchmarkx.io.load.loaders.GraphLoader
 
-#defaults:
-  #- transforms/graph2cellcomplex: cell_cycles_lifting
-  #- transforms/feature_liftings: base_lifting
+defaults:
+  - transforms: ${get_default_transform:graph,${model}}
 
 # Data definition
 parameters:

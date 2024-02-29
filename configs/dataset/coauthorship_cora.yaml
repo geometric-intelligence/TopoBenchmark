@@ -1,9 +1,8 @@
 _target_: topobenchmarkx.io.load.loaders.HypergraphLoader
 
-# defaults:
-#   - transforms/graph2hypergraph: hypergraph_khop
+defaults:
+  - transforms: ${get_default_transform:hypergraph,${model}}
 
-#   - transforms/feature_liftings: base_lifting
 # Data definition
 parameters:
   data_domain: hypergraph

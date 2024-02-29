@@ -8,11 +8,12 @@ import omegaconf
 import toponetx.datasets.graph as graph
 import torch
 import torch_geometric
+from sklearn.model_selection import StratifiedKFold
 from topomodelx.utils.sparse import from_sparse
 from torch_geometric.data import Data
 from torch_sparse import coalesce
 
-from topobenchmarkx.data.datasets import CustomDataset
+from topobenchmarkx.data.datasets import CustomDataset, TorchGeometricDataset
 
 
 def get_complex_connectivity(complex, max_rank):
@@ -94,8 +95,9 @@ def get_zero_complex_connectivity(complex, max_rank):
             "hodge_laplacian_{}".format(rank_idx): from_sparse(
                 complex.hodge_laplacian_matrix(rank=rank_idx)
             ),
-            "laplacian_up_{}".format(rank_idx): torch.zeros(
-                (complex.number_of_edges(), complex.number_of_edges())
+            # torch.zeros((complex.number_of_edges(), complex.number_of_edges())
+            "laplacian_up_{}".format(rank_idx): generate_zero_sparse_connectivity(
+                m=complex.number_of_edges(), n=complex.number_of_edges()
             ),
         }
     )
@@ -103,15 +105,28 @@ def get_zero_complex_connectivity(complex, max_rank):
     max_rank = 2
     connectivity.update(
         {
-            "incidence_{}".format(max_rank): torch.zeros(
-                (complex.number_of_edges(), 1)
+            "incidence_{}".format(max_rank): generate_zero_sparse_connectivity(
+                m=complex.number_of_edges(), n=1
             ),
-            "laplacian_down_{}".format(max_rank): torch.zeros((1, 1)),
-            "hodge_laplacian_{}".format(max_rank): torch.zeros((1, 1)),
+            # torch.zeros(
+            #     (complex.number_of_edges(), 1)
+            # ),
+            "laplacian_down_{}".format(max_rank): generate_zero_sparse_connectivity(
+                m=1, n=1
+            ),  # torch.zeros((1, 1)),
+            "hodge_laplacian_{}".format(max_rank): generate_zero_sparse_connectivity(
+                m=1, n=1
+            ),  # torch.zeros((1, 1)),
         }
     )
     connectivity.update({"shape": complex.shape})
     return connectivity
+
+
+def generate_zero_sparse_connectivity(m, n):
+    # indices = torch.vstack([torch.arange(m*n).long(), torch.arange(m*n).long()])
+    # values = torch.zeros(m*n)
+    return torch.sparse_coo_tensor((m, n)).coalesce()
 
 
 def load_cell_complex_dataset(cfg):
@@ -372,31 +387,50 @@ def k_fold_split(dataset, parameters, ignore_negative=True):
             labeled_nodes = labels
 
         n = labeled_nodes.shape[0]
-        valid_num = int(n / k)
 
-        perm = torch.as_tensor(np.random.permutation(n))
-        for fold_n in range(k):
-            train_indices = torch.cat(
-                [perm[: valid_num * fold_n], perm[valid_num * (fold_n + 1) :]], dim=0
-            )
-            val_indices = perm[valid_num * fold_n : valid_num * (fold_n + 1)]
+        x_idx = np.arange(n)
+        y = np.array([data.y.squeeze(0).numpy() for data in dataset])
+        skf = StratifiedKFold(n_splits=k)
 
-            if not ignore_negative:
-                return train_indices, val_indices
-
-            train_idx = labeled_nodes[train_indices]
-            valid_idx = labeled_nodes[val_indices]
-
+        for fold_n, (train_idx, valid_idx) in enumerate(skf.split(x_idx, y)):
             split_idx = {"train": train_idx, "valid": valid_idx, "test": valid_idx}
+
             assert np.all(
                 np.sort(
                     np.array(split_idx["train"].tolist() + split_idx["valid"].tolist())
                 )
                 == np.sort(np.arange(len(labels)))
             ), "Not every sample has been loaded."
-
             split_path = os.path.join(split_dir, f"{fold_n}.npz")
+
             np.savez(split_path, **split_idx)
+
+        # valid_num = int(n / k)
+
+        # perm = torch.as_tensor(np.random.permutation(n))
+
+        # for fold_n in range(k):
+        #     train_indices = torch.cat(
+        #         [perm[: valid_num * fold_n], perm[valid_num * (fold_n + 1) :]], dim=0
+        #     )
+        #     val_indices = perm[valid_num * fold_n : valid_num * (fold_n + 1)]
+
+        #     if not ignore_negative:
+        #         return train_indices, val_indices
+
+        #     train_idx = labeled_nodes[train_indices]
+        #     valid_idx = labeled_nodes[val_indices]
+
+        #     split_idx = {"train": train_idx, "valid": valid_idx, "test": valid_idx}
+        #     assert np.all(
+        #         np.sort(
+        #             np.array(split_idx["train"].tolist() + split_idx["valid"].tolist())
+        #         )
+        #         == np.sort(np.arange(len(labels)))
+        #     ), "Not every sample has been loaded."
+
+        #     split_path = os.path.join(split_dir, f"{fold_n}.npz")
+        #     np.savez(split_path, **split_idx)
 
     split_path = os.path.join(split_dir, f"{fold}.npz")
     split_idx = np.load(split_path)
@@ -512,22 +546,31 @@ def load_graph_tudataset_split(dataset, cfg):
 
     # data_lst = [dataset[i] for i in range(len(dataset))]
     # REWRITE LATER
-    dataset = [
-        CustomDataset(data_train_lst),
-        CustomDataset(data_val_lst),
-        CustomDataset(data_test_lst),
-    ]
+    if cfg.torch_geometric_dataset:
+        dataset = [
+            TorchGeometricDataset(data_train_lst),
+            TorchGeometricDataset(data_val_lst),
+            TorchGeometricDataset(data_test_lst),
+        ]
+
+    else:
+        dataset = [
+            CustomDataset(data_train_lst),
+            CustomDataset(data_val_lst),
+            CustomDataset(data_test_lst),
+        ]
     return dataset
+
 
 def load_graph_prepared_split(datasets, cfg):
     data_train_lst, data_val_lst, data_test_lst = [], [], []
-    for dataset, split in zip(datasets, ["train","val","test"]):
+    for dataset, split in zip(datasets, ["train", "val", "test"]):
         for i in range(len(dataset)):
             graph = dataset[i]
             graph.x = graph.x.float()
             # x can have shape [n_nodes] instead of [n_nodes, 1]
-            if len(graph.x.shape)==1:
-                graph.x = torch.unsqueeze(graph.x,1)
+            if len(graph.x.shape) == 1:
+                graph.x = torch.unsqueeze(graph.x, 1)
             assigned = False
             if split == "train":
                 graph.train_mask = torch.Tensor([1]).long()
@@ -544,14 +587,15 @@ def load_graph_prepared_split(datasets, cfg):
                 graph.val_mask = torch.Tensor([0]).long()
                 graph.test_mask = torch.Tensor([0]).long()
                 data_test_lst.append(graph)
-            
+
     dataset = [
         CustomDataset(data_train_lst),
         CustomDataset(data_val_lst),
         CustomDataset(data_test_lst),
     ]
     return dataset
-    
+
+
 def ensure_serializable(obj):
     if isinstance(obj, dict):
         for key, value in obj.items():

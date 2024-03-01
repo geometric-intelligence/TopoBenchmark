@@ -554,19 +554,12 @@ def load_graph_tudataset_split(dataset, cfg):
 
     # data_lst = [dataset[i] for i in range(len(dataset))]
     # REWRITE LATER
-    if cfg.torch_geometric_dataset:
-        dataset = [
-            TorchGeometricDataset(data_train_lst),
-            TorchGeometricDataset(data_val_lst),
-            TorchGeometricDataset(data_test_lst),
-        ]
 
-    else:
-        dataset = [
-            CustomDataset(data_train_lst),
-            CustomDataset(data_val_lst),
-            CustomDataset(data_test_lst),
-        ]
+    dataset = [
+        CustomDataset(data_train_lst),
+        CustomDataset(data_val_lst),
+        CustomDataset(data_test_lst),
+    ]
     return dataset
 
 

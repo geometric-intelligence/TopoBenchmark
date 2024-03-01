@@ -28,7 +28,6 @@ parameters:
   batch_size: 128 # We have an issue with allowing multiple graphs in a batch due to sparse incidences
   num_workers: 0
   pin_memory: True
-  torch_geometric_dataset: True
 
 
 

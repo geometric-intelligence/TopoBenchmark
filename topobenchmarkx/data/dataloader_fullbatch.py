@@ -163,7 +163,7 @@ class FullBatchDataModule(LightningDataModule):
         pass
 
 
-class GraphFullBatchDataModule(LightningDataModule):
+class DefaultDataModule(LightningDataModule):
     """`LightningDataModule` for the MNIST dataset.
 
     The MNIST database of handwritten digits has a training set of 60,000 examples, and a test set of 10,000 examples.
@@ -187,9 +187,9 @@ class GraphFullBatchDataModule(LightningDataModule):
     def __init__(
         self,
         dataset_train,
-        dataset_val,
+        dataset_val=None,
         dataset_test=None,
-        batch_size=64,
+        batch_size=1,
         num_workers: int = 0,
         pin_memory: bool = False,
     ) -> None:
@@ -208,9 +208,18 @@ class GraphFullBatchDataModule(LightningDataModule):
         self.save_hyperparameters(logger=False)
 
         self.dataset_train = dataset_train
-        self.dataset_val = dataset_val
-        self.dataset_test = dataset_test
         self.batch_size = batch_size
+
+        if dataset_val == None and dataset_test == None:
+            # Transductive setting
+            self.dataset_val = dataset_train
+            self.dataset_test = dataset_train
+            assert (
+                self.batch_size == 1
+            ), "Batch size must be 1 for transductive setting."
+        else:
+            self.dataset_val = dataset_val
+            self.dataset_test = dataset_test
 
     def train_dataloader(self) -> DataLoader:
         """Create and return the train dataloader.

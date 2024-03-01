@@ -22,6 +22,6 @@ parameters:
   k: 3 # for k-Fold Cross-Validation
 
   # Dataloader parameters
-  batch_size: 1 # Needs to be divisible by the number of devices (e.g., if in a distributed setup)
+  batch_size: 1 # Fixed
   num_workers: 0
   pin_memory: False

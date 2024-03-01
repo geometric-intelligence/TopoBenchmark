@@ -6,6 +6,7 @@ defaults:
   # - transforms/graph2cellcomplex: cell_cycles_lifting
   #- transforms/graph2hypergraph: hypergraph_khop
   - transforms/graph2simplicial: simplicial_clique
+  #- transforms/graph2simplicial: simplicial_neighborhood
   - transforms/feature_liftings: base_lifting
 
 # Data definition

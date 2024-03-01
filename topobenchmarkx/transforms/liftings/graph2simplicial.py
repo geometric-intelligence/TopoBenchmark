@@ -90,6 +90,7 @@ class SimplicialNeighborhoodLifting(Graph2SimplicialLifting):
         edge_index = torch_geometric.utils.to_undirected(data.edge_index)
         simplices = [set() for _ in range(self.complex_dim + 1)]
         for n in range(n_nodes):
+            # Find 1-hop node n neighbors
             neighbors, _, _, _ = torch_geometric.utils.k_hop_subgraph(n, 1, edge_index)
             if n not in neighbors:
                 neighbors.append(n)

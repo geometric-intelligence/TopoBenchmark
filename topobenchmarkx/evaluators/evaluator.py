@@ -101,6 +101,7 @@ class Evaluator:
 
 from torchmetrics import MetricCollection
 from torchmetrics.classification import AUROC, Accuracy, Precision, Recall
+from torchmetrics.regression import MeanAbsoluteError, MeanSquaredError
 
 # Define metrics
 METRICS = {
@@ -108,21 +109,30 @@ METRICS = {
     "precision": Precision,
     "recall": Recall,
     "auroc": AUROC,
+    "mae": MeanAbsoluteError,
+    "mse": MeanSquaredError,
 }
 
 
 class TorchEvaluator:
     def __init__(self, **kwargs):
-        parameters = {"num_classes": kwargs["num_classes"]}
+        self.task = kwargs["task"]
 
         if kwargs["num_classes"] == 1 and kwargs["task"] == "classification":
+            parameters = {"num_classes": kwargs["num_classes"]}
             parameters["task"] = "binary"
 
         elif kwargs["num_classes"] > 1 and kwargs["task"] == "classification":
+            parameters = {"num_classes": kwargs["num_classes"]}
             parameters["task"] = "multiclass"
 
         elif kwargs["task"] == "multilabel classification":
+            parameters = {"num_classes": kwargs["num_classes"]}
             parameters["task"] = "multilabel"
+
+        elif kwargs["task"] == "regression":
+            parameters = {}
+        # parameters["task"] = "regression"
 
         else:
             raise ValueError(f"Invalid task {kwargs['task']}")
@@ -137,7 +147,14 @@ class TorchEvaluator:
         preds = model_out["logits"].cpu()
         target = model_out["labels"].cpu()
 
-        self.metrics.update(preds, target)
+        if self.task == "regression":
+            self.metrics.update(preds, target.unsqueeze(1))
+
+        elif self.task == "classification":
+            self.metrics.update(preds, target)
+
+        else:
+            raise ValueError(f"Invalid task {self.task}")
 
     def compute(self, mode):
         res_dict = self.metrics.compute()

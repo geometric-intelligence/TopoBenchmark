@@ -85,6 +85,12 @@ class NetworkModule(LightningModule):
 
         model_out = self.forward(batch)
         model_out = self.readout(model_out)
+
+        model_out = self.process_outputs(batch, model_out)
+
+        model_out = self.criterion(model_out)
+        self.evaluator.update(model_out)
+
         # model_out = self.criterion(model_out)
 
         return model_out
@@ -97,22 +103,20 @@ class NetworkModule(LightningModule):
         :param batch_idx: The index of the current batch.
         :return: A tensor of losses between model predictions and targets.
         """
-        # if data_transform == True:
-        #     batch = data_transform(batch)
-
+        self.state_str = "Training"
         model_out = self.model_step(batch)
 
-        if self.task_level == "node":
-            # Keep only train data points
-            for key, val in model_out.items():
-                if key in ["logits", "labels"]:
-                    model_out[key] = val[batch.train_mask]
+        # if self.task_level == "node":
+        #     # Keep only train data points
+        #     for key, val in model_out.items():
+        #         if key in ["logits", "labels"]:
+        #             model_out[key] = val[batch.train_mask]
 
-        # Criterion
-        model_out = self.criterion(model_out)
+        # # Criterion
+        # model_out = self.criterion(model_out)
 
-        # Evaluation
-        self.evaluator.update(model_out)
+        # # Evaluation
+        # self.evaluator.update(model_out)
 
         # Update and log metrics
         self.log(
@@ -136,21 +140,22 @@ class NetworkModule(LightningModule):
             labels.
         :param batch_idx: The index of the current batch.
         """
+        self.state_str = "Validation"
         model_out = self.model_step(batch)
 
-        # Keep only validation data points
-        if self.task_level == "node":
-            for key, val in model_out.items():
-                # if key not in ["loss", "hyperedge"]:
-                if key in ["logits", "labels"]:
-                    model_out[key] = val[batch.val_mask]
+        # # Keep only validation data points
+        # if self.task_level == "node":
+        #     for key, val in model_out.items():
+        #         # if key not in ["loss", "hyperedge"]:
+        #         if key in ["logits", "labels"]:
+        #             model_out[key] = val[batch.val_mask]
 
-        # Criterion
-        model_out = self.criterion(model_out)
+        # # Criterion
+        # model_out = self.criterion(model_out)
 
-        # Evaluation
-        self.evaluator.update(model_out)
-        self.metric_collector_val.append((model_out["logits"], model_out["labels"]))
+        # # Evaluation
+        # self.evaluator.update(model_out)
+        # self.metric_collector_val.append((model_out["logits"], model_out["labels"]))
 
         # Log Loss
         self.log(
@@ -171,17 +176,17 @@ class NetworkModule(LightningModule):
             labels.
         :param batch_idx: The index of the current batch.
         """
-
+        self.state_str = "Test"
         model_out = self.model_step(batch)
 
-        if self.task_level == "node":
-            # Keep only test data points
-            for key, val in model_out.items():
-                if key in ["logits", "labels"]:
-                    model_out[key] = val[batch.test_mask]
+        # if self.task_level == "node":
+        #     # Keep only test data points
+        #     for key, val in model_out.items():
+        #         if key in ["logits", "labels"]:
+        #             model_out[key] = val[batch.test_mask]
 
-        # Criterion
-        model_out = self.criterion(model_out)
+        # # Criterion
+        # model_out = self.criterion(model_out)
 
         # Log loss
         self.log(
@@ -194,8 +199,29 @@ class NetworkModule(LightningModule):
         )
 
         # Evaluation
-        self.evaluator.update(model_out)
-        self.metric_collector_test.append((model_out["logits"], model_out["labels"]))
+        # self.evaluator.update(model_out)
+        # self.metric_collector_test.append((model_out["logits"], model_out["labels"]))
+
+    def process_outputs(self, batch, model_out: dict) -> dict:
+        """Process model outputs."""
+
+        # Get the correct mask
+        if self.state_str == "Training":
+            mask = batch.train_mask
+        elif self.state_str == "Validation":
+            mask = batch.val_mask
+        elif self.state_str == "Test":
+            mask = batch.test_mask
+        else:
+            raise ValueError("Invalid state_str")
+
+        if self.task_level == "node":
+            # Keep only train data points
+            for key, val in model_out.items():
+                if key in ["logits", "labels"]:
+                    model_out[key] = val[mask]
+
+        return model_out
 
     def log_metrics(self, mode=None):
         """Log metrics."""

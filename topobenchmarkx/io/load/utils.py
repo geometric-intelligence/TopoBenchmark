@@ -388,7 +388,7 @@ def k_fold_split(dataset, parameters, ignore_negative=True):
 
         n = labeled_nodes.shape[0]
 
-        if dataset.__len__() == 1:
+        if len(dataset) == 1:
             y = dataset[0].y.squeeze(0).numpy()
         else:
             y = np.array([data.y.squeeze(0).numpy() for data in dataset])

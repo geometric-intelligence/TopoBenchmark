@@ -1,25 +1,27 @@
-_target_: topobenchmarkx.io.load.loaders.HypergraphLoader
+_target_: topobenchmarkx.io.load.loaders.GraphLoader
+
 
 defaults:
-  - transforms: ${get_default_transform:hypergraph,${model}}
+  - transforms: ${get_default_transform:graph,${model}}
 
 # Data definition
 parameters:
   data_domain: hypergraph
   data_type: coauthorship
-  data_name: Cora
+  data_name: citeseer
   data_dir: ${paths.data_dir}${dataset.parameters.data_domain}/${dataset.parameters.data_type}/${dataset.parameters.data_name}
   data_split_dir: ${paths.data_dir}/data_splits/${dataset.parameters.data_name}
 
   # Dataset parameters
-  num_features: 1433
-  num_classes: 7
+  num_features: 3703
+  num_classes: 6
   task: classification
   task_level: node
   data_seed: 0
+  split_type: test #'k-fold' # either k-fold or test
+  k: 10 # for k-Fold Cross-Validation
 
   # Dataloader parameters
-  batch_size: 128 # Needs to be divisible by the number of devices (e.g., if in a distributed setup)
-  # train_val_test_split: [55_000, 5_000, 10_000]
+  batch_size: 1 # Needs to be divisible by the number of devices (e.g., if in a distributed setup)
   num_workers: 0
   pin_memory: False

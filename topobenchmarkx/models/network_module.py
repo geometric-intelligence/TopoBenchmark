@@ -105,7 +105,7 @@ class NetworkModule(LightningModule):
         if self.task_level == "node":
             # Keep only train data points
             for key, val in model_out.items():
-                if key not in ["loss", "hyperedge"]:
+                if key in ["logits", "labels"]:
                     model_out[key] = val[batch.train_mask]
 
         # Criterion
@@ -141,7 +141,8 @@ class NetworkModule(LightningModule):
         # Keep only validation data points
         if self.task_level == "node":
             for key, val in model_out.items():
-                if key not in ["loss", "hyperedge"]:
+                # if key not in ["loss", "hyperedge"]:
+                if key in ["logits", "labels"]:
                     model_out[key] = val[batch.val_mask]
 
         # Criterion
@@ -176,7 +177,7 @@ class NetworkModule(LightningModule):
         if self.task_level == "node":
             # Keep only test data points
             for key, val in model_out.items():
-                if key not in ["loss", "hyperedge"]:
+                if key in ["logits", "labels"]:
                     model_out[key] = val[batch.test_mask]
 
         # Criterion

@@ -10,6 +10,27 @@ from lightning import Callback, LightningDataModule, LightningModule, Trainer
 from lightning.pytorch.loggers import Logger
 from omegaconf import DictConfig, OmegaConf
 
+
+def get_default_transform(data_domain, model):
+    model_domain = model.split("/")[0]
+    if data_domain == model_domain:
+        return "identity"
+    elif data_domain == "graph" and model_domain != "combinatorial":
+        return f"graph2{model_domain}_default"
+    else:
+        raise ValueError(
+            f"Invalid combination of data_domain={data_domain} and model_domain={model_domain}"
+        )
+
+
+OmegaConf.register_new_resolver("get_default_transform", get_default_transform)
+
+OmegaConf.register_new_resolver(
+    "parameter_multiplication", lambda x, y: int(int(x) * int(y))
+)
+
+# lambda x: x.split('/')[0])
+
 # Inputs to load data
 # from topobenchmarkx.data.load.loaders import HypergraphLoader
 # from topobenchmarkx.data.datasets import CustomDataset
@@ -17,10 +38,9 @@ from omegaconf import DictConfig, OmegaConf
 os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 
 rootutils.setup_root(__file__, indicator=".project-root", pythonpath=True)
-from topobenchmarkx.data.dataloader_fullbatch import (
+from topobenchmarkx.data.dataloader_fullbatch import (  # TorchGeometricBatchDataModule,
     FullBatchDataModule,
     GraphFullBatchDataModule,
-    TorchGeometricBatchDataModule,
 )
 from topobenchmarkx.utils import (
     RankedLogger,
@@ -79,19 +99,19 @@ def train(cfg: DictConfig) -> Tuple[Dict[str, Any], Dict[str, Any]]:
         datamodule = FullBatchDataModule(dataset=dataset)
 
     elif cfg.dataset.parameters.task_level == "graph":
-        if cfg.dataset.parameters.torch_geometric_dataset:
-            datamodule = TorchGeometricBatchDataModule(
-                dataset_train=dataset[0],
-                dataset_val=dataset[1],
-                dataset_test=dataset[2],
-                batch_size=cfg.dataset.parameters.batch_size,
-            )
-        else:
-            datamodule = GraphFullBatchDataModule(
-                dataset_train=dataset[0],
-                dataset_val=dataset[1],
-                dataset_test=dataset[2],
-            )
+        # if cfg.dataset.parameters.torch_geometric_dataset:
+        #     datamodule = TorchGeometricBatchDataModule(
+        #         dataset_train=dataset[0],
+        #         dataset_val=dataset[1],
+        #         dataset_test=dataset[2],
+        #         batch_size=cfg.dataset.parameters.batch_size,
+        #     )
+        # else:
+        datamodule = GraphFullBatchDataModule(
+            dataset_train=dataset[0],
+            dataset_val=dataset[1],
+            dataset_test=dataset[2],
+        )
     else:
         raise ValueError("Invalid task_level")
 

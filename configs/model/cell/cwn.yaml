@@ -5,8 +5,8 @@ backbone:
   in_channels_0: ${dataset.parameters.num_features}
   in_channels_1: ${dataset.parameters.num_features}
   in_channels_2: ${dataset.parameters.num_features}
-  hid_channels: 16
-  n_layers: 4
+  hid_channels: 128
+  n_layers: 1
   #dropout: 0.5
   #heads: 3
   #concat: True

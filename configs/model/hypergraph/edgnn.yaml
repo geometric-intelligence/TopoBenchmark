@@ -1,6 +1,7 @@
 _target_: topobenchmarkx.models.network_module.NetworkModule
 
 model_name: edgnn
+model_domain: hypergraph
 
 feature_encoder:
   _target_: topobenchmarkx.models.encoders.default_encoders.BaseNodeFeatureEncoder

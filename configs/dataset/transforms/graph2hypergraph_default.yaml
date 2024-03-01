@@ -1,0 +1,2 @@
+defaults:
+  - graph2hypergraph_lifting: hypergraph_khop

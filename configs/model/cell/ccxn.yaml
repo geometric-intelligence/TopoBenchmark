@@ -1,11 +1,20 @@
 _target_: topobenchmarkx.models.network_module.NetworkModule
 
-backbone:
-  _target_: topomodelx.nn.cell.ccxn.CCXN
+feature_encoder:
+  _target_: topobenchmarkx.models.encoders.default_encoders.BaseFaceFeatureEncoder
   in_channels_0: ${dataset.parameters.num_features}
   in_channels_1: ${dataset.parameters.num_features}
   in_channels_2: ${dataset.parameters.num_features}
-  n_layers: 2
+  out_channels_0: 128
+  out_channels_1: 128
+  out_channels_2: 128
+
+backbone:
+  _target_: topomodelx.nn.cell.ccxn.CCXN
+  in_channels_0: ${model.feature_encoder.out_channels_0}
+  in_channels_1: ${model.feature_encoder.out_channels_1}
+  in_channels_2: ${model.feature_encoder.out_channels_2}
+  n_layers: 1
   att: True
 
 loss:
@@ -25,15 +34,14 @@ backbone_wrapper:
 optimizer:
   _target_: torch.optim.Adam
   _partial_: true
-  lr: 0.1
+  lr: 0.001
   weight_decay: 0.0
 
 scheduler:
-  _target_: torch.optim.lr_scheduler.ReduceLROnPlateau
+  _target_: torch.optim.lr_scheduler.PolynomialLR
   _partial_: true
-  mode: min
-  factor: 0.1
-  patience: 10
+  last_epoch: -1
+  total_iters: ${trainer.max_epochs}
 
 # compile model for faster training with pytorch 2.0
 compile: false

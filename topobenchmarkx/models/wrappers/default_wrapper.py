@@ -80,8 +80,10 @@ class CANWrapper(DefaultWrapper):
             batch.laplacian_down_1.coalesce(),
             batch.laplacian_up_1.coalesce(),
         )
+        x_0 = torch.sparse.mm(batch.incidence_1, x_1)
+
         model_out["x_1"] = x_1
-        # TODO: project the edge-level output of the model back to the node-level
+        model_out["x_0"] = x_0
         return model_out
 
 

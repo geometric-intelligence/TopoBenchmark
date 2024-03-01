@@ -388,9 +388,16 @@ def k_fold_split(dataset, parameters, ignore_negative=True):
 
         n = labeled_nodes.shape[0]
 
+        if dataset.__len__() == 1:
+            y = dataset[0].y.squeeze(0).numpy()
+        else:
+            y = np.array([data.y.squeeze(0).numpy() for data in dataset])
+
         x_idx = np.arange(n)
-        y = np.array([data.y.squeeze(0).numpy() for data in dataset])
-        skf = StratifiedKFold(n_splits=k)
+        x_idx = np.random.permutation(x_idx)
+        y = y[x_idx]
+
+        skf = StratifiedKFold(n_splits=k, shuffle=True, random_state=42)
 
         for fold_n, (train_idx, valid_idx) in enumerate(skf.split(x_idx, y)):
             split_idx = {"train": train_idx, "valid": valid_idx, "test": valid_idx}
@@ -446,6 +453,7 @@ def load_graph_cocitation_split(dataset, cfg):
         split_idx = k_fold_split(dataset, cfg)
         data.train_mask = split_idx["train"]
         data.val_mask = split_idx["valid"]
+        data.test_mask = split_idx["test"]
         return CustomDataset([data])
     else:
         raise NotImplementedError(

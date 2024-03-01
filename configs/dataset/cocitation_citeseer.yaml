@@ -2,9 +2,7 @@ _target_: topobenchmarkx.io.load.loaders.GraphLoader
 
 
 defaults:
-  #- transforms/graph2hypergraph: hypergraph_khop
-  - transforms/graph2simplicial: simplicial_clique
-  - transforms/feature_liftings: base_lifting
+  - transforms: ${get_default_transform:graph,${model}}
 
 # Data definition
 parameters:
@@ -21,7 +19,7 @@ parameters:
   task_level: node
   data_seed: 0
   split_type: k-fold #'k-fold' # either k-fold or test
-  k: 2 # for k-Fold Cross-Validation
+  k: 3 # for k-Fold Cross-Validation
 
   # Dataloader parameters
   batch_size: 1 # Needs to be divisible by the number of devices (e.g., if in a distributed setup)

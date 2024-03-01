@@ -1,12 +1,17 @@
 _target_: topobenchmarkx.models.network_module.NetworkModule
 
+feature_encoder:
+  _target_: topobenchmarkx.models.encoders.default_encoders.BaseEdgeFeatureEncoder
+  in_channels: ${dataset.parameters.num_features}
+  out_channels: ${model.backbone.out_channels}
+
 backbone:
   _target_: topomodelx.nn.cell.can.CAN
-  in_channels_0: ${dataset.parameters.num_features}
-  in_channels_1: ${dataset.parameters.num_features}
-  out_channels: 7
+  in_channels_0: ${model.backbone.out_channels}
+  in_channels_1: ${model.backbone.out_channels}
+  out_channels: 128
   dropout: 0.5
-  heads: 3
+  heads: 4 # For now we stuck to out_channels//heads
   concat: True
   skip_connection: True
   n_layers: 2
@@ -23,7 +28,7 @@ loss:
 readout:
   _target_: topobenchmarkx.models.readouts.default_readouts.NodeLevelReadOut
   task_level: ${dataset.parameters.task_level}
-  in_channels: 21
+  in_channels: ${parameter_multiplication:${model.backbone.out_channels},${model.backbone.heads}} #[${model.backbone.heads},  ]
   out_channels: ${dataset.parameters.num_classes}
 
 # readout_workaround:
@@ -38,15 +43,14 @@ backbone_wrapper:
 optimizer:
   _target_: torch.optim.Adam
   _partial_: true
-  lr: 0.1
+  lr: 0.01
   weight_decay: 0.0
 
 scheduler:
-  _target_: torch.optim.lr_scheduler.ReduceLROnPlateau
+  _target_: torch.optim.lr_scheduler.PolynomialLR
   _partial_: true
-  mode: min
-  factor: 0.1
-  patience: 10
+  last_epoch: -1
+  total_iters: ${trainer.max_epochs}
 
 # compile model for faster training with pytorch 2.0
 compile: false

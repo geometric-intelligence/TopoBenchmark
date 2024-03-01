@@ -19,7 +19,7 @@ parameters:
   data_seed: 0
 
   # Dataloader parameters
-  batch_size: 128 # Needs to be divisible by the number of devices (e.g., if in a distributed setup)
+  batch_size: 1 # Fixed
   # train_val_test_split: [55_000, 5_000, 10_000]
   num_workers: 0
   pin_memory: False

@@ -39,8 +39,8 @@ os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 
 rootutils.setup_root(__file__, indicator=".project-root", pythonpath=True)
 from topobenchmarkx.data.dataloader_fullbatch import (  # TorchGeometricBatchDataModule,
+    DefaultDataModule,
     FullBatchDataModule,
-    GraphFullBatchDataModule,
 )
 from topobenchmarkx.utils import (
     RankedLogger,
@@ -96,7 +96,7 @@ def train(cfg: DictConfig) -> Tuple[Dict[str, Any], Dict[str, Any]]:
     log.info(f"Instantiating datamodule <{cfg.dataset._target_}>")
 
     if cfg.dataset.parameters.task_level == "node":
-        datamodule = FullBatchDataModule(dataset=dataset)
+        datamodule = DefaultDataModule(dataset_train=dataset)
 
     elif cfg.dataset.parameters.task_level == "graph":
         # if cfg.dataset.parameters.torch_geometric_dataset:
@@ -107,10 +107,11 @@ def train(cfg: DictConfig) -> Tuple[Dict[str, Any], Dict[str, Any]]:
         #         batch_size=cfg.dataset.parameters.batch_size,
         #     )
         # else:
-        datamodule = GraphFullBatchDataModule(
+        datamodule = DefaultDataModule(
             dataset_train=dataset[0],
             dataset_val=dataset[1],
             dataset_test=dataset[2],
+            batch_size=cfg.dataset.parameters.batch_size,
         )
     else:
         raise ValueError("Invalid task_level")

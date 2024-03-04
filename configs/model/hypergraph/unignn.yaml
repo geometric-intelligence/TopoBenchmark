@@ -11,7 +11,8 @@ backbone:
 
 loss:
   _target_: topobenchmarkx.models.losses.loss.DefaultLoss
-  task: ${data.task}
+  task: ${dataset.parameters.task}
+  loss_type: ${dataset.parameters.loss_type}
 
 # evaluator:
 #   _target_: topobenchmarkx.evaluators.evaluator.Evaluator

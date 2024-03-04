@@ -16,6 +16,7 @@ parameters:
   num_features: 500
   num_classes: 3
   task: classification
+  loss_type: cross_entropy
   task_level: node
   data_seed: 0
   split_type: test #'k-fold' # either k-fold or test

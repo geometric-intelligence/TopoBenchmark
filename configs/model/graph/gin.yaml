@@ -8,14 +8,15 @@ feature_encoder:
 backbone:
   _target_: torch_geometric.nn.models.GIN
   in_channels: ${model.backbone.hidden_channels}
-  hidden_channels: 128
-  num_layers: 1
+  hidden_channels: 32
+  num_layers: 4
   dropout: 0.0
   act: relu
 
 loss:
   _target_: topobenchmarkx.models.losses.loss.DefaultLoss
   task: ${dataset.parameters.task}
+  loss_type: ${dataset.parameters.loss_type}
 
 # evaluator:
 #   _target_: topobenchmarkx.evaluators.evaluator.Evaluator

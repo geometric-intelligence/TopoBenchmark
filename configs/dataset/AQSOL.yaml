@@ -15,6 +15,7 @@ parameters:
   num_features: 1 # here basically I specify the initial num features in mutang at x aka x_0
   num_classes: 1
   task: classification
+  loss_type: cross_entropy
   task_level: graph
   data_seed: 0
   split_type: 'k-fold' # either k-fold or test

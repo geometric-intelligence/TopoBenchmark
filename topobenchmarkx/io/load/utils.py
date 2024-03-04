@@ -21,11 +21,13 @@ def get_complex_connectivity(complex, max_rank):
     connectivity.update(
         {
             "laplacian_up_{}".format(0): from_sparse(
-                complex.up_laplacian_matrix(rank=0)
+                complex.up_laplacian_matrix(rank=0, signed=False)
             ),
-            "adjacency_{}".format(0): from_sparse(complex.adjacency_matrix(rank=0)),
+            "adjacency_{}".format(0): from_sparse(
+                complex.adjacency_matrix(rank=0, signed=False)
+            ),
             "hodge_laplacian_{}".format(0): from_sparse(
-                complex.hodge_laplacian_matrix(rank=0)
+                complex.hodge_laplacian_matrix(rank=0, signed=False)
             ),
         }
     )
@@ -34,32 +36,32 @@ def get_complex_connectivity(complex, max_rank):
         connectivity.update(
             {
                 "incidence_{}".format(rank_idx): from_sparse(
-                    complex.incidence_matrix(rank=rank_idx)
+                    complex.incidence_matrix(rank=rank_idx, signed=False)
                 ),
                 "laplacian_down_{}".format(rank_idx): from_sparse(
-                    complex.down_laplacian_matrix(rank=rank_idx)
+                    complex.down_laplacian_matrix(rank=rank_idx, signed=False)
                 ),
                 "laplacian_up_{}".format(rank_idx): from_sparse(
-                    complex.up_laplacian_matrix(rank=rank_idx)
+                    complex.up_laplacian_matrix(rank=rank_idx, signed=False)
                 ),
                 "adjacency_{}".format(rank_idx): from_sparse(
-                    complex.adjacency_matrix(rank=rank_idx)
+                    complex.adjacency_matrix(rank=rank_idx, signed=False)
                 ),
                 "hodge_laplacian_{}".format(rank_idx): from_sparse(
-                    complex.hodge_laplacian_matrix(rank=rank_idx)
+                    complex.hodge_laplacian_matrix(rank=rank_idx, signed=False)
                 ),
             }
         )
     connectivity.update(
         {
             "incidence_{}".format(max_rank): from_sparse(
-                complex.incidence_matrix(rank=max_rank)
+                complex.incidence_matrix(rank=max_rank, signed=False)
             ),
             "laplacian_down_{}".format(max_rank): from_sparse(
-                complex.down_laplacian_matrix(rank=max_rank)
+                complex.down_laplacian_matrix(rank=max_rank, signed=False)
             ),
             "hodge_laplacian_{}".format(max_rank): from_sparse(
-                complex.hodge_laplacian_matrix(rank=max_rank)
+                complex.hodge_laplacian_matrix(rank=max_rank, signed=False)
             ),
         }
     )
@@ -72,11 +74,13 @@ def get_zero_complex_connectivity(complex, max_rank):
     connectivity.update(
         {
             "laplacian_up_{}".format(0): from_sparse(
-                complex.up_laplacian_matrix(rank=0)
+                complex.up_laplacian_matrix(rank=0, signed=False)
             ),
-            "adjacency_{}".format(0): from_sparse(complex.adjacency_matrix(rank=0)),
+            "adjacency_{}".format(0): from_sparse(
+                complex.adjacency_matrix(rank=0, signed=False)
+            ),
             "hodge_laplacian_{}".format(0): from_sparse(
-                complex.hodge_laplacian_matrix(rank=0)
+                complex.hodge_laplacian_matrix(rank=0, signed=False)
             ),
         }
     )
@@ -84,16 +88,16 @@ def get_zero_complex_connectivity(complex, max_rank):
     connectivity.update(
         {
             "incidence_{}".format(rank_idx): from_sparse(
-                complex.incidence_matrix(rank=rank_idx)
+                complex.incidence_matrix(rank=rank_idx, signed=False)
             ),
             "laplacian_down_{}".format(rank_idx): from_sparse(
-                complex.down_laplacian_matrix(rank=rank_idx)
+                complex.down_laplacian_matrix(rank=rank_idx, signed=False)
             ),
             "adjacency_{}".format(rank_idx): from_sparse(
-                complex.adjacency_matrix(rank=rank_idx)
+                complex.adjacency_matrix(rank=rank_idx, signed=False)
             ),
             "hodge_laplacian_{}".format(rank_idx): from_sparse(
-                complex.hodge_laplacian_matrix(rank=rank_idx)
+                complex.hodge_laplacian_matrix(rank=rank_idx, signed=False)
             ),
             # torch.zeros((complex.number_of_edges(), complex.number_of_edges())
             "laplacian_up_{}".format(rank_idx): generate_zero_sparse_connectivity(

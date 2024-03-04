@@ -99,14 +99,6 @@ def train(cfg: DictConfig) -> Tuple[Dict[str, Any], Dict[str, Any]]:
         datamodule = DefaultDataModule(dataset_train=dataset)
 
     elif cfg.dataset.parameters.task_level == "graph":
-        # if cfg.dataset.parameters.torch_geometric_dataset:
-        #     datamodule = TorchGeometricBatchDataModule(
-        #         dataset_train=dataset[0],
-        #         dataset_val=dataset[1],
-        #         dataset_test=dataset[2],
-        #         batch_size=cfg.dataset.parameters.batch_size,
-        #     )
-        # else:
         datamodule = DefaultDataModule(
             dataset_train=dataset[0],
             dataset_val=dataset[1],

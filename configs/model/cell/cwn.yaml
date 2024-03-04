@@ -1,21 +1,26 @@
 _target_: topobenchmarkx.models.network_module.NetworkModule
 
-backbone:
-  _target_: topomodelx.nn.cell.cwn.CWN
+feature_encoder:
+  _target_: topobenchmarkx.models.encoders.default_encoders.BaseFaceFeatureEncoder
   in_channels_0: ${dataset.parameters.num_features}
   in_channels_1: ${dataset.parameters.num_features}
   in_channels_2: ${dataset.parameters.num_features}
+  out_channels_0: ${model.backbone.hid_channels}
+  out_channels_1: ${model.backbone.hid_channels}
+  out_channels_2: ${model.backbone.hid_channels}
+
+backbone:
+  _target_: topomodelx.nn.cell.cwn.CWN
+  in_channels_0: ${model.backbone.hid_channels}
+  in_channels_1: ${model.backbone.hid_channels}
+  in_channels_2: ${model.backbone.hid_channels}
   hid_channels: 128
   n_layers: 1
-  #dropout: 0.5
-  #heads: 3
-  #concat: True
-  #skip_connection: True
-  #att_lift: False
 
 loss:
   _target_: topobenchmarkx.models.losses.loss.DefaultLoss
   task: ${dataset.parameters.task}
+  loss_type: ${dataset.parameters.loss_type}
 
 readout:
   _target_: topobenchmarkx.models.readouts.default_readouts.GNNBatchReadOut

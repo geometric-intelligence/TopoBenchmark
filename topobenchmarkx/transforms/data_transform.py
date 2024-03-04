@@ -7,6 +7,7 @@ from topobenchmarkx.transforms.data_manipulations.manipulations import (
     EqualGausFeatures,
     IdentityTransform,
     NodeDegrees,
+    NodeFeaturesToFloat,
     OneHotDegreeFeatures,
     RemoveExtraFeatureFromProteins,
 )
@@ -42,6 +43,7 @@ TRANSFORMS = {
     "RemoveExtraFeatureFromProteins": RemoveExtraFeatureFromProteins,
     "OneHotDegreeFeatures": OneHotDegreeFeatures,
     "EqualGausFeatures": EqualGausFeatures,
+    "NodeFeaturesToFloat": NodeFeaturesToFloat,
 }
 
 

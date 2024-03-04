@@ -37,6 +37,19 @@ class EqualGausFeatures(torch_geometric.transforms.BaseTransform):
         return self.forward(data)
 
 
+class NodeFeaturesToFloat(torch_geometric.transforms.BaseTransform):
+    def __init__(self, **kwargs):
+        super().__init__()
+        self.type = "map_node_features_to_float"
+
+    def forward(self, data: torch_geometric.data.Data) -> dict:
+        data.x = data.x.float()
+        return data
+
+    def __call__(self, data):
+        return self.forward(data)
+
+
 class DataFieldsToDense(torch_geometric.transforms.BaseTransform):
     def __init__(self, **kwargs):
         super().__init__()

@@ -19,6 +19,7 @@ parameters:
   # max_x_1_degree: 3062
   num_classes: 2
   task: classification
+  loss_type: cross_entropy
   task_level: graph
   data_seed: 0
   split_type: 'k-fold' # either k-fold or test
@@ -28,7 +29,6 @@ parameters:
   batch_size: 128 # We have an issue with allowing multiple graphs in a batch due to sparse incidences
   num_workers: 0
   pin_memory: True
-  torch_geometric_dataset: True
 
 
 

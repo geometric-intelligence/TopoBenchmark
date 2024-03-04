@@ -3,5 +3,5 @@ transform_type: 'lifting'
 transform_name: "CellCyclesLifting"
 k_value: 1
 complex_dim: 2
-max_cell_lenght: 6
+max_cell_lenght: 18
 aggregation_method: "sum"

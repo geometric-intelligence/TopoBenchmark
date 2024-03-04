@@ -1,7 +1,8 @@
 _target_: topobenchmarkx.io.load.loaders.GraphLoader
 
-#defaults:
-  #- transforms: ${get_default_transform:graph,${model}}
+defaults:
+  - transforms/data_manipulations: node_feat_to_float
+  - transforms: ${get_default_transform:graph,${model}}
 
 # Data definition
 parameters:
@@ -14,14 +15,15 @@ parameters:
   # Dataset parameters
   num_features: 1 # here basically I specify the initial num features in mutang at x aka x_0
   num_classes: 1
-  task: classification
+  task: regression
+  loss_type: mae
   task_level: graph
   data_seed: 0
   split_type: 'k-fold' # either k-fold or test
   k: 10 # for k-Fold Cross-Validation
 
   # Dataloader parameters
-  batch_size: 10 # We have an issue with allowing multiple graphs in a batch due to sparse incidences
+  batch_size: 256 # We have an issue with allowing multiple graphs in a batch due to sparse incidences
   num_workers: 0
   pin_memory: False
 

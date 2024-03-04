@@ -63,6 +63,9 @@ def get_complex_connectivity(complex, max_rank):
             "hodge_laplacian_{}".format(max_rank): from_sparse(
                 complex.hodge_laplacian_matrix(rank=max_rank, signed=False)
             ),
+            "adjacency_{}".format(max_rank): generate_zero_sparse_connectivity(
+                m=complex.shape[1], n=complex.shape[1]
+            ),
         }
     )
     connectivity.update({"shape": complex.shape})
@@ -93,15 +96,15 @@ def get_zero_complex_connectivity(complex, max_rank):
             "laplacian_down_{}".format(rank_idx): from_sparse(
                 complex.down_laplacian_matrix(rank=rank_idx, signed=False)
             ),
-            "adjacency_{}".format(rank_idx): from_sparse(
-                complex.adjacency_matrix(rank=rank_idx, signed=False)
-            ),
             "hodge_laplacian_{}".format(rank_idx): from_sparse(
                 complex.hodge_laplacian_matrix(rank=rank_idx, signed=False)
             ),
             # torch.zeros((complex.number_of_edges(), complex.number_of_edges())
             "laplacian_up_{}".format(rank_idx): generate_zero_sparse_connectivity(
-                m=complex.number_of_edges(), n=complex.number_of_edges()
+                m=complex.shape[1], n=complex.shape[1]
+            ),
+            "adjacency_{}".format(rank_idx): generate_zero_sparse_connectivity(
+                m=complex.shape[1], n=complex.shape[1]
             ),
         }
     )
@@ -110,7 +113,7 @@ def get_zero_complex_connectivity(complex, max_rank):
     connectivity.update(
         {
             "incidence_{}".format(max_rank): generate_zero_sparse_connectivity(
-                m=complex.number_of_edges(), n=1
+                m=complex.shape[1], n=1
             ),
             # torch.zeros(
             #     (complex.number_of_edges(), 1)
@@ -119,6 +122,9 @@ def get_zero_complex_connectivity(complex, max_rank):
                 m=1, n=1
             ),  # torch.zeros((1, 1)),
             "hodge_laplacian_{}".format(max_rank): generate_zero_sparse_connectivity(
+                m=1, n=1
+            ),  # torch.zeros((1, 1)),
+            "adjacency_{}".format(max_rank): generate_zero_sparse_connectivity(
                 m=1, n=1
             ),  # torch.zeros((1, 1)),
         }

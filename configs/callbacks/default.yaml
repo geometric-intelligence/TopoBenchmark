@@ -8,15 +8,15 @@ defaults:
 model_checkpoint:
   dirpath: ${paths.output_dir}/checkpoints
   filename: "epoch_{epoch:03d}"
-  monitor: val/${get_monitor_metric:${dataset.parameters.task},${dataset.parameters.loss_type}} #
-  mode: "min"
+  monitor: ${get_monitor_metric:${dataset.parameters.task},${dataset.parameters.loss_type}} #
+  mode: "${get_monitor_mode:${dataset.parameters.task}}"
   save_last: False
   auto_insert_metric_name: False
 
 early_stopping:
-  monitor: val/${dataset.parameters.loss_type}
+  monitor: ${callbacks.model_checkpoint.monitor}
   patience: 25
-  mode: "min"
+  mode: ${callbacks.model_checkpoint.mode}
 
 model_summary:
   max_depth: -1

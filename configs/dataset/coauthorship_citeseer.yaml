@@ -19,7 +19,7 @@ parameters:
   loss_type: cross_entropy
   task_level: node
   data_seed: 0
-  split_type: test #'k-fold' # either k-fold or test
+  split_type: k-fold #'k-fold' # either k-fold or test
   k: 10 # for k-Fold Cross-Validation
 
   # Dataloader parameters

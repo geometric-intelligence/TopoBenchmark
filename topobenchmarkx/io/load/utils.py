@@ -520,18 +520,10 @@ def rand_train_test_idx(
     return split_idx
 
 
-def load_graph_tudataset_split(dataset, cfg):
-    if cfg.split_type == "test":
-        labels = dataset.y
-        split_idx = rand_train_test_idx(labels)
-    elif cfg.split_type == "k-fold":
-        split_idx = k_fold_split(dataset, cfg)
-    else:
-        raise NotImplementedError(
-            f"split_type {cfg.split_type} not valid. Choose either 'test' or 'k-fold'"
-        )
-
+def get_tran_val_test_graph_datasets(dataset, split_idx):
     data_train_lst, data_val_lst, data_test_lst = [], [], []
+
+    # Go over each of the graph and assign correct label
     for i in range(len(dataset)):
         graph = dataset[i]
         assigned = False
@@ -547,7 +539,7 @@ def load_graph_tudataset_split(dataset, cfg):
             graph.test_mask = torch.Tensor([0]).long()
             data_val_lst.append(graph)
             assigned = True
-        if i in split_idx["test"]:
+        elif i in split_idx["test"]:
             graph.train_mask = torch.Tensor([0]).long()
             graph.val_mask = torch.Tensor([0]).long()
             graph.test_mask = torch.Tensor([1]).long()
@@ -556,49 +548,111 @@ def load_graph_tudataset_split(dataset, cfg):
         if not assigned:
             raise ValueError("Graph not in any split")
 
-    # data_lst = [dataset[i] for i in range(len(dataset))]
-    # REWRITE LATER
-
-    dataset = [
+    datasets = [
         CustomDataset(data_train_lst),
         CustomDataset(data_val_lst),
         CustomDataset(data_test_lst),
     ]
-    return dataset
+
+    return datasets
 
 
-def load_graph_prepared_split(datasets, cfg):
-    data_train_lst, data_val_lst, data_test_lst = [], [], []
-    for dataset, split in zip(datasets, ["train", "val", "test"]):
-        for i in range(len(dataset)):
-            graph = dataset[i]
-            graph.x = graph.x.float()
-            # x can have shape [n_nodes] instead of [n_nodes, 1]
-            if len(graph.x.shape) == 1:
-                graph.x = torch.unsqueeze(graph.x, 1)
-            assigned = False
-            if split == "train":
-                graph.train_mask = torch.Tensor([1]).long()
-                graph.val_mask = torch.Tensor([0]).long()
-                graph.test_mask = torch.Tensor([0]).long()
-                data_train_lst.append(graph)
-            if split == "train":
-                graph.train_mask = torch.Tensor([1]).long()
-                graph.val_mask = torch.Tensor([0]).long()
-                graph.test_mask = torch.Tensor([0]).long()
-                data_val_lst.append(graph)
-            if split == "train":
-                graph.train_mask = torch.Tensor([1]).long()
-                graph.val_mask = torch.Tensor([0]).long()
-                graph.test_mask = torch.Tensor([0]).long()
-                data_test_lst.append(graph)
+def load_graph_tudataset_split(dataset, cfg):
+    if cfg.split_type == "test":
+        labels = dataset.y
+        split_idx = rand_train_test_idx(labels)
+    elif cfg.split_type == "k-fold":
+        split_idx = k_fold_split(dataset, cfg)
+    else:
+        raise NotImplementedError(
+            f"split_type {cfg.split_type} not valid. Choose either 'test' or 'k-fold'"
+        )
 
-    dataset = [
-        CustomDataset(data_train_lst),
-        CustomDataset(data_val_lst),
-        CustomDataset(data_test_lst),
-    ]
-    return dataset
+    train_dataset, val_dataset, test_dataset = get_tran_val_test_graph_datasets(
+        dataset, split_idx
+    )
+
+    return [train_dataset, val_dataset, test_dataset]
+
+    # data_train_lst, data_val_lst, data_test_lst = [], [], []
+    # for i in range(len(dataset)):
+    #     graph = dataset[i]
+    #     assigned = False
+    #     if i in split_idx["train"]:
+    #         graph.train_mask = torch.Tensor([1]).long()
+    #         graph.val_mask = torch.Tensor([0]).long()
+    #         graph.test_mask = torch.Tensor([0]).long()
+    #         data_train_lst.append(graph)
+    #         assigned = True
+    #     elif i in split_idx["valid"]:
+    #         graph.train_mask = torch.Tensor([0]).long()
+    #         graph.val_mask = torch.Tensor([1]).long()
+    #         graph.test_mask = torch.Tensor([0]).long()
+    #         data_val_lst.append(graph)
+    #         assigned = True
+    #     elif i in split_idx["test"]:
+    #         graph.train_mask = torch.Tensor([0]).long()
+    #         graph.val_mask = torch.Tensor([0]).long()
+    #         graph.test_mask = torch.Tensor([1]).long()
+    #         data_test_lst.append(graph)
+    #         assigned = True
+    #     if not assigned:
+    #         raise ValueError("Graph not in any split")
+
+    # # data_lst = [dataset[i] for i in range(len(dataset))]
+    # # REWRITE LATER
+
+    # dataset = [
+    #     CustomDataset(data_train_lst),
+    #     CustomDataset(data_val_lst),
+    #     CustomDataset(data_test_lst),
+    # ]
+    # return dataset
+
+
+# def load_graph_prepared_split(datasets, cfg):
+#     """processing"""
+
+#     # TODO validate this code
+
+#     data_train_lst, data_val_lst, data_test_lst = [], [], []
+#     for dataset, split in zip(datasets, ["train", "val", "test"]):
+#         for i in range(len(dataset)):
+#             graph = dataset[i]
+#             graph.x = graph.x.float()
+#             # x can have shape [n_nodes] instead of [n_nodes, 1]
+#             if len(graph.x.shape) == 1:
+#                 graph.x = torch.unsqueeze(graph.x, 1)
+
+#             assigned = False
+#             if split == "train":
+#                 graph.train_mask = torch.Tensor([1]).long()
+#                 graph.val_mask = torch.Tensor([0]).long()
+#                 graph.test_mask = torch.Tensor([0]).long()
+#                 data_train_lst.append(graph)
+#                 assigned = True
+#             elif split == "val":
+#                 graph.train_mask = torch.Tensor([0]).long()
+#                 graph.val_mask = torch.Tensor([1]).long()
+#                 graph.test_mask = torch.Tensor([0]).long()
+#                 data_val_lst.append(graph)
+#                 assigned = True
+#             elif split == "test":
+#                 graph.train_mask = torch.Tensor([0]).long()
+#                 graph.val_mask = torch.Tensor([0]).long()
+#                 graph.test_mask = torch.Tensor([1]).long()
+#                 data_test_lst.append(graph)
+#                 assigned = True
+#             if not assigned:
+#                 raise ValueError("Graph not in any split")
+
+#     dataset = [
+#         CustomDataset(data_train_lst),
+#         CustomDataset(data_val_lst),
+#         CustomDataset(data_test_lst),
+#     ]
+
+#     return dataset
 
 
 def ensure_serializable(obj):

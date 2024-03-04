@@ -1,2 +1,7 @@
-_target_: topobenchmarkx.evaluators.evaluator.Evaluator
-metrics: [acc, pre, rec, f1] #pre, rec, f1
+_target_: topobenchmarkx.evaluators.evaluator.TorchEvaluator
+task: ${dataset.parameters.task}
+task_level: ${dataset.parameters.task_level}
+num_classes: ${dataset.parameters.num_classes}
+
+classification_metrics:  [accuracy] #Available options: accuracy, auroc, precision, recall
+regression_metrics: [mae, mse] #Available options: mae, mse

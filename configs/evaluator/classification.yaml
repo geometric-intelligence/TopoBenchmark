@@ -1,7 +1,0 @@
-_target_: topobenchmarkx.evaluators.evaluator.TorchEvaluator
-metric_names: [accuracy] #, precision, recall
-task: ${dataset.parameters.task}
-task_level: ${dataset.parameters.task_level}
-num_classes: ${dataset.parameters.num_classes}
-
-

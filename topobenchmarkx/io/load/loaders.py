@@ -13,9 +13,9 @@ from topobenchmarkx.data.datasets import CustomDataset
 from topobenchmarkx.io.load.loader import AbstractLoader
 from topobenchmarkx.io.load.preprocessor import Preprocessor
 from topobenchmarkx.io.load.utils import (
+    get_tran_val_test_graph_datasets,
     load_cell_complex_dataset,
     load_graph_cocitation_split,
-    load_graph_prepared_split,
     load_graph_tudataset_split,
     load_hypergraph_pickle_dataset,
     load_simplicial_dataset,
@@ -145,12 +145,33 @@ class GraphLoader(AbstractLoader):
                         split=split,
                     )
                 )
+
+            assert self.parameters.split_type == "fixed"
+            # The splits are predefined
+            # Extract and prepare split_idx
+            split_idx = {"train": np.arange(len(datasets[0]))}
+
+            split_idx["valid"] = np.arange(
+                len(datasets[0]), len(datasets[0]) + len(datasets[1])
+            )
+
+            split_idx["test"] = np.arange(
+                len(datasets[0]) + len(datasets[1]),
+                len(datasets[0]) + len(datasets[1]) + len(datasets[2]),
+            )
+
+            # Join dataset to process it
+            joined_dataset = datasets[0] + datasets[1] + datasets[2]
+
             if self.transforms_config is not None:
-                for i in range(len(datasets)):
-                    datasets[i] = Preprocessor(
-                        data_dir, datasets[i], self.transforms_config
-                    )
-            dataset = load_graph_prepared_split(datasets, self.parameters)
+                joined_dataset = Preprocessor(
+                    data_dir,
+                    joined_dataset,
+                    self.transforms_config,
+                )
+
+            # Split back the into train/val/test datasets
+            dataset = get_tran_val_test_graph_datasets(joined_dataset, split_idx)
 
         elif self.parameters.data_name in ["AQSOL"]:
             datasets = []
@@ -161,12 +182,31 @@ class GraphLoader(AbstractLoader):
                         split=split,
                     )
                 )
+            # The splits are predefined
+            # Extract and prepare split_idx
+            split_idx = {"train": np.arange(len(datasets[0]))}
+
+            split_idx["valid"] = np.arange(
+                len(datasets[0]), len(datasets[0]) + len(datasets[1])
+            )
+
+            split_idx["test"] = np.arange(
+                len(datasets[0]) + len(datasets[1]),
+                len(datasets[0]) + len(datasets[1]) + len(datasets[2]),
+            )
+
+            # Join dataset to process it
+            joined_dataset = datasets[0] + datasets[1] + datasets[2]
+
             if self.transforms_config is not None:
-                for i in range(len(datasets)):
-                    datasets[i] = Preprocessor(
-                        data_dir, datasets[i], self.transforms_config
-                    )
-            dataset = load_graph_prepared_split(datasets, self.parameters)
+                joined_dataset = Preprocessor(
+                    data_dir,
+                    joined_dataset,
+                    self.transforms_config,
+                )
+
+            # Split back the into train/val/test datasets
+            dataset = get_tran_val_test_graph_datasets(joined_dataset, split_idx)
         else:
             raise NotImplementedError(
                 f"Dataset {self.parameters.data_name} not implemented"

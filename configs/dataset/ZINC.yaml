@@ -19,8 +19,8 @@ parameters:
   loss_type: mae
   task_level: graph
   data_seed: 0
-  split_type: 'k-fold' # either k-fold or test
-  k: 10 # for k-Fold Cross-Validation
+  split_type: 'fixed' # either k-fold or test
+  #k: 10 # for k-Fold Cross-Validation
 
   # Dataloader parameters
   batch_size: 256 # We have an issue with allowing multiple graphs in a batch due to sparse incidences

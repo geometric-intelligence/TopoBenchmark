@@ -8,14 +8,14 @@ from topobenchmarkx.io.load.utils import ensure_serializable, make_hash
 
 
 class Preprocessor(torch_geometric.data.InMemoryDataset):
-    def __init__(self, data_dir, data_list, transforms_config):
+    def __init__(self, data_dir, data_list, transforms_config, **kwargs):
         if isinstance(data_list, torch_geometric.data.Dataset):
             data_list = [data_list.get(idx) for idx in range(len(data_list))]
         elif isinstance(data_list, torch_geometric.data.Data):
             data_list = [data_list]
         self.data_list = data_list
         pre_transform = self.instantiate_pre_transform(data_dir, transforms_config)
-        super().__init__(self.processed_data_dir, None, pre_transform)
+        super().__init__(self.processed_data_dir, None, pre_transform, **kwargs)
         self.save_transform_parameters()
         self.load(self.processed_paths[0])
 

@@ -5,9 +5,9 @@ feature_encoder:
   in_channels_0: ${dataset.parameters.num_features}
   in_channels_1: ${dataset.parameters.num_features}
   in_channels_2: ${dataset.parameters.num_features}
-  out_channels_0: 128
-  out_channels_1: 128
-  out_channels_2: 128
+  out_channels_0: ${model.backbone_additional_params.hidden_channels}
+  out_channels_1: ${model.backbone_additional_params.hidden_channels}
+  out_channels_2: ${model.backbone_additional_params.hidden_channels}
 
 backbone:
   _target_: topomodelx.nn.cell.ccxn.CCXN
@@ -17,15 +17,18 @@ backbone:
   n_layers: 1
   att: True
 
+backbone_additional_params:
+  hidden_channels: 128
+
 loss:
   _target_: topobenchmarkx.models.losses.loss.DefaultLoss
   task: ${dataset.parameters.task}
   loss_type: ${dataset.parameters.loss_type}
 
 readout:
-  _target_: topobenchmarkx.models.readouts.default_readouts.NodeLevelReadOut
+  _target_: topobenchmarkx.models.readouts.default_readouts.GNNBatchReadOut
   task_level: ${dataset.parameters.task_level}
-  in_channels: ${model.backbone.in_channels_0}
+  in_channels: ${model.backbone_additional_params.hidden_channels}
   out_channels: ${dataset.parameters.num_classes}
 
 backbone_wrapper:

@@ -14,8 +14,8 @@ backbone:
   input_dropout: 0.2
   dropout: 0.2
   activation: relu
-  MLP_num_layers: 2
-  All_num_layers: 2
+  MLP_num_layers: 0
+  All_num_layers: 1
   edconv_type: EquivSet
   aggregate: 'add'
 
@@ -23,12 +23,10 @@ loss:
   _target_: topobenchmarkx.models.losses.loss.DefaultLoss
   task: ${dataset.parameters.task}
   loss_type: ${dataset.parameters.loss_type}
-# evaluator:
-#   _target_: topobenchmarkx.evaluators.evaluator.Evaluator
-#   metrics: [acc, rocauc]
+
 
 readout:
-  _target_: topobenchmarkx.models.readouts.default_readouts.NodeLevelReadOut
+  _target_: topobenchmarkx.models.readouts.default_readouts.GNNBatchReadOut
   task_level: ${dataset.parameters.task_level}
   in_channels: ${model.backbone.num_features}
   out_channels: ${dataset.parameters.num_classes}
@@ -44,11 +42,10 @@ optimizer:
   weight_decay: 0.0
 
 scheduler:
-  _target_: torch.optim.lr_scheduler.ReduceLROnPlateau
+  _target_: torch.optim.lr_scheduler.StepLR
   _partial_: true
-  mode: min
-  factor: 0.1
-  patience: 10
+  step_size: 50
+  gamma: 0.5
 
 # compile model for faster training with pytorch 2.0
 compile: false

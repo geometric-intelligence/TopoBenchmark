@@ -6,9 +6,6 @@ backbone:
   hidden_channels: 128
   n_layers: 1
 
-
-
-
 loss:
   _target_: topobenchmarkx.models.losses.loss.DefaultLoss
   task: ${dataset.parameters.task}
@@ -38,11 +35,10 @@ optimizer:
   weight_decay: 0.0
 
 scheduler:
-  _target_: torch.optim.lr_scheduler.ReduceLROnPlateau
+  _target_: torch.optim.lr_scheduler.StepLR
   _partial_: true
-  mode: min
-  factor: 0.1
-  patience: 10
+  step_size: 50
+  gamma: 0.5
 
 # compile model for faster training with pytorch 2.0
 compile: false

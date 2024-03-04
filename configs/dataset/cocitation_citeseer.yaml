@@ -20,7 +20,7 @@ parameters:
   task_level: node
   data_seed: 0
   split_type: k-fold #'k-fold' # either k-fold or test
-  k: 3 # for k-Fold Cross-Validation
+  k: 10 # for k-Fold Cross-Validation
 
   # Dataloader parameters
   batch_size: 1 # Fixed

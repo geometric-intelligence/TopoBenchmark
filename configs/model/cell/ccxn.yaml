@@ -42,10 +42,10 @@ optimizer:
   weight_decay: 0.0
 
 scheduler:
-  _target_: torch.optim.lr_scheduler.PolynomialLR
+  _target_: torch.optim.lr_scheduler.StepLR
   _partial_: true
-  last_epoch: -1
-  total_iters: ${trainer.max_epochs}
+  step_size: 50
+  gamma: 0.5
 
 # compile model for faster training with pytorch 2.0
 compile: false

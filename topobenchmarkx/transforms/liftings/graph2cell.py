@@ -6,10 +6,7 @@ import torch_geometric
 from scipy.optimize import minimize
 from toponetx.classes import CellComplex
 
-from topobenchmarkx.io.load.utils import (
-    get_complex_connectivity,
-    get_zero_complex_connectivity,
-)
+from topobenchmarkx.io.load.utils import get_complex_connectivity
 
 __all__ = [
     "CellCyclesLifting",
@@ -84,9 +81,7 @@ class CellCyclesLifting(Graph2CellLifting):
         # Eliminate cycles that are greater than the max_cell_lenght
         cycles = [cycle for cycle in cycles if len(cycle) <= self.max_cell_lenght]
         if len(cycles) == 0:
-            lifted_topology = get_zero_complex_connectivity(
-                cell_complex, self.complex_dim
-            )
+            lifted_topology = get_complex_connectivity(cell_complex, self.complex_dim)
             print("Warning: The graph has no cycles")
         else:
             # if len([len(cycle)==self.complex_dim for cycle in cycles]) < 3:

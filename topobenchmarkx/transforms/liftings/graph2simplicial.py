@@ -8,10 +8,7 @@ import torch
 import torch_geometric
 from toponetx.classes import SimplicialComplex
 
-from topobenchmarkx.io.load.utils import (
-    get_complex_connectivity,
-    get_zero_complex_connectivity,
-)
+from topobenchmarkx.io.load.utils import get_complex_connectivity
 
 # from topobenchmarkx.transforms.liftings.graph2domain import Graph2Domain
 # from scipy.optimize import minimize
@@ -57,7 +54,7 @@ class Graph2SimplicialLifting(torch_geometric.transforms.BaseTransform):
         # TODO: Projection of the features
         for i in range(self.complex_dim):
             features[f"x_{i + 1}"] = torch.zeros(
-                lifted_topology[f"num_simplices_{i + 1}"], data.x.shape[1]
+                lifted_topology["shape"][i + 1], data.x.shape[1]
             )
         return features
 
@@ -186,13 +183,7 @@ class SimplicialCliqueLifting(Graph2SimplicialLifting):
             if i > 1:
                 simplicial_complex.add_simplices_from(simplices[i])
 
-        if len(simplicial_complex.shape) < self.complex_dim + 1:
-            lifted_topology = get_zero_complex_connectivity(simplicial_complex, 2)
-            print("Warning: The graph has no cycles")
-        else:
-            lifted_topology = get_complex_connectivity(
-                simplicial_complex, self.complex_dim
-            )
+        lifted_topology = get_complex_connectivity(simplicial_complex, self.complex_dim)
         return {**lifted_topology, **num_simplices}
 
         incidences = [

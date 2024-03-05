@@ -11,15 +11,14 @@ class BaseNodeFeatureEncoder(AbstractInitFeaturesEncoder):
         self.linear1 = torch.nn.Linear(in_channels, out_channels)
         self.linear2 = torch.nn.Linear(out_channels, out_channels)
         self.relu = torch.nn.ReLU()
-        self.BN1 = GraphNorm(out_channels)
-        self.BN2 = GraphNorm(out_channels)
+        self.BN = GraphNorm(out_channels)
 
     def forward(self, data: torch_geometric.data.Data) -> torch_geometric.data.Data:
         try:
             x = data.x_0
         except:
             x = data.x
-        x = self.relu(self.BN1(self.linear1(x), batch=data.batch))
+        x = self.relu(self.BN(self.linear1(x), batch=data.batch))
         x = self.linear2(x)
 
         data.x = x

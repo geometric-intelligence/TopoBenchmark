@@ -1,8 +1,9 @@
 _target_: topobenchmarkx.io.load.loaders.GraphLoader
 
 defaults:
-  - transforms/data_manipulations: node_degrees
-  - transforms/data_manipulations@transforms.one_hot_node_degree_features: one_hot_node_degree_features
+  # - transforms/data_manipulations: node_degrees
+  # - transforms/data_manipulations@transforms.one_hot_node_degree_features: one_hot_node_degree_features
+  - transforms/data_manipulations: equal_gaus_features
   - transforms: ${get_default_transform:graph,${model}}
 
 # Data definition
@@ -14,7 +15,7 @@ parameters:
   data_split_dir: ${paths.data_dir}/data_splits/${dataset.parameters.data_name}
 
   # Dataset parameters
-  num_features: 3063
+  num_features: 10
   max_node_degree: 3062
   # max_x_1_degree: 3062
   num_classes: 2

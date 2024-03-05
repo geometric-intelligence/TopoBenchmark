@@ -1,5 +1,7 @@
+from collections import defaultdict
 from typing import Any, Dict, Optional
 
+import torch
 from lightning import LightningDataModule
 from torch.utils.data import DataLoader
 from torch_geometric.data import Batch, Data
@@ -51,15 +53,30 @@ def collate_fn(batch):
         ys - a LongTensor of all labels in batch
     """
     data_list = []
-    for b in batch:
+    batch_idx_dict = defaultdict(list)
+    for batch_idx, b in enumerate(batch):
         values, keys = b[0], b[1]
         data = MyData()
         for key, value in zip(keys, values):
             if is_sparse(value):
                 value = value.coalesce()
             data[key] = value
+
+        # Generate batch_slice values for x_2, x_3, ...
+        x_keys = [el for el in keys if ("x_" in el)]
+        for x_key in x_keys:
+            if x_key != "x_0":
+                batch_idx_dict[f"batch_{x_key.split('_')[1]}"].append(
+                    torch.tensor([[batch_idx] * data[x_key].shape[0]])
+                )
+
         data_list.append(data)
-    return Batch.from_data_list(data_list)
+    batch = Batch.from_data_list(data_list)
+
+    # Add batch slices to batch
+    for key, value in batch_idx_dict.items():
+        batch[key] = torch.cat(value, dim=1).squeeze(0).long()
+    return batch
 
 
 class FullBatchDataModule(LightningDataModule):

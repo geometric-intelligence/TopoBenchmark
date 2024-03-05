@@ -533,13 +533,15 @@ def get_tran_val_test_graph_datasets(dataset, split_idx):
             graph.test_mask = torch.Tensor([0]).long()
             data_train_lst.append(graph)
             assigned = True
-        elif i in split_idx["valid"]:
+
+        if i in split_idx["valid"]:
             graph.train_mask = torch.Tensor([0]).long()
             graph.val_mask = torch.Tensor([1]).long()
             graph.test_mask = torch.Tensor([0]).long()
             data_val_lst.append(graph)
             assigned = True
-        elif i in split_idx["test"]:
+
+        if i in split_idx["test"]:
             graph.train_mask = torch.Tensor([0]).long()
             graph.val_mask = torch.Tensor([0]).long()
             graph.test_mask = torch.Tensor([1]).long()

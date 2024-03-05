@@ -104,8 +104,8 @@ class CANWrapper(DefaultWrapper):
             batch.x,
             batch.x_1,
             batch.adjacency_0.coalesce(),
-            batch.laplacian_down_1.coalesce(),
-            batch.laplacian_up_1.coalesce(),
+            batch.down_laplacian_1.coalesce(),
+            batch.up_laplacian_1.coalesce(),
         )
         x_0 = torch.sparse.mm(batch.incidence_1, x_1)
 

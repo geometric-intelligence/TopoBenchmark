@@ -82,7 +82,7 @@ class SCCNWrapper(DefaultWrapper):
             for r in range(1, self.backbone.layers[0].max_rank + 1)
         }
         adjacencies = {
-            f"rank_{r}": batch[f"adjacency_{r}"]
+            f"rank_{r}": batch[f"hodge_laplacian_{r}"]
             for r in range(self.backbone.layers[0].max_rank + 1)
         }
         output = self.backbone(features, incidences, adjacencies)

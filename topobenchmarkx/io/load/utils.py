@@ -17,125 +17,42 @@ from topobenchmarkx.data.datasets import CustomDataset, TorchGeometricDataset
 
 
 def get_complex_connectivity(complex, max_rank):
+    practical_shape = list(
+        np.pad(list(complex.shape), (0, max_rank + 1 - len(complex.shape)))
+    )
     connectivity = {}
-    connectivity.update(
-        {
-            "laplacian_up_{}".format(0): from_sparse(
-                complex.up_laplacian_matrix(rank=0, signed=False)
-            ),
-            "adjacency_{}".format(0): from_sparse(
-                complex.adjacency_matrix(rank=0, signed=False)
-            ),
-            "hodge_laplacian_{}".format(0): from_sparse(
-                complex.hodge_laplacian_matrix(rank=0, signed=False)
-            ),
-        }
-    )
-
-    for rank_idx in range(1, max_rank):
-        connectivity.update(
-            {
-                "incidence_{}".format(rank_idx): from_sparse(
-                    complex.incidence_matrix(rank=rank_idx, signed=False)
-                ),
-                "laplacian_down_{}".format(rank_idx): from_sparse(
-                    complex.down_laplacian_matrix(rank=rank_idx, signed=False)
-                ),
-                "laplacian_up_{}".format(rank_idx): from_sparse(
-                    complex.up_laplacian_matrix(rank=rank_idx, signed=False)
-                ),
-                "adjacency_{}".format(rank_idx): from_sparse(
-                    complex.adjacency_matrix(rank=rank_idx, signed=False)
-                ),
-                "hodge_laplacian_{}".format(rank_idx): from_sparse(
-                    complex.hodge_laplacian_matrix(rank=rank_idx, signed=False)
-                ),
-            }
-        )
-    connectivity.update(
-        {
-            "incidence_{}".format(max_rank): from_sparse(
-                complex.incidence_matrix(rank=max_rank, signed=False)
-            ),
-            "laplacian_down_{}".format(max_rank): from_sparse(
-                complex.down_laplacian_matrix(rank=max_rank, signed=False)
-            ),
-            "hodge_laplacian_{}".format(max_rank): from_sparse(
-                complex.hodge_laplacian_matrix(rank=max_rank, signed=False)
-            ),
-            "adjacency_{}".format(max_rank): generate_zero_sparse_connectivity(
-                m=complex.shape[1], n=complex.shape[1]
-            ),
-        }
-    )
-    connectivity.update({"shape": complex.shape})
-    return connectivity
-
-
-def get_zero_complex_connectivity(complex, max_rank):
-    connectivity = {}
-    connectivity.update(
-        {
-            "laplacian_up_{}".format(0): from_sparse(
-                complex.up_laplacian_matrix(rank=0, signed=False)
-            ),
-            "adjacency_{}".format(0): from_sparse(
-                complex.adjacency_matrix(rank=0, signed=False)
-            ),
-            "hodge_laplacian_{}".format(0): from_sparse(
-                complex.hodge_laplacian_matrix(rank=0, signed=False)
-            ),
-        }
-    )
-    rank_idx = 1
-    connectivity.update(
-        {
-            "incidence_{}".format(rank_idx): from_sparse(
-                complex.incidence_matrix(rank=rank_idx, signed=False)
-            ),
-            "laplacian_down_{}".format(rank_idx): from_sparse(
-                complex.down_laplacian_matrix(rank=rank_idx, signed=False)
-            ),
-            "hodge_laplacian_{}".format(rank_idx): from_sparse(
-                complex.hodge_laplacian_matrix(rank=rank_idx, signed=False)
-            ),
-            # torch.zeros((complex.number_of_edges(), complex.number_of_edges())
-            "laplacian_up_{}".format(rank_idx): generate_zero_sparse_connectivity(
-                m=complex.shape[1], n=complex.shape[1]
-            ),
-            "adjacency_{}".format(rank_idx): generate_zero_sparse_connectivity(
-                m=complex.shape[1], n=complex.shape[1]
-            ),
-        }
-    )
-
-    max_rank = 2
-    connectivity.update(
-        {
-            "incidence_{}".format(max_rank): generate_zero_sparse_connectivity(
-                m=complex.shape[1], n=1
-            ),
-            # torch.zeros(
-            #     (complex.number_of_edges(), 1)
-            # ),
-            "laplacian_down_{}".format(max_rank): generate_zero_sparse_connectivity(
-                m=1, n=1
-            ),  # torch.zeros((1, 1)),
-            "hodge_laplacian_{}".format(max_rank): generate_zero_sparse_connectivity(
-                m=1, n=1
-            ),  # torch.zeros((1, 1)),
-            "adjacency_{}".format(max_rank): generate_zero_sparse_connectivity(
-                m=1, n=1
-            ),  # torch.zeros((1, 1)),
-        }
-    )
-    connectivity.update({"shape": complex.shape})
+    for rank_idx in range(max_rank + 1):
+        for connectivity_info in [
+            "incidence",
+            "down_laplacian",
+            "up_laplacian",
+            "adjacency",
+            "hodge_laplacian",
+        ]:
+            try:
+                connectivity[f"{connectivity_info}_{rank_idx}"] = from_sparse(
+                    getattr(complex, f"{connectivity_info}_matrix")(
+                        rank=rank_idx, signed=False
+                    )
+                )
+            except ValueError:
+                if connectivity_info == "incidence":
+                    connectivity[
+                        f"{connectivity_info}_{rank_idx}"
+                    ] = generate_zero_sparse_connectivity(
+                        m=practical_shape[rank_idx - 1], n=practical_shape[rank_idx]
+                    )
+                else:
+                    connectivity[
+                        f"{connectivity_info}_{rank_idx}"
+                    ] = generate_zero_sparse_connectivity(
+                        m=practical_shape[rank_idx], n=practical_shape[rank_idx]
+                    )
+    connectivity["shape"] = practical_shape
     return connectivity
 
 
 def generate_zero_sparse_connectivity(m, n):
-    # indices = torch.vstack([torch.arange(m*n).long(), torch.arange(m*n).long()])
-    # values = torch.zeros(m*n)
     return torch.sparse_coo_tensor((m, n)).coalesce()
 
 

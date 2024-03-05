@@ -64,6 +64,33 @@ class SANWrapper(DefaultWrapper):
         return model_out
 
 
+class SCCNWrapper(DefaultWrapper):
+    """Abstract class that provides an interface to loss logic within network"""
+
+    def __init__(self, backbone):
+        super().__init__(backbone)
+
+    def __call__(self, batch):
+        """Define logic for forward pass"""
+        model_out = {"labels": batch.y, "batch": batch.batch}
+        features = {
+            f"rank_{r}": batch[f"x_{r}"]
+            for r in range(self.backbone.layers[0].max_rank + 1)
+        }
+        incidences = {
+            f"rank_{r}": batch[f"incidence_{r}"]
+            for r in range(1, self.backbone.layers[0].max_rank + 1)
+        }
+        adjacencies = {
+            f"rank_{r}": batch[f"hodge_laplacian_{r}"]
+            for r in range(self.backbone.layers[0].max_rank + 1)
+        }
+        output = self.backbone(features, incidences, adjacencies)
+        for r in range(self.backbone.layers[0].max_rank):
+            model_out[f"x_{r}"] = output[f"rank_{r}"]
+        return model_out
+
+
 class CANWrapper(DefaultWrapper):
     """Abstract class that provides an interface to loss logic within network"""
 

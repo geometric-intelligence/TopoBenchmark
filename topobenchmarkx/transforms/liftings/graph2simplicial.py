@@ -6,9 +6,11 @@ from itertools import combinations
 import networkx as nx
 import torch
 import torch_geometric
+from toponetx.classes import SimplicialComplex
 
-from topobenchmarkx.transforms.liftings.graph2domain import Graph2Domain
+from topobenchmarkx.io.load.utils import get_complex_connectivity
 
+# from topobenchmarkx.transforms.liftings.graph2domain import Graph2Domain
 # from scipy.optimize import minimize
 
 __all__ = [
@@ -52,7 +54,7 @@ class Graph2SimplicialLifting(torch_geometric.transforms.BaseTransform):
         # TODO: Projection of the features
         for i in range(self.complex_dim):
             features[f"x_{i + 1}"] = torch.zeros(
-                lifted_topology[f"num_simplices_{i + 1}"], data.x.shape[1]
+                lifted_topology["shape"][i + 1], data.x.shape[1]
             )
         return features
 
@@ -155,17 +157,18 @@ class SimplicialCliqueLifting(Graph2SimplicialLifting):
             ]
 
     def lift_topology(self, data: torch_geometric.data.Data) -> dict:
-        lifted_topology = {}
+        num_simplices = {}
         n_nodes = data.x.shape[0]
         edges = [
             (i.item(), j.item()) for i, j in zip(data.edge_index[0], data.edge_index[1])
         ]
         # Add self edges to avoid not considering isolated nodes without selfloops
-        self_edges = [(i, i) for i in range(n_nodes)]
-        edges = edges + self_edges
+        # self_edges = [(i, i) for i in range(n_nodes)]
+        # edges = list(set(edges + self_edges))
         G = nx.Graph()
         G.add_edges_from(edges)
         cliques = nx.find_cliques(G)
+        simplicial_complex = SimplicialComplex(G)
         simplices = [set() for _ in range(self.complex_dim + 1)]
         for clique in cliques:
             for i in range(self.complex_dim + 1):
@@ -176,7 +179,12 @@ class SimplicialCliqueLifting(Graph2SimplicialLifting):
             simplices[i] = list(simplices[i])
             if i == 0:
                 simplices[i].sort()
-            lifted_topology[f"num_simplices_{i}"] = len(simplices[i])
+            num_simplices[f"num_simplices_{i}"] = len(simplices[i])
+            if i > 1:
+                simplicial_complex.add_simplices_from(simplices[i])
+
+        lifted_topology = get_complex_connectivity(simplicial_complex, self.complex_dim)
+        return {**lifted_topology, **num_simplices}
 
         incidences = [
             torch.zeros(len(simplices[i]), len(simplices[i + 1]))

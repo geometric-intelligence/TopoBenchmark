@@ -1,3 +1,2 @@
 defaults:
   - graph2simplicial_lifting: simplicial_clique #simplicial_neighborhood #simplicial_clique
-  - feature_liftings: base_lifting

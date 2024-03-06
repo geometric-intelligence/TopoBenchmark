@@ -1,3 +1,2 @@
 defaults:
   - graph2cell_lifting: cell_cycles
-  - feature_liftings: base_lifting

@@ -5,15 +5,15 @@ feature_encoder:
   in_channels_0: ${dataset.parameters.num_features}
   in_channels_1: ${dataset.parameters.num_features}
   in_channels_2: ${dataset.parameters.num_features}
-  out_channels_0: 32
-  out_channels_1: 32
-  out_channels_2: 32
+  out_channels_0: ${model.backbone.in_channels_0}
+  out_channels_1: ${model.backbone.in_channels_1}
+  out_channels_2: ${model.backbone.in_channels_2}
 
 backbone:
   _target_: topomodelx.nn.simplicial.scn2.SCN2
-  in_channels_0: ${model.feature_encoder.out_channels_0}
-  in_channels_1: ${model.feature_encoder.out_channels_1}
-  in_channels_2: ${model.feature_encoder.out_channels_2}
+  in_channels_0: 32
+  in_channels_1: 32
+  in_channels_2: 32
   n_layers: 2
 
 loss:

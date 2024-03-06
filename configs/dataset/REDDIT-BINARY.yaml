@@ -12,7 +12,7 @@ parameters:
   data_type: TUDataset
   data_name: REDDIT-BINARY
   data_dir: ${paths.data_dir}${dataset.parameters.data_domain}/${dataset.parameters.data_type}
-  data_split_dir: ${paths.data_dir}/data_splits/${dataset.parameters.data_name}
+  data_split_dir: ${paths.data_dir}data_splits/${dataset.parameters.data_name}
 
   # Dataset parameters
   num_features: 10

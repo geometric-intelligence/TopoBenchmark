@@ -64,6 +64,71 @@ class SANWrapper(DefaultWrapper):
         return model_out
 
 
+# TODO: relocate this function to a more appropriate location
+def normalize_matrix(matrix):
+    import numpy as np
+    import scipy as sp
+    from topomodelx.utils.sparse import from_sparse
+
+    matrix = matrix.to_dense().numpy()
+    m, n = matrix.shape
+    diags_ = abs(matrix).sum(axis=1)
+
+    with np.errstate(divide="ignore"):
+        diags_sqrt = 1.0 / np.sqrt(diags_)
+    diags_sqrt[np.isinf(diags_sqrt)] = 0
+    diags_sqrt = sp.sparse.csr_array(
+        sp.sparse.spdiags(diags_sqrt.T, 0, m, n, format="csr")
+    )
+    return from_sparse(sp.sparse.csr_matrix(diags_sqrt @ (matrix @ diags_sqrt)))
+
+
+class SCNWrapper(DefaultWrapper):
+    """Abstract class that provides an interface to loss logic within network"""
+
+    def __init__(self, backbone):
+        super().__init__(backbone)
+
+    def __call__(self, batch):
+        """Define logic for forward pass"""
+        model_out = {"labels": batch.y, "batch": batch.batch}
+        laplacian_0 = normalize_matrix(batch.hodge_laplacian_0)
+        laplacian_1 = normalize_matrix(batch.hodge_laplacian_1)
+        laplacian_2 = normalize_matrix(batch.hodge_laplacian_2)
+        x_0, x_1, x_2 = self.backbone(
+            batch.x_0, batch.x_1, batch.x_2, laplacian_0, laplacian_1, laplacian_2
+        )
+        model_out["x_0"] = x_0
+        model_out["x_1"] = x_1
+        model_out["x_2"] = x_2
+        return model_out
+
+
+class SCCNNWrapper(DefaultWrapper):
+    """Abstract class that provides an interface to loss logic within network"""
+
+    def __init__(self, backbone):
+        super().__init__(backbone)
+
+    def __call__(self, batch):
+        """Define logic for forward pass"""
+        model_out = {"labels": batch.y, "batch": batch.batch}
+        x_all = (batch.x_0, batch.x_1, batch.x_2)
+        laplacian_all = (
+            batch.hodge_laplacian_0,
+            batch.down_laplacian_1,
+            batch.up_laplacian_1,
+            batch.down_laplacian_2,
+            batch.up_laplacian_2,
+        )
+        incidence_all = (batch.incidence_1, batch.incidence_2)
+        x_0, x_1, x_2 = self.backbone(x_all, laplacian_all, incidence_all)
+        model_out["x_0"] = x_0
+        model_out["x_1"] = x_1
+        model_out["x_2"] = x_2
+        return model_out
+
+
 class SCCNWrapper(DefaultWrapper):
     """Abstract class that provides an interface to loss logic within network"""
 

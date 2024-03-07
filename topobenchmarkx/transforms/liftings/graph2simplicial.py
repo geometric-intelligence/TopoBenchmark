@@ -52,7 +52,7 @@ class SimplicialNeighborhoodLifting(Graph2SimplicialLifting):
         self.max_k_simplices = max_k_simplices
 
     def lift_topology(self, data: torch_geometric.data.Data) -> dict:
-        graph = self._generate_graph(data)
+        graph = self._generate_graph_from_data(data)
         simplicial_complex = SimplicialComplex(graph)
         edge_index = torch_geometric.utils.to_undirected(data.edge_index)
         simplices = [set() for _ in range(2, self.complex_dim + 1)]
@@ -81,7 +81,7 @@ class SimplicialCliqueLifting(Graph2SimplicialLifting):
         super().__init__(**kwargs)
 
     def lift_topology(self, data: torch_geometric.data.Data) -> dict:
-        graph = self._generate_graph(data)
+        graph = self._generate_graph_from_data(data)
         simplicial_complex = SimplicialComplex(graph)
         cliques = nx.find_cliques(graph)
         simplices = [set() for _ in range(2, self.complex_dim + 1)]

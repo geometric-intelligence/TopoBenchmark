@@ -47,7 +47,7 @@ class CellCyclesLifting(Graph2CellLifting):
         self.max_cell_length = max_cell_length
 
     def lift_topology(self, data: torch_geometric.data.Data) -> dict:
-        G = self._generate_graph(data)
+        G = self._generate_graph_from_data(data)
         cycles = nx.cycle_basis(G)
         cell_complex = CellComplex(G)
 

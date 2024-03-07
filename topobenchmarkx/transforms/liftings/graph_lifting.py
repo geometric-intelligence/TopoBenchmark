@@ -36,7 +36,7 @@ class GraphLifting(torch_geometric.transforms.BaseTransform):
     def _data_has_edge_attr(self, data: torch_geometric.data.Data) -> bool:
         return hasattr(data, "edge_attr") and data.edge_attr is not None
 
-    def _generate_graph(self, data: torch_geometric.data.Data) -> nx.Graph:
+    def _generate_graph_from_data(self, data: torch_geometric.data.Data) -> nx.Graph:
         nodes = [(n, dict(features=data.x[n], dim=0)) for n in range(data.x.shape[0])]
         if self.preserve_edge_attr and self._data_has_edge_attr(data):
             edge_index, edge_attr = data.edge_index, data.edge_attr if is_undirected(

@@ -19,13 +19,29 @@ __all__ = [
 
 class Graph2SimplicialLifting(GraphLifting):
     def __init__(self, complex_dim=2, **kwargs):
-        super().__init__()
+        super().__init__(**kwargs)
         self.complex_dim = complex_dim
         self.type = "graph2simplicial"
 
     @abstractmethod
     def lift_topology(self, data: torch_geometric.data.Data) -> dict:
         raise NotImplementedError
+
+    def _get_lifted_topology(
+        self, simplicial_complex: SimplicialComplex, graph: nx.Graph
+    ) -> dict:
+        lifted_topology = get_complex_connectivity(simplicial_complex, self.complex_dim)
+        lifted_topology["x_0"] = torch.stack(
+            list(simplicial_complex.get_simplex_attributes("features", 0).values())
+        )
+        # If new edges have been added during the lifting process, we discard the edge attributes
+        if self.contains_edge_attr and simplicial_complex.shape[1] == (
+            graph.number_of_edges()
+        ):
+            lifted_topology["x_1"] = torch.stack(
+                list(simplicial_complex.get_simplex_attributes("features", 1).values())
+            )
+        return lifted_topology
 
 
 class SimplicialNeighborhoodLifting(Graph2SimplicialLifting):
@@ -36,17 +52,11 @@ class SimplicialNeighborhoodLifting(Graph2SimplicialLifting):
         self.max_k_simplices = max_k_simplices
 
     def lift_topology(self, data: torch_geometric.data.Data) -> dict:
-        n_nodes = data.x.shape[0]
-        edges = [
-            (i.item(), j.item()) for i, j in zip(data.edge_index[0], data.edge_index[1])
-        ]
+        graph = self._generate_graph(data)
+        simplicial_complex = SimplicialComplex(graph)
         edge_index = torch_geometric.utils.to_undirected(data.edge_index)
-        G = nx.Graph()
-        G.add_nodes_from(range(n_nodes))
-        G.add_edges_from(edges)
-        simplicial_complex = SimplicialComplex(G)
         simplices = [set() for _ in range(2, self.complex_dim + 1)]
-        for n in range(n_nodes):
+        for n in range(graph.number_of_nodes()):
             # Find 1-hop node n neighbors
             neighbors, _, _, _ = torch_geometric.utils.k_hop_subgraph(n, 1, edge_index)
             if n not in neighbors:
@@ -63,8 +73,7 @@ class SimplicialNeighborhoodLifting(Graph2SimplicialLifting):
                 random.shuffle(set_k_simplices)
                 set_k_simplices = set_k_simplices[: self.max_k_simplices]
             simplicial_complex.add_simplices_from(set_k_simplices)
-        lifted_topology = get_complex_connectivity(simplicial_complex, self.complex_dim)
-        return lifted_topology
+        return self._get_lifted_topology(simplicial_complex, graph)
 
 
 class SimplicialCliqueLifting(Graph2SimplicialLifting):
@@ -72,15 +81,9 @@ class SimplicialCliqueLifting(Graph2SimplicialLifting):
         super().__init__(**kwargs)
 
     def lift_topology(self, data: torch_geometric.data.Data) -> dict:
-        n_nodes = data.x.shape[0]
-        edges = [
-            (i.item(), j.item()) for i, j in zip(data.edge_index[0], data.edge_index[1])
-        ]
-        G = nx.Graph()
-        G.add_nodes_from(range(n_nodes))
-        G.add_edges_from(edges)
-        cliques = nx.find_cliques(G)
-        simplicial_complex = SimplicialComplex(G)
+        graph = self._generate_graph(data)
+        simplicial_complex = SimplicialComplex(graph)
+        cliques = nx.find_cliques(graph)
         simplices = [set() for _ in range(2, self.complex_dim + 1)]
         for clique in cliques:
             for i in range(2, self.complex_dim + 1):
@@ -90,5 +93,4 @@ class SimplicialCliqueLifting(Graph2SimplicialLifting):
         for set_k_simplices in simplices:
             simplicial_complex.add_simplices_from(list(set_k_simplices))
 
-        lifted_topology = get_complex_connectivity(simplicial_complex, self.complex_dim)
-        return lifted_topology
+        return self._get_lifted_topology(simplicial_complex, graph)

@@ -17,13 +17,27 @@ __all__ = [
 # Base
 class Graph2CellLifting(GraphLifting):
     def __init__(self, complex_dim=2, **kwargs):
-        super().__init__()
+        super().__init__(**kwargs)
         self.complex_dim = complex_dim
         self.type = "graph2cell"
 
     @abstractmethod
     def lift_topology(self, data: torch_geometric.data.Data) -> dict:
         raise NotImplementedError
+
+    def _get_lifted_topology(self, cell_complex: CellComplex, graph: nx.Graph) -> dict:
+        lifted_topology = get_complex_connectivity(cell_complex, self.complex_dim)
+        lifted_topology["x_0"] = torch.stack(
+            list(cell_complex.get_cell_attributes("features", 0).values())
+        )
+        # If new edges have been added during the lifting process, we discard the edge attributes
+        if self.contains_edge_attr and cell_complex.shape[1] == (
+            graph.number_of_edges()
+        ):
+            lifted_topology["x_1"] = torch.stack(
+                list(cell_complex.get_cell_attributes("features", 1).values())
+            )
+        return lifted_topology
 
 
 class CellCyclesLifting(Graph2CellLifting):
@@ -33,14 +47,7 @@ class CellCyclesLifting(Graph2CellLifting):
         self.max_cell_length = max_cell_length
 
     def lift_topology(self, data: torch_geometric.data.Data) -> dict:
-        n_nodes = data.x.shape[0]
-        lifted_topology = {}
-        edges = [
-            (i.item(), j.item()) for i, j in zip(data.edge_index[0], data.edge_index[1])
-        ]
-        G = nx.Graph()
-        G.add_nodes_from(range(n_nodes))
-        G.add_edges_from(edges)
+        G = self._generate_graph(data)
         cycles = nx.cycle_basis(G)
         cell_complex = CellComplex(G)
 
@@ -51,5 +58,4 @@ class CellCyclesLifting(Graph2CellLifting):
             cycles = [cycle for cycle in cycles if len(cycle) <= self.max_cell_length]
         if len(cycles) != 0:
             cell_complex.add_cells_from(cycles, rank=self.complex_dim)
-        lifted_topology = get_complex_connectivity(cell_complex, self.complex_dim)
-        return lifted_topology
+        return self._get_lifted_topology(cell_complex, G)

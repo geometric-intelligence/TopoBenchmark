@@ -1,17 +1,13 @@
 _target_: topobenchmarkx.models.network_module.NetworkModule
 
 feature_encoder:
-  _target_: topobenchmarkx.models.encoders.default_encoders.BaseFaceFeatureEncoder
-  in_channels_0: ${dataset.parameters.num_features}
-  in_channels_1: ${dataset.parameters.num_features}
-  in_channels_2: ${dataset.parameters.num_features}
-  out_channels_0: ${model.backbone.channels}
-  out_channels_1: ${model.backbone.channels}
-  out_channels_2: ${model.backbone.channels}
+  _target_: topobenchmarkx.models.encoders.default_encoders.BaseFeatureEncoder
+  in_channels: ${infer_in_channels:${dataset}} #${dataset.parameters.num_features}
+  out_channels: 32
 
 backbone:
   _target_: topomodelx.nn.simplicial.sccn.SCCN
-  channels: 32
+  channels: ${model.feature_encoder.out_channels}
   max_rank: 2
   n_layers: 2
   update_func: "sigmoid"

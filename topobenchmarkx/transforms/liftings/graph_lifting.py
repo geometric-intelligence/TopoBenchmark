@@ -1,52 +1,59 @@
 from abc import abstractmethod
 
+import networkx as nx
 import torch
 import torch_geometric
+from torch_geometric.utils.undirected import is_undirected, to_undirected
+
+from topobenchmarkx.transforms.feature_liftings.feature_liftings import (
+    ProjectionLifting,
+)
+
+FEATURE_LIFTINGS = {
+    "projection": ProjectionLifting,
+}
 
 
 class GraphLifting(torch_geometric.transforms.BaseTransform):
-    def __init__(self):
+    def __init__(
+        self, feature_lifting="projection", preserve_edge_attr=False, **kwargs
+    ):
         super().__init__()
-
-    def preserve_fields(self, data: torch_geometric.data.Data) -> dict:
-        preserved_fields = {}
-        for key, value in data.items():
-            preserved_fields[key] = value
-        return preserved_fields
-
-    def lift_features(self, initial_data: dict, lifted_topology: dict) -> dict:
-        features = {}
-        features["x_0"] = initial_data["x"]
-        keys = sorted(
-            [
-                key.split("_")[1]
-                for key in lifted_topology.keys()
-                if ("incidence" in key and "0" not in key)
-            ]
-        )
-        # TODO: revise this to allow using existing edge attributes (specially when having directed edges)
-        # if "1" in keys and ("edge_attr" in initial_data or "x_1" in initial_data):
-        #     edge_attr = initial_data["edge_attr"] if "edge_attr" in initial_data else initial_data["x_1"]
-        #     if edge_attr.shape[0] == lifted_topology["incidence_1"].shape[1]:
-        #         features["x_1"] = edge_attr
-        #         keys.remove("1")
-        for elem in keys:
-            idx_to_project = 0 if elem == "hyperedges" else int(elem) - 1
-            features["x_" + elem] = torch.matmul(
-                lifted_topology["incidence_" + elem].t(),
-                features[f"x_{idx_to_project}"],
-            )
-        return features
+        self.feature_lifting = FEATURE_LIFTINGS[feature_lifting]()
+        self.preserve_edge_attr = preserve_edge_attr
 
     @abstractmethod
     def lift_topology(self, data: torch_geometric.data.Data) -> dict:
         raise NotImplementedError
 
     def forward(self, data: torch_geometric.data.Data) -> torch_geometric.data.Data:
-        initial_data = self.preserve_fields(data)
+        initial_data = data.to_dict()
         lifted_topology = self.lift_topology(data)
-        lifted_features = self.lift_features(initial_data, lifted_topology)
-        lifted_data = torch_geometric.data.Data(
-            **initial_data, **lifted_topology, **lifted_features
-        )
+        lifted_topology = self.feature_lifting(lifted_topology)
+        lifted_data = torch_geometric.data.Data(**initial_data, **lifted_topology)
         return lifted_data
+
+    def _data_has_edge_attr(self, data: torch_geometric.data.Data) -> bool:
+        return hasattr(data, "edge_attr") and data.edge_attr is not None
+
+    def _generate_graph_from_data(self, data: torch_geometric.data.Data) -> nx.Graph:
+        nodes = [(n, dict(features=data.x[n], dim=0)) for n in range(data.x.shape[0])]
+        if self.preserve_edge_attr and self._data_has_edge_attr(data):
+            edge_index, edge_attr = data.edge_index, data.edge_attr if is_undirected(
+                data.edge_index, data.edge_attr
+            ) else to_undirected(data.edge_index, data.edge_attr)
+            edges = [
+                (i.item(), j.item(), dict(features=edge_attr[edge_idx], dim=1))
+                for edge_idx, (i, j) in enumerate(zip(edge_index[0], edge_index[1]))
+            ]
+            self.contains_edge_attr = True
+        else:
+            edges = [
+                (i.item(), j.item())
+                for i, j in zip(data.edge_index[0], data.edge_index[1])
+            ]
+            self.contains_edge_attr = False
+        graph = nx.Graph()
+        graph.add_nodes_from(nodes)
+        graph.add_edges_from(edges)
+        return graph

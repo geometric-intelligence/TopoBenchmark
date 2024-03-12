@@ -1,15 +1,18 @@
 _target_: topobenchmarkx.models.network_module.NetworkModule
 
 feature_encoder:
-  _target_: topobenchmarkx.models.encoders.default_encoders.BaseEdgeFeatureEncoder
-  in_channels: ${dataset.parameters.num_features}
-  out_channels: ${model.backbone.out_channels}
+  _target_: topobenchmarkx.models.encoders.default_encoders.BaseFeatureEncoder
+  in_channels: ${infer_in_channels:${dataset}} #${dataset.parameters.num_features}
+  out_channels: 32
+  selected_dimensions:
+    - 0
+    - 1
 
 backbone:
   _target_: topomodelx.nn.cell.can.CAN
-  in_channels_0: ${model.backbone.out_channels}
-  in_channels_1: ${model.backbone.out_channels}
-  out_channels: 128
+  in_channels_0: ${model.feature_encoder.out_channels}
+  in_channels_1: ${model.feature_encoder.out_channels}
+  out_channels: ${model.feature_encoder.out_channels}
   dropout: 0.5
   heads: 4 # For now we stuck to out_channels//heads
   concat: True
@@ -29,7 +32,7 @@ loss:
 readout:
   _target_: topobenchmarkx.models.readouts.default_readouts.GNNBatchReadOut
   task_level: ${dataset.parameters.task_level}
-  in_channels: ${parameter_multiplication:${model.backbone.out_channels},${model.backbone.heads}} #[${model.backbone.heads},  ]
+  in_channels: ${parameter_multiplication:${model.backbone.out_channels},${model.backbone.heads}}
   out_channels: ${dataset.parameters.num_classes}
 
 # readout_workaround:

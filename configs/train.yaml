@@ -5,7 +5,7 @@
 defaults:
   - _self_
   - dataset: MUTAG
-  - model: simplicial/sccn
+  - model: hypergraph/allsettransformer
   - evaluator: default
   - callbacks: default
   - logger: wandb # set logger here or use command line (e.g. `python train.py logger=tensorboard`)

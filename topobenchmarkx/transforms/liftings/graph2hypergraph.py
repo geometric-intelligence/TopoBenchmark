@@ -13,7 +13,7 @@ __all__ = [
 
 class Graph2HypergraphLifting(GraphLifting):
     def __init__(self, **kwargs):
-        super().__init__()
+        super().__init__(**kwargs)
         self.type = "graph2hypergraph"
 
     @abstractmethod
@@ -56,7 +56,11 @@ class HypergraphKHopLifting(Graph2HypergraphLifting):
 
         num_hyperedges = incidence_1.shape[1]
         incidence_1 = torch.Tensor(incidence_1).to_sparse_coo()
-        return {"incidence_hyperedges": incidence_1, "num_hyperedges": num_hyperedges}
+        return {
+            "incidence_hyperedges": incidence_1,
+            "num_hyperedges": num_hyperedges,
+            "x_0": data.x,
+        }
 
 
 class HypergraphKNearestNeighborsLifting(Graph2HypergraphLifting):
@@ -73,4 +77,8 @@ class HypergraphKNearestNeighborsLifting(Graph2HypergraphLifting):
         data_lifted = self.transform(data)
         incidence_1[data_lifted.edge_index[0], data_lifted.edge_index[1]] = 1
         incidence_1 = torch.Tensor(incidence_1).to_sparse_coo()
-        return {"incidence_hyperedges": incidence_1, "num_hyperedges": num_hyperedges}
+        return {
+            "incidence_hyperedges": incidence_1,
+            "num_hyperedges": num_hyperedges,
+            "x_0": data.x,
+        }

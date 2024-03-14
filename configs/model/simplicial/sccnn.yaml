@@ -1,17 +1,14 @@
 _target_: topobenchmarkx.models.network_module.NetworkModule
 
-# feature_encoder:
-#   _target_: topobenchmarkx.models.encoders.default_encoders.BaseFaceFeatureEncoder
-#   in_channels_0: ${dataset.parameters.num_features}
-#   in_channels_1: ${dataset.parameters.num_features}
-#   in_channels_2: ${dataset.parameters.num_features}
-#   out_channels_0: ${model.backbone.in_channels_all[0]}
-#   out_channels_1: ${model.backbone.in_channels_all[1]}
-#   out_channels_2: ${model.backbone.in_channels_all[2]}
 feature_encoder:
   _target_: topobenchmarkx.models.encoders.default_encoders.BaseFeatureEncoder
   in_channels: ${infer_in_channels:${dataset}} #${dataset.parameters.num_features}
-  out_channels: 32
+  out_channels: 128
+  selected_dimensions:
+    - 0
+    - 1
+    - 2
+
 
 backbone:
   _target_: topomodelx.nn.simplicial.sccnn.SCCNN
@@ -23,11 +20,11 @@ backbone:
     - ${model.backbone.in_channels_all[0]}
     - ${model.backbone.in_channels_all[1]}
     - ${model.backbone.in_channels_all[2]}
-  conv_order: 2
+  conv_order: 1 # Increasing order make the training unstable 
   sc_order: 3
   aggr_norm: False
   update_func: null
-  n_layers: 2
+  n_layers: 1
 
 loss:
   _target_: topobenchmarkx.models.losses.loss.DefaultLoss

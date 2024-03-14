@@ -14,9 +14,9 @@ model_checkpoint:
   auto_insert_metric_name: False
 
 early_stopping:
-  monitor: ${callbacks.model_checkpoint.monitor}
+  monitor: ${get_monitor_metric:${dataset.parameters.task},${dataset.parameters.loss_type}} #${callbacks.model_checkpoint.monitor}
   patience: 25
-  mode: ${callbacks.model_checkpoint.mode}
+  mode: "${get_monitor_mode:${dataset.parameters.task}}" #${callbacks.model_checkpoint.mode}
 
 model_summary:
   max_depth: -1

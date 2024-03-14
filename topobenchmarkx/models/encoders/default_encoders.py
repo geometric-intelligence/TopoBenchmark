@@ -39,8 +39,10 @@ class BaseFeatureEncoder(AbstractInitFeaturesEncoder):
             )
 
     def forward(self, data: torch_geometric.data.Data) -> torch_geometric.data.Data:
+        
         if not hasattr(data, "x_0"):
             data.x_0 = data.x
+        
         for i in self.dimensions:
             if hasattr(data, f"x_{i}") and hasattr(self, f"encoder_{i}"):
                 batch = data.batch if i == 0 else getattr(data, f"batch_{i}")

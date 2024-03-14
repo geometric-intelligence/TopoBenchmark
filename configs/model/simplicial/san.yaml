@@ -1,9 +1,11 @@
 _target_: topobenchmarkx.models.network_module.NetworkModule
 
 feature_encoder:
-  _target_: topobenchmarkx.models.encoders.default_encoders.BaseEdgeFeatureEncoder
-  in_channels: ${dataset.parameters.num_features}
-  out_channels: ${model.backbone.hidden_channels}
+  _target_: topobenchmarkx.models.encoders.default_encoders.BaseFeatureEncoder
+  in_channels: ${infer_in_channels:${dataset}} #${dataset.parameters.num_features}
+  out_channels: 32
+  selected_dimensions:
+    - 1
 
 backbone:
   _target_: topomodelx.nn.simplicial.san.SAN

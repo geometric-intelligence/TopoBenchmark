@@ -1,16 +1,33 @@
 _target_: topobenchmarkx.models.network_module.NetworkModule
 
+# feature_encoder:
+#   _target_: topobenchmarkx.models.encoders.default_encoders.BaseFaceFeatureEncoder
+#   in_channels_0: ${dataset.parameters.num_features}
+#   in_channels_1: ${dataset.parameters.num_features}
+#   in_channels_2: ${dataset.parameters.num_features}
+#   out_channels_0: ${model.backbone.in_channels_all[0]}
+#   out_channels_1: ${model.backbone.in_channels_all[1]}
+#   out_channels_2: ${model.backbone.in_channels_all[2]}
 feature_encoder:
   _target_: topobenchmarkx.models.encoders.default_encoders.BaseFeatureEncoder
   in_channels: ${infer_in_channels:${dataset}} #${dataset.parameters.num_features}
   out_channels: 32
 
 backbone:
-  _target_: topomodelx.nn.simplicial.sccn.SCCN
-  channels: ${model.feature_encoder.out_channels}
-  max_rank: 2
+  _target_: topomodelx.nn.simplicial.sccnn.SCCNN
+  in_channels_all:
+    - ${model.feature_encoder.out_channels}
+    - ${model.feature_encoder.out_channels}
+    - ${model.feature_encoder.out_channels}
+  hidden_channels_all:
+    - ${model.backbone.in_channels_all[0]}
+    - ${model.backbone.in_channels_all[1]}
+    - ${model.backbone.in_channels_all[2]}
+  conv_order: 2
+  sc_order: 3
+  aggr_norm: False
+  update_func: null
   n_layers: 2
-  update_func: "sigmoid"
 
 loss:
   _target_: topobenchmarkx.models.losses.loss.DefaultLoss
@@ -24,7 +41,7 @@ loss:
 readout:
   _target_: topobenchmarkx.models.readouts.default_readouts.GNNBatchReadOut
   task_level: ${dataset.parameters.task_level}
-  in_channels: ${model.backbone.channels}
+  in_channels: ${model.feature_encoder.out_channels}
   out_channels: ${dataset.parameters.num_classes}
 
 # readout_workaround:
@@ -33,7 +50,7 @@ readout:
 
 
 backbone_wrapper:
-  _target_: topobenchmarkx.models.wrappers.default_wrapper.SCCNWrapper
+  _target_: topobenchmarkx.models.wrappers.default_wrapper.SCCNNWrapper
   _partial_: true
 
 optimizer:

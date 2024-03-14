@@ -9,9 +9,7 @@ import torch_geometric
 from toponetx.classes import SimplicialComplex
 
 from topobenchmarkx.io.load.utils import get_complex_connectivity
-
-# from topobenchmarkx.transforms.liftings.graph2domain import Graph2Domain
-# from scipy.optimize import minimize
+from topobenchmarkx.transforms.liftings.graph_lifting import GraphLifting
 
 __all__ = [
     "SimplicialNeighborhoodLifting",
@@ -19,207 +17,80 @@ __all__ = [
 ]
 
 
-# class Graph2SimplicialLifting(Graph2Domain):
-#    def __init__(self, complex_dim=2, **kwargs):#
-#        super().__init__()
-#        self.complex_dim = complex_dim
-#        self.type = "graph2simplicial"
-
-# def lift_features(self, data: torch_geometric.data.Data, lifted_topology) -> dict:
-#     features = {}
-#     features["x_0"] = data.x
-#     # TODO: Check if that is correct
-#     for i in range(self.complex_dim):
-#         features[f"x_{i + 1}"] = torch.matmul(
-#             lifted_topology[f"incidence_{i + 1}"].t(), features[f"x_{i}"]
-#         )
-#     return features
-
-
-class Graph2SimplicialLifting(torch_geometric.transforms.BaseTransform):
+class Graph2SimplicialLifting(GraphLifting):
     def __init__(self, complex_dim=2, **kwargs):
-        super().__init__()
+        super().__init__(**kwargs)
         self.complex_dim = complex_dim
         self.type = "graph2simplicial"
-
-    def preserve_fields(self, data: torch_geometric.data.Data) -> dict:
-        preserved_fields = {}
-        for key, value in data.items():
-            preserved_fields[key] = value
-        return preserved_fields
-
-    def lift_features(self, data: torch_geometric.data.Data, lifted_topology) -> dict:
-        features = {}
-        features["x_0"] = data.x
-        # TODO: Projection of the features
-        for i in range(self.complex_dim):
-            features[f"x_{i + 1}"] = torch.zeros(
-                lifted_topology["shape"][i + 1], data.x.shape[1]
-            )
-        return features
 
     @abstractmethod
     def lift_topology(self, data: torch_geometric.data.Data) -> dict:
         raise NotImplementedError
 
-    def forward(self, data: torch_geometric.data.Data) -> torch_geometric.data.Data:
-        initial_data = self.preserve_fields(data)
-        lifted_topology = self.lift_topology(data)
-        lifted_features = self.lift_features(data, lifted_topology)
-        lifted_data = torch_geometric.data.Data(
-            **initial_data, **lifted_topology, **lifted_features
+    def _get_lifted_topology(
+        self, simplicial_complex: SimplicialComplex, graph: nx.Graph
+    ) -> dict:
+        lifted_topology = get_complex_connectivity(simplicial_complex, self.complex_dim)
+        lifted_topology["x_0"] = torch.stack(
+            list(simplicial_complex.get_simplex_attributes("features", 0).values())
         )
-        return lifted_data
+        # If new edges have been added during the lifting process, we discard the edge attributes
+        if self.contains_edge_attr and simplicial_complex.shape[1] == (
+            graph.number_of_edges()
+        ):
+            lifted_topology["x_1"] = torch.stack(
+                list(simplicial_complex.get_simplex_attributes("features", 1).values())
+            )
+        return lifted_topology
 
 
 class SimplicialNeighborhoodLifting(Graph2SimplicialLifting):
     """ """
 
-    def __init__(self, max_triangles=10000, **kwargs):
+    def __init__(self, max_k_simplices=5000, **kwargs):
         super().__init__(**kwargs)
-        self.max_triangles = max_triangles
-        self.added_fields = []
-        for i in range(1, self.complex_dim + 1):
-            self.added_fields += [
-                f"incidence_{i}",
-                f"laplacian_down_{i}",
-                f"laplacian_up_{i-1}",
-            ]
+        self.max_k_simplices = max_k_simplices
 
     def lift_topology(self, data: torch_geometric.data.Data) -> dict:
-        lifted_topology = {}
-        n_nodes = data.x.shape[0]
+        graph = self._generate_graph_from_data(data)
+        simplicial_complex = SimplicialComplex(graph)
         edge_index = torch_geometric.utils.to_undirected(data.edge_index)
-        simplices = [set() for _ in range(self.complex_dim + 1)]
-        for n in range(n_nodes):
+        simplices = [set() for _ in range(2, self.complex_dim + 1)]
+        for n in range(graph.number_of_nodes()):
             # Find 1-hop node n neighbors
             neighbors, _, _, _ = torch_geometric.utils.k_hop_subgraph(n, 1, edge_index)
             if n not in neighbors:
                 neighbors.append(n)
             neighbors = neighbors.numpy()
             neighbors = set(neighbors)
-            for i in range(self.complex_dim + 1):
+            for i in range(2, self.complex_dim + 1):
                 for c in combinations(neighbors, i + 1):
-                    simplices[i].add(tuple(c))
+                    simplices[i - 2].add(tuple(c))
 
-        for i in range(self.complex_dim + 1):
-            simplices[i] = list(simplices[i])
-            if i == 0:
-                simplices[i].sort()
-            if i == 2 and len(simplices[i]) > self.max_triangles:
-                random.shuffle(simplices[i])
-                simplices[i] = simplices[i][: self.max_triangles]
-            lifted_topology[f"num_simplices_{i}"] = len(simplices[i])
-        incidences = [
-            torch.zeros(len(simplices[i]), len(simplices[i + 1]))
-            for i in range(self.complex_dim)
-        ]
-        laplacians_up = [
-            torch.zeros(len(simplices[i]), len(simplices[i]))
-            for i in range(self.complex_dim)
-        ]
-        laplacians_down = [
-            torch.zeros(len(simplices[i + 1]), len(simplices[i + 1]))
-            for i in range(self.complex_dim)
-        ]
-        for i in range(self.complex_dim):
-            for idx_i, s_i in enumerate(simplices[i]):
-                for idx_i_1, s_i_1 in enumerate(simplices[i + 1]):
-                    if all(e in s_i_1 for e in s_i):
-                        incidences[i][idx_i][idx_i_1] = 1
-            degree = torch.diag(torch.sum(incidences[i], dim=1))
-            laplacians_down[i] = 2 * degree - torch.mm(
-                incidences[i], torch.transpose(incidences[i], 1, 0)
-            )
-            degree = torch.diag(torch.sum(incidences[i], dim=0))
-            laplacians_up[i] = 2 * degree - torch.mm(
-                torch.transpose(incidences[i], 1, 0), incidences[i]
-            )
-        for i, field in enumerate(self.added_fields):
-            if i % 3 == 0:
-                lifted_topology[field] = incidences[int(i / 3)].to_sparse_coo()
-            if i % 3 == 1:
-                lifted_topology[field] = laplacians_up[int(i / 3)].to_sparse_coo()
-            if i % 3 == 2:
-                lifted_topology[field] = laplacians_down[int(i / 3)].to_sparse_coo()
-        return lifted_topology
+        for set_k_simplices in simplices:
+            set_k_simplices = list(set_k_simplices)
+            if len(set_k_simplices) > self.max_k_simplices:
+                random.shuffle(set_k_simplices)
+                set_k_simplices = set_k_simplices[: self.max_k_simplices]
+            simplicial_complex.add_simplices_from(set_k_simplices)
+        return self._get_lifted_topology(simplicial_complex, graph)
 
 
 class SimplicialCliqueLifting(Graph2SimplicialLifting):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        # self.added_fields = []
-        # for i in range(1, self.complex_dim + 1):
-        #     self.added_fields += [
-        #         f"incidence_{i}",
-        #         f"laplacian_down_{i}",
-        #         f"laplacian_up_{i-1}",
-        #     ]
 
     def lift_topology(self, data: torch_geometric.data.Data) -> dict:
-        num_simplices = {}
-        n_nodes = data.x.shape[0]
-        edges = [
-            (i.item(), j.item()) for i, j in zip(data.edge_index[0], data.edge_index[1])
-        ]
-        # Add self edges to avoid not considering isolated nodes without selfloops
-        # self_edges = [(i, i) for i in range(n_nodes)]
-        # edges = list(set(edges + self_edges))
-        G = nx.Graph()
-        G.add_edges_from(edges)
-        cliques = nx.find_cliques(G)
-        simplicial_complex = SimplicialComplex(G)
-        simplices = [set() for _ in range(self.complex_dim + 1)]
+        graph = self._generate_graph_from_data(data)
+        simplicial_complex = SimplicialComplex(graph)
+        cliques = nx.find_cliques(graph)
+        simplices = [set() for _ in range(2, self.complex_dim + 1)]
         for clique in cliques:
-            for i in range(self.complex_dim + 1):
+            for i in range(2, self.complex_dim + 1):
                 for c in combinations(clique, i + 1):
-                    simplices[i].add(tuple(c))
+                    simplices[i - 2].add(tuple(c))
 
-        for i in range(self.complex_dim + 1):
-            simplices[i] = list(simplices[i])
-            if i == 0:
-                simplices[i].sort()
-            num_simplices[f"num_simplices_{i}"] = len(simplices[i])
-            if i > 1:
-                simplicial_complex.add_simplices_from(simplices[i])
+        for set_k_simplices in simplices:
+            simplicial_complex.add_simplices_from(list(set_k_simplices))
 
-        lifted_topology = get_complex_connectivity(simplicial_complex, self.complex_dim)
-        return {**lifted_topology, **num_simplices}
-
-        # incidences = [
-        #     torch.zeros(len(simplices[i]), len(simplices[i + 1]))
-        #     for i in range(self.complex_dim)
-        # ]
-
-        # laplacians_up = [
-        #     torch.zeros(len(simplices[i]), len(simplices[i]))
-        #     for i in range(self.complex_dim)
-        # ]
-        # laplacians_down = [
-        #     torch.zeros(len(simplices[i + 1]), len(simplices[i + 1]))
-        #     for i in range(self.complex_dim)
-        # ]
-        # for i in range(self.complex_dim):
-        #     for idx_i, s_i in enumerate(simplices[i]):
-        #         for idx_i_1, s_i_1 in enumerate(simplices[i + 1]):
-        #             if all(e in s_i_1 for e in s_i):
-        #                 incidences[i][idx_i][idx_i_1] = 1
-
-        #     degree = torch.diag(torch.sum(incidences[i], dim=1))
-        #     laplacians_down[i] = 2 * degree - torch.mm(
-        #         incidences[i], torch.transpose(incidences[i], 1, 0)
-        #     )
-
-        #     degree = torch.diag(torch.sum(incidences[i], dim=0))
-        #     laplacians_up[i] = 2 * degree - torch.mm(
-        #         torch.transpose(incidences[i], 1, 0), incidences[i]
-        #     )
-
-        # for i, field in enumerate(self.added_fields):
-        #     if i % 3 == 0:
-        #         lifted_topology[field] = incidences[int(i / 3)].to_sparse_coo()
-        #     if i % 3 == 1:
-        #         lifted_topology[field] = laplacians_up[int(i / 3)].to_sparse_coo()
-        #     if i % 3 == 2:
-        #         lifted_topology[field] = laplacians_down[int(i / 3)].to_sparse_coo()
-        # return lifted_topology
+        return self._get_lifted_topology(simplicial_complex, graph)

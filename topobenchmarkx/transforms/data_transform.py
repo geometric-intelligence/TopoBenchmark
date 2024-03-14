@@ -12,7 +12,7 @@ from topobenchmarkx.transforms.data_manipulations.manipulations import (
     RemoveExtraFeatureFromProteins,
 )
 from topobenchmarkx.transforms.feature_liftings.feature_liftings import (
-    BaseTopologyLifting,
+    ProjectionLifting,
 )
 from topobenchmarkx.transforms.liftings.graph2cell import CellCyclesLifting
 from topobenchmarkx.transforms.liftings.graph2hypergraph import (
@@ -35,7 +35,7 @@ TRANSFORMS = {
     # Graph -> Cell Complex
     "CellCyclesLifting": CellCyclesLifting,
     # Feature Liftings
-    "BaseTopologyLifting": BaseTopologyLifting,
+    "ProjectionLifting": ProjectionLifting,
     # Data Manipulations
     "Identity": IdentityTransform,
     "DataFieldsToDense": DataFieldsToDense,

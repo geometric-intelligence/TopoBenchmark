@@ -3,14 +3,14 @@ _target_: topobenchmarkx.models.network_module.NetworkModule
 model_name: alldeepset
 
 feature_encoder:
-  _target_: topobenchmarkx.models.encoders.default_encoders.BaseNodeFeatureEncoder
-  in_channels: ${dataset.parameters.num_features}
-  out_channels: ${model.backbone.hidden_channels}
+  _target_: topobenchmarkx.models.encoders.default_encoders.BaseFeatureEncoder
+  in_channels: ${infer_in_channels:${dataset}} #${dataset.parameters.num_features}
+  out_channels: 32
 
 backbone:
   _target_: topomodelx.nn.hypergraph.allset.AllSet
-  in_channels: ${model.backbone.hidden_channels}
-  hidden_channels: 96
+  in_channels: ${model.feature_encoder.out_channels}
+  hidden_channels: ${model.feature_encoder.out_channels}
   n_layers: 1
   layer_dropout: 0.25
   mlp_num_layers: 2

@@ -20,7 +20,6 @@ class BaseEncoder(torch.nn.Module):
         x = self.linear2(x)
         return x
 
-
 class BaseFeatureEncoder(AbstractInitFeaturesEncoder):
     def __init__(self, in_channels, out_channels, selected_dimensions=None):
         super(AbstractInitFeaturesEncoder, self).__init__()
@@ -36,6 +35,48 @@ class BaseFeatureEncoder(AbstractInitFeaturesEncoder):
                 self,
                 f"encoder_{i}",
                 BaseEncoder(self.in_channels[i], self.out_channels),
+            )
+
+    def forward(self, data: torch_geometric.data.Data) -> torch_geometric.data.Data:
+        
+        if not hasattr(data, "x_0"):
+            data.x_0 = data.x
+        
+        for i in self.dimensions:
+            if hasattr(data, f"x_{i}") and hasattr(self, f"encoder_{i}"):
+                batch = data.batch if i == 0 else getattr(data, f"batch_{i}")
+                data[f"x_{i}"] = getattr(self, f"encoder_{i}")(data[f"x_{i}"], batch)
+        return data
+
+
+
+class BaseShallowEncoder(torch.nn.Module):
+    def __init__(self, in_channels, out_channels, hidden_layers=1):
+        super().__init__()
+        self.linear1 = torch.nn.Linear(in_channels, out_channels)        
+        self.relu = torch.nn.ELU()
+        
+
+    def forward(self, x: torch.Tensor, batch: torch.Tensor) -> torch.Tensor:
+        x = self.linear1(x)
+        x = self.relu(x)
+        return x
+    
+class BaseShallowFeatureEncoder(AbstractInitFeaturesEncoder):
+    def __init__(self, in_channels, out_channels, selected_dimensions=None):
+        super(AbstractInitFeaturesEncoder, self).__init__()
+        self.in_channels = in_channels
+        self.out_channels = out_channels
+        self.dimensions = (
+            selected_dimensions
+            if selected_dimensions is not None
+            else range(len(self.in_channels))
+        )
+        for i in self.dimensions:
+            setattr(
+                self,
+                f"encoder_{i}",
+                BaseShallowEncoder(self.in_channels[i], self.out_channels),
             )
 
     def forward(self, data: torch_geometric.data.Data) -> torch_geometric.data.Data:

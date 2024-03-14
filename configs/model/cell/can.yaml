@@ -13,11 +13,11 @@ backbone:
   in_channels_0: ${model.feature_encoder.out_channels}
   in_channels_1: ${model.feature_encoder.out_channels}
   out_channels: ${model.feature_encoder.out_channels}
-  dropout: 0.5
+  dropout: 0.0
   heads: 4 # For now we stuck to out_channels//heads
   concat: True
   skip_connection: True
-  n_layers: 2
+  n_layers: 1
   att_lift: False
 
 loss:

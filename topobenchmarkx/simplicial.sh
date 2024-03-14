@@ -29,7 +29,6 @@ python train.py dataset=MUTAG model=simplicial/sccnn model.optimizer.lr=0.01,0.0
 # Fixed split
 python train.py dataset=ZINC model=simplicial/sccnn model.optimizer.lr=0.01,0.001 model.feature_encoder.out_channels=16,32,64,128 model.backbone.n_layers=1,2,3,4 dataset.parameters.batch_size=128,256 dataset.parameters.data_seed=0 trainer.check_val_every_n_epoch=5 callbacks.early_stopping.patience=10 trainer=default logger.wandb.project=topobenchmark_0503 dataset.transforms.graph2simplicial_lifting.complex_dim=3 --multirun
 
-
 # SCN
 # Batch size =1
 python train.py dataset=cocitation_cora model=simplicial/scn model.optimizer.lr=0.01,0.001 model.feature_encoder.out_channels=32,64,128 model.backbone.n_layers=1,2 dataset.parameters.data_seed=0,3,5 trainer.check_val_every_n_epoch=5 callbacks.early_stopping.patience=10 trainer=default logger.wandb.project=topobenchmark_0503 dataset.transforms.graph2simplicial_lifting.complex_dim=3 --multirun

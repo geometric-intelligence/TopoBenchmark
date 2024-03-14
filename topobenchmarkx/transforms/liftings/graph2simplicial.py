@@ -148,13 +148,13 @@ class SimplicialNeighborhoodLifting(Graph2SimplicialLifting):
 class SimplicialCliqueLifting(Graph2SimplicialLifting):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.added_fields = []
-        for i in range(1, self.complex_dim + 1):
-            self.added_fields += [
-                f"incidence_{i}",
-                f"laplacian_down_{i}",
-                f"laplacian_up_{i-1}",
-            ]
+        # self.added_fields = []
+        # for i in range(1, self.complex_dim + 1):
+        #     self.added_fields += [
+        #         f"incidence_{i}",
+        #         f"laplacian_down_{i}",
+        #         f"laplacian_up_{i-1}",
+        #     ]
 
     def lift_topology(self, data: torch_geometric.data.Data) -> dict:
         num_simplices = {}
@@ -186,40 +186,40 @@ class SimplicialCliqueLifting(Graph2SimplicialLifting):
         lifted_topology = get_complex_connectivity(simplicial_complex, self.complex_dim)
         return {**lifted_topology, **num_simplices}
 
-        incidences = [
-            torch.zeros(len(simplices[i]), len(simplices[i + 1]))
-            for i in range(self.complex_dim)
-        ]
+        # incidences = [
+        #     torch.zeros(len(simplices[i]), len(simplices[i + 1]))
+        #     for i in range(self.complex_dim)
+        # ]
 
-        laplacians_up = [
-            torch.zeros(len(simplices[i]), len(simplices[i]))
-            for i in range(self.complex_dim)
-        ]
-        laplacians_down = [
-            torch.zeros(len(simplices[i + 1]), len(simplices[i + 1]))
-            for i in range(self.complex_dim)
-        ]
-        for i in range(self.complex_dim):
-            for idx_i, s_i in enumerate(simplices[i]):
-                for idx_i_1, s_i_1 in enumerate(simplices[i + 1]):
-                    if all(e in s_i_1 for e in s_i):
-                        incidences[i][idx_i][idx_i_1] = 1
+        # laplacians_up = [
+        #     torch.zeros(len(simplices[i]), len(simplices[i]))
+        #     for i in range(self.complex_dim)
+        # ]
+        # laplacians_down = [
+        #     torch.zeros(len(simplices[i + 1]), len(simplices[i + 1]))
+        #     for i in range(self.complex_dim)
+        # ]
+        # for i in range(self.complex_dim):
+        #     for idx_i, s_i in enumerate(simplices[i]):
+        #         for idx_i_1, s_i_1 in enumerate(simplices[i + 1]):
+        #             if all(e in s_i_1 for e in s_i):
+        #                 incidences[i][idx_i][idx_i_1] = 1
 
-            degree = torch.diag(torch.sum(incidences[i], dim=1))
-            laplacians_down[i] = 2 * degree - torch.mm(
-                incidences[i], torch.transpose(incidences[i], 1, 0)
-            )
+        #     degree = torch.diag(torch.sum(incidences[i], dim=1))
+        #     laplacians_down[i] = 2 * degree - torch.mm(
+        #         incidences[i], torch.transpose(incidences[i], 1, 0)
+        #     )
 
-            degree = torch.diag(torch.sum(incidences[i], dim=0))
-            laplacians_up[i] = 2 * degree - torch.mm(
-                torch.transpose(incidences[i], 1, 0), incidences[i]
-            )
+        #     degree = torch.diag(torch.sum(incidences[i], dim=0))
+        #     laplacians_up[i] = 2 * degree - torch.mm(
+        #         torch.transpose(incidences[i], 1, 0), incidences[i]
+        #     )
 
-        for i, field in enumerate(self.added_fields):
-            if i % 3 == 0:
-                lifted_topology[field] = incidences[int(i / 3)].to_sparse_coo()
-            if i % 3 == 1:
-                lifted_topology[field] = laplacians_up[int(i / 3)].to_sparse_coo()
-            if i % 3 == 2:
-                lifted_topology[field] = laplacians_down[int(i / 3)].to_sparse_coo()
-        return lifted_topology
+        # for i, field in enumerate(self.added_fields):
+        #     if i % 3 == 0:
+        #         lifted_topology[field] = incidences[int(i / 3)].to_sparse_coo()
+        #     if i % 3 == 1:
+        #         lifted_topology[field] = laplacians_up[int(i / 3)].to_sparse_coo()
+        #     if i % 3 == 2:
+        #         lifted_topology[field] = laplacians_down[int(i / 3)].to_sparse_coo()
+        # return lifted_topology

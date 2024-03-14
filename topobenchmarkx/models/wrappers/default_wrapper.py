@@ -57,7 +57,7 @@ class SANWrapper(DefaultWrapper):
         """Define logic for forward pass"""
         model_out = {"labels": batch.y, "batch": batch.batch}
 
-        x_1 = self.backbone(batch.x_1, batch.laplacian_up_1, batch.laplacian_down_1)
+        x_1 = self.backbone(batch.x_1, batch.up_laplacian_1, batch.down_laplacian_1)
         # Project the edge-level output of the model back to the node-level
         x_0 = torch.sparse.mm(batch.incidence_1, x_1)
         model_out["x_0"] = x_0

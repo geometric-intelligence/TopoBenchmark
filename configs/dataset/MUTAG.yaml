@@ -24,8 +24,8 @@ parameters:
   k: 10 # for k-Fold Cross-Validation
 
   # Lifting parameters
-  max_dim_if_lifted: 3
-  preserve_edge_attr_if_lifted: True
+  max_dim_if_lifted: 2
+  preserve_edge_attr_if_lifted: False
 
   # Dataloader parameters
   batch_size: 10 # We have an issue with allowing multiple graphs in a batch due to sparse incidences

@@ -1,13 +1,5 @@
 _target_: topobenchmarkx.models.network_module.NetworkModule
 
-# feature_encoder:
-#   _target_: topobenchmarkx.models.encoders.default_encoders.BaseFaceFeatureEncoder
-#   in_channels_0: ${dataset.parameters.num_features}
-#   in_channels_1: ${dataset.parameters.num_features}
-#   in_channels_2: ${dataset.parameters.num_features}
-#   out_channels_0: ${model.backbone.hid_channels}
-#   out_channels_1: ${model.backbone.hid_channels}
-#   out_channels_2: ${model.backbone.hid_channels}
 feature_encoder:
   _target_: topobenchmarkx.models.encoders.default_encoders.BaseFeatureEncoder
   in_channels: ${infer_in_channels:${dataset}} #${dataset.parameters.num_features}
@@ -19,7 +11,7 @@ backbone:
   in_channels_1: ${model.feature_encoder.out_channels}
   in_channels_2: ${model.feature_encoder.out_channels}
   hid_channels: ${model.feature_encoder.out_channels}
-  n_layers: 1
+  n_layers: 4
 
 loss:
   _target_: topobenchmarkx.models.losses.loss.DefaultLoss

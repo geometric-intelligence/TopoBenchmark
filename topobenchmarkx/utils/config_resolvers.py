@@ -41,18 +41,47 @@ def infer_in_channels(dataset):
             if t in dataset.transforms:
                 return True, t
         return False, None
+    
+    def check_for_type_feature_lifting(dataset, lifting):
+        lifting_params_keys = dataset.transforms[lifting].keys()
+        if 'feature_lifting' in lifting_params_keys:
+            feature_lifting = dataset.transforms[lifting]['feature_lifting']
+        else:
+            feature_lifting = 'projection'
+
+        return feature_lifting
+
 
     there_is_complex_lifting, lifting = find_complex_lifting(dataset)
     if there_is_complex_lifting:
+        # Get type of feature lifting
+        feature_lifting = check_for_type_feature_lifting(dataset, lifting)
+
         if isinstance(dataset.parameters.num_features, int):
-            return [dataset.parameters.num_features] * dataset.transforms[
-                lifting
-            ].complex_dim
-        else:
-            if not dataset.transforms[lifting].preserve_edge_attr:
-                return [dataset.parameters.num_features[0]] * dataset.transforms[
+            if feature_lifting == 'projection':
+                return [dataset.parameters.num_features] * dataset.transforms[
                     lifting
                 ].complex_dim
+            
+            else: 
+                return_value = [dataset.parameters.num_features]
+                for i in range(2, dataset.transforms[lifting].complex_dim + 1):
+                    return_value += [int(dataset.parameters.num_features * i)]
+
+                return return_value
+        else:
+            if not dataset.transforms[lifting].preserve_edge_attr:
+                if feature_lifting == 'projection':
+                    return [dataset.parameters.num_features[0]] * dataset.transforms[
+                        lifting
+                    ].complex_dim
+                else:
+                    return_value = [dataset.parameters.num_features]
+                    for i in range(2, dataset.transforms[lifting].complex_dim + 1):
+                        return_value += [int(dataset.parameters.num_features * i)]
+
+                    return return_value
+
             else:
                 return list(dataset.parameters.num_features) + [
                     dataset.parameters.num_features[1]

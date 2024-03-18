@@ -102,7 +102,8 @@ class NodeDegrees(torch_geometric.transforms.BaseTransform):
         if data[field].is_sparse:
             degrees = data[field].to_dense().sum(1)
         else:
-            degrees = data[field].sum(1)
+            assert field == 'edge_index', 'Following logic of finding degrees is only implemented for edge_index'
+            degrees = torch_geometric.utils.to_dense_adj(data[field], max_num_nodes=data['num_nodes']).squeeze(0).sum(1)
             
         if "incidence" in field:
             field_name = str(int(field.split("_")[1]) - 1) +"_cell" + "_degrees"
@@ -232,6 +233,10 @@ class OneHotDegree(torch_geometric.transforms.BaseTransform):
         assert data.edge_index is not None
 
         deg = data[degrees_field].to(torch.long)
+        
+        if len(deg.shape)==2:
+            deg = deg.squeeze(1)
+            
         deg = one_hot(deg, num_classes=self.max_degree + 1)
 
         if self.cat:

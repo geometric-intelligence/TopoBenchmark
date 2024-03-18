@@ -62,32 +62,6 @@ class HypergraphLoader(AbstractLoader):
         data = load_split(data, self.parameters)
         dataset = CustomDataset([data])
 
-        # pre_transforms_dict = hydra.utils.instantiate(self.transforms_config)
-
-        # pre_transforms_dict = hydra.utils.instantiate(self.transforms_config)
-        # pre_transforms = torch_geometric.transforms.Compose(
-        #     list(pre_transforms_dict.values())
-        # )
-        # repo_name = "_".join(list(self.transforms_config.keys()))
-        # transform_parameters = {
-        #     transform_name: transform.parameters
-        #     for transform_name, transform in pre_transforms_dict.items()
-        # }
-        # # Prepare the data directory name
-        # params_hash = make_hash(transform_parameters)
-        # data_dir = os.path.join(
-        #     os.path.join(
-        #         os.path.join(self.parameters["data_dir"], self.parameters["data_name"]),
-        #         repo_name,
-        #     ),
-        #     f"{params_hash}",
-        # )
-
-        # if pre_transforms is not None:
-        #     dataset = PreprocessedDataset(data_dir, dataset, pre_transforms)
-        # We need to add checks that:
-        # All nodes belong to some edge, in case some not, create selfedge
-
         return dataset
 
 
@@ -213,7 +187,7 @@ class GraphLoader(AbstractLoader):
             )
 
         return dataset
-    
+
 
 class ManualGraphLoader(AbstractLoader):
     def __init__(self, parameters: DictConfig, transforms=None):
@@ -224,6 +198,7 @@ class ManualGraphLoader(AbstractLoader):
 
     def load(self):
         import networkx as nx
+
         # Define the vertices (just 7 vertices)
         vertices = [i for i in range(9)]
         y = [0, 1, 1, 1, 0, 0, 0, 0, 0]
@@ -241,8 +216,8 @@ class ManualGraphLoader(AbstractLoader):
             [6, 3],
             [2, 6],
             [5, 7],
-            [2,8],
-            [0,8],
+            [2, 8],
+            [0, 8],
         ]
 
         # Define the tetrahedrons
@@ -264,13 +239,19 @@ class ManualGraphLoader(AbstractLoader):
         G.add_edges_from(edges)
         G.to_undirected()
         edge_list = torch.Tensor(list(G.edges())).T.long()
-        #edge_list = torch.sparse_coo_tensor(edge_list, torch.ones(edge_list.shape[1]), (len(vertices), len(vertices)))
-        data = torch_geometric.data.Data(x=torch.ones((len(vertices), 1)).float(), edge_index=edge_list, num_nodes=len(vertices), y=torch.tensor(y))
-        
+        # edge_list = torch.sparse_coo_tensor(edge_list, torch.ones(edge_list.shape[1]), (len(vertices), len(vertices)))
+        data = torch_geometric.data.Data(
+            x=torch.ones((len(vertices), 1)).float(),
+            edge_index=edge_list,
+            num_nodes=len(vertices),
+            y=torch.tensor(y),
+        )
+
         if self.transforms_config is not None:
             data_dir = os.path.join(
-            self.parameters["data_dir"], self.parameters["data_name"])
+                self.parameters["data_dir"], self.parameters["data_name"]
+            )
             processor_dataset = Preprocessor(data_dir, data, self.transforms_config)
-        
+
         dataset = CustomDataset([processor_dataset[0]])
         return dataset

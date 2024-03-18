@@ -7,10 +7,12 @@ from torch_geometric.utils.undirected import is_undirected, to_undirected
 
 from topobenchmarkx.transforms.feature_liftings.feature_liftings import (
     ProjectionLifting,
+    ConcatentionLifting,
 )
 
 FEATURE_LIFTINGS = {
     "projection": ProjectionLifting,
+    "concatenation": ConcatentionLifting,
 }
 
 

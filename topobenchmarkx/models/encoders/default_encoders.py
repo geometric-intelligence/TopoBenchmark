@@ -6,22 +6,23 @@ from topobenchmarkx.models.abstractions.encoder import AbstractInitFeaturesEncod
 
 
 class BaseEncoder(torch.nn.Module):
-    def __init__(self, in_channels, out_channels, hidden_layers=1):
+    def __init__(self, in_channels, out_channels, dropout=0):
         super().__init__()
         self.linear1 = torch.nn.Linear(in_channels, out_channels)
         self.linear2 = torch.nn.Linear(out_channels, out_channels)
         self.relu = torch.nn.ReLU()
         self.BN = GraphNorm(out_channels)
+        self.dropout = torch.nn.Dropout(dropout)
 
     def forward(self, x: torch.Tensor, batch: torch.Tensor) -> torch.Tensor:
-        x = self.linear1(x)
+        x = self.dropout(self.linear1(x))
         x = self.BN(x, batch=batch) if batch.shape[0] > 0 else self.BN(x)
         x = self.relu(x)
         x = self.linear2(x)
         return x
 
 class BaseFeatureEncoder(AbstractInitFeaturesEncoder):
-    def __init__(self, in_channels, out_channels, selected_dimensions=None):
+    def __init__(self, in_channels, out_channels, proj_dropout=0, selected_dimensions=None):
         super(AbstractInitFeaturesEncoder, self).__init__()
         self.in_channels = in_channels
         self.out_channels = out_channels
@@ -34,7 +35,7 @@ class BaseFeatureEncoder(AbstractInitFeaturesEncoder):
             setattr(
                 self,
                 f"encoder_{i}",
-                BaseEncoder(self.in_channels[i], self.out_channels),
+                BaseEncoder(self.in_channels[i], self.out_channels, dropout=proj_dropout),
             )
 
     def forward(self, data: torch_geometric.data.Data) -> torch_geometric.data.Data:

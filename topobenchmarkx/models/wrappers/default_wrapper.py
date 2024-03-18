@@ -25,7 +25,7 @@ class GNNWrapper(DefaultWrapper):
     def __call__(self, batch):
         """Define logic for forward pass"""
         model_out = {"labels": batch.y}
-        x_0 = self.backbone(batch.x, batch.edge_index)
+        x_0 = self.backbone(batch.x_0, batch.edge_index)
         model_out["x_0"] = x_0
         model_out["batch"] = batch.batch
         return model_out
@@ -217,7 +217,7 @@ class CWNWrapper(DefaultWrapper):
         )
 
 
-        model_out["x_0"] = torch.mm(batch.incidence_1, x_1)
+        model_out["x_0"] = torch.mm(batch.incidence_1, x_1) # + torch.mm(batch.incidence_1,torch.mm(batch.incidence_2, x_2))
         model_out["x_1"] = x_1
         model_out["x_2"] = x_2
         return model_out

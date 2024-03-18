@@ -213,3 +213,64 @@ class GraphLoader(AbstractLoader):
             )
 
         return dataset
+    
+
+class ManualGraphLoader(AbstractLoader):
+    def __init__(self, parameters: DictConfig, transforms=None):
+        super().__init__(parameters)
+        self.parameters = parameters
+        # Still not instantiated
+        self.transforms_config = transforms
+
+    def load(self):
+        import networkx as nx
+        # Define the vertices (just 7 vertices)
+        vertices = [i for i in range(9)]
+        y = [0, 1, 1, 1, 0, 0, 0, 0, 0]
+        # Define the edges
+        edges = [
+            [0, 1],
+            [0, 2],
+            [0, 3],
+            [0, 4],
+            [1, 2],
+            [1, 3],
+            [2, 3],
+            [5, 2],
+            [5, 6],
+            [6, 3],
+            [2, 6],
+            [5, 7],
+            [2,8],
+            [0,8],
+        ]
+
+        # Define the tetrahedrons
+        tetrahedrons = [[0, 1, 2, 3], [0, 1, 2, 4]]
+
+        # Add tetrahedrons
+        for tetrahedron in tetrahedrons:
+            for i in range(len(tetrahedron)):
+                for j in range(i + 1, len(tetrahedron)):
+                    edges.append([tetrahedron[i], tetrahedron[j]])
+
+        # Create a graph
+        G = nx.Graph()
+
+        # Add vertices
+        G.add_nodes_from(vertices)
+
+        # Add edges
+        G.add_edges_from(edges)
+        G.to_undirected()
+        edge_list = torch.Tensor(list(G.edges())).T.long()
+        #edge_list = torch.sparse_coo_tensor(edge_list, torch.ones(edge_list.shape[1]), (len(vertices), len(vertices)))
+        data = torch_geometric.data.Data(x=torch.ones((len(vertices), 1)).float(), edge_index=edge_list, num_nodes=len(vertices), y=torch.tensor(y))
+        
+        if self.transforms_config is not None:
+            data_dir = os.path.join(
+            self.parameters["data_dir"], self.parameters["data_name"])
+            processor_dataset = Preprocessor(data_dir, data, self.transforms_config)
+        
+        dataset = CustomDataset([processor_dataset[0]])
+        return dataset

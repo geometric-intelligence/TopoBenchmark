@@ -9,10 +9,12 @@ from topobenchmarkx.transforms.data_manipulations.manipulations import (
     NodeDegrees,
     NodeFeaturesToFloat,
     OneHotDegreeFeatures,
-    RemoveExtraFeatureFromProteins,
+    CalculateSimplicialCurvature,
+    KeepOnlyConnectedComponent,
 )
 from topobenchmarkx.transforms.feature_liftings.feature_liftings import (
     ProjectionLifting,
+    ConcatentionLifting,
 )
 from topobenchmarkx.transforms.liftings.graph2cell import CellCyclesLifting
 from topobenchmarkx.transforms.liftings.graph2hypergraph import (
@@ -36,14 +38,16 @@ TRANSFORMS = {
     "CellCyclesLifting": CellCyclesLifting,
     # Feature Liftings
     "ProjectionLifting": ProjectionLifting,
+    "ConcatentionLifting": ConcatentionLifting,
     # Data Manipulations
     "Identity": IdentityTransform,
     "DataFieldsToDense": DataFieldsToDense,
     "NodeDegrees": NodeDegrees,
-    "RemoveExtraFeatureFromProteins": RemoveExtraFeatureFromProteins,
     "OneHotDegreeFeatures": OneHotDegreeFeatures,
     "EqualGausFeatures": EqualGausFeatures,
     "NodeFeaturesToFloat": NodeFeaturesToFloat,
+    "CalculateSimplicialCurvature": CalculateSimplicialCurvature,
+    "KeepOnlyConnectedComponent": KeepOnlyConnectedComponent,
 }
 
 

@@ -84,7 +84,14 @@ class NodeDegrees(torch_geometric.transforms.BaseTransform):
         self.parameters = kwargs
 
     def forward(self, data: torch_geometric.data.Data) -> dict:
-        for field in self.parameters["selected_fields"]:
+
+        field_to_process = []
+        for key in data.keys():
+            for field_substring in self.parameters["selected_fields"]:
+                if field_substring in key and key != "incidence_0":
+                    field_to_process.append(key)
+
+        for field in field_to_process:
             data = self.calculate_node_degrees(data, field)
 
         return data
@@ -93,29 +100,92 @@ class NodeDegrees(torch_geometric.transforms.BaseTransform):
         self, data: torch_geometric.data.Data, field: str
     ) -> torch.Tensor:
         if data[field].is_sparse:
-            indices = data[field].indices()
-            degrees = torch_geometric.utils.degree(indices[0])
+            degrees = data[field].to_dense().sum(1)
         else:
-            degrees = torch_geometric.utils.degree(data[field][0])
-
-        # assert degrees.size(0) == data.x.size(
-        #     0
-        # ), "Node degrees and node features must have the same size!"
-        if field == "edge_index":
-            name_degrees = "node_degrees"
-        elif field == "incidence_1":
-            name_degrees = "x_0_degrees"
-        elif field == "incidence_2":
-            name_degrees = "x_1_degrees"
+            degrees = data[field].sum(1)
+            
+        if "incidence" in field:
+            field_name = str(int(field.split("_")[1]) - 1) +"_cell" + "_degrees"
         else:
-            pass
+            field_name = "node_degrees"
 
-        data[name_degrees] = degrees
+        data[field_name] = degrees.unsqueeze(1)
         return data
 
     def __call__(self, data):
         return self.forward(data)
 
+class KeepOnlyConnectedComponent(torch_geometric.transforms.BaseTransform):
+    def __init__(self, **kwargs):
+        super().__init__()
+        self.type = "keep_connected_component"
+        self.parameters = kwargs
+
+    def forward(self, data: torch_geometric.data.Data) -> dict:
+        from torch_geometric.transforms import LargestConnectedComponents
+        # torch_geometric.transforms.largest_connected_components()
+        num_components = self.parameters['num_components']
+        lcc = LargestConnectedComponents(num_components=num_components, connection='strong')
+        data = lcc(data)
+        return data
+
+    def __call__(self, data):
+        return self.forward(data)
+
+class CalculateSimplicialCurvature(torch_geometric.transforms.BaseTransform):
+    def __init__(self, **kwargs):
+        super().__init__()
+        self.type = "simplicial_curvature"
+        self.parameters = kwargs
+
+    def forward(self, data: torch_geometric.data.Data) -> dict:
+        data = self.one_cell_curvature(data)
+        data = self.zero_cell_curvature(data)
+        data = self.two_cell_curvature(data)
+        return data
+
+    def zero_cell_curvature(
+        self, data: torch_geometric.data.Data, 
+    ) -> torch_geometric.data.Data:
+        data["0_cell_curvature"] = torch.mm(abs(data['incidence_1']), data['1_cell_curvature'])
+        return data
+    
+    def one_cell_curvature(
+        self, data: torch_geometric.data.Data, 
+    ) -> torch_geometric.data.Data:
+        data["1_cell_curvature"] = 4 - torch.mm(abs(data['incidence_1']).T, data['0_cell_degrees']) + 3 * data['1_cell_degrees']
+        return data
+    
+    def two_cell_curvature(
+        self, data: torch_geometric.data.Data, 
+    ) -> torch.Tensor:
+        term1 = data['2_cell_degrees']
+    
+        # Find triangles that belong to multiple tetrahedrons
+        two_cell_degrees = data['2_cell_degrees'].clone()
+        idx = torch.where(data['2_cell_degrees']>1)[0]
+        two_cell_degrees[idx] = 0
+
+        # Find all triangles that belong to at least one tetrahedron
+        idx = torch.where(data['2_cell_degrees']>0)[0]
+
+        incidence_2 = data['incidence_2'].to_dense().clone()
+        
+        # Keep only those triangles that belong to at least one tetrahedron
+        incidence_2_subset = incidence_2[:, idx]
+
+        # Find 1-cell (edge) degrees aka find the number of triangles that every 1-cell belongs to
+        one_cell_degreees_subset = incidence_2_subset.sum(1, keepdim=True)
+
+        # Check the condition
+        one_cell_degrees_conditioned = (one_cell_degreees_subset == data['1_cell_degrees']) * data['1_cell_degrees']
+        term2 = torch.mm(abs(data['incidence_2']).T, one_cell_degrees_conditioned)
+        data["2_cell_curvature"] = 3 + term1 - term2
+
+        return data
+
+    def __call__(self, data):
+        return self.forward(data)
 
 class OneHotDegreeFeatures(torch_geometric.transforms.BaseTransform):
     def __init__(self, **kwargs):
@@ -134,7 +204,6 @@ class OneHotDegreeFeatures(torch_geometric.transforms.BaseTransform):
 
     def __call__(self, data):
         return self.forward(data)
-
 
 class OneHotDegree(torch_geometric.transforms.BaseTransform):
     r"""Adds the node degree as one hot encodings to the node features
@@ -177,7 +246,6 @@ class OneHotDegree(torch_geometric.transforms.BaseTransform):
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}({self.max_degree})"
 
-
 class KeepSelectedDataFields(torch_geometric.transforms.BaseTransform):
     def __init__(self, **kwargs):
         super().__init__()
@@ -185,48 +253,52 @@ class KeepSelectedDataFields(torch_geometric.transforms.BaseTransform):
         self.parameters = kwargs
 
     def forward(self, data: torch_geometric.data.Data) -> dict:
-        self.parameters["keep_fields"]
-        for key, _ in data.items():
-            if key not in self.parameters["keep_fields"]:
-                del data[key]
+        # Keeps all the fields
+        if len(self.parameters["keep_fields"]) == 1:
+            return data
+    
+        else:
+            for key, _ in data.items():
+                if key not in self.parameters["keep_fields"]:
+                    del data[key]
         return data
 
     def __call__(self, data):
         return self.forward(data)
 
 
-class RemoveExtraFeatureFromProteins(torch_geometric.transforms.BaseTransform):
-    """Remove extra features from the proteins dataset
+# class RemoveExtraFeatureFromProteins(torch_geometric.transforms.BaseTransform):
+#     """Remove extra features from the proteins dataset
 
-    While loading with pretransform, the proteins dataset has extra features
-    that are not present in the original dataset. This transform removes the
-    extra features.
-    The extra features is supposed to be added when use_node_attr=True, but
-    even with use_node_attr=False and passed pre_transforms, the extra features
-    are removed from data.x after pre_transforms are applied.
+#     While loading with pretransform, the proteins dataset has extra features
+#     that are not present in the original dataset. This transform removes the
+#     extra features.
+#     The extra features is supposed to be added when use_node_attr=True, but
+#     even with use_node_attr=False and passed pre_transforms, the extra features
+#     are removed from data.x after pre_transforms are applied.
 
-    HardCoded solution
-    """
+#     HardCoded solution
+#     """
 
-    def __init__(self, **kwargs):
-        super().__init__()
-        self.type = "remove_extra_features_from_proteins"
-        self.parameters = kwargs
+#     def __init__(self, **kwargs):
+#         super().__init__()
+#         self.type = "remove_extra_features_from_proteins"
+#         self.parameters = kwargs
 
-    def forward(self, data: torch_geometric.data.Data) -> dict:
-        dim_slice = self.parameters["remove_first_n_features"]
-        search_field = self.parameters["search_field"]
-        # Find all the fields that contain the search_field
-        fields = [key for key in data.keys() if "x" in key and len(key) == 1]
+#     def forward(self, data: torch_geometric.data.Data) -> dict:
+#         dim_slice = self.parameters["remove_first_n_features"]
+#         search_field = self.parameters["search_field"]
+#         # Find all the fields that contain the search_field
+#         fields = [key for key in data.keys() if "x" in key and len(key) == 1]
 
-        for field in fields:
-            assert (
-                self.parameters["expected_number_of_features"]
-                == data[field][:, dim_slice:].shape[1]
-            ), "The expected number of features does not match the number of features in the data"
-            data[field] = data[field][:, dim_slice:]
+#         for field in fields:
+#             assert (
+#                 self.parameters["expected_number_of_features"]
+#                 == data[field][:, dim_slice:].shape[1]
+#             ), "The expected number of features does not match the number of features in the data"
+#             data[field] = data[field][:, dim_slice:]
 
-        return data
+#         return data
 
-    def __call__(self, data):
-        return self.forward(data)
+#     def __call__(self, data):
+#         return self.forward(data)

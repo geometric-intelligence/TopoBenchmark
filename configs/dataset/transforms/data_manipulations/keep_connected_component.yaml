@@ -1,5 +1,4 @@
 _target_: topobenchmarkx.transforms.data_transform.DataTransform
-transform_name: "NodeDegrees"
+transform_name: "KeepOnlyConnectedComponent"
 transform_type: "data manipulation"
-selected_fields: ["edge_index", "incidence"]
-
+num_components: 1

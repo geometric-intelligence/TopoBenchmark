@@ -28,10 +28,7 @@ OmegaConf.register_new_resolver("infer_in_channels", infer_in_channels)
 OmegaConf.register_new_resolver(
     "parameter_multiplication", lambda x, y: int(int(x) * int(y))
 )
-from topobenchmarkx.data.dataloader_fullbatch import (  # TorchGeometricBatchDataModule,
-    DefaultDataModule,
-    FullBatchDataModule,
-)
+from topobenchmarkx.data.dataloader_fullbatch import DefaultDataModule
 from topobenchmarkx.utils import (
     RankedLogger,
     extras,

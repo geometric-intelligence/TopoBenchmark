@@ -1,5 +1,6 @@
 _target_: topobenchmarkx.transforms.data_transform.DataTransform
-transform_name: "NodeDegrees"
+transform_name: "KeepSelectedFields"
 transform_type: "data manipulation"
-selected_fields: ["edge_index", "incidence"]
 
+keep_fields:
+  - "x"

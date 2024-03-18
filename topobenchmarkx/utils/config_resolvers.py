@@ -63,24 +63,33 @@ def infer_in_channels(dataset):
                     lifting
                 ].complex_dim
             
-            else: 
+            elif feature_lifting == 'concatenation':
                 return_value = [dataset.parameters.num_features]
                 for i in range(2, dataset.transforms[lifting].complex_dim + 1):
                     return_value += [int(dataset.parameters.num_features * i)]
 
                 return return_value
+            
+            else:
+                return [dataset.parameters.num_features] * dataset.transforms[
+                    lifting
+                ].complex_dim
         else:
             if not dataset.transforms[lifting].preserve_edge_attr:
                 if feature_lifting == 'projection':
                     return [dataset.parameters.num_features[0]] * dataset.transforms[
                         lifting
                     ].complex_dim
-                else:
+                elif feature_lifting == 'concatenation':
                     return_value = [dataset.parameters.num_features]
                     for i in range(2, dataset.transforms[lifting].complex_dim + 1):
                         return_value += [int(dataset.parameters.num_features * i)]
 
                     return return_value
+                else:
+                    return [dataset.parameters.num_features] * dataset.transforms[
+                    lifting
+                    ].complex_dim
 
             else:
                 return list(dataset.parameters.num_features) + [

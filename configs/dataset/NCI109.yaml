@@ -16,6 +16,7 @@ parameters:
   num_classes: 2
   task: classification
   loss_type: cross_entropy
+  monitor_metric: accuracy
   task_level: graph
   data_seed: 0
   split_type: 'k-fold' # either k-fold or test

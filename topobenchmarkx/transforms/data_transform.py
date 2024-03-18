@@ -15,6 +15,7 @@ from topobenchmarkx.transforms.data_manipulations.manipulations import (
 from topobenchmarkx.transforms.feature_liftings.feature_liftings import (
     ProjectionLifting,
     ConcatentionLifting,
+    SetLifting
 )
 from topobenchmarkx.transforms.liftings.graph2cell import CellCyclesLifting
 from topobenchmarkx.transforms.liftings.graph2hypergraph import (
@@ -39,6 +40,7 @@ TRANSFORMS = {
     # Feature Liftings
     "ProjectionLifting": ProjectionLifting,
     "ConcatentionLifting": ConcatentionLifting,
+    "SetLifting": SetLifting,
     # Data Manipulations
     "Identity": IdentityTransform,
     "DataFieldsToDense": DataFieldsToDense,

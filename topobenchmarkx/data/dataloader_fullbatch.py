@@ -54,6 +54,10 @@ def collate_fn(batch):
     """
     data_list = []
     batch_idx_dict = defaultdict(list)
+
+    # Keep track of the running index for each cell dimension
+    running_idx = {}
+
     for batch_idx, b in enumerate(batch):
         values, keys = b[0], b[1]
         data = MyData()
@@ -65,10 +69,24 @@ def collate_fn(batch):
         # Generate batch_slice values for x_2, x_3, ...
         x_keys = [el for el in keys if ("x_" in el)]
         for x_key in x_keys:
+            cell_dim = int(x_key.split("_")[1])
+            current_number_of_nodes = data["x_0"].shape[0]
+            current_number_of_cells = data[x_key].shape[0]
+            
             if x_key != "x_0":
-                batch_idx_dict[f"batch_{x_key.split('_')[1]}"].append(
-                    torch.tensor([[batch_idx] * data[x_key].shape[0]])
+                batch_idx_dict[f"batch_{cell_dim}"].append(
+                    torch.tensor([[batch_idx] * current_number_of_cells])
                 )
+
+                
+                if running_idx.get(f'cell_running_idx_number_{cell_dim}') is None:
+                    running_idx[f'cell_running_idx_number_{cell_dim}'] = current_number_of_nodes
+                else:
+                    # Make sure the idx is contiguous and refer to approriate x_0 in settransformer
+                    data[f'x_{cell_dim}'] = (data[f'x_{cell_dim}'] + running_idx[f'cell_running_idx_number_{cell_dim}']).long()
+                    running_idx[f'cell_running_idx_number_{cell_dim}'] += current_number_of_nodes
+                
+                
 
         data_list.append(data)
     batch = Batch.from_data_list(data_list)

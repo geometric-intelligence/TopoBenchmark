@@ -64,42 +64,25 @@ class SANWrapper(DefaultWrapper):
         return model_out
 
 
-# TODO: relocate this function to a more appropriate location
-# def normalize_matrix(matrix):
-#     import numpy as np
-#     import scipy as sp
-#     from topomodelx.utils.sparse import from_sparse
-
-#     matrix = matrix.to_dense().numpy()
-#     m, n = matrix.shape
-#     diags_ = abs(matrix).sum(axis=1)
-
-#     with np.errstate(divide="ignore"):
-#         diags_sqrt = 1.0 / np.sqrt(diags_)
-#     diags_sqrt[np.isinf(diags_sqrt)] = 0
-#     diags_sqrt = sp.sparse.csr_array(
-#         sp.sparse.spdiags(diags_sqrt.T, 0, m, n, format="csr")
-#     )
-#     return from_sparse(sp.sparse.csr_matrix(diags_sqrt @ (matrix @ diags_sqrt)))
- 
-
 # TODO: finish proper normalization
 def normalize_matrix(matrix):
-    
     matrix = matrix.to_dense()
-    n,_ = matrix.shape
+    n, _ = matrix.shape
     abs_matrix = abs(matrix)
     diag_sum = abs_matrix.sum(axis=1)
-    
+
     # Handle division by zero
     idxs = torch.where(diag_sum != 0)
     diag_sum[idxs] = 1.0 / torch.sqrt(diag_sum[idxs])
 
-    
     diag_indices = torch.stack([torch.arange(n), torch.arange(n)])
-    diag_matrix = torch.sparse_coo_tensor(diag_indices, diag_sum, matrix.shape, device=matrix.device).coalesce()
+    diag_matrix = torch.sparse_coo_tensor(
+        diag_indices, diag_sum, matrix.shape, device=matrix.device
+    ).coalesce()
     normalized_matrix = diag_matrix @ (matrix @ diag_matrix)
-    return torch.sparse_coo_tensor(normalized_matrix.nonzero().T, normalized_matrix[normalized_matrix != 0], (n,n))
+    return torch.sparse_coo_tensor(
+        normalized_matrix.nonzero().T, normalized_matrix[normalized_matrix != 0], (n, n)
+    )
 
 
 class SCNWrapper(DefaultWrapper):
@@ -198,6 +181,27 @@ class CANWrapper(DefaultWrapper):
         return model_out
 
 
+class CWNDCMWrapper(DefaultWrapper):
+    """Abstract class that provides an interface to loss logic within network"""
+
+    def __init__(self, backbone):
+        super().__init__(backbone)
+
+    def __call__(self, batch):
+        """Define logic for forward pass"""
+        model_out = {"labels": batch.y, "batch": batch.batch}
+        x_1 = self.backbone(
+            batch.x_1,
+            batch.down_laplacian_1.coalesce(),
+            batch.up_laplacian_1.coalesce(),
+        )
+        x_0 = torch.sparse.mm(batch.incidence_1, x_1)
+
+        model_out["x_1"] = x_1
+        model_out["x_0"] = x_0
+        return model_out
+
+
 class CWNWrapper(DefaultWrapper):
     """Abstract class that provides an interface to loss logic within network"""
 
@@ -216,8 +220,9 @@ class CWNWrapper(DefaultWrapper):
             neighborhood_2_to_1=batch.incidence_2,
         )
 
-
-        model_out["x_0"] = torch.mm(batch.incidence_1, x_1) # + torch.mm(batch.incidence_1,torch.mm(batch.incidence_2, x_2))
+        model_out["x_0"] = torch.mm(
+            batch.incidence_1, x_1
+        )  # + torch.mm(batch.incidence_1,torch.mm(batch.incidence_2, x_2))
         model_out["x_1"] = x_1
         model_out["x_2"] = x_2
         return model_out

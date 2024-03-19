@@ -181,6 +181,27 @@ class CANWrapper(DefaultWrapper):
         return model_out
 
 
+class CWNDCMWrapper(DefaultWrapper):
+    """Abstract class that provides an interface to loss logic within network"""
+
+    def __init__(self, backbone):
+        super().__init__(backbone)
+
+    def __call__(self, batch):
+        """Define logic for forward pass"""
+        model_out = {"labels": batch.y, "batch": batch.batch}
+        x_1 = self.backbone(
+            batch.x_1,
+            batch.down_laplacian_1.coalesce(),
+            batch.up_laplacian_1.coalesce(),
+        )
+        x_0 = torch.sparse.mm(batch.incidence_1, x_1)
+
+        model_out["x_1"] = x_1
+        model_out["x_0"] = x_0
+        return model_out
+
+
 class CWNWrapper(DefaultWrapper):
     """Abstract class that provides an interface to loss logic within network"""
 

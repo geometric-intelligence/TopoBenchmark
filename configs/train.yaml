@@ -4,13 +4,8 @@
 # order of defaults determines the order in which configs override each other
 defaults:
   - _self_
-<<<<<<< HEAD
   - dataset: ZINC
   - model: simplicial/sccnn
-=======
-  - dataset: MUTAG
-  - model: cell/cwn_dcm
->>>>>>> 5147457747cb1ff196daf17ece6bb1968f3b5d1d
   - evaluator: default
   - callbacks: default
   - logger: wandb # set logger here or use command line (e.g. `python train.py logger=tensorboard`)

@@ -109,8 +109,15 @@ class SCNWrapper(DefaultWrapper):
 class SCCNNWrapper(DefaultWrapper):
     """Abstract class that provides an interface to loss logic within network"""
 
-    def __init__(self, backbone):
+    def __init__(self, backbone, **kwargs):
         super().__init__(backbone)
+        import topomodelx
+        if kwargs.get("out_channels", False):
+            self.agg_conv_1 = topomodelx.base.conv.Conv(kwargs["out_channels"], kwargs["out_channels"], aggr_norm=False)
+            self.agg_conv_2 = topomodelx.base.conv.Conv(kwargs["out_channels"], kwargs["out_channels"], aggr_norm=False)
+            from torch_geometric.nn.norm import GraphNorm
+            self.norm_1 = GraphNorm(kwargs["out_channels"])
+            self.norm_2 = GraphNorm(kwargs["out_channels"])
 
     def __call__(self, batch):
         """Define logic for forward pass"""
@@ -125,9 +132,19 @@ class SCCNNWrapper(DefaultWrapper):
         )
         incidence_all = (batch.incidence_1, batch.incidence_2)
         x_0, x_1, x_2 = self.backbone(x_all, laplacian_all, incidence_all)
-        model_out["x_0"] = x_0
-        model_out["x_1"] = x_1
+        
+        
+        # model_out["x_2"] = x_2
+        # model_out["x_1"] = x_1
+        # model_out["x_0"] = x_0
+        
         model_out["x_2"] = x_2
+        model_out["x_1"] = self.norm_1(x_1 + self.agg_conv_1(model_out["x_2"], batch.incidence_2), batch.batch_1)
+        model_out["x_0"] = self.norm_2(x_0 + self.agg_conv_2(model_out["x_1"], batch.incidence_1), batch.batch)
+
+        # model_out["x_2"] = x_2
+        # model_out["x_1"] = self.norm_1(x_1, batch.batch_1)
+        # model_out["x_0"] = self.norm_2(x_0, batch.batch)
         return model_out
 
 

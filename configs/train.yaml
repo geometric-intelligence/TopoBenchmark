@@ -5,11 +5,11 @@
 defaults:
   - _self_
   - dataset: ZINC
-  - model: simplicial/sccnn
+  - model: simplicial/sccnn_custom
   - evaluator: default
   - callbacks: default
   - logger: wandb # set logger here or use command line (e.g. `python train.py logger=tensorboard`)
-  - trainer: cpu
+  - trainer: default
   - paths: default
   - extras: default
   - hydra: default

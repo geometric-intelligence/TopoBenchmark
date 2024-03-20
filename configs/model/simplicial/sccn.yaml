@@ -3,7 +3,7 @@ _target_: topobenchmarkx.models.network_module.NetworkModule
 feature_encoder:
   _target_: topobenchmarkx.models.encoders.default_encoders.BaseFeatureEncoder
   in_channels: ${infer_in_channels:${dataset}} #${dataset.parameters.num_features}
-  out_channels: 32
+  out_channels: 128
 
 backbone:
   _target_: topomodelx.nn.simplicial.sccn.SCCN
@@ -26,6 +26,7 @@ readout:
   task_level: ${dataset.parameters.task_level}
   in_channels: ${model.backbone.channels}
   out_channels: ${dataset.parameters.num_classes}
+  pooling_type: sum
 
 # readout_workaround:
 #   _target_: topobenchmarkx.models.readout_workaround.ReadOutWorkaround

@@ -34,9 +34,9 @@ class CW(nn.Module):
         return z_h + z_s + z_i
 
 
-class CWN(nn.Module):
+class CWNDCM(nn.Module):
     def __init__(self, in_channels, n_layers=2, dropout=0.0, last_act=False):
-        super(CWN, self).__init__()
+        super(CWNDCM, self).__init__()
         self.d = dropout
         self.convs = nn.ModuleList()
         self.last_act = last_act

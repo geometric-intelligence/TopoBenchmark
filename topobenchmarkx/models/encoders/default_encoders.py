@@ -15,9 +15,9 @@ class BaseEncoder(torch.nn.Module):
         self.dropout = torch.nn.Dropout(dropout)
 
     def forward(self, x: torch.Tensor, batch: torch.Tensor) -> torch.Tensor:
-        x = self.dropout(self.linear1(x))
+        x = self.linear1(x)
         x = self.BN(x, batch=batch) if batch.shape[0] > 0 else self.BN(x)
-        x = self.relu(x)
+        x = self.dropout(self.relu(x))
         x = self.linear2(x)
         return x
 
@@ -84,7 +84,7 @@ class SetFeatureEncoder(AbstractInitFeaturesEncoder):
                     f"encoder_{i}",
                     Perceiver(
                         dim=self.out_channels,
-                        depth=idx + 1,
+                        depth=1,
                         cross_heads=4,
                         cross_dim_head=self.out_channels,
                         latent_dim_head=self.out_channels,

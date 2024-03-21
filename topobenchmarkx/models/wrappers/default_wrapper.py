@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
 
 import torch
-
+import topomodelx
+from torch_geometric.nn.norm import GraphNorm
 
 class DefaultWrapper(ABC, torch.nn.Module):
     """Abstract class that provides an interface to loss logic within netowrk"""
@@ -111,13 +112,14 @@ class SCCNNWrapper(DefaultWrapper):
 
     def __init__(self, backbone, **kwargs):
         super().__init__(backbone)
-        import topomodelx
         if kwargs.get("out_channels", False):
             self.agg_conv_1 = topomodelx.base.conv.Conv(kwargs["out_channels"], kwargs["out_channels"], aggr_norm=False)
             self.agg_conv_2 = topomodelx.base.conv.Conv(kwargs["out_channels"], kwargs["out_channels"], aggr_norm=False)
-            from torch_geometric.nn.norm import GraphNorm
+    
             self.norm_1 = GraphNorm(kwargs["out_channels"])
             self.norm_2 = GraphNorm(kwargs["out_channels"])
+        
+        self.wrapper_readout = kwargs.get("wrapper_readout")
 
     def __call__(self, batch):
         """Define logic for forward pass"""
@@ -133,26 +135,35 @@ class SCCNNWrapper(DefaultWrapper):
         incidence_all = (batch.incidence_1, batch.incidence_2)
         x_0, x_1, x_2 = self.backbone(x_all, laplacian_all, incidence_all)
         
-        
-        # model_out["x_2"] = x_2
-        # model_out["x_1"] = x_1
-        # model_out["x_0"] = x_0
-        
-        model_out["x_2"] = x_2
-        model_out["x_1"] = self.norm_1(x_1 + self.agg_conv_1(model_out["x_2"], batch.incidence_2), batch.batch_1)
-        model_out["x_0"] = self.norm_2(x_0 + self.agg_conv_2(model_out["x_1"], batch.incidence_1), batch.batch)
+        if self.wrapper_readout == 'original':
+            model_out["x_2"] = x_2
+            model_out["x_1"] = x_1
+            model_out["x_0"] = x_0
 
-        # model_out["x_2"] = x_2
-        # model_out["x_1"] = self.norm_1(x_1, batch.batch_1)
-        # model_out["x_0"] = self.norm_2(x_0, batch.batch)
+        elif self.wrapper_readout == 'signal_prop_down':
+            model_out["x_2"] = x_2
+            model_out["x_1"] = self.norm_1(x_1 + self.agg_conv_1(model_out["x_2"], batch.incidence_2), batch.batch_1)
+            model_out["x_0"] = self.norm_2(x_0 + self.agg_conv_2(model_out["x_1"], batch.incidence_1), batch.batch)
+
+        else:
+            raise ValueError(f"Invalid wrapper readout method: {self.wrapper_readout}")
+        
         return model_out
 
 
 class SCCNWrapper(DefaultWrapper):
     """Abstract class that provides an interface to loss logic within network"""
 
-    def __init__(self, backbone):
+    def __init__(self, backbone, **kwargs):
         super().__init__(backbone)
+        if kwargs.get("out_channels", False):
+            self.agg_conv_1 = topomodelx.base.conv.Conv(kwargs["out_channels"], kwargs["out_channels"], aggr_norm=False)
+            self.agg_conv_2 = topomodelx.base.conv.Conv(kwargs["out_channels"], kwargs["out_channels"], aggr_norm=False)
+    
+            self.norm_1 = GraphNorm(kwargs["out_channels"])
+            self.norm_2 = GraphNorm(kwargs["out_channels"])
+        
+        self.wrapper_readout = kwargs.get("wrapper_readout")
 
     def __call__(self, batch):
         """Define logic for forward pass"""
@@ -170,8 +181,41 @@ class SCCNWrapper(DefaultWrapper):
             for r in range(self.backbone.layers[0].max_rank + 1)
         }
         output = self.backbone(features, incidences, adjacencies)
-        for r in range(self.backbone.layers[0].max_rank):
-            model_out[f"x_{r}"] = output[f"rank_{r}"]
+
+        # TODO: First decide which strategy is the best then make code general
+        if len(output) == 3: 
+            x_0, x_1, x_2 = output["rank_0"], output["rank_1"], output["rank_2"]
+            if self.wrapper_readout == 'original':
+                model_out["x_2"] = x_2
+                model_out["x_1"] = x_1
+                model_out["x_0"] = x_0
+
+            elif self.wrapper_readout == 'signal_prop_down':
+                model_out["x_2"] = x_2
+                model_out["x_1"] = self.norm_1(x_1 + self.agg_conv_1(model_out["x_2"], batch.incidence_2), batch.batch_1)
+                model_out["x_0"] = self.norm_2(x_0 + self.agg_conv_2(model_out["x_1"], batch.incidence_1), batch.batch)
+
+            else:
+                raise ValueError(f"Invalid wrapper readout method: {self.wrapper_readout}")
+
+        elif len(output) == 2:
+            x_0, x_1 = output["rank_0"], output["rank_1"]
+            if self.wrapper_readout == 'original':
+                model_out["x_1"] = x_1
+                model_out["x_0"] = x_0
+
+            elif self.wrapper_readout == 'signal_prop_down':
+                model_out["x_1"] = x_1
+                model_out["x_0"] = self.norm_2(x_0 + self.agg_conv_2(model_out["x_1"], batch.incidence_1), batch.batch)
+
+            else:
+                raise ValueError(f"Invalid wrapper readout method: {self.wrapper_readout}")
+        
+        else:
+            raise ValueError(f"Invalid number of output tensors: {len(output)}")
+
+        # for r in range(self.backbone.layers[0].max_rank):
+        #     model_out[f"x_{r}"] = output[f"rank_{r}"]
         return model_out
 
 

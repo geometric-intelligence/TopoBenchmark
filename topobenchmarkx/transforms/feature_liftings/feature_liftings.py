@@ -60,7 +60,7 @@ class ConcatentionLifting(torch_geometric.transforms.BaseTransform):
                     
                     # Obtain the node representations, so it can be combined for higher order features.
                     for i,_ in enumerate(range(int(elem), 1, -1)):
-                        dense_incidence = data["incidence_" + str(int(elem) - 1 - i)].T.to_dense()
+                        dense_incidence = abs(data["incidence_" + str(int(elem) - 1 - i)].T.to_dense())
                         dense_incidence = dense_incidence[positions].sum(dim=1)
                         positions = non_zero_positions(dense_incidence)
                             
@@ -112,7 +112,7 @@ class SetLifting(torch_geometric.transforms.BaseTransform):
                     
                     # Obtain the node representations, so it can be combined for higher order features.
                     for i,_ in enumerate(range(int(elem), 1, -1)):
-                        dense_incidence = data["incidence_" + str(int(elem) - 1 - i)].T.to_dense()
+                        dense_incidence = abs(data["incidence_" + str(int(elem) - 1 - i)].T.to_dense())
                         dense_incidence = dense_incidence[positions].sum(dim=1)
                         positions = non_zero_positions(dense_incidence)
         

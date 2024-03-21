@@ -55,8 +55,6 @@ class BaseFeatureEncoder(AbstractInitFeaturesEncoder):
 
 
 from topobenchmarkx.models.encoders.perceiver import Perceiver
-
-
 class SetFeatureEncoder(AbstractInitFeaturesEncoder):
     def __init__(
         self, in_channels, out_channels, proj_dropout=0, selected_dimensions=None

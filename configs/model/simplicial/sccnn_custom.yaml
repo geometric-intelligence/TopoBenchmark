@@ -20,7 +20,7 @@ backbone:
     - ${model.backbone.in_channels_all[0]}
     - ${model.backbone.in_channels_all[1]}
     - ${model.backbone.in_channels_all[2]}
-  conv_order: 2 # Increasing order make the training unstable 
+  conv_order: 1 # Increasing order make the training unstable 
   sc_order: 3
   aggr_norm: False
   update_func: "sigmoid"
@@ -51,6 +51,7 @@ backbone_wrapper:
   _target_: topobenchmarkx.models.wrappers.default_wrapper.SCCNNWrapper
   _partial_: true
   out_channels: ${model.feature_encoder.out_channels}
+  wrapper_readout: "signal_prop_down"
 
 optimizer:
   _target_: torch.optim.Adam

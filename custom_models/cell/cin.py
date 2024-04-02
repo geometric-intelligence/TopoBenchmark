@@ -211,6 +211,13 @@ class CWNLayer(nn.Module):
             if update_fn is not None
             else _CWNDefaultUpdate(out_channels, out_channels)
         )
+        self.mlp_arrow = MLP(
+            [in_channels_1, in_channels_1, in_channels_1],
+            act='relu',
+            act_first=False,
+            norm=torch.nn.BatchNorm1d(out_channels),
+            # norm_kwargs=self.norm_kwargs,
+        )
 
         self.mlp = MLP(
             [in_channels_2 + in_channels_2, out_channels, out_channels],
@@ -303,10 +310,14 @@ class CWNLayer(nn.Module):
             Architectures of topological deep learning: a survey on topological neural networks (2023).
             https://arxiv.org/abs/2304.10031.
         """
+        # Appendix Eq. 4 right part
         x_convolved_1_to_1 = (1 + self.eps) * x_1 + self.conv_1_to_1(
             x_1, x_2, neighborhood_1_to_1, neighborhood_2_to_1
         )
-        x_convolved_0_to_1 = (1 + self.eps) * x_1 + self.conv_0_to_1(x_0, x_1, neighborhood_0_to_1)
+        x_convolved_1_to_1 = self.mlp_arrow(x_convolved_1_to_1)
+
+        # 
+        x_convolved_0_to_1 = (1 + self.eps) * x_1 + self.conv_0_to_1(x_0, neighborhood_0_to_1)
 
         x_aggregated = self.mlp(torch.cat([x_convolved_0_to_1, x_convolved_1_to_1], dim=-1))
         #x_aggregated = self.aggregate_fn(x_convolved_1_to_1, x_convolved_0_to_1)
@@ -359,13 +370,16 @@ class _CWNDefaultFirstConv(nn.Module):
         torch.Tensor, shape = (n_{r}_cells, out_channels)
             Updated representations on the r-cells.
         """
+        # 
         x_up = F.elu(self.conv_1_to_1(x_1, neighborhood_1_to_1))
         x_up = (1 + self.eps) * x_1 + x_up
+
+
 
         x_coboundary = F.elu(self.conv_2_to_1(x_2, neighborhood_2_to_1))
         x_coboundary = (1 + self.eps) * x_1 + x_coboundary
 
-        return self.mlp(torch.cat([x_up + x_coboundary], dim=-1))
+        return self.mlp(torch.cat([x_up, x_coboundary], dim=-1))
 
 
 class _CWNDefaultSecondConv(nn.Module):
@@ -376,13 +390,13 @@ class _CWNDefaultSecondConv(nn.Module):
     a protocol for the second convolutional step in CWN layer.
     """
 
-    def __init__(self, in_channels_0, in_channels_1, out_channels) -> None:
+    def __init__(self, in_channels_0, out_channels) -> None:
         super().__init__()
         self.conv_0_to_1 = Conv(
             in_channels_0, out_channels, aggr_norm=False, update_func=None
         )
 
-    def forward(self, x_0, x_1, neighborhood_0_to_1):
+    def forward(self, x_0, neighborhood_0_to_1):
         r"""Forward pass.
 
         Parameters

@@ -99,14 +99,14 @@ class NodeDegrees(torch_geometric.transforms.BaseTransform):
         self, data: torch_geometric.data.Data, field: str
     ) -> torch.Tensor:
         if data[field].is_sparse:
-            degrees = data[field].to_dense().sum(1)
+            degrees = abs(data[field].to_dense()).sum(1)
         else:
             assert (
                 field == "edge_index"
             ), "Following logic of finding degrees is only implemented for edge_index"
             degrees = (
                 torch_geometric.utils.to_dense_adj(
-                    data[field], max_num_nodes=data["num_nodes"]
+                    data[field], max_num_nodes=data["x"].shape[0]  # data["num_nodes"]
                 )
                 .squeeze(0)
                 .sum(1)
@@ -181,29 +181,41 @@ class CalculateSimplicialCurvature(torch_geometric.transforms.BaseTransform):
         self,
         data: torch_geometric.data.Data,
     ) -> torch.Tensor:
+        # Term 1 is simply the degree of the 2-cell (i.e. each triangle belong to n tetrahedrons)
         term1 = data["2_cell_degrees"]
+
+        # set diag values to zero
 
         # Find triangles that belong to multiple tetrahedrons
         two_cell_degrees = data["2_cell_degrees"].clone()
         idx = torch.where(data["2_cell_degrees"] > 1)[0]
         two_cell_degrees[idx] = 0
 
-        # Find all triangles that belong to at least one tetrahedron
-        idx = torch.where(data["2_cell_degrees"] > 0)[0]
+        up = data["incidence_3"].to_dense() @ data["incidence_3"].to_dense().T
+        down = data["incidence_2"].to_dense().T @ data["incidence_2"].to_dense()
+        mask = torch.eye(up.size()[0]).bool()
+        up.masked_fill_(mask, 0)
+        down.masked_fill_(mask, 0)
+        diff = (down - up) * 1
+        term2 = diff.sum(1, keepdim=True)
 
-        incidence_2 = data["incidence_2"].to_dense().clone()
+        # # Find all triangles that belong to at least one tetrahedron
+        # idx = torch.where(two_cell_degrees > 0)[0] #torch.where(data["2_cell_degrees"] > 0)[0]
 
-        # Keep only those triangles that belong to at least one tetrahedron
-        incidence_2_subset = incidence_2[:, idx]
+        # # Edges to Triangles incidence matrix
+        # incidence_2 = data["incidence_2"].to_dense().clone()
 
-        # Find 1-cell (edge) degrees aka find the number of triangles that every 1-cell belongs to
-        one_cell_degreees_subset = incidence_2_subset.sum(1, keepdim=True)
+        # # Keep only those triangles that belong to at least one tetrahedron
+        # incidence_2_subset = incidence_2[:, idx]
 
-        # Check the condition
-        one_cell_degrees_conditioned = (
-            one_cell_degreees_subset == data["1_cell_degrees"]
-        ) * data["1_cell_degrees"]
-        term2 = torch.mm(abs(data["incidence_2"]).T, one_cell_degrees_conditioned)
+        # # Find 1-cell (edge) degrees aka find the number of triangles that every 1-cell belongs to
+        # one_cell_degreees_subset = incidence_2_subset.sum(1, keepdim=True)
+
+        # # Check the condition
+        # one_cell_degrees_conditioned = (
+        #     one_cell_degreees_subset == data["1_cell_degrees"]
+        # ) * one_cell_degreees_subset
+        # term2 = torch.mm(abs(data["incidence_2"]).T, one_cell_degrees_conditioned)
         data["2_cell_curvature"] = 3 + term1 - term2
 
         return data

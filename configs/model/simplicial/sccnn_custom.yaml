@@ -3,19 +3,37 @@ _target_: topobenchmarkx.models.network_module.NetworkModule
 feature_encoder:
   _target_: topobenchmarkx.models.encoders.default_encoders.BaseFeatureEncoder
   in_channels: ${infer_in_channels:${dataset}} #${dataset.parameters.num_features}
-  out_channels: 32
+  out_channels: 64
+  selected_dimensions:
+    - 0
+    - 1
+    - 2
+
 
 backbone:
-  _target_: topomodelx.nn.simplicial.scn2.SCN2
-  in_channels_0: ${model.feature_encoder.out_channels}
-  in_channels_1: ${model.feature_encoder.out_channels}
-  in_channels_2: ${model.feature_encoder.out_channels}
+  _target_: custom_models.simplicial.sccnn.SCCNNCusctom
+  in_channels_all:
+    - ${model.feature_encoder.out_channels}
+    - ${model.feature_encoder.out_channels}
+    - ${model.feature_encoder.out_channels}
+  hidden_channels_all:
+    - ${model.backbone.in_channels_all[0]}
+    - ${model.backbone.in_channels_all[1]}
+    - ${model.backbone.in_channels_all[2]}
+  conv_order: 1 # Increasing order make the training unstable 
+  sc_order: 3
+  aggr_norm: False
+  update_func: "sigmoid"
   n_layers: 1
 
 loss:
   _target_: topobenchmarkx.models.losses.loss.DefaultLoss
   task: ${dataset.parameters.task}
   loss_type: ${dataset.parameters.loss_type}
+
+# evaluator:
+#   _target_: topobenchmarkx.evaluators.evaluator.Evaluator
+#   metrics: [acc, rocauc]
 
 readout:
   _target_: topobenchmarkx.models.readouts.default_readouts.GNNBatchReadOut
@@ -24,8 +42,13 @@ readout:
   out_channels: ${dataset.parameters.num_classes}
   pooling_type: sum
 
+# readout_workaround:
+#   _target_: topobenchmarkx.models.readout_workaround.ReadOutWorkaround
+#   backbone_outputs: ["x_0"]
+
+
 backbone_wrapper:
-  _target_: topobenchmarkx.models.wrappers.default_wrapper.SCNWrapper
+  _target_: topobenchmarkx.models.wrappers.default_wrapper.SCCNNWrapper
   _partial_: true
   out_channels: ${model.feature_encoder.out_channels}
   wrapper_readout: "signal_prop_down"
@@ -33,7 +56,7 @@ backbone_wrapper:
 optimizer:
   _target_: torch.optim.Adam
   _partial_: true
-  lr: 0.001 #0.01
+  lr: 0.01 #0.01
   weight_decay: 0.0
 
 scheduler:

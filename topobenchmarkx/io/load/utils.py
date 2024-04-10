@@ -16,7 +16,7 @@ from torch_sparse import coalesce
 from topobenchmarkx.data.datasets import CustomDataset, TorchGeometricDataset
 
 
-def get_complex_connectivity(complex, max_rank):
+def get_complex_connectivity(complex, max_rank, signed=False):
     practical_shape = list(
         np.pad(list(complex.shape), (0, max_rank + 1 - len(complex.shape)))
     )
@@ -32,7 +32,7 @@ def get_complex_connectivity(complex, max_rank):
             try:
                 connectivity[f"{connectivity_info}_{rank_idx}"] = from_sparse(
                     getattr(complex, f"{connectivity_info}_matrix")(
-                        rank=rank_idx, signed=False
+                        rank=rank_idx, signed=signed
                     )
                 )
             except ValueError:

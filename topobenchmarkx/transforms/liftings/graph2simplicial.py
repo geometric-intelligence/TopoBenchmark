@@ -22,6 +22,7 @@ class Graph2SimplicialLifting(GraphLifting):
         super().__init__(**kwargs)
         self.complex_dim = complex_dim
         self.type = "graph2simplicial"
+        self.signed = kwargs.get("signed", False)
 
     @abstractmethod
     def lift_topology(self, data: torch_geometric.data.Data) -> dict:
@@ -30,7 +31,9 @@ class Graph2SimplicialLifting(GraphLifting):
     def _get_lifted_topology(
         self, simplicial_complex: SimplicialComplex, graph: nx.Graph
     ) -> dict:
-        lifted_topology = get_complex_connectivity(simplicial_complex, self.complex_dim)
+        lifted_topology = get_complex_connectivity(
+            simplicial_complex, self.complex_dim, signed=self.signed
+        )
         lifted_topology["x_0"] = torch.stack(
             list(simplicial_complex.get_simplex_attributes("features", 0).values())
         )

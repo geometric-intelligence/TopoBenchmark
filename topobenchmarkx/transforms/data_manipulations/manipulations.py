@@ -12,9 +12,6 @@ class IdentityTransform(torch_geometric.transforms.BaseTransform):
     def forward(self, data: torch_geometric.data.Data) -> dict:
         return data
 
-    def __call__(self, data):
-        return self.forward(data)
-
 
 class EqualGausFeatures(torch_geometric.transforms.BaseTransform):
     def __init__(self, **kwargs):
@@ -33,9 +30,6 @@ class EqualGausFeatures(torch_geometric.transforms.BaseTransform):
         data.x = self.feature_vector.expand(data.num_nodes, -1)
         return data
 
-    def __call__(self, data):
-        return self.forward(data)
-
 
 class NodeFeaturesToFloat(torch_geometric.transforms.BaseTransform):
     def __init__(self, **kwargs):
@@ -45,36 +39,6 @@ class NodeFeaturesToFloat(torch_geometric.transforms.BaseTransform):
     def forward(self, data: torch_geometric.data.Data) -> dict:
         data.x = data.x.float()
         return data
-
-    def __call__(self, data):
-        return self.forward(data)
-
-
-class DataFieldsToDense(torch_geometric.transforms.BaseTransform):
-    def __init__(self, **kwargs):
-        super().__init__()
-        self.type = "datafields2dense"
-        self.parameters = kwargs
-
-    def forward(self, data: torch_geometric.data.Data) -> dict:
-        raise NotImplementedError
-        # # Move the data fields to dense if data[key] is sparse
-        # for key, value in data.items():
-        #     if hasattr(value, "to_dense"):
-        #         data[key] = value.to_dense()
-
-        # # # Workaround for the batch attribute
-        # # for key, value in data.items():
-        # #     # Check if values is a tensor
-        # #     if type(data[key]) == torch.Tensor:
-        # #         data[key] = value.unsqueeze(1)
-        # #     else:
-        # #         data[key] = torch.tensor(data[key]).unsqueeze(0)
-
-        # return data
-
-    def __call__(self, data):
-        return self.forward(data)
 
 
 class NodeDegrees(torch_geometric.transforms.BaseTransform):
@@ -120,17 +84,30 @@ class NodeDegrees(torch_geometric.transforms.BaseTransform):
         data[field_name] = degrees.unsqueeze(1)
         return data
 
-    def __call__(self, data):
-        return self.forward(data)
-
 
 class KeepOnlyConnectedComponent(torch_geometric.transforms.BaseTransform):
+    """
+    A transform that keeps only the largest connected components of the input graph.
+
+    Args:
+        **kwargs: Parameters for the transform.
+    """
+
     def __init__(self, **kwargs):
         super().__init__()
         self.type = "keep_connected_component"
         self.parameters = kwargs
 
     def forward(self, data: torch_geometric.data.Data) -> dict:
+        """
+        Apply the transform to the input data.
+
+        Args:
+            data: The input data.
+
+        Returns:
+            The transformed data.
+        """
         from torch_geometric.transforms import LargestConnectedComponents
 
         # torch_geometric.transforms.largest_connected_components()
@@ -141,17 +118,30 @@ class KeepOnlyConnectedComponent(torch_geometric.transforms.BaseTransform):
         data = lcc(data)
         return data
 
-    def __call__(self, data):
-        return self.forward(data)
-
 
 class CalculateSimplicialCurvature(torch_geometric.transforms.BaseTransform):
+    """
+    A transform that calculates the simplicial curvature of the input graph.
+
+    Args:
+        **kwargs: Parameters for the transform.
+    """
+
     def __init__(self, **kwargs):
         super().__init__()
         self.type = "simplicial_curvature"
         self.parameters = kwargs
 
     def forward(self, data: torch_geometric.data.Data) -> dict:
+        """
+        Apply the transform to the input data.
+
+        Args:
+            data: The input data.
+
+        Returns:
+            The transformed data.
+        """
         data = self.one_cell_curvature(data)
         data = self.zero_cell_curvature(data)
         data = self.two_cell_curvature(data)
@@ -161,6 +151,15 @@ class CalculateSimplicialCurvature(torch_geometric.transforms.BaseTransform):
         self,
         data: torch_geometric.data.Data,
     ) -> torch_geometric.data.Data:
+        """
+        Calculate the zero cell curvature of the input data.
+
+        Args:
+            data: The input data.
+
+        Returns:
+            The data with the calculated zero cell curvature.
+        """
         data["0_cell_curvature"] = torch.mm(
             abs(data["incidence_1"]), data["1_cell_curvature"]
         )
@@ -198,30 +197,9 @@ class CalculateSimplicialCurvature(torch_geometric.transforms.BaseTransform):
         down.masked_fill_(mask, 0)
         diff = (down - up) * 1
         term2 = diff.sum(1, keepdim=True)
-
-        # # Find all triangles that belong to at least one tetrahedron
-        # idx = torch.where(two_cell_degrees > 0)[0] #torch.where(data["2_cell_degrees"] > 0)[0]
-
-        # # Edges to Triangles incidence matrix
-        # incidence_2 = data["incidence_2"].to_dense().clone()
-
-        # # Keep only those triangles that belong to at least one tetrahedron
-        # incidence_2_subset = incidence_2[:, idx]
-
-        # # Find 1-cell (edge) degrees aka find the number of triangles that every 1-cell belongs to
-        # one_cell_degreees_subset = incidence_2_subset.sum(1, keepdim=True)
-
-        # # Check the condition
-        # one_cell_degrees_conditioned = (
-        #     one_cell_degreees_subset == data["1_cell_degrees"]
-        # ) * one_cell_degreees_subset
-        # term2 = torch.mm(abs(data["incidence_2"]).T, one_cell_degrees_conditioned)
         data["2_cell_curvature"] = 3 + term1 - term2
 
         return data
-
-    def __call__(self, data):
-        return self.forward(data)
 
 
 class OneHotDegreeFeatures(torch_geometric.transforms.BaseTransform):
@@ -238,9 +216,6 @@ class OneHotDegreeFeatures(torch_geometric.transforms.BaseTransform):
         )
 
         return data
-
-    def __call__(self, data):
-        return self.forward(data)
 
 
 class OneHotDegree(torch_geometric.transforms.BaseTransform):
@@ -305,6 +280,3 @@ class KeepSelectedDataFields(torch_geometric.transforms.BaseTransform):
                 if key not in self.parameters["keep_fields"]:
                     del data[key]
         return data
-
-    def __call__(self, data):
-        return self.forward(data)

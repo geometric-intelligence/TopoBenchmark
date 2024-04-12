@@ -1,13 +1,12 @@
 from abc import abstractmethod
 
 import networkx as nx
-import torch
 import torch_geometric
 from torch_geometric.utils.undirected import is_undirected, to_undirected
 
 from topobenchmarkx.transforms.feature_liftings.feature_liftings import (
-    ProjectionLifting,
     ConcatentionLifting,
+    ProjectionLifting,
     SetLifting,
 )
 
@@ -41,13 +40,12 @@ class GraphLifting(torch_geometric.transforms.BaseTransform):
         return hasattr(data, "edge_attr") and data.edge_attr is not None
 
     def _generate_graph_from_data(self, data: torch_geometric.data.Data) -> nx.Graph:
-        """
-        """
+        """ """
         # Check if data object have edge_attr, return list of tuples as [(node_id, {'features':data}, 'dim':1)] or ??
         nodes = [(n, dict(features=data.x[n], dim=0)) for n in range(data.x.shape[0])]
-        
+
         if self.preserve_edge_attr and self._data_has_edge_attr(data):
-            # In case edge features are given, assign to every edge features 
+            # In case edge features are given, assign features to every edge
             edge_index, edge_attr = data.edge_index, data.edge_attr if is_undirected(
                 data.edge_index, data.edge_attr
             ) else to_undirected(data.edge_index, data.edge_attr)
@@ -57,7 +55,7 @@ class GraphLifting(torch_geometric.transforms.BaseTransform):
             ]
             self.contains_edge_attr = True
         else:
-            # If edge_attr is not present, return list list of edges 
+            # If edge_attr is not present, return list list of edges
             edges = [
                 (i.item(), j.item())
                 for i, j in zip(data.edge_index[0], data.edge_index[1])

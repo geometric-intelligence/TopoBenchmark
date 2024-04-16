@@ -258,11 +258,12 @@ def load_split(data, cfg):
     data_dir = os.path.join(cfg["data_split_dir"], "train_prop=0.5")
     load_path = f"{data_dir}/split_{cfg['data_seed']}.npz"
     splits = np.load(load_path, allow_pickle=True)
+    # Upload masks
     data.train_mask = torch.from_numpy(splits["train"])
     data.val_mask = torch.from_numpy(splits["valid"])
     data.test_mask = torch.from_numpy(splits["test"])
 
-    # check that all nodes belong to splits
+    # Check that all nodes assigned to splits
     assert (
         torch.unique(
             torch.concat([data.train_mask, data.val_mask, data.test_mask])
@@ -339,32 +340,6 @@ def k_fold_split(dataset, parameters, ignore_negative=True):
 
             np.savez(split_path, **split_idx)
 
-        # valid_num = int(n / k)
-
-        # perm = torch.as_tensor(np.random.permutation(n))
-
-        # for fold_n in range(k):
-        #     train_indices = torch.cat(
-        #         [perm[: valid_num * fold_n], perm[valid_num * (fold_n + 1) :]], dim=0
-        #     )
-        #     val_indices = perm[valid_num * fold_n : valid_num * (fold_n + 1)]
-
-        #     if not ignore_negative:
-        #         return train_indices, val_indices
-
-        #     train_idx = labeled_nodes[train_indices]
-        #     valid_idx = labeled_nodes[val_indices]
-
-        #     split_idx = {"train": train_idx, "valid": valid_idx, "test": valid_idx}
-        #     assert np.all(
-        #         np.sort(
-        #             np.array(split_idx["train"].tolist() + split_idx["valid"].tolist())
-        #         )
-        #         == np.sort(np.arange(len(labels)))
-        #     ), "Not every sample has been loaded."
-
-        #     split_path = os.path.join(split_dir, f"{fold_n}.npz")
-        #     np.savez(split_path, **split_idx)
 
     split_path = os.path.join(split_dir, f"{fold}.npz")
     split_idx = np.load(split_path)
@@ -373,15 +348,18 @@ def k_fold_split(dataset, parameters, ignore_negative=True):
 
 def load_graph_cocitation_split(dataset, cfg):
     data = dataset.data
+    
     if cfg.split_type == "test":
         data = load_split(data, cfg)
         return CustomDataset([data])
+    
     elif cfg.split_type == "k-fold":
         split_idx = k_fold_split(dataset, cfg)
         data.train_mask = split_idx["train"]
         data.val_mask = split_idx["valid"]
         data.test_mask = split_idx["test"]
         return CustomDataset([data])
+    
     else:
         raise NotImplementedError(
             f"split_type {cfg.split_type} not valid. Choose either 'test' or 'k-fold'"

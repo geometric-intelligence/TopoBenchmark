@@ -1,14 +1,19 @@
 from abc import ABC, abstractmethod
 
-import hydra
+import torch_geometric
 from omegaconf import DictConfig
-from torch_geometric.data import Data
 
 # logger = logging.getLogger(__name__)
 
 
 class AbstractLoader(ABC):
-    """Abstract class that provides an interface to load signals (audio)"""
+    """Abstract class that provides an interface to load data.
+
+    Parameters
+    ----------
+    parameters : DictConfig
+        Configuration parameters.
+    """
 
     def __init__(self, parameters: DictConfig):
         self.cfg = parameters
@@ -16,12 +21,16 @@ class AbstractLoader(ABC):
     @abstractmethod
     def load(
         self,
-    ) -> Data:
+    ) -> torch_geometric.data.Data:
         """Load data into Data.
 
-        Parameters:
-          :file: Path to audio file to load
-          :label: Label can be any type, lately passed as a value to the dict
+        Parameters
+        ----------
+        None
 
-        :return:
+        Returns
+        -------
+        Data
+            Data object containing the loaded data.
         """
+        raise NotImplementedError

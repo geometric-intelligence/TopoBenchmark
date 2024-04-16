@@ -13,10 +13,26 @@ from topomodelx.utils.sparse import from_sparse
 from torch_geometric.data import Data
 from torch_sparse import coalesce
 
-from topobenchmarkx.data.datasets import CustomDataset, TorchGeometricDataset
+from topobenchmarkx.data.datasets import CustomDataset
 
 
 def get_complex_connectivity(complex, max_rank, signed=False):
+    r"""Gets the connectivity matrices for the complex.
+
+    Parameters
+    ----------
+    complex : topnetx.CellComplex, topnetx.SimplicialComplex
+        Cell complex.
+    max_rank : int
+        Maximum rank of the complex.
+    signed : bool
+        If True, returns signed connectivity matrices.
+
+    Returns
+    -------
+    dict
+        Dictionary containing the connectivity matrices.
+    """
     practical_shape = list(
         np.pad(list(complex.shape), (0, max_rank + 1 - len(complex.shape)))
     )
@@ -53,14 +69,41 @@ def get_complex_connectivity(complex, max_rank, signed=False):
 
 
 def generate_zero_sparse_connectivity(m, n):
+    r"""Generates a zero sparse connectivity matrix.
+
+    Parameters
+    ----------
+    m : int
+        Number of rows.
+    n : int
+        Number of columns.
+
+    Returns
+    -------
+    torch.sparse_coo_tensor
+        Zero sparse connectivity matrix.
+    """
     return torch.sparse_coo_tensor((m, n)).coalesce()
 
 
 def load_cell_complex_dataset(cfg):
+    r"""Loads cell complex datasets."""
     pass
 
 
 def load_simplicial_dataset(cfg):
+    r"""Loads simplicial datasets.
+
+    Parameters
+    ----------
+    cfg : DictConfig
+        Configuration parameters.
+
+    Returns
+    -------
+    torch_geometric.data.Data
+        Simplicial dataset.
+    """
     if cfg["data_name"] != "KarateClub":
         return NotImplementedError
     data = graph.karate_club(complex_type="simplicial", feat_dim=2)
@@ -141,10 +184,17 @@ def load_simplicial_dataset(cfg):
 
 
 def load_hypergraph_pickle_dataset(cfg):
-    """
-    this will read the citation dataset from HyperGCN, and convert it edge_list to
-    [[ -V- ]]
-     [ -E- ]]
+    r"""Loads hypergraph datasets from pickle files.
+
+    Parameters
+    ----------
+    cfg : DictConfig
+        Configuration parameters.
+
+    Returns
+    -------
+    torch_geometric.data.Data
+        Hypergraph dataset.
     """
     data_dir = cfg["data_dir"]
     print(f"Loading {cfg['data_domain']} dataset name: {cfg['data_name']}")
@@ -240,6 +290,18 @@ def load_hypergraph_pickle_dataset(cfg):
 
 
 def get_Planetoid_pyg(cfg):
+    r"""Loads Planetoid graph datasets from torch_geometric.
+
+    Parameters
+    ----------
+    cfg : DictConfig
+        Configuration parameters.
+
+    Returns
+    -------
+    torch_geometric.data.Data
+        Graph dataset.
+    """
     data_dir, data_name = cfg["data_dir"], cfg["data_name"]
     dataset = torch_geometric.datasets.Planetoid(data_dir, data_name)
     data = dataset.data
@@ -248,6 +310,18 @@ def get_Planetoid_pyg(cfg):
 
 
 def get_TUDataset_pyg(cfg):
+    r"""Loads TU graph datasets from torch_geometric.
+
+    Parameters
+    ----------
+    cfg : DictConfig
+        Configuration parameters.
+
+    Returns
+    -------
+    list
+        List containing the graph dataset.
+    """
     data_dir, data_name = cfg["data_dir"], cfg["data_name"]
     dataset = torch_geometric.datasets.TUDataset(root=data_dir, name=data_name)
     data_lst = [data for data in dataset]
@@ -255,6 +329,20 @@ def get_TUDataset_pyg(cfg):
 
 
 def load_split(data, cfg):
+    r"""Loads the split for the graph dataset.
+
+    Parameters
+    ----------
+    data : torch_geometric.data.Data
+        Graph dataset.
+    cfg : DictConfig
+        Configuration parameters.
+
+    Returns
+    -------
+    torch_geometric.data.Data
+        Graph dataset with the specified split.
+    """
     data_dir = os.path.join(cfg["data_split_dir"], "train_prop=0.5")
     load_path = f"{data_dir}/split_{cfg['data_seed']}.npz"
     splits = np.load(load_path, allow_pickle=True)
@@ -274,13 +362,22 @@ def load_split(data, cfg):
 
 def k_fold_split(dataset, parameters, ignore_negative=True):
     """
-    Returns train and valid indices as in K-Fold Cross-Validation. If the split already exists it loads it automatically, otherwise it creates the split file for the subsequent runs.
+    Returns train and valid indices as in K-Fold Cross-Validation. If the split already exists
+    it loads it automatically, otherwise it creates the split file for the subsequent runs.
 
-    :param dataset: Dataset object containing either one or multiple graphs
-    :param data_dir: The directory where the data is stored, it will be used to store the splits
-    :param parameters: DictConfig containing the parameters for the dataset
-    :param ignore_negative: If True the function ignores negative labels. Default True.
-    :return split_idx: A dictionary containing "train" and "valid" tensors with the respective indices.
+    Parameters
+    ----------
+    dataset : torch_geometric.data.Dataset
+        Graph dataset.
+    parameters : DictConfig
+        Configuration parameters.
+    ignore_negative : bool
+        If True, ignores negative labels.
+
+    Returns
+    -------
+    dict
+        Dictionary containing the train, validation and test indices.
     """
     data_dir = parameters.data_split_dir
     k = parameters.k
@@ -339,39 +436,26 @@ def k_fold_split(dataset, parameters, ignore_negative=True):
 
             np.savez(split_path, **split_idx)
 
-        # valid_num = int(n / k)
-
-        # perm = torch.as_tensor(np.random.permutation(n))
-
-        # for fold_n in range(k):
-        #     train_indices = torch.cat(
-        #         [perm[: valid_num * fold_n], perm[valid_num * (fold_n + 1) :]], dim=0
-        #     )
-        #     val_indices = perm[valid_num * fold_n : valid_num * (fold_n + 1)]
-
-        #     if not ignore_negative:
-        #         return train_indices, val_indices
-
-        #     train_idx = labeled_nodes[train_indices]
-        #     valid_idx = labeled_nodes[val_indices]
-
-        #     split_idx = {"train": train_idx, "valid": valid_idx, "test": valid_idx}
-        #     assert np.all(
-        #         np.sort(
-        #             np.array(split_idx["train"].tolist() + split_idx["valid"].tolist())
-        #         )
-        #         == np.sort(np.arange(len(labels)))
-        #     ), "Not every sample has been loaded."
-
-        #     split_path = os.path.join(split_dir, f"{fold_n}.npz")
-        #     np.savez(split_path, **split_idx)
-
     split_path = os.path.join(split_dir, f"{fold}.npz")
     split_idx = np.load(split_path)
     return split_idx
 
 
 def load_graph_cocitation_split(dataset, cfg):
+    r"""Loads cocitation graph datasets with the specified split.
+
+    Parameters
+    ----------
+    dataset : torch_geometric.data.Dataset
+        Graph dataset.
+    cfg : DictConfig
+        Configuration parameters.
+
+    Returns
+    -------
+    list
+        List containing the train, validation, and test splits.
+    """
     data = dataset.data
     if cfg.split_type == "test":
         data = load_split(data, cfg)
@@ -391,8 +475,29 @@ def load_graph_cocitation_split(dataset, cfg):
 def rand_train_test_idx(
     label, train_prop=0.5, valid_prop=0.25, ignore_negative=True, balance=False, seed=0
 ):
-    """Adapted from https://github.com/CUAI/Non-Homophily-Benchmarks"""
-    """ randomly splits label into train/valid/test splits """
+    """Adapted from https://github.com/CUAI/Non-Homophily-Benchmarks
+    randomly splits label into train/valid/test splits.
+
+    Parameters
+    ----------
+    label : torch.Tensor
+        Label tensor.
+    train_prop : float
+        Proportion of training data.
+    valid_prop : float
+        Proportion of validation data.
+    ignore_negative : bool
+        If True, ignores negative labels.
+    balance : bool
+        If True, balances the classes.
+    seed : int
+        Random seed.
+
+    Returns
+    -------
+    dict
+        Dictionary containing the train, validation and test indices.
+    """
     # set seed
     torch.manual_seed(seed)
     np.random.seed(seed)
@@ -443,7 +548,21 @@ def rand_train_test_idx(
     return split_idx
 
 
-def get_tran_val_test_graph_datasets(dataset, split_idx):
+def get_train_val_test_graph_datasets(dataset, split_idx):
+    r"""Splits the graph dataset into train, validation, and test datasets.
+
+    Parameters
+    ----------
+    dataset : torch_geometric.data.Dataset
+        Graph dataset.
+    split_idx : dict
+        Dictionary containing the indices for the train, validation, and test splits.
+
+    Returns
+    -------
+    list
+        List containing the train, validation, and test datasets.
+    """
     data_train_lst, data_val_lst, data_test_lst = [], [], []
 
     # Go over each of the graph and assign correct label
@@ -483,6 +602,20 @@ def get_tran_val_test_graph_datasets(dataset, split_idx):
 
 
 def load_graph_tudataset_split(dataset, cfg):
+    r"""Loads the graph dataset with the specified split.
+
+    Parameters
+    ----------
+    dataset : torch_geometric.data.Dataset
+        Graph dataset.
+    cfg : DictConfig
+        Configuration parameters.
+
+    Returns
+    -------
+    list
+        List containing the train, validation, and test splits.
+    """
     if cfg.split_type == "test":
         labels = dataset.y
         split_idx = rand_train_test_idx(labels)
@@ -493,7 +626,7 @@ def load_graph_tudataset_split(dataset, cfg):
             f"split_type {cfg.split_type} not valid. Choose either 'test' or 'k-fold'"
         )
 
-    train_dataset, val_dataset, test_dataset = get_tran_val_test_graph_datasets(
+    train_dataset, val_dataset, test_dataset = get_train_val_test_graph_datasets(
         dataset, split_idx
     )
 
@@ -501,6 +634,18 @@ def load_graph_tudataset_split(dataset, cfg):
 
 
 def ensure_serializable(obj):
+    r"""Ensures that the object is serializable.
+
+    Parameters
+    ----------
+    obj : object
+        Object to ensure serializability.
+
+    Returns
+    -------
+    object
+        Object that is serializable.
+    """
     if isinstance(obj, dict):
         for key, value in obj.items():
             obj[key] = ensure_serializable(value)
@@ -518,10 +663,19 @@ def ensure_serializable(obj):
 
 
 def make_hash(o):
-    """
-    Makes a hash from a dictionary, list, tuple or set to any level, that contains
-    only other hashable types (including any lists, tuples, sets, and
+    r"""Makes a hash from a dictionary, list, tuple or set to any level, that
+    contains only other hashable types (including any lists, tuples, sets, and
     dictionaries).
+
+    Parameters
+    ----------
+    o : dict, list, tuple, set
+        Object to hash.
+
+    Returns
+    -------
+    int
+        Hash of the object.
     """
     sha1 = hashlib.sha1()
     sha1.update(str.encode(str(o)))

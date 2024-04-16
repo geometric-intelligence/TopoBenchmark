@@ -1,10 +1,8 @@
 # import copy
-import json
 import os
 
-import hydra
+import networkx as nx
 import numpy as np
-import toponetx.datasets.graph as graph
 import torch
 import torch_geometric
 from omegaconf import DictConfig
@@ -13,7 +11,7 @@ from topobenchmarkx.data.datasets import CustomDataset
 from topobenchmarkx.io.load.loader import AbstractLoader
 from topobenchmarkx.io.load.preprocessor import Preprocessor
 from topobenchmarkx.io.load.utils import (
-    get_tran_val_test_graph_datasets,
+    get_train_val_test_graph_datasets,
     load_cell_complex_dataset,
     load_graph_cocitation_split,
     load_graph_tudataset_split,
@@ -24,32 +22,78 @@ from topobenchmarkx.io.load.utils import (
 
 
 class CellComplexLoader(AbstractLoader):
+    r"""Loader for cell complex datasets.
+
+    Parameters
+    ----------
+    parameters : DictConfig
+        Configuration parameters.
+    """
+
     def __init__(self, parameters: DictConfig):
         super().__init__(parameters)
         self.parameters = parameters
 
     def load(
         self,
-    ):
+    ) -> CustomDataset:
+        r"""Load cell complex dataset.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        CustomDataset
+            CustomDataset object containing the loaded data.
+        """
         data = load_cell_complex_dataset(self.parameters)
         dataset = CustomDataset([data])
         return dataset
 
 
 class SimplicialLoader(AbstractLoader):
+    r"""Loader for simplicial datasets.
+
+    Parameters
+    ----------
+    parameters : DictConfig
+        Configuration parameters.
+    """
+
     def __init__(self, parameters: DictConfig):
         super().__init__(parameters)
         self.parameters = parameters
 
     def load(
         self,
-    ):
+    ) -> CustomDataset:
+        r"""Load simplicial dataset.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        CustomDataset
+            CustomDataset object containing the loaded data.
+        """
         data = load_simplicial_dataset(self.parameters)
         dataset = CustomDataset([data])
         return dataset
 
 
 class HypergraphLoader(AbstractLoader):
+    r"""Loader for hypergraph datasets.
+
+    Parameters
+    ----------
+    parameters : DictConfig
+        Configuration parameters.
+    """
+
     def __init__(self, parameters: DictConfig, transforms=None):
         super().__init__(parameters)
         self.parameters = parameters
@@ -57,22 +101,51 @@ class HypergraphLoader(AbstractLoader):
 
     def load(
         self,
-    ):
+    ) -> CustomDataset:
+        r"""Load hypergraph dataset.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        CustomDataset
+            CustomDataset object containing the loaded data.
+        """
         data = load_hypergraph_pickle_dataset(self.parameters)
         data = load_split(data, self.parameters)
         dataset = CustomDataset([data])
-
         return dataset
 
 
 class GraphLoader(AbstractLoader):
+    r"""Loader for graph datasets.
+
+    Parameters
+    ----------
+    parameters : DictConfig
+        Configuration parameters.
+    """
+
     def __init__(self, parameters: DictConfig, transforms=None):
         super().__init__(parameters)
         self.parameters = parameters
         # Still not instantiated
         self.transforms_config = transforms
 
-    def load(self):
+    def load(self) -> CustomDataset:
+        r"""Load graph dataset.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        CustomDataset
+            CustomDataset object containing the loaded data.
+        """
         data_dir = os.path.join(
             self.parameters["data_dir"], self.parameters["data_name"]
         )
@@ -145,7 +218,7 @@ class GraphLoader(AbstractLoader):
                 )
 
             # Split back the into train/val/test datasets
-            dataset = get_tran_val_test_graph_datasets(joined_dataset, split_idx)
+            dataset = get_train_val_test_graph_datasets(joined_dataset, split_idx)
 
         elif self.parameters.data_name in ["AQSOL"]:
             datasets = []
@@ -180,7 +253,7 @@ class GraphLoader(AbstractLoader):
                 )
 
             # Split back the into train/val/test datasets
-            dataset = get_tran_val_test_graph_datasets(joined_dataset, split_idx)
+            dataset = get_train_val_test_graph_datasets(joined_dataset, split_idx)
         else:
             raise NotImplementedError(
                 f"Dataset {self.parameters.data_name} not implemented"
@@ -190,15 +263,32 @@ class GraphLoader(AbstractLoader):
 
 
 class ManualGraphLoader(AbstractLoader):
+    r"""Loader for manual graph datasets.
+
+    Parameters
+    ----------
+    parameters : DictConfig
+        Configuration parameters.
+    """
+
     def __init__(self, parameters: DictConfig, transforms=None):
         super().__init__(parameters)
         self.parameters = parameters
         # Still not instantiated
         self.transforms_config = transforms
 
-    def load(self):
-        import networkx as nx
+    def load(self) -> CustomDataset:
+        r"""Load manual graph dataset.
 
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        CustomDataset
+            CustomDataset object containing the loaded data.
+        """
         # Define the vertices (just 7 vertices)
         vertices = [i for i in range(9)]
         y = [0, 1, 1, 1, 0, 0, 0, 0, 0]

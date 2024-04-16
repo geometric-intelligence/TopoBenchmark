@@ -3,19 +3,19 @@
 import torch_geometric
 
 from topobenchmarkx.transforms.data_manipulations.manipulations import (
+    CalculateSimplicialCurvature,
     DataFieldsToDense,
     EqualGausFeatures,
     IdentityTransform,
+    KeepOnlyConnectedComponent,
     NodeDegrees,
     NodeFeaturesToFloat,
     OneHotDegreeFeatures,
-    CalculateSimplicialCurvature,
-    KeepOnlyConnectedComponent,
 )
 from topobenchmarkx.transforms.feature_liftings.feature_liftings import (
-    ProjectionLifting,
     ConcatentionLifting,
-    SetLifting
+    ProjectionLifting,
+    SetLifting,
 )
 from topobenchmarkx.transforms.liftings.graph2cell import CellCyclesLifting
 from topobenchmarkx.transforms.liftings.graph2hypergraph import (
@@ -54,28 +54,41 @@ TRANSFORMS = {
 
 
 class DataTransform(torch_geometric.transforms.BaseTransform):
-    """Abstract class that provides an interface to define a custom data lifting"""
+    """Abstract class that provides an interface to define a custom data lifting.
+
+    Parameters
+    ----------
+    transform_name : str
+        The name of the transform to be used.
+    **kwargs : optional
+        Additional arguments for the class.
+    """
 
     def __init__(self, transform_name, **kwargs):
         super().__init__()
 
-        self.preserve_parameters(transform_name, **kwargs)
+        kwargs["transform_name"] = transform_name
+        self.parameters = kwargs
 
         self.transform = (
             TRANSFORMS[transform_name](**kwargs) if transform_name is not None else None
         )
 
     def forward(self, data: torch_geometric.data.Data) -> torch_geometric.data.Data:
-        """Forward pass of the lifting"""
-        transformed_data = self.transform(data)  # if self.lifting is not None else data
+        """Forward pass of the lifting.
+
+        Parameters
+        ----------
+        data : torch_geometric.data.Data
+            The input data to be lifted.
+
+        Returns
+        -------
+        torch_geometric.data.Data
+            The lifted data.
+        """
+        transformed_data = self.transform(data)
         return transformed_data
-
-    def __call__(self, data):
-        return self.forward(data)
-
-    def preserve_parameters(self, transform_name, **kwargs):
-        kwargs["transform_name"] = transform_name
-        self.parameters = kwargs
 
 
 if __name__ == "__main__":

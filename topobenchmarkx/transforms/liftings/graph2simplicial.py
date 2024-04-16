@@ -18,6 +18,16 @@ __all__ = [
 
 
 class Graph2SimplicialLifting(GraphLifting):
+    r"""Abstract class for lifting graphs to simplicial complexes.
+
+    Parameters
+    ----------
+    complex_dim : int, optional
+        The dimension of the simplicial complex to be generated. Default is 2.
+    **kwargs : optional
+        Additional arguments for the class.
+    """
+
     def __init__(self, complex_dim=2, **kwargs):
         super().__init__(**kwargs)
         self.complex_dim = complex_dim
@@ -26,11 +36,37 @@ class Graph2SimplicialLifting(GraphLifting):
 
     @abstractmethod
     def lift_topology(self, data: torch_geometric.data.Data) -> dict:
+        r"""Lifts the topology of a graph to simplicial complex domain.
+
+        Parameters
+        ----------
+        data : torch_geometric.data.Data
+            The input data to be lifted.
+
+        Returns
+        -------
+        dict
+            The lifted topology.
+        """
         raise NotImplementedError
 
     def _get_lifted_topology(
         self, simplicial_complex: SimplicialComplex, graph: nx.Graph
     ) -> dict:
+        r"""Returns the lifted topology.
+
+        Parameters
+        ----------
+        simplicial_complex : SimplicialComplex
+            The simplicial complex.
+        graph : nx.Graph
+            The input graph.
+
+        Returns
+        -------
+        dict
+            The lifted topology.
+        """
         lifted_topology = get_complex_connectivity(
             simplicial_complex, self.complex_dim, signed=self.signed
         )
@@ -48,13 +84,33 @@ class Graph2SimplicialLifting(GraphLifting):
 
 
 class SimplicialNeighborhoodLifting(Graph2SimplicialLifting):
-    """ """
+    r"""Lifts graphs to simplicial complex domain by considering k-hop neighborhoods.
+
+    Parameters
+    ----------
+    max_k_simplices : int, optional
+        The maximum number of k-simplices to consider. Default is 5000.
+    **kwargs : optional
+        Additional arguments for the class.
+    """
 
     def __init__(self, max_k_simplices=5000, **kwargs):
         super().__init__(**kwargs)
         self.max_k_simplices = max_k_simplices
 
     def lift_topology(self, data: torch_geometric.data.Data) -> dict:
+        r"""Lifts the topology of a graph to simplicial complex domain by considering k-hop neighborhoods.
+
+        Parameters
+        ----------
+        data : torch_geometric.data.Data
+            The input data to be lifted.
+
+        Returns
+        -------
+        dict
+            The lifted topology.
+        """
         graph = self._generate_graph_from_data(data)
         simplicial_complex = SimplicialComplex(graph)
         edge_index = torch_geometric.utils.to_undirected(data.edge_index)
@@ -69,7 +125,6 @@ class SimplicialNeighborhoodLifting(Graph2SimplicialLifting):
             for i in range(2, self.complex_dim + 1):
                 for c in combinations(neighbors, i + 1):
                     simplices[i - 2].add(tuple(c))
-
         for set_k_simplices in simplices:
             set_k_simplices = list(set_k_simplices)
             if len(set_k_simplices) > self.max_k_simplices:
@@ -80,10 +135,30 @@ class SimplicialNeighborhoodLifting(Graph2SimplicialLifting):
 
 
 class SimplicialCliqueLifting(Graph2SimplicialLifting):
+    r"""Lifts graphs to simplicial complex domain by identifying the cliques as k-simplices.
+
+    Parameters
+    ----------
+    **kwargs : optional
+        Additional arguments for the class.
+    """
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
     def lift_topology(self, data: torch_geometric.data.Data) -> dict:
+        r"""Lifts the topology of a graph to a simplicial complex by identifying the cliques as k-simplices.
+
+        Parameters
+        ----------
+        data : torch_geometric.data.Data
+            The input data to be lifted.
+
+        Returns
+        -------
+        dict
+            The lifted topology.
+        """
         graph = self._generate_graph_from_data(data)
         simplicial_complex = SimplicialComplex(graph)
         cliques = nx.find_cliques(graph)

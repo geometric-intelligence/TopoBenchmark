@@ -12,21 +12,63 @@ __all__ = [
 
 
 class Graph2HypergraphLifting(GraphLifting):
+    r"""Abstract class for lifting graphs to hypergraphs.
+
+    Parameters
+    ----------
+    **kwargs : optional
+        Additional arguments for the class.
+    """
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.type = "graph2hypergraph"
 
     @abstractmethod
     def lift_topology(self, data: torch_geometric.data.Data) -> dict:
+        r"""Lifts the topology of a graph to hypergraph domain.
+
+        Parameters
+        ----------
+        data : torch_geometric.data.Data
+            The input data to be lifted.
+
+        Returns
+        -------
+        dict
+            The lifted topology.
+        """
         raise NotImplementedError
 
 
 class HypergraphKHopLifting(Graph2HypergraphLifting):
+    r"""Lifts graphs to hypergraph domain by considering k-hop neighborhoods.
+
+    Parameters
+    ----------
+    k_value : int, optional
+        The number of hops to consider. Default is 1.
+    **kwargs : optional
+        Additional arguments for the class.
+    """
+
     def __init__(self, k_value=1, **kwargs):
         super().__init__(**kwargs)
         self.k = k_value
 
     def lift_topology(self, data: torch_geometric.data.Data) -> dict:
+        r"""Lifts the topology of a graph to hypergraph domain by considering k-hop neighborhoods.
+
+        Parameters
+        ----------
+        data : torch_geometric.data.Data
+            The input data to be lifted.
+
+        Returns
+        -------
+        dict
+            The lifted topology.
+        """
         # Check if data has instance x:
         if hasattr(data, "x") and data.x is not None:
             num_nodes = data.x.shape[0]
@@ -64,12 +106,34 @@ class HypergraphKHopLifting(Graph2HypergraphLifting):
 
 
 class HypergraphKNearestNeighborsLifting(Graph2HypergraphLifting):
+    r"""Lifts graphs to hypergraph domain by considering k-nearest neighbors.
+
+    Parameters
+    ----------
+    k_value : int, optional
+        The number of nearest neighbors to consider. Default is 1.
+    **kwargs : optional
+        Additional arguments for the class.
+    """
+
     def __init__(self, k_value=1, **kwargs):
         super().__init__()
         self.k = k_value
         self.transform = torch_geometric.transforms.KNNGraph(self.k)
 
     def lift_topology(self, data: torch_geometric.data.Data) -> dict:
+        r"""Lifts the topology of a graph to hypergraph domain by considering k-nearest neighbors.
+
+        Parameters
+        ----------
+        data : torch_geometric.data.Data
+            The input data to be lifted.
+
+        Returns
+        -------
+        dict
+            The lifted topology.
+        """
         num_nodes = data.x.shape[0]
         data.pos = data.x
         num_hyperedges = num_nodes

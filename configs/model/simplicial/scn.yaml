@@ -29,7 +29,7 @@ backbone_wrapper:
   _partial_: true
   out_channels: ${model.feature_encoder.out_channels}
   wrapper_readout: "signal_prop_down"
-  
+
 optimizer:
   _target_: torch.optim.Adam
   _partial_: true

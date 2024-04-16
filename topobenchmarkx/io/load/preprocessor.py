@@ -8,6 +8,20 @@ from topobenchmarkx.io.load.utils import ensure_serializable, make_hash
 
 
 class Preprocessor(torch_geometric.data.InMemoryDataset):
+    r"""Preprocessor for datasets.
+
+    Parameters
+    ----------
+    data_dir : str
+        Path to the directory containing the data.
+    data_list : list
+        List of data objects.
+    transforms_config : DictConfig
+        Configuration parameters for the transforms.
+    **kwargs: optional
+        Additional arguments.
+    """
+
     def __init__(self, data_dir, data_list, transforms_config, **kwargs):
         if isinstance(data_list, torch_geometric.data.Dataset):
             data_list = [data_list.get(idx) for idx in range(len(data_list))]
@@ -21,13 +35,43 @@ class Preprocessor(torch_geometric.data.InMemoryDataset):
 
     @property
     def processed_dir(self) -> str:
+        r"""Return the path to the processed directory.
+
+        Returns
+        -------
+        str
+            Path to the processed directory.
+        """
         return self.root
 
     @property
-    def processed_file_names(self):
+    def processed_file_names(self) -> str:
+        r"""Return the name of the processed file.
+
+        Returns
+        -------
+        str
+            Name of the processed file.
+        """
         return "data.pt"
 
-    def instantiate_pre_transform(self, data_dir, transforms_config):
+    def instantiate_pre_transform(
+        self, data_dir, transforms_config
+    ) -> torch_geometric.transforms.Compose:
+        r"""Instantiate the pre-transforms.
+
+        Parameters
+        ----------
+        data_dir : str
+            Path to the directory containing the data.
+        transforms_config : DictConfig
+            Configuration parameters for the transforms.
+
+        Returns
+        -------
+        torch_geometric.transforms.Compose
+            Pre-transform object.
+        """
         pre_transforms_dict = hydra.utils.instantiate(transforms_config)
         pre_transforms = torch_geometric.transforms.Compose(
             list(pre_transforms_dict.values())
@@ -35,7 +79,20 @@ class Preprocessor(torch_geometric.data.InMemoryDataset):
         self.set_processed_data_dir(pre_transforms_dict, data_dir, transforms_config)
         return pre_transforms
 
-    def set_processed_data_dir(self, pre_transforms_dict, data_dir, transforms_config):
+    def set_processed_data_dir(
+        self, pre_transforms_dict, data_dir, transforms_config
+    ) -> None:
+        r"""Set the processed data directory.
+
+        Parameters
+        ----------
+        pre_transforms_dict : dict
+            Dictionary containing the pre-transforms.
+        data_dir : str
+            Path to the directory containing the data.
+        transforms_config : DictConfig
+            Configuration parameters for the transforms.
+        """
         # Use self.transform_parameters to define unique save/load path for each transform parameters
         repo_name = "_".join(list(transforms_config.keys()))
         transforms_parameters = {
@@ -46,7 +103,8 @@ class Preprocessor(torch_geometric.data.InMemoryDataset):
         self.transforms_parameters = ensure_serializable(transforms_parameters)
         self.processed_data_dir = os.path.join(*[data_dir, repo_name, f"{params_hash}"])
 
-    def save_transform_parameters(self):
+    def save_transform_parameters(self) -> None:
+        r"""Save the transform parameters."""
         # Check if root/params_dict.json exists, if not, save it
         path_transform_parameters = os.path.join(
             self.processed_data_dir, "path_transform_parameters_dict.json"
@@ -66,7 +124,8 @@ class Preprocessor(torch_geometric.data.InMemoryDataset):
                     f"Transform parameters are the same, using existing data_dir: {self.processed_data_dir}"
                 )
 
-    def process(self):
+    def process(self) -> None:
+        r"""Process the data."""
         self.data_list = [self.pre_transform(d) for d in self.data_list]
 
         self.data, self.slices = self.collate(self.data_list)

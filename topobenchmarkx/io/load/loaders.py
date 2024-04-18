@@ -11,12 +11,14 @@ from topobenchmarkx.data.datasets import CustomDataset
 from topobenchmarkx.io.load.loader import AbstractLoader
 from topobenchmarkx.io.load.preprocessor import Preprocessor
 from topobenchmarkx.io.load.utils import (
-    get_train_val_test_graph_datasets,
     load_cell_complex_dataset,
-    load_graph_cocitation_split,
-    load_graph_tudataset_split,
     load_hypergraph_pickle_dataset,
     load_simplicial_dataset,
+)
+from topobenchmarkx.io.load.split_utils import (
+    assing_train_val_test_mask_to_graphs,
+    load_graph_cocitation_split,
+    load_graph_tudataset_split,
     load_split,
 )
 
@@ -159,7 +161,7 @@ class GraphLoader(AbstractLoader):
             )
             if self.transforms_config is not None:
                 dataset = Preprocessor(data_dir, dataset, self.transforms_config)
-
+            
             dataset = load_graph_cocitation_split(dataset, self.parameters)
 
         elif self.parameters.data_name in [
@@ -218,7 +220,7 @@ class GraphLoader(AbstractLoader):
                 )
 
             # Split back the into train/val/test datasets
-            dataset = get_train_val_test_graph_datasets(joined_dataset, split_idx)
+            dataset = assing_train_val_test_mask_to_graphs(joined_dataset, split_idx)
 
         elif self.parameters.data_name in ["AQSOL"]:
             datasets = []
@@ -253,7 +255,7 @@ class GraphLoader(AbstractLoader):
                 )
 
             # Split back the into train/val/test datasets
-            dataset = get_train_val_test_graph_datasets(joined_dataset, split_idx)
+            dataset = assing_train_val_test_mask_to_graphs(joined_dataset, split_idx)
         else:
             raise NotImplementedError(
                 f"Dataset {self.parameters.data_name} not implemented"

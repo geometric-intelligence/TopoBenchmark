@@ -8,12 +8,12 @@ import omegaconf
 import toponetx.datasets.graph as graph
 import torch
 import torch_geometric
-from sklearn.model_selection import StratifiedKFold
 from topomodelx.utils.sparse import from_sparse
 from torch_geometric.data import Data
 from torch_sparse import coalesce
 
-from topobenchmarkx.data.datasets import CustomDataset
+#from sklearn.model_selection import StratifiedKFold
+#from topobenchmarkx.data.datasets import CustomDataset
 
 
 def get_complex_connectivity(complex, max_rank, signed=False):
@@ -328,311 +328,6 @@ def get_TUDataset_pyg(cfg):
     return data_lst
 
 
-def load_split(data, cfg):
-    r"""Loads the split for the graph dataset.
-
-    Parameters
-    ----------
-    data : torch_geometric.data.Data
-        Graph dataset.
-    cfg : DictConfig
-        Configuration parameters.
-
-    Returns
-    -------
-    torch_geometric.data.Data
-        Graph dataset with the specified split.
-    """
-    data_dir = os.path.join(cfg["data_split_dir"], "train_prop=0.5")
-    load_path = f"{data_dir}/split_{cfg['data_seed']}.npz"
-    splits = np.load(load_path, allow_pickle=True)
-    data.train_mask = torch.from_numpy(splits["train"])
-    data.val_mask = torch.from_numpy(splits["valid"])
-    data.test_mask = torch.from_numpy(splits["test"])
-
-    # check that all nodes belong to splits
-    assert (
-        torch.unique(
-            torch.concat([data.train_mask, data.val_mask, data.test_mask])
-        ).shape[0]
-        == data.num_nodes
-    ), "Not all nodes within splits"
-    return data
-
-
-def k_fold_split(dataset, parameters, ignore_negative=True):
-    """
-    Returns train and valid indices as in K-Fold Cross-Validation. If the split already exists
-    it loads it automatically, otherwise it creates the split file for the subsequent runs.
-
-    Parameters
-    ----------
-    dataset : torch_geometric.data.Dataset
-        Graph dataset.
-    parameters : DictConfig
-        Configuration parameters.
-    ignore_negative : bool
-        If True, ignores negative labels.
-
-    Returns
-    -------
-    dict
-        Dictionary containing the train, validation and test indices.
-    """
-    data_dir = parameters.data_split_dir
-    k = parameters.k
-    fold = parameters.data_seed
-    assert fold < k, "data_seed needs to be less than k"
-
-    torch.manual_seed(0)
-    np.random.seed(0)
-
-    split_dir = os.path.join(data_dir, f"{k}-fold")
-    if not os.path.isdir(split_dir):
-        os.makedirs(split_dir)
-    split_path = os.path.join(split_dir, f"{fold}.npz")
-    if os.path.isfile(split_path):
-        split_idx = np.load(split_path)
-        return split_idx
-    else:
-        if parameters.task_level == "graph":
-            labels = dataset.y
-        else:
-            if len(dataset) == 1:
-                labels = dataset.y
-            else:
-                # This is the case of node level task with multiple graphs
-                # Here dataset.y cannot be used to measure the number of elements to associate to the splits
-                labels = torch.ones(len(dataset))
-
-        if ignore_negative:
-            labeled_nodes = torch.where(labels != -1)[0]
-        else:
-            labeled_nodes = labels
-
-        n = labeled_nodes.shape[0]
-
-        if len(dataset) == 1:
-            y = dataset[0].y.squeeze(0).numpy()
-        else:
-            y = np.array([data.y.squeeze(0).numpy() for data in dataset])
-
-        x_idx = np.arange(n)
-        x_idx = np.random.permutation(x_idx)
-        y = y[x_idx]
-
-        skf = StratifiedKFold(n_splits=k, shuffle=True, random_state=42)
-
-        for fold_n, (train_idx, valid_idx) in enumerate(skf.split(x_idx, y)):
-            split_idx = {"train": train_idx, "valid": valid_idx, "test": valid_idx}
-
-            assert np.all(
-                np.sort(
-                    np.array(split_idx["train"].tolist() + split_idx["valid"].tolist())
-                )
-                == np.sort(np.arange(len(labels)))
-            ), "Not every sample has been loaded."
-            split_path = os.path.join(split_dir, f"{fold_n}.npz")
-
-            np.savez(split_path, **split_idx)
-
-    split_path = os.path.join(split_dir, f"{fold}.npz")
-    split_idx = np.load(split_path)
-    return split_idx
-
-
-def load_graph_cocitation_split(dataset, cfg):
-    r"""Loads cocitation graph datasets with the specified split.
-
-    Parameters
-    ----------
-    dataset : torch_geometric.data.Dataset
-        Graph dataset.
-    cfg : DictConfig
-        Configuration parameters.
-
-    Returns
-    -------
-    list
-        List containing the train, validation, and test splits.
-    """
-    data = dataset.data
-    if cfg.split_type == "test":
-        data = load_split(data, cfg)
-        return CustomDataset([data])
-    elif cfg.split_type == "k-fold":
-        split_idx = k_fold_split(dataset, cfg)
-        data.train_mask = split_idx["train"]
-        data.val_mask = split_idx["valid"]
-        data.test_mask = split_idx["test"]
-        return CustomDataset([data])
-    else:
-        raise NotImplementedError(
-            f"split_type {cfg.split_type} not valid. Choose either 'test' or 'k-fold'"
-        )
-
-
-def rand_train_test_idx(
-    label, train_prop=0.5, valid_prop=0.25, ignore_negative=True, balance=False, seed=0
-):
-    """Adapted from https://github.com/CUAI/Non-Homophily-Benchmarks
-    randomly splits label into train/valid/test splits.
-
-    Parameters
-    ----------
-    label : torch.Tensor
-        Label tensor.
-    train_prop : float
-        Proportion of training data.
-    valid_prop : float
-        Proportion of validation data.
-    ignore_negative : bool
-        If True, ignores negative labels.
-    balance : bool
-        If True, balances the classes.
-    seed : int
-        Random seed.
-
-    Returns
-    -------
-    dict
-        Dictionary containing the train, validation and test indices.
-    """
-    # set seed
-    torch.manual_seed(seed)
-    np.random.seed(seed)
-
-    if not balance:
-        if ignore_negative:
-            labeled_nodes = torch.where(label != -1)[0]
-        else:
-            labeled_nodes = label
-
-        n = labeled_nodes.shape[0]
-        train_num = int(n * train_prop)
-        valid_num = int(n * valid_prop)
-
-        perm = torch.as_tensor(np.random.permutation(n))
-
-        train_indices = perm[:train_num]
-        val_indices = perm[train_num : train_num + valid_num]
-        test_indices = perm[train_num + valid_num :]
-
-        if not ignore_negative:
-            return train_indices, val_indices, test_indices
-
-        train_idx = labeled_nodes[train_indices]
-        valid_idx = labeled_nodes[val_indices]
-        test_idx = labeled_nodes[test_indices]
-
-        split_idx = {"train": train_idx, "valid": valid_idx, "test": test_idx}
-    else:
-        #         ipdb.set_trace()
-        indices = []
-        for i in range(label.max() + 1):
-            index = torch.where((label == i))[0].view(-1)
-            index = index[torch.randperm(index.size(0))]
-            indices.append(index)
-
-        percls_trn = int(train_prop / (label.max() + 1) * len(label))
-        val_lb = int(valid_prop * len(label))
-        train_idx = torch.cat([i[:percls_trn] for i in indices], dim=0)
-        rest_index = torch.cat([i[percls_trn:] for i in indices], dim=0)
-        rest_index = rest_index[torch.randperm(rest_index.size(0))]
-        valid_idx = rest_index[:val_lb]
-        test_idx = rest_index[val_lb:]
-        split_idx = {"train": train_idx, "valid": valid_idx, "test": test_idx}
-
-    # Save splits to disk
-
-    return split_idx
-
-
-def get_train_val_test_graph_datasets(dataset, split_idx):
-    r"""Splits the graph dataset into train, validation, and test datasets.
-
-    Parameters
-    ----------
-    dataset : torch_geometric.data.Dataset
-        Graph dataset.
-    split_idx : dict
-        Dictionary containing the indices for the train, validation, and test splits.
-
-    Returns
-    -------
-    list
-        List containing the train, validation, and test datasets.
-    """
-    data_train_lst, data_val_lst, data_test_lst = [], [], []
-
-    # Go over each of the graph and assign correct label
-    for i in range(len(dataset)):
-        graph = dataset[i]
-        assigned = False
-        if i in split_idx["train"]:
-            graph.train_mask = torch.Tensor([1]).long()
-            graph.val_mask = torch.Tensor([0]).long()
-            graph.test_mask = torch.Tensor([0]).long()
-            data_train_lst.append(graph)
-            assigned = True
-
-        if i in split_idx["valid"]:
-            graph.train_mask = torch.Tensor([0]).long()
-            graph.val_mask = torch.Tensor([1]).long()
-            graph.test_mask = torch.Tensor([0]).long()
-            data_val_lst.append(graph)
-            assigned = True
-
-        if i in split_idx["test"]:
-            graph.train_mask = torch.Tensor([0]).long()
-            graph.val_mask = torch.Tensor([0]).long()
-            graph.test_mask = torch.Tensor([1]).long()
-            data_test_lst.append(graph)
-            assigned = True
-        if not assigned:
-            raise ValueError("Graph not in any split")
-
-    datasets = [
-        CustomDataset(data_train_lst),
-        CustomDataset(data_val_lst),
-        CustomDataset(data_test_lst),
-    ]
-
-    return datasets
-
-
-def load_graph_tudataset_split(dataset, cfg):
-    r"""Loads the graph dataset with the specified split.
-
-    Parameters
-    ----------
-    dataset : torch_geometric.data.Dataset
-        Graph dataset.
-    cfg : DictConfig
-        Configuration parameters.
-
-    Returns
-    -------
-    list
-        List containing the train, validation, and test splits.
-    """
-    if cfg.split_type == "test":
-        labels = dataset.y
-        split_idx = rand_train_test_idx(labels)
-    elif cfg.split_type == "k-fold":
-        split_idx = k_fold_split(dataset, cfg)
-    else:
-        raise NotImplementedError(
-            f"split_type {cfg.split_type} not valid. Choose either 'test' or 'k-fold'"
-        )
-
-    train_dataset, val_dataset, test_dataset = get_train_val_test_graph_datasets(
-        dataset, split_idx
-    )
-
-    return [train_dataset, val_dataset, test_dataset]
-
-
 def ensure_serializable(obj):
     r"""Ensures that the object is serializable.
 
@@ -683,3 +378,316 @@ def make_hash(o):
     # convert the hex back to int and restrict it to the relevant int range
     seed = int(hash_as_hex, 16) % 4294967295
     return seed
+
+# Moved to splits_utils.py
+# def load_split(data, cfg):
+#     r"""Loads the split for the graph dataset.
+
+#     Parameters
+#     ----------
+#     data : torch_geometric.data.Data
+#         Graph dataset.
+#     cfg : DictConfig
+#         Configuration parameters.
+
+#     Returns
+#     -------
+#     torch_geometric.data.Data
+#         Graph dataset with the specified split.
+#     """
+#     data_dir = os.path.join(cfg["data_split_dir"], "train_prop=0.5")
+#     load_path = f"{data_dir}/split_{cfg['data_seed']}.npz"
+#     splits = np.load(load_path, allow_pickle=True)
+#     # Upload masks
+#     data.train_mask = torch.from_numpy(splits["train"])
+#     data.val_mask = torch.from_numpy(splits["valid"])
+#     data.test_mask = torch.from_numpy(splits["test"])
+
+#     # Check that all nodes assigned to splits
+#     assert (
+#         torch.unique(
+#             torch.concat([data.train_mask, data.val_mask, data.test_mask])
+#         ).shape[0]
+#         == data.num_nodes
+#     ), "Not all nodes within splits"
+#     return data
+
+
+# def k_fold_split(dataset, parameters, ignore_negative=True):
+#     """
+#     Returns train and valid indices as in K-Fold Cross-Validation. If the split already exists
+#     it loads it automatically, otherwise it creates the split file for the subsequent runs.
+
+#     Parameters
+#     ----------
+#     dataset : torch_geometric.data.Dataset
+#         Graph dataset.
+#     parameters : DictConfig
+#         Configuration parameters.
+#     ignore_negative : bool
+#         If True, ignores negative labels.
+
+#     Returns
+#     -------
+#     dict
+#         Dictionary containing the train, validation and test indices.
+#     """
+#     data_dir = parameters.data_split_dir
+#     k = parameters.k
+#     fold = parameters.data_seed
+#     assert fold < k, "data_seed needs to be less than k"
+
+#     torch.manual_seed(0)
+#     np.random.seed(0)
+
+#     split_dir = os.path.join(data_dir, f"{k}-fold")
+#     if not os.path.isdir(split_dir):
+#         os.makedirs(split_dir)
+#     split_path = os.path.join(split_dir, f"{fold}.npz")
+#     if os.path.isfile(split_path):
+#         split_idx = np.load(split_path)
+#         return split_idx
+#     else:
+#         if parameters.task_level == "graph":
+#             labels = dataset.y
+#         else:
+#             # TODO: change if to assert in case comment below is positively resolved
+#             if len(dataset) == 1:
+#                 labels = dataset.y
+#             # TODO: Do we actually need this? I don't recall any node level dataset with multiple graphs
+#             # else:
+                
+#             #     # This is the case of node level task with multiple graphs
+#             #     # Here dataset.y cannot be used to measure the number of elements to associate to the splits
+#             #     labels = torch.ones(len(dataset))
+
+#         # TODO: I dont remember any dataset which actually has -1 as label? should we remove this if statement?
+#         if ignore_negative:
+#             labeled_nodes = torch.where(labels != -1)[0]
+#         else:
+#             labeled_nodes = labels
+
+#         n = labeled_nodes.shape[0]
+
+#         if len(dataset) == 1:
+#             y = dataset[0].y.squeeze(0).numpy()
+#         else:
+#             y = np.array([data.y.squeeze(0).numpy() for data in dataset])
+
+#         x_idx = np.arange(n)
+#         x_idx = np.random.permutation(x_idx)
+#         y = y[x_idx]
+
+#         skf = StratifiedKFold(n_splits=k, shuffle=True, random_state=42)
+
+#         for fold_n, (train_idx, valid_idx) in enumerate(skf.split(x_idx, y)):
+#             split_idx = {"train": train_idx, "valid": valid_idx, "test": valid_idx}
+
+#             assert np.all(
+#                 np.sort(
+#                     np.array(split_idx["train"].tolist() + split_idx["valid"].tolist())
+#                 )
+#                 == np.sort(np.arange(len(labels)))
+#             ), "Not every sample has been loaded."
+#             split_path = os.path.join(split_dir, f"{fold_n}.npz")
+
+#             np.savez(split_path, **split_idx)
+
+#     split_path = os.path.join(split_dir, f"{fold}.npz")
+#     split_idx = np.load(split_path)
+#     return split_idx
+
+
+# def load_graph_cocitation_split(dataset, cfg):
+#     r"""Loads cocitation graph datasets with the specified split.
+
+#     Parameters
+#     ----------
+#     dataset : torch_geometric.data.Dataset
+#         Graph dataset.
+#     cfg : DictConfig
+#         Configuration parameters.
+
+#     Returns
+#     -------
+#     list
+#         List containing the train, validation, and test splits.
+#     """
+#     data = dataset.data
+    
+#     if cfg.split_type == "test":
+#         data = load_split(data, cfg)
+#         return CustomDataset([data])
+    
+#     elif cfg.split_type == "k-fold":
+#         split_idx = k_fold_split(dataset, cfg)
+#         data.train_mask = split_idx["train"]
+#         data.val_mask = split_idx["valid"]
+#         data.test_mask = split_idx["test"]
+#         return CustomDataset([data])
+    
+#     else:
+#         raise NotImplementedError(
+#             f"split_type {cfg.split_type} not valid. Choose either 'test' or 'k-fold'"
+#         )
+
+
+# def rand_train_test_idx(
+#     label, train_prop=0.5, valid_prop=0.25, ignore_negative=True, balance=False, seed=0
+# ):
+#     """Adapted from https://github.com/CUAI/Non-Homophily-Benchmarks
+#     randomly splits label into train/valid/test splits.
+
+#     Parameters
+#     ----------
+#     label : torch.Tensor
+#         Label tensor.
+#     train_prop : float
+#         Proportion of training data.
+#     valid_prop : float
+#         Proportion of validation data.
+#     ignore_negative : bool
+#         If True, ignores negative labels.
+#     balance : bool
+#         If True, balances the classes.
+#     seed : int
+#         Random seed.
+
+#     Returns
+#     -------
+#     dict
+#         Dictionary containing the train, validation and test indices.
+#     """
+#     # set seed
+#     torch.manual_seed(seed)
+#     np.random.seed(seed)
+
+#     if not balance:
+#         if ignore_negative:
+#             labeled_nodes = torch.where(label != -1)[0]
+#         else:
+#             labeled_nodes = label
+
+#         n = labeled_nodes.shape[0]
+#         train_num = int(n * train_prop)
+#         valid_num = int(n * valid_prop)
+
+#         perm = torch.as_tensor(np.random.permutation(n))
+
+#         train_indices = perm[:train_num]
+#         val_indices = perm[train_num : train_num + valid_num]
+#         test_indices = perm[train_num + valid_num :]
+
+#         if not ignore_negative:
+#             return train_indices, val_indices, test_indices
+
+#         train_idx = labeled_nodes[train_indices]
+#         valid_idx = labeled_nodes[val_indices]
+#         test_idx = labeled_nodes[test_indices]
+
+#         split_idx = {"train": train_idx, "valid": valid_idx, "test": test_idx}
+#     else:
+#         #         ipdb.set_trace()
+#         indices = []
+#         for i in range(label.max() + 1):
+#             index = torch.where((label == i))[0].view(-1)
+#             index = index[torch.randperm(index.size(0))]
+#             indices.append(index)
+
+#         percls_trn = int(train_prop / (label.max() + 1) * len(label))
+#         val_lb = int(valid_prop * len(label))
+#         train_idx = torch.cat([i[:percls_trn] for i in indices], dim=0)
+#         rest_index = torch.cat([i[percls_trn:] for i in indices], dim=0)
+#         rest_index = rest_index[torch.randperm(rest_index.size(0))]
+#         valid_idx = rest_index[:val_lb]
+#         test_idx = rest_index[val_lb:]
+#         split_idx = {"train": train_idx, "valid": valid_idx, "test": test_idx}
+
+#     # Save splits to disk
+
+#     return split_idx
+
+
+# def get_train_val_test_graph_datasets(dataset, split_idx):
+#     r"""Splits the graph dataset into train, validation, and test datasets.
+
+#     Parameters
+#     ----------
+#     dataset : torch_geometric.data.Dataset
+#         Graph dataset.
+#     split_idx : dict
+#         Dictionary containing the indices for the train, validation, and test splits.
+
+#     Returns
+#     -------
+#     list
+#         List containing the train, validation, and test datasets.
+#     """
+#     data_train_lst, data_val_lst, data_test_lst = [], [], []
+
+#     # Go over each of the graph and assign correct label
+#     for i in range(len(dataset)):
+#         graph = dataset[i]
+#         assigned = False
+#         if i in split_idx["train"]:
+#             graph.train_mask = torch.Tensor([1]).long()
+#             graph.val_mask = torch.Tensor([0]).long()
+#             graph.test_mask = torch.Tensor([0]).long()
+#             data_train_lst.append(graph)
+#             assigned = True
+
+#         if i in split_idx["valid"]:
+#             graph.train_mask = torch.Tensor([0]).long()
+#             graph.val_mask = torch.Tensor([1]).long()
+#             graph.test_mask = torch.Tensor([0]).long()
+#             data_val_lst.append(graph)
+#             assigned = True
+
+#         if i in split_idx["test"]:
+#             graph.train_mask = torch.Tensor([0]).long()
+#             graph.val_mask = torch.Tensor([0]).long()
+#             graph.test_mask = torch.Tensor([1]).long()
+#             data_test_lst.append(graph)
+#             assigned = True
+#         if not assigned:
+#             raise ValueError("Graph not in any split")
+
+#     datasets = [
+#         CustomDataset(data_train_lst),
+#         CustomDataset(data_val_lst),
+#         CustomDataset(data_test_lst),
+#     ]
+
+#     return datasets
+
+
+# def load_graph_tudataset_split(dataset, cfg):
+#     r"""Loads the graph dataset with the specified split.
+
+#     Parameters
+#     ----------
+#     dataset : torch_geometric.data.Dataset
+#         Graph dataset.
+#     cfg : DictConfig
+#         Configuration parameters.
+
+#     Returns
+#     -------
+#     list
+#         List containing the train, validation, and test splits.
+#     """
+#     if cfg.split_type == "test":
+#         labels = dataset.y
+#         split_idx = rand_train_test_idx(labels)
+#     elif cfg.split_type == "k-fold":
+#         split_idx = k_fold_split(dataset, cfg)
+#     else:
+#         raise NotImplementedError(
+#             f"split_type {cfg.split_type} not valid. Choose either 'test' or 'k-fold'"
+#         )
+
+#     train_dataset, val_dataset, test_dataset = get_train_val_test_graph_datasets(
+#         dataset, split_idx
+#     )
+
+#     return [train_dataset, val_dataset, test_dataset]

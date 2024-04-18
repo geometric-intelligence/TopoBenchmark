@@ -82,7 +82,7 @@ class DataTransform(torch_geometric.transforms.BaseTransform):
 
         Returns
         -------
-        torch_geometric.data.Data
+        transformed_data : torch_geometric.data.Data
             The lifted data.
         """
         transformed_data = self.transform(data)

@@ -4,7 +4,6 @@ import torch_geometric
 
 from topobenchmarkx.transforms.data_manipulations.manipulations import (
     CalculateSimplicialCurvature,
-    DataFieldsToDense,
     EqualGausFeatures,
     IdentityTransform,
     KeepOnlyConnectedComponent,
@@ -43,7 +42,6 @@ TRANSFORMS = {
     "SetLifting": SetLifting,
     # Data Manipulations
     "Identity": IdentityTransform,
-    "DataFieldsToDense": DataFieldsToDense,
     "NodeDegrees": NodeDegrees,
     "OneHotDegreeFeatures": OneHotDegreeFeatures,
     "EqualGausFeatures": EqualGausFeatures,

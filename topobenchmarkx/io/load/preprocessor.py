@@ -6,7 +6,6 @@ import torch_geometric
 
 from topobenchmarkx.io.load.utils import ensure_serializable, make_hash
 
-
 class Preprocessor(torch_geometric.data.InMemoryDataset):
     r"""Preprocessor for datasets.
 

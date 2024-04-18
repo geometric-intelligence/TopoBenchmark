@@ -1,6 +1,7 @@
 _target_: topobenchmarkx.io.load.loaders.GraphLoader
 
 defaults:
+  #- transforms/data_manipulations@transforms.infere_radius_connectivity: infere_radius_connectivity
   - transforms: ${get_default_transform:graph,${model}}
 
 # Data definition

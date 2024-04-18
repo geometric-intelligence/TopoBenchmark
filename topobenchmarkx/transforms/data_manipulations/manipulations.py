@@ -1,7 +1,7 @@
 import torch
 import torch_geometric
 from torch_geometric.utils import one_hot
-
+from torch_geometric.nn import knn_graph, radius_graph
 
 class IdentityTransform(torch_geometric.transforms.BaseTransform):
     r"""An identity transform that does nothing to the input data."""
@@ -26,6 +26,48 @@ class IdentityTransform(torch_geometric.transforms.BaseTransform):
         """
         return data
 
+class InfereKNNConnectivity(torch_geometric.transforms.BaseTransform):
+    r""" A transform that generates the k-nearest neighbor connectivity of the input point cloud."""
+    def __init__(self, **kwargs):
+        super().__init__()
+        self.type = "infere_knn_connectivity"
+        self.parameters = kwargs
+    
+    def forward(self, data: torch_geometric.data.Data):
+        r"""Apply the transform to the input data.
+        Parameters
+        ----------
+        data : torch_geometric.data.Data
+            The input data.
+        Returns
+        -------
+        torch_geometric.data.Data
+            The transformed data.
+        """
+
+        data.edge_index = knn_graph(data.x, **self.parameters["args"])
+        return data
+
+class InfereRadiusConnectivity(torch_geometric.transforms.BaseTransform):
+    r""" A transform that generates the radius connectivity of the input point cloud."""
+    def __init__(self, **kwargs):
+        super().__init__()
+        self.type = "infere_radius_connectivity"
+        self.parameters = kwargs
+    def forward(self, data: torch_geometric.data.Data):
+        r"""Apply the transform to the input data.
+        Parameters
+        ----------
+        data : torch_geometric.data.Data
+            The input data.
+        Returns
+        -------
+        torch_geometric.data.Data
+            The transformed data.
+        """
+        data.edge_index = radius_graph(data.x, **self.parameters["args"])
+        return data
+    
 
 class EqualGausFeatures(torch_geometric.transforms.BaseTransform):
     r"""A transform that generates equal Gaussian features for all nodes in the input graph.

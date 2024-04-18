@@ -6,15 +6,36 @@ from topobenchmarkx.evaluators.metrics import METRICS
 
 
 class TorchEvaluator:
-    def __init__(self, **kwargs):
-        self.task = kwargs["task"]
+    r"""Evaluator class that is responsible for computing the metrics for a given task.
+    
+    Parameters
+    ----------
+   task : str
+        The task type. It can be either "classification" or "regression".
+    
+    **kwargs : 
+        Additional arguments for the class. The arguments depend on the task. 
+        In "classification" scenario, the following arguments are expected:
+        - num_classes : int
+            The number of classes.
+        - classification_metrics : list
+            A list of classification metrics to be computed.
+        
+        In "regression" scenario, the following arguments are expected:
+        - regression_metrics : list
+            A list of regression metrics to be computed.
+        
+    """
+    def __init__(self, task, **kwargs):
+        
+        # Define the task
+        self.task = task        
 
-        if kwargs["num_classes"] == 1 and kwargs["task"] == "classification":
-            parameters = {"num_classes": kwargs["num_classes"]}
-            parameters["task"] = "binary"
-            metric_names = kwargs["classification_metrics"]
-
-        elif kwargs["num_classes"] > 1 and kwargs["task"] == "classification":
+        # Define the metrics depending on the task
+        if kwargs["num_classes"] > 1 and kwargs["task"] == "classification":
+            # Note that even for binary classification, we use multiclass metrics
+            # Accoding to the torchmetrics documentation (https://lightning.ai/docs/torchmetrics/stable/classification/accuracy.html#torchmetrics.classification.MulticlassAccuracy)
+            # This setup should work correctly
             parameters = {"num_classes": kwargs["num_classes"]}
             parameters["task"] = "multiclass"
             metric_names = kwargs["classification_metrics"]
@@ -27,7 +48,6 @@ class TorchEvaluator:
         elif kwargs["task"] == "regression":
             parameters = {}
             metric_names = kwargs["regression_metrics"]
-        # parameters["task"] = "regression"
 
         else:
             raise ValueError(f"Invalid task {kwargs['task']}")
@@ -39,6 +59,18 @@ class TorchEvaluator:
         self.best_metric = {}
 
     def update(self, model_out: dict):
+        """Update the metrics with the model output.
+        
+        Parameters
+        ----------
+        model_out : dict
+            The model output. It should contain the following keys:
+            - logits : torch.Tensor
+                The model predictions.
+            - labels : torch.Tensor
+                The ground truth labels.
+
+        """
         preds = model_out["logits"].cpu()
         target = model_out["labels"].cpu()
 
@@ -51,31 +83,24 @@ class TorchEvaluator:
         else:
             raise ValueError(f"Invalid task {self.task}")
 
-    def compute(self, mode):
+    def compute(self,):
+        """Compute the metrics.
+
+        Returns
+        -------
+        res_dict : dict
+            A dictionary containing the computed metrics.
+        """
+
         res_dict = self.metrics.compute()
-        # res_dict = self.update_best_metric(res_dict, mode)
 
         return res_dict
 
-    # def update_best_metric(self, res_dict, mode):
-    #     for key in res_dict:
-    #         # Check if "{best_}key" exists
-    #         if f"best_{key}" not in self.best_metric:
-    #             self.best_metric[f"best_{mode}_{key}"] = res_dict[key]
-    #         else:
-    #             if res_dict[key] > self.best_metric[f"best_{mode}_{key}"]:
-    #                 self.best_metric[f"best_{mode}_{key}"] = res_dict[key]
-
-    #     # Add best metrics to res_dict
-    #     res_dict.update(self.best_metric)
-    #     return res_dict
-
-    def reset(
-        self,
-    ):
+    def reset(self,):
+        """Reset the metrics. This method should be called after each epoch"""
         self.metrics.reset()
 
 
 if __name__ == "__main__":
-    evaluator = Evaluator()
-    print(evaluator.expected_input_format)
+    evaluator = TorchEvaluator(task="classification", num_classes=3, classification_metrics=["accuracy"])
+    print(evaluator.task)

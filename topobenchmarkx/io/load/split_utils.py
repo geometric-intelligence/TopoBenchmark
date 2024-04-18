@@ -127,7 +127,7 @@ def random_splitting(
             split_path = os.path.join(split_dir, f"{fold_n}.npz")
             np.savez(split_path, **split_idx)
 
-    # Load the split   
+    # Load the split
     split_path = os.path.join(split_dir, f"{fold}.npz")
     split_idx = np.load(split_path)
 
@@ -160,6 +160,7 @@ def load_split(data, cfg, train_prop=0.5):
     data_dir = os.path.join(cfg["data_split_dir"], f"train_prop={train_prop}")
     load_path = f"{data_dir}/split_{cfg['data_seed']}.npz"
     splits = np.load(load_path, allow_pickle=True)
+    
     # Upload masks
     data.train_mask = torch.from_numpy(splits["train"])
     data.val_mask = torch.from_numpy(splits["valid"])
@@ -247,7 +248,6 @@ def load_graph_tudataset_split(dataset, cfg):
     labels = np.array([data.y.squeeze(0).numpy() for data in dataset])
 
     if cfg.split_type == "random":
-        #labels = dataset.y
         split_idx = random_splitting(labels, cfg)
 
     elif cfg.split_type == "k-fold":
@@ -280,7 +280,6 @@ def load_graph_cocitation_split(dataset, cfg):
         List containing the train, validation, and test splits.
     """
     
-    
     # Extract labels from dataset object
     assert len(dataset) == 1, "Torch Geometric Cocitation dataset should have only one graph"
     
@@ -290,7 +289,6 @@ def load_graph_cocitation_split(dataset, cfg):
     # Ensure labels are one dimensional array
     assert len(labels.shape) == 1, "Labels should be one dimensional array"
         
-    
     if cfg.split_type == "random":
         splits = random_splitting(labels, cfg)
     
@@ -301,6 +299,7 @@ def load_graph_cocitation_split(dataset, cfg):
         raise NotImplementedError(
             f"split_type {cfg.split_type} not valid. Choose either 'test' or 'k-fold'"
         )
+    
     # Assign train val test masks to the graph
     data.train_mask = torch.from_numpy(splits["train"])
     data.val_mask = torch.from_numpy(splits["valid"])

@@ -122,9 +122,9 @@ class SimplicialNeighborhoodLifting(Graph2SimplicialLifting):
                 neighbors.append(n)
             neighbors = neighbors.numpy()
             neighbors = set(neighbors)
-            for i in range(2, self.complex_dim + 1):
+            for i in range(1, self.complex_dim):
                 for c in combinations(neighbors, i + 1):
-                    simplices[i - 2].add(tuple(c))
+                    simplices[i - 1].add(tuple(c))
         for set_k_simplices in simplices:
             set_k_simplices = list(set_k_simplices)
             if len(set_k_simplices) > self.max_k_simplices:

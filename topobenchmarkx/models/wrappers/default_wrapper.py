@@ -66,45 +66,68 @@ class SANWrapper(DefaultWrapper):
         return model_out
 
 
-# TODO: finish proper normalization
-def normalize_matrix(matrix):
-    matrix = matrix.to_dense()
-    n, _ = matrix.shape
-    abs_matrix = abs(matrix)
-    diag_sum = abs_matrix.sum(axis=1)
 
-    # Handle division by zero
-    idxs = torch.where(diag_sum != 0)
-    diag_sum[idxs] = 1.0 / torch.sqrt(diag_sum[idxs])
-
-    diag_indices = torch.stack([torch.arange(n), torch.arange(n)])
-    diag_matrix = torch.sparse_coo_tensor(
-        diag_indices, diag_sum, matrix.shape, device=matrix.device
-    ).coalesce()
-    normalized_matrix = diag_matrix @ (matrix @ diag_matrix)
-    return torch.sparse_coo_tensor(
-        normalized_matrix.nonzero().T, normalized_matrix[normalized_matrix != 0], (n, n)
-    )
 
 
 class SCNWrapper(DefaultWrapper):
     """Abstract class that provides an interface to loss logic within network"""
 
-    def __init__(self, backbone):
+    def __init__(self, backbone, **kwargs):
         super().__init__(backbone)
+        if kwargs.get("out_channels", False):
+            self.agg_conv_1 = topomodelx.base.conv.Conv(
+                kwargs["out_channels"], kwargs["out_channels"], aggr_norm=False
+            )
+            self.agg_conv_2 = topomodelx.base.conv.Conv(
+                kwargs["out_channels"], kwargs["out_channels"], aggr_norm=False
+            )
+
+            self.norm_1 = GraphNorm(kwargs["out_channels"])
+            self.norm_2 = GraphNorm(kwargs["out_channels"])
+
+        self.wrapper_readout = kwargs.get("wrapper_readout")
 
     def __call__(self, batch):
         """Define logic for forward pass"""
         model_out = {"labels": batch.y, "batch": batch.batch}
+        
+        
+        def normalize_matrix(matrix):
+            matrix = matrix.to_dense()
+            n, _ = matrix.shape
+            abs_matrix = abs(matrix)
+            diag_sum = abs_matrix.sum(axis=1)
+
+            # Handle division by zero
+            idxs = torch.where(diag_sum != 0)
+            diag_sum[idxs] = 1.0 / torch.sqrt(diag_sum[idxs])
+
+            diag_indices = torch.stack([torch.arange(n), torch.arange(n)])
+            diag_matrix = torch.sparse_coo_tensor(
+                diag_indices, diag_sum, matrix.shape, device=matrix.device
+            ).coalesce()
+            normalized_matrix = diag_matrix @ (matrix @ diag_matrix)
+            return torch.sparse_coo_tensor(
+                normalized_matrix.nonzero().T, normalized_matrix[normalized_matrix != 0], (n, n)
+            )
+        
         laplacian_0 = normalize_matrix(batch.hodge_laplacian_0)
         laplacian_1 = normalize_matrix(batch.hodge_laplacian_1)
         laplacian_2 = normalize_matrix(batch.hodge_laplacian_2)
         x_0, x_1, x_2 = self.backbone(
             batch.x_0, batch.x_1, batch.x_2, laplacian_0, laplacian_1, laplacian_2
         )
-        model_out["x_0"] = x_0
-        model_out["x_1"] = x_1
+
+        # Propagate signal down
         model_out["x_2"] = x_2
+        model_out["x_1"] = self.norm_1(
+            x_1 + self.agg_conv_1(model_out["x_2"], batch.incidence_2),
+            batch.batch_1,
+        )
+        model_out["x_0"] = self.norm_2(
+            x_0 + self.agg_conv_2(model_out["x_1"], batch.incidence_1), batch.batch
+        )
+        
         return model_out
 
 

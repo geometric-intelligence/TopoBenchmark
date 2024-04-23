@@ -23,8 +23,9 @@ parameters:
   monitor_metric: accuracy
   task_level: graph
   data_seed: 0
-  split_type: 'k-fold' # either k-fold or test
-  k: 10 # for k-Fold Cross-Validation
+  split_type: random #'k-fold' # either "k-fold" or "random" strategies
+  k: 10 # for "k-fold" Cross-Validation
+  train_prop: 0.5 # for "random" strategy splitting
 
   # Dataloader parameters
   batch_size: 64 # We have an issue with allowing multiple graphs in a batch due to sparse incidences

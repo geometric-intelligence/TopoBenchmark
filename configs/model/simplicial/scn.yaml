@@ -4,6 +4,10 @@ feature_encoder:
   _target_: topobenchmarkx.models.encoders.default_encoders.BaseFeatureEncoder
   in_channels: ${infer_in_channels:${dataset}} #${dataset.parameters.num_features}
   out_channels: 32
+  selected_dimensions:
+    - 0
+    - 1
+    - 2
 
 backbone:
   _target_: topomodelx.nn.simplicial.scn2.SCN2

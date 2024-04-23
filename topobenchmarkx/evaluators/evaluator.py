@@ -29,10 +29,10 @@ class TorchEvaluator:
     def __init__(self, task, **kwargs):
         
         # Define the task
-        self.task = task        
+        self.task = task      
 
         # Define the metrics depending on the task
-        if kwargs["num_classes"] > 1 and kwargs["task"] == "classification":
+        if kwargs["num_classes"] > 1 and self.task == "classification":
             # Note that even for binary classification, we use multiclass metrics
             # Accoding to the torchmetrics documentation (https://lightning.ai/docs/torchmetrics/stable/classification/accuracy.html#torchmetrics.classification.MulticlassAccuracy)
             # This setup should work correctly
@@ -40,12 +40,12 @@ class TorchEvaluator:
             parameters["task"] = "multiclass"
             metric_names = kwargs["classification_metrics"]
 
-        elif kwargs["task"] == "multilabel classification":
+        elif self.task == "multilabel classification":
             parameters = {"num_classes": kwargs["num_classes"]}
             parameters["task"] = "multilabel"
             metric_names = kwargs["classification_metrics"]
 
-        elif kwargs["task"] == "regression":
+        elif self.task == "regression":
             parameters = {}
             metric_names = kwargs["regression_metrics"]
 
@@ -83,7 +83,7 @@ class TorchEvaluator:
         else:
             raise ValueError(f"Invalid task {self.task}")
 
-    def compute(self,):
+    def compute(self):
         """Compute the metrics.
 
         Returns

@@ -225,7 +225,7 @@ class NetworkModule(LightningModule):
 
     def log_metrics(self, mode=None):
         """Log metrics."""
-        metrics_dict = self.evaluator.compute(mode)
+        metrics_dict = self.evaluator.compute()
         for key in metrics_dict.keys():
             self.log(
                 f"{mode}/{key}",

@@ -112,14 +112,17 @@ class HypergraphKNearestNeighborsLifting(Graph2HypergraphLifting):
     ----------
     k_value : int, optional
         The number of nearest neighbors to consider. Default is 1.
+    loop: boolean, optional
+        If True the hyperedges will contain the node they were created from.
     **kwargs : optional
         Additional arguments for the class.
     """
 
-    def __init__(self, k_value=1, **kwargs):
+    def __init__(self, k_value=1, loop=True, **kwargs):
         super().__init__()
         self.k = k_value
-        self.transform = torch_geometric.transforms.KNNGraph(self.k)
+        self.loop = loop
+        self.transform = torch_geometric.transforms.KNNGraph(self.k, self.loop)
 
     def lift_topology(self, data: torch_geometric.data.Data) -> dict:
         r"""Lifts the topology of a graph to hypergraph domain by considering k-nearest neighbors.
@@ -139,7 +142,7 @@ class HypergraphKNearestNeighborsLifting(Graph2HypergraphLifting):
         num_hyperedges = num_nodes
         incidence_1 = torch.zeros(num_nodes, num_nodes)
         data_lifted = self.transform(data)
-        incidence_1[data_lifted.edge_index[0], data_lifted.edge_index[1]] = 1
+        incidence_1[data_lifted.edge_index[1], data_lifted.edge_index[0]] = 1
         incidence_1 = torch.Tensor(incidence_1).to_sparse_coo()
         return {
             "incidence_hyperedges": incidence_1,

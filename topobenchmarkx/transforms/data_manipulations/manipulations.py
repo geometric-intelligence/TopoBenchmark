@@ -45,7 +45,10 @@ class InfereKNNConnectivity(torch_geometric.transforms.BaseTransform):
             The transformed data.
         """
 
-        data.edge_index = knn_graph(data.x, **self.parameters["args"])
+        edge_index = knn_graph(data.x, **self.parameters["args"])
+        
+        # Remove duplicates
+        data.edge_index = edge_index
         return data
 
 class InfereRadiusConnectivity(torch_geometric.transforms.BaseTransform):

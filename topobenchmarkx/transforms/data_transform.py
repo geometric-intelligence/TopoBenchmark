@@ -12,6 +12,7 @@ from topobenchmarkx.transforms.data_manipulations.manipulations import (
     NodeDegrees,
     NodeFeaturesToFloat,
     OneHotDegreeFeatures,
+    KeepSelectedDataFields,
 )
 from topobenchmarkx.transforms.feature_liftings.feature_liftings import (
     ConcatentionLifting,
@@ -53,6 +54,7 @@ TRANSFORMS = {
     "NodeFeaturesToFloat": NodeFeaturesToFloat,
     "CalculateSimplicialCurvature": CalculateSimplicialCurvature,
     "KeepOnlyConnectedComponent": KeepOnlyConnectedComponent,
+    "KeepSelectedDataFields": KeepSelectedDataFields,
 }
 
 

@@ -93,9 +93,9 @@ class SCNWrapper(DefaultWrapper):
         
         
         def normalize_matrix(matrix):
-            matrix = matrix.to_dense()
-            n, _ = matrix.shape
-            abs_matrix = abs(matrix)
+            matrix_ = matrix.to_dense()
+            n, _ = matrix_.shape
+            abs_matrix = abs(matrix_)
             diag_sum = abs_matrix.sum(axis=1)
 
             # Handle division by zero
@@ -104,12 +104,12 @@ class SCNWrapper(DefaultWrapper):
 
             diag_indices = torch.stack([torch.arange(n), torch.arange(n)])
             diag_matrix = torch.sparse_coo_tensor(
-                diag_indices, diag_sum, matrix.shape, device=matrix.device
+                diag_indices, diag_sum, matrix_.shape, device=matrix.device
             ).coalesce()
             normalized_matrix = diag_matrix @ (matrix @ diag_matrix)
-            return torch.sparse_coo_tensor(
-                normalized_matrix.nonzero().T, normalized_matrix[normalized_matrix != 0], (n, n)
-            )
+            return normalized_matrix #torch.sparse_coo_tensor(
+               # normalized_matrix.nonzero().T, normalized_matrix[normalized_matrix != 0], (n, n)
+            #)
         
         laplacian_0 = normalize_matrix(batch.hodge_laplacian_0)
         laplacian_1 = normalize_matrix(batch.hodge_laplacian_1)

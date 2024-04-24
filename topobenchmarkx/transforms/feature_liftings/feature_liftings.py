@@ -1,7 +1,7 @@
 import torch
 import torch_geometric
 
-
+import time
 class ProjectionLifting(torch_geometric.transforms.BaseTransform):
     r"""Lifts r-cell features to r+1-cells by projection.
 
@@ -68,7 +68,7 @@ class ConcatentionLifting(torch_geometric.transforms.BaseTransform):
 
     def __init__(self, **kwargs):
         super().__init__()
-
+    
     def lift_features(
         self, data: torch_geometric.data.Data | dict
     ) -> torch_geometric.data.Data | dict:
@@ -84,49 +84,21 @@ class ConcatentionLifting(torch_geometric.transforms.BaseTransform):
         torch_geometric.data.Data | dict
             The lifted data."""
 
-        def non_zero_positions(tensor):
-            r"""Returns the non-zero positions of a tensor.
-
-            Parameters
-            ----------
-            tensor : torch.Tensor
-                The input tensor.
-
-            Returns
-            -------
-            torch.Tensor
-                The --sorted-- non-zero positions of the tensor.
-            """
-            positions = []
-            for i in range(tensor.size(0)):
-                non_zero_indices = torch.nonzero(tensor[i]).squeeze()
-
-                # Check if non_zero_indices is empty
-                if non_zero_indices.numel() > 0:
-                    positions.append(non_zero_indices)
-            # Sort the positions such respecting the node index order
-            positions = torch.stack(positions).sort()[0]
-            return positions
-
         keys = sorted([key.split("_")[1] for key in data.keys() if "incidence" in key])
         for elem in keys:
             if f"x_{elem}" not in data:
                 idx_to_project = 0 if elem == "hyperedges" else int(elem) - 1
-                dense_incidence = data["incidence_" + elem].T.to_dense()
-                n, _ = dense_incidence.shape
+                incidence = data["incidence_" + elem]
+                _, n = incidence.shape
 
                 if n != 0:
-                    positions = non_zero_positions(dense_incidence)
+                    idxs = []
+                    for n_feature in range(n):
+                        idxs_for_feature = incidence.indices()[0, incidence.indices()[1,:]==n_feature]
+                        idxs.append(torch.sort(idxs_for_feature)[0])
 
-                    # Obtain the node representations, so it can be combined for higher order features.
-                    for i, _ in enumerate(range(int(elem), 1, -1)):
-                        dense_incidence = abs(
-                            data["incidence_" + str(int(elem) - 1 - i)].T.to_dense()
-                        )
-                        dense_incidence = dense_incidence[positions].sum(dim=1)
-                        positions = non_zero_positions(dense_incidence)
-
-                    values = data[f"x_{idx_to_project}"][positions].view(n, -1)
+                    idxs = torch.stack(idxs, dim=0)
+                    values = data[f"x_{idx_to_project}"][idxs].view(n,-1)
                 else:
                     values = torch.tensor([])
 
@@ -163,11 +135,11 @@ class SetLifting(torch_geometric.transforms.BaseTransform):
 
     def __init__(self, **kwargs):
         super().__init__()
-
+    
     def lift_features(
         self, data: torch_geometric.data.Data | dict
     ) -> torch_geometric.data.Data | dict:
-        r"""Indexes r-cells to build r+1-cell features using the incidence matrix.
+        r"""Concatenates r-cell features to r+1-cell structures using the incidence matrix.
 
         Parameters
         ----------
@@ -177,40 +149,26 @@ class SetLifting(torch_geometric.transforms.BaseTransform):
         Returns
         -------
         torch_geometric.data.Data | dict
-            The lifted data.
-        """
-
-        def non_zero_positions(tensor):
-            positions = []
-            for i in range(tensor.size(0)):
-                non_zero_indices = torch.nonzero(tensor[i]).squeeze()
-
-                # Check if non_zero_indices is empty
-                if non_zero_indices.numel() > 0:
-                    positions.append(non_zero_indices)
-            # Sort the positions such respecting the node index order
-            positions = torch.stack(positions).sort()[0]
-            return positions
+            The lifted data."""
 
         keys = sorted([key.split("_")[1] for key in data.keys() if "incidence" in key])
         for elem in keys:
             if f"x_{elem}" not in data:
                 idx_to_project = 0 if elem == "hyperedges" else int(elem) - 1
-                dense_incidence = data["incidence_" + elem].T.to_dense()
-                n, _ = dense_incidence.shape
+                incidence = data["incidence_" + elem]
+                _, n = incidence.shape
 
                 if n != 0:
-                    positions = non_zero_positions(dense_incidence)
+                    idxs = []
+                    for n_feature in range(n):
+                        idxs_for_feature = incidence.indices()[0, incidence.indices()[1,:]==n_feature]
+                        idxs.append(torch.sort(idxs_for_feature)[0])
 
-                    # Obtain the node representations, so it can be combined for higher order features.
-                    for i, _ in enumerate(range(int(elem), 1, -1)):
-                        dense_incidence = abs(
-                            data["incidence_" + str(int(elem) - 1 - i)].T.to_dense()
-                        )
-                        dense_incidence = dense_incidence[positions].sum(dim=1)
-                        positions = non_zero_positions(dense_incidence)
-
-                    values = positions
+                    idxs = torch.stack(idxs, dim=0)
+                    if elem=='1':
+                        values = idxs
+                    else:
+                        values = torch.sort(torch.unique(data["x_" + str(int(elem)-1)][idxs].view(idxs.shape[0],-1), dim=1), dim=1)[0]
                 else:
                     values = torch.tensor([])
 

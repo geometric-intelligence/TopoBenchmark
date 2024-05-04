@@ -3,7 +3,7 @@ _target_: topobenchmarkx.io.load.loaders.GraphLoader
 
 defaults:
   - transforms: ${get_default_transform:graph,${model}}
-
+  
 # Data definition
 parameters:
   data_domain: graph

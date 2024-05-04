@@ -1,8 +1,6 @@
 _target_: topobenchmarkx.io.load.loaders.GraphLoader
 
 defaults:
-  # - transforms/data_manipulations: node_degrees
-  # - transforms/data_manipulations@transforms.one_hot_node_degree_features: one_hot_node_degree_features
   - transforms/data_manipulations: equal_gaus_features
   - transforms: ${get_default_transform:graph,${model}}
 

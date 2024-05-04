@@ -22,6 +22,7 @@ from topobenchmarkx.io.load.split_utils import (
     load_split,
 )
 
+from topobenchmarkx.io.load.download_utils import download_google_drive_datasets
 
 class CellComplexLoader(AbstractLoader):
     r"""Loader for cell complex datasets.
@@ -151,6 +152,7 @@ class GraphLoader(AbstractLoader):
         data_dir = os.path.join(
             self.parameters["data_dir"], self.parameters["data_name"]
         )
+        
         if (
             self.parameters.data_name.lower() in ["cora", "citeseer", "pubmed"]
             and self.parameters.data_type == "cocitation"
@@ -256,6 +258,17 @@ class GraphLoader(AbstractLoader):
 
             # Split back the into train/val/test datasets
             dataset = assing_train_val_test_mask_to_graphs(joined_dataset, split_idx)
+        elif self.parameters.data_name in ["contact-high-school"]:
+            file_link = "https://drive.google.com/open?id=1VA2P62awVYgluOIh1W4NZQQgkQCBk-Eu"
+            
+            download_google_drive_datasets(
+                file_link, 
+                dataset_name=self.parameters.data_name,
+                format="tar.gz"
+            )
+
+            
+
         else:
             raise NotImplementedError(
                 f"Dataset {self.parameters.data_name} not implemented"

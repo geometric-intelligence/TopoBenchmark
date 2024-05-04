@@ -1,10 +1,7 @@
 _target_: topobenchmarkx.io.load.loaders.ManualGraphLoader
 
 defaults:
-  #- transforms/data_manipulations@transforms.keep_connected_component: keep_connected_component
   - transforms: ${get_default_transform:graph,${model}}
-  - transforms/data_manipulations: node_degrees
-  - transforms/data_manipulations@transforms.simplicial_curvature: simplicial_curvature
 
 # Data definition
 parameters:

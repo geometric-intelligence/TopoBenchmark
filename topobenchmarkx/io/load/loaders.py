@@ -22,7 +22,8 @@ from topobenchmarkx.io.load.split_utils import (
     load_split,
 )
 
-from topobenchmarkx.io.load.download_utils import download_google_drive_datasets
+from topobenchmarkx.data.us_county_demos_dataset import USCountyDemosDataset
+
 
 class CellComplexLoader(AbstractLoader):
     r"""Loader for cell complex datasets.
@@ -258,16 +259,19 @@ class GraphLoader(AbstractLoader):
 
             # Split back the into train/val/test datasets
             dataset = assing_train_val_test_mask_to_graphs(joined_dataset, split_idx)
-        elif self.parameters.data_name in ["contact-high-school"]:
-            file_link = "https://drive.google.com/open?id=1VA2P62awVYgluOIh1W4NZQQgkQCBk-Eu"
-            
-            download_google_drive_datasets(
-                file_link, 
-                dataset_name=self.parameters.data_name,
-                format="tar.gz"
+        
+        elif self.parameters.data_name in ['US-county-demos']:
+            dataset = USCountyDemosDataset(
+                root=self.parameters["data_dir"],
+                name=self.parameters["data_name"],
+                parameters=self.parameters
             )
-
             
+            if self.transforms_config is not None:
+                dataset = Preprocessor(data_dir, dataset, self.transforms_config)
+            
+            # We need to map original dataset into custom one to make batching work
+            dataset = CustomDataset([dataset[0]])
 
         else:
             raise NotImplementedError(

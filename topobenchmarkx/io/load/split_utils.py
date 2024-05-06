@@ -22,6 +22,7 @@ def k_fold_split(labels, parameters):
     dict
         Dictionary containing the train, validation and test indices.
     """
+
     data_dir = parameters.data_split_dir
     k = parameters.k
     fold = parameters.data_seed
@@ -89,13 +90,13 @@ def random_splitting(
     dict
         Dictionary containing the train, validation and test indices.
     """
-    fold = parameters.data_seed
-    train_prop = parameters.train_prop
+    fold = parameters['data_seed']
+    data_dir = parameters['data_split_dir']
+    train_prop = parameters['train_prop']
     valid_prop = (1-train_prop) / 2
     
        
     # Create split directory if it does not exist
-    data_dir = parameters.data_split_dir
     split_dir = os.path.join(data_dir, f"train_prop={train_prop}_global_seed={global_data_seed}")
     generate_splits = False
     if not os.path.isdir(split_dir):

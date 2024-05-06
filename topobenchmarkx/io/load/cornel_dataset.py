@@ -3,9 +3,7 @@ import pandas as pd
 import torch
 import torch_geometric
 
-def load_us_county_demos(path, dataset_name):
-    
-    year = dataset_name.split('-')[-1]
+def load_us_county_demos(path, year=2012):
 
     edges_df = pd.read_csv(f'{path}/county_graph.csv')
     stat = pd.read_csv(f'{path}/county_stats_{year}.csv', encoding='ISO-8859-1')
@@ -76,8 +74,8 @@ def load_us_county_demos(path, dataset_name):
 
     stat['MedianIncome'] = stat['MedianIncome'].apply(lambda x: x.replace(',', '')).to_numpy().astype(float)
 
-    x = stat[x_col].to_numpy()
-    y = stat[y_col].to_numpy()
+    x = torch.tensor(stat[x_col].to_numpy(), dtype=torch.float32)
+    y = torch.tensor(stat[y_col].to_numpy(), dtype=torch.float32)
 
 
     data = torch_geometric.data.Data(x=x, y=y, edge_index=edge_index)

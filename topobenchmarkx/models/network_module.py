@@ -1,12 +1,8 @@
-from typing import Any, Dict, Tuple, Union
+from typing import Any, Union
 
-import numpy as np
 import torch
 from lightning import LightningModule
-from torchmetrics import MaxMetric, MeanMetric
-from torchmetrics.classification.accuracy import Accuracy
-
-from topobenchmarkx.models.wrappers.default_wrapper import HypergraphWrapper, SANWrapper
+from torchmetrics import MeanMetric
 
 # import topomodelx
 
@@ -25,7 +21,7 @@ class NetworkModule(LightningModule):
         loss: torch.nn.Module,
         backbone_wrapper: torch.nn.Module,
         feature_encoder: Union[torch.nn.Module, None] = None,
-        **kwargs
+        **kwargs,
         # optimizer: torch.optim.Optimizer,
         # scheduler: torch.optim.lr_scheduler,
         # compile: bool,
@@ -69,7 +65,7 @@ class NetworkModule(LightningModule):
         """
         return self.backbone(batch)
 
-    def model_step(self, batch) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+    def model_step(self, batch) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         """Perform a single model step on a batch of data.
 
         :param batch: A batch of data (a tuple) containing the input tensor of images and target labels.
@@ -132,7 +128,7 @@ class NetworkModule(LightningModule):
         return model_out["loss"]
 
     def validation_step(
-        self, batch: Tuple[torch.Tensor, torch.Tensor], batch_idx: int
+        self, batch: tuple[torch.Tensor, torch.Tensor], batch_idx: int
     ) -> None:
         """Perform a single validation step on a batch of data from the validation set.
 
@@ -168,7 +164,7 @@ class NetworkModule(LightningModule):
         )
 
     def test_step(
-        self, batch: Tuple[torch.Tensor, torch.Tensor], batch_idx: int
+        self, batch: tuple[torch.Tensor, torch.Tensor], batch_idx: int
     ) -> None:
         """Perform a single test step on a batch of data from the test set.
 
@@ -283,7 +279,7 @@ class NetworkModule(LightningModule):
         if self.hparams.compile and stage == "fit":
             self.net = torch.compile(self.net)
 
-    def configure_optimizers(self) -> Dict[str, Any]:
+    def configure_optimizers(self) -> dict[str, Any]:
         """Choose what optimizers and learning-rate schedulers to use in your optimization.
         Normally you'd need one. But in the case of GANs or similar you might have multiple.
 

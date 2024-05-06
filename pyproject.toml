@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "TopoBenchmarkX"
-version = "0.0.1"
+dynamic = ["version"]
 authors = [
     {name = "PyT-Team Authors", email = "tlscabinet@gmail.com"}
 ]
@@ -33,6 +33,7 @@ dependencies=[
     "matplotlib",
     "networkx",
     "pandas",
+    "gudhi",
     "pyg-nightly",
     "decorator",
     "hypernetx < 2.0.0",
@@ -41,10 +42,12 @@ dependencies=[
     "hydra-core==1.3.2",
     "hydra-colorlog==1.2.0",
     "hydra-optuna-sweeper==1.2.0",
+    "lightning==2.2.1",
+    "einops==0.7.0",
+    "wandb==0.16.4",
     "rich",
     "rootutils",
     "pytest",
-
 ]
 
 [project.optional-dependencies]
@@ -57,20 +60,15 @@ doc = [
     "pydata-sphinx-theme"
 ]
 lint = [
-    "black",
-    "black[jupyter]",
-    "flake8",
-    "flake8-docstrings",
-    "Flake8-pyproject",
-    "isort",
-    "pre-commit"
+    "pre-commit",
+    "ruff"
 ]
 test = [
     "pytest",
     "pytest-cov",
     "coverage",
     "jupyter",
-    "mypy"
+    "mypy",
 ]
 
 dev = ["TopoBenchmarkX[test, lint]"]
@@ -79,6 +77,37 @@ all = ["TopoBenchmarkX[dev, doc]"]
 [project.urls]
 homepage="https://github.com/pyt-team/TopoBenchmarkX"
 repository="https://github.com/pyt-team/TopoBenchmarkX"
+
+[tool.ruff]
+target-version = "py310"
+extend-include = ["*.ipynb"]
+
+[tool.ruff.format]
+docstring-code-format = false
+
+[tool.ruff.lint]
+select = [
+    "F", # pyflakes errors
+    "E", # code style
+    "W", # warnings
+    "I", # import order
+    "UP", # pyupgrade rules
+    "B", # bugbear rules
+    "PIE", # pie rules
+    "Q", # quote rules
+    "RET", # return rules
+    "SIM", # code simplifications
+    "NPY", # numpy rules
+    "PERF", # performance rules
+    "RUF", # miscellaneous rules
+]
+ignore = ["E501"] # line too long
+
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"
+
+[tool.ruff.per-file-ignores]
+"__init__.py" = ["F403"]
 
 [tool.setuptools.dynamic]
 version = {attr = "topobenchmarkx.__version__"}
@@ -93,6 +122,7 @@ include = [
 warn_redundant_casts = true
 warn_unused_ignores = true
 show_error_codes = true
+disable_error_code = ["import-untyped"]
 plugins = "numpy.typing.mypy_plugin"
 
 [[tool.mypy.overrides]]
@@ -104,26 +134,15 @@ ignore_missing_imports = true
 [tool.pytest.ini_options]
 addopts = "--capture=no"
 
-[tool.black]
-line-length = 88
-
-[tool.isort]
-line_length = 88
-multi_line_output = 3
-include_trailing_comma = true
-skip = [".gitignore", "__init__.py"]
-
-[tool.flake8]
-max-line-length = 88
-application_import_names = "topobenchmarkx"
-docstring-convention = "numpy"
-exclude = [
-    "topobenchmarkx/__init__.py",
-    "docs/conf.py"
+[tool.numpydoc_validation]
+checks = [
+    "all",
+    "GL01",
+    "ES01",
+    "EX01",
+    "SA01"
 ]
-
-import_order_style = "smarkets"
-extend-ignore = ["E501", "E203"]
-per-file-ignores = [
-    "*/__init__.py: D104, F401",
+exclude = [
+    '\.undocumented_method$',
+    '\.__init__$',
 ]

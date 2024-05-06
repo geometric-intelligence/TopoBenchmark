@@ -8,21 +8,20 @@ import torch_geometric
 from omegaconf import DictConfig
 
 from topobenchmarkx.data.datasets import CustomDataset
+from topobenchmarkx.data.us_county_demos_dataset import USCountyDemosDataset
 from topobenchmarkx.io.load.loader import AbstractLoader
 from topobenchmarkx.io.load.preprocessor import Preprocessor
-from topobenchmarkx.io.load.utils import (
-    load_cell_complex_dataset,
-    load_hypergraph_pickle_dataset,
-    load_simplicial_dataset,
-)
 from topobenchmarkx.io.load.split_utils import (
     assing_train_val_test_mask_to_graphs,
     load_graph_cocitation_split,
     load_graph_tudataset_split,
     load_split,
 )
-
-from topobenchmarkx.data.us_county_demos_dataset import USCountyDemosDataset
+from topobenchmarkx.io.load.utils import (
+    load_cell_complex_dataset,
+    load_hypergraph_pickle_dataset,
+    load_simplicial_dataset,
+)
 
 
 class CellComplexLoader(AbstractLoader):
@@ -153,7 +152,7 @@ class GraphLoader(AbstractLoader):
         data_dir = os.path.join(
             self.parameters["data_dir"], self.parameters["data_name"]
         )
-        
+
         if (
             self.parameters.data_name.lower() in ["cora", "citeseer", "pubmed"]
             and self.parameters.data_type == "cocitation"
@@ -164,7 +163,7 @@ class GraphLoader(AbstractLoader):
             )
             if self.transforms_config is not None:
                 dataset = Preprocessor(data_dir, dataset, self.transforms_config)
-            
+
             dataset = load_graph_cocitation_split(dataset, self.parameters)
 
         elif self.parameters.data_name in [
@@ -259,17 +258,17 @@ class GraphLoader(AbstractLoader):
 
             # Split back the into train/val/test datasets
             dataset = assing_train_val_test_mask_to_graphs(joined_dataset, split_idx)
-        
-        elif self.parameters.data_name in ['US-county-demos']:
+
+        elif self.parameters.data_name in ["US-county-demos"]:
             dataset = USCountyDemosDataset(
                 root=self.parameters["data_dir"],
                 name=self.parameters["data_name"],
-                parameters=self.parameters
+                parameters=self.parameters,
             )
-            
+
             if self.transforms_config is not None:
                 dataset = Preprocessor(data_dir, dataset, self.transforms_config)
-            
+
             # We need to map original dataset into custom one to make batching work
             dataset = CustomDataset([dataset[0]])
 
@@ -319,6 +318,7 @@ class ManualGraphLoader(AbstractLoader):
         dataset = CustomDataset([processor_dataset[0]])
         return dataset
 
+
 def manual_graph():
     """Create a manual graph for testing purposes."""
     # Define the vertices (just 9 vertices)
@@ -361,7 +361,7 @@ def manual_graph():
     G.add_edges_from(edges)
     G.to_undirected()
     edge_list = torch.Tensor(list(G.edges())).T.long()
-    
+
     # Generate feature from 0 to 9
     x = torch.tensor([1, 5, 10, 50, 100, 500, 1000, 5000, 10000]).unsqueeze(1).float()
 
@@ -372,6 +372,7 @@ def manual_graph():
         y=torch.tensor(y),
     )
     return data
+
 
 def manual_simple_graph():
     """Create a manual graph for testing purposes."""
@@ -412,7 +413,7 @@ def manual_simple_graph():
     G.add_edges_from(edges)
     G.to_undirected()
     edge_list = torch.Tensor(list(G.edges())).T.long()
-    
+
     # Generate feature from 0 to 9
     x = torch.tensor([1, 5, 10, 50, 100, 500, 1000, 5000]).unsqueeze(1).float()
 

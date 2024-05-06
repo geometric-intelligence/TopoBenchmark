@@ -106,19 +106,26 @@ class GraphLifting(torch_geometric.transforms.BaseTransform):
 
         if self.preserve_edge_attr and self._data_has_edge_attr(data):
             # In case edge features are given, assign features to every edge
-            edge_index, edge_attr = data.edge_index, data.edge_attr if is_undirected(
-                data.edge_index, data.edge_attr
-            ) else to_undirected(data.edge_index, data.edge_attr)
+            edge_index, edge_attr = (
+                data.edge_index,
+                (
+                    data.edge_attr
+                    if is_undirected(data.edge_index, data.edge_attr)
+                    else to_undirected(data.edge_index, data.edge_attr)
+                ),
+            )
             edges = [
                 (i.item(), j.item(), dict(features=edge_attr[edge_idx], dim=1))
-                for edge_idx, (i, j) in enumerate(zip(edge_index[0], edge_index[1]))
+                for edge_idx, (i, j) in enumerate(
+                    zip(edge_index[0], edge_index[1], strict=False)
+                )
             ]
             self.contains_edge_attr = True
         else:
             # If edge_attr is not present, return list list of edges
             edges = [
                 (i.item(), j.item())
-                for i, j in zip(data.edge_index[0], data.edge_index[1])
+                for i, j in zip(data.edge_index[0], data.edge_index[1], strict=False)
             ]
             self.contains_edge_attr = False
         graph = nx.Graph()

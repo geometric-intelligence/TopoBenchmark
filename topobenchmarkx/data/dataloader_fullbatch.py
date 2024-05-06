@@ -1,11 +1,10 @@
 from collections import defaultdict
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 import torch
 from lightning import LightningDataModule
 from torch.utils.data import DataLoader
 from torch_geometric.data import Batch, Data
-from torch_geometric.data import DataLoader as PyGDataLoader
 from torch_geometric.utils import is_sparse
 from torch_sparse import SparseTensor
 
@@ -61,7 +60,7 @@ def collate_fn(batch):
     for batch_idx, b in enumerate(batch):
         values, keys = b[0], b[1]
         data = MyData()
-        for key, value in zip(keys, values):
+        for key, value in zip(keys, values, strict=False):
             if is_sparse(value):
                 value = value.coalesce()
             data[key] = value
@@ -69,9 +68,8 @@ def collate_fn(batch):
         # Generate batch_slice values for x_2, x_3, ...
         x_keys = [el for el in keys if ("x_" in el)]
         for x_key in x_keys:
-            #current_number_of_nodes = data["x_0"].shape[0]
-            
-            
+            # current_number_of_nodes = data["x_0"].shape[0]
+
             if x_key != "x_0" and x_key != "x_hyperedges":
                 cell_dim = int(x_key.split("_")[1])
                 current_number_of_cells = data[x_key].shape[0]
@@ -81,9 +79,9 @@ def collate_fn(batch):
                 )
 
                 if running_idx.get(f"cell_running_idx_number_{cell_dim}") is None:
-                    running_idx[
-                        f"cell_running_idx_number_{cell_dim}"
-                    ] = current_number_of_cells #current_number_of_nodes
+                    running_idx[f"cell_running_idx_number_{cell_dim}"] = (
+                        current_number_of_cells  # current_number_of_nodes
+                    )
                 else:
                     # Make sure the idx is contiguous
                     data[f"x_{cell_dim}"] = (
@@ -91,23 +89,22 @@ def collate_fn(batch):
                         + running_idx[f"cell_running_idx_number_{cell_dim}"]
                     ).long()
 
-                    running_idx[
-                        f"cell_running_idx_number_{cell_dim}"
-                    ] += current_number_of_cells #current_number_of_nodes
-            
-            elif x_key == "x_hyperedges":
+                    running_idx[f"cell_running_idx_number_{cell_dim}"] += (
+                        current_number_of_cells  # current_number_of_nodes
+                    )
 
+            elif x_key == "x_hyperedges":
                 cell_dim = x_key.split("_")[1]
                 current_number_of_hyperedges = data[x_key].shape[0]
 
-                batch_idx_dict[f"batch_hyperedges"].append(
+                batch_idx_dict["batch_hyperedges"].append(
                     torch.tensor([[batch_idx] * current_number_of_hyperedges])
                 )
 
                 if running_idx.get(f"cell_running_idx_number_{cell_dim}") is None:
-                    running_idx[
-                        f"cell_running_idx_number_{cell_dim}"
-                    ] = current_number_of_hyperedges
+                    running_idx[f"cell_running_idx_number_{cell_dim}"] = (
+                        current_number_of_hyperedges
+                    )
                 else:
                     # Make sure the idx is contiguous
                     data[f"x_{cell_dim}"] = (
@@ -115,9 +112,9 @@ def collate_fn(batch):
                         + running_idx[f"cell_running_idx_number_{cell_dim}"]
                     ).long()
 
-                    running_idx[
-                        f"cell_running_idx_number_{cell_dim}"
-                    ] += current_number_of_hyperedges
+                    running_idx[f"cell_running_idx_number_{cell_dim}"] += (
+                        current_number_of_hyperedges
+                    )
             else:
                 # Function Batch.from_data_list creates a running index automatically
                 pass
@@ -215,45 +212,40 @@ class FullBatchDataModule(LightningDataModule):
         :param stage: The stage being torn down. Either `"fit"`, `"validate"`, `"test"`, or `"predict"`.
             Defaults to ``None``.
         """
-        pass
 
-    def state_dict(self) -> Dict[Any, Any]:
+    def state_dict(self) -> dict[Any, Any]:
         """Called when saving a checkpoint. Implement to generate and save the datamodule state.
 
         :return: A dictionary containing the datamodule state that you want to save.
         """
         return {}
 
-    def load_state_dict(self, state_dict: Dict[str, Any]) -> None:
+    def load_state_dict(self, state_dict: dict[str, Any]) -> None:
         """Called when loading a checkpoint. Implement to reload datamodule state given datamodule
         `state_dict()`.
 
         :param state_dict: The datamodule state returned by `self.state_dict()`.
         """
-        pass
 
 
 class DefaultDataModule(LightningDataModule):
     """
-        Initializes the DefaultDataModule class.
+    Initializes the DefaultDataModule class.
 
-        Args:
-            dataset_train: The training dataset.
-            dataset_val: The validation dataset (optional).
-            dataset_test: The test dataset (optional).
-            batch_size: The batch size for the dataloader.
-            num_workers: The number of worker processes to use for data loading.
-            pin_memory: If True, the data loader will copy tensors into pinned memory before returning them.
+    Args:
+        dataset_train: The training dataset.
+        dataset_val: The validation dataset (optional).
+        dataset_test: The test dataset (optional).
+        batch_size: The batch size for the dataloader.
+        num_workers: The number of worker processes to use for data loading.
+        pin_memory: If True, the data loader will copy tensors into pinned memory before returning them.
 
-        Returns:
-            None
-        
-        Read the docs:
-            https://lightning.ai/docs/pytorch/latest/data/datamodule.html
-        """
+    Returns:
+        None
 
-    
-   
+    Read the docs:
+        https://lightning.ai/docs/pytorch/latest/data/datamodule.html
+    """
 
     def __init__(
         self,
@@ -264,7 +256,6 @@ class DefaultDataModule(LightningDataModule):
         num_workers: int = 0,
         pin_memory: bool = False,
     ) -> None:
-        
         super().__init__()
 
         # this line allows to access init params with 'self.hparams' attribute
@@ -336,19 +327,17 @@ class DefaultDataModule(LightningDataModule):
         :param stage: The stage being torn down. Either `"fit"`, `"validate"`, `"test"`, or `"predict"`.
             Defaults to ``None``.
         """
-        pass
 
-    def state_dict(self) -> Dict[Any, Any]:
+    def state_dict(self) -> dict[Any, Any]:
         """Called when saving a checkpoint. Implement to generate and save the datamodule state.
 
         :return: A dictionary containing the datamodule state that you want to save.
         """
         return {}
 
-    def load_state_dict(self, state_dict: Dict[str, Any]) -> None:
+    def load_state_dict(self, state_dict: dict[str, Any]) -> None:
         """Called when loading a checkpoint. Implement to reload datamodule state given datamodule
         `state_dict()`.
 
         :param state_dict: The datamodule state returned by `self.state_dict()`.
         """
-        pass

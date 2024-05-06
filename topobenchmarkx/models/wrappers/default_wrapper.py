@@ -15,7 +15,6 @@ class DefaultWrapper(ABC, torch.nn.Module):
     @abstractmethod
     def __call__(self, batch):
         """Define logic for forward pass"""
-        pass
 
 
 class GNNWrapper(DefaultWrapper):
@@ -66,9 +65,6 @@ class SANWrapper(DefaultWrapper):
         return model_out
 
 
-
-
-
 class SCNWrapper(DefaultWrapper):
     """Abstract class that provides an interface to loss logic within network"""
 
@@ -90,8 +86,7 @@ class SCNWrapper(DefaultWrapper):
     def __call__(self, batch):
         """Define logic for forward pass"""
         model_out = {"labels": batch.y, "batch": batch.batch}
-        
-        
+
         def normalize_matrix(matrix):
             matrix_ = matrix.to_dense()
             n, _ = matrix_.shape
@@ -107,10 +102,10 @@ class SCNWrapper(DefaultWrapper):
                 diag_indices, diag_sum, matrix_.shape, device=matrix.device
             ).coalesce()
             normalized_matrix = diag_matrix @ (matrix @ diag_matrix)
-            return normalized_matrix #torch.sparse_coo_tensor(
-               # normalized_matrix.nonzero().T, normalized_matrix[normalized_matrix != 0], (n, n)
-            #)
-        
+            return normalized_matrix  # torch.sparse_coo_tensor(
+            # normalized_matrix.nonzero().T, normalized_matrix[normalized_matrix != 0], (n, n)
+            # )
+
         laplacian_0 = normalize_matrix(batch.hodge_laplacian_0)
         laplacian_1 = normalize_matrix(batch.hodge_laplacian_1)
         laplacian_2 = normalize_matrix(batch.hodge_laplacian_2)
@@ -127,7 +122,7 @@ class SCNWrapper(DefaultWrapper):
         model_out["x_0"] = self.norm_2(
             x_0 + self.agg_conv_2(model_out["x_1"], batch.incidence_1), batch.batch
         )
-        
+
         return model_out
 
 

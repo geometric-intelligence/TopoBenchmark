@@ -1,7 +1,8 @@
 import torch
 import torch_geometric
-from torch_geometric.utils import one_hot
 from torch_geometric.nn import knn_graph, radius_graph
+from torch_geometric.utils import one_hot
+
 
 class IdentityTransform(torch_geometric.transforms.BaseTransform):
     r"""An identity transform that does nothing to the input data."""
@@ -26,13 +27,15 @@ class IdentityTransform(torch_geometric.transforms.BaseTransform):
         """
         return data
 
+
 class InfereKNNConnectivity(torch_geometric.transforms.BaseTransform):
-    r""" A transform that generates the k-nearest neighbor connectivity of the input point cloud."""
+    r"""A transform that generates the k-nearest neighbor connectivity of the input point cloud."""
+
     def __init__(self, **kwargs):
         super().__init__()
         self.type = "infere_knn_connectivity"
         self.parameters = kwargs
-    
+
     def forward(self, data: torch_geometric.data.Data):
         r"""Apply the transform to the input data.
         Parameters
@@ -46,17 +49,20 @@ class InfereKNNConnectivity(torch_geometric.transforms.BaseTransform):
         """
 
         edge_index = knn_graph(data.x, **self.parameters["args"])
-        
+
         # Remove duplicates
         data.edge_index = edge_index
         return data
 
+
 class InfereRadiusConnectivity(torch_geometric.transforms.BaseTransform):
-    r""" A transform that generates the radius connectivity of the input point cloud."""
+    r"""A transform that generates the radius connectivity of the input point cloud."""
+
     def __init__(self, **kwargs):
         super().__init__()
         self.type = "infere_radius_connectivity"
         self.parameters = kwargs
+
     def forward(self, data: torch_geometric.data.Data):
         r"""Apply the transform to the input data.
         Parameters
@@ -70,7 +76,7 @@ class InfereRadiusConnectivity(torch_geometric.transforms.BaseTransform):
         """
         data.edge_index = radius_graph(data.x, **self.parameters["args"])
         return data
-    
+
 
 class EqualGausFeatures(torch_geometric.transforms.BaseTransform):
     r"""A transform that generates equal Gaussian features for all nodes in the input graph.
@@ -202,7 +208,8 @@ class NodeDegrees(torch_geometric.transforms.BaseTransform):
             ), "Following logic of finding degrees is only implemented for edge_index"
             degrees = (
                 torch_geometric.utils.to_dense_adj(
-                    data[field], max_num_nodes=data["x"].shape[0]  # data["num_nodes"]
+                    data[field],
+                    max_num_nodes=data["x"].shape[0],  # data["num_nodes"]
                 )
                 .squeeze(0)
                 .sum(1)
@@ -493,7 +500,9 @@ class KeepSelectedDataFields(torch_geometric.transforms.BaseTransform):
             The transformed data.
         """
         # Keeps all the fields
-        fields_to_keep = self.parameters["base_fields"] + self.parameters["preserved_fields"]
+        fields_to_keep = (
+            self.parameters["base_fields"] + self.parameters["preserved_fields"]
+        )
         # if len(self.parameters["keep_fields"]) == 1:
         #     return data
 

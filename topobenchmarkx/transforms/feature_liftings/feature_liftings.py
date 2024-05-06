@@ -1,7 +1,7 @@
 import torch
 import torch_geometric
 
-import time
+
 class ProjectionLifting(torch_geometric.transforms.BaseTransform):
     r"""Lifts r-cell features to r+1-cells by projection.
 
@@ -68,7 +68,7 @@ class ConcatentionLifting(torch_geometric.transforms.BaseTransform):
 
     def __init__(self, **kwargs):
         super().__init__()
-    
+
     def lift_features(
         self, data: torch_geometric.data.Data | dict
     ) -> torch_geometric.data.Data | dict:
@@ -94,11 +94,13 @@ class ConcatentionLifting(torch_geometric.transforms.BaseTransform):
                 if n != 0:
                     idxs = []
                     for n_feature in range(n):
-                        idxs_for_feature = incidence.indices()[0, incidence.indices()[1,:]==n_feature]
+                        idxs_for_feature = incidence.indices()[
+                            0, incidence.indices()[1, :] == n_feature
+                        ]
                         idxs.append(torch.sort(idxs_for_feature)[0])
 
                     idxs = torch.stack(idxs, dim=0)
-                    values = data[f"x_{idx_to_project}"][idxs].view(n,-1)
+                    values = data[f"x_{idx_to_project}"][idxs].view(n, -1)
                 else:
                     values = torch.tensor([])
 
@@ -135,7 +137,7 @@ class SetLifting(torch_geometric.transforms.BaseTransform):
 
     def __init__(self, **kwargs):
         super().__init__()
-    
+
     def lift_features(
         self, data: torch_geometric.data.Data | dict
     ) -> torch_geometric.data.Data | dict:
@@ -161,14 +163,24 @@ class SetLifting(torch_geometric.transforms.BaseTransform):
                 if n != 0:
                     idxs = []
                     for n_feature in range(n):
-                        idxs_for_feature = incidence.indices()[0, incidence.indices()[1,:]==n_feature]
+                        idxs_for_feature = incidence.indices()[
+                            0, incidence.indices()[1, :] == n_feature
+                        ]
                         idxs.append(torch.sort(idxs_for_feature)[0])
 
                     idxs = torch.stack(idxs, dim=0)
-                    if elem=='1':
+                    if elem == "1":
                         values = idxs
                     else:
-                        values = torch.sort(torch.unique(data["x_" + str(int(elem)-1)][idxs].view(idxs.shape[0],-1), dim=1), dim=1)[0]
+                        values = torch.sort(
+                            torch.unique(
+                                data["x_" + str(int(elem) - 1)][idxs].view(
+                                    idxs.shape[0], -1
+                                ),
+                                dim=1,
+                            ),
+                            dim=1,
+                        )[0]
                 else:
                     values = torch.tensor([])
 

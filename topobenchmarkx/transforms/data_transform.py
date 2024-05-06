@@ -5,14 +5,14 @@ import torch_geometric
 from topobenchmarkx.transforms.data_manipulations.manipulations import (
     CalculateSimplicialCurvature,
     EqualGausFeatures,
+    IdentityTransform,
     InfereKNNConnectivity,
     InfereRadiusConnectivity,
-    IdentityTransform,
     KeepOnlyConnectedComponent,
+    KeepSelectedDataFields,
     NodeDegrees,
     NodeFeaturesToFloat,
     OneHotDegreeFeatures,
-    KeepSelectedDataFields,
 )
 from topobenchmarkx.transforms.feature_liftings.feature_liftings import (
     ConcatentionLifting,
@@ -43,7 +43,6 @@ TRANSFORMS = {
     "ProjectionLifting": ProjectionLifting,
     "ConcatentionLifting": ConcatentionLifting,
     "SetLifting": SetLifting,
-
     # Data Manipulations
     "Identity": IdentityTransform,
     "InfereKNNConnectivity": InfereKNNConnectivity,

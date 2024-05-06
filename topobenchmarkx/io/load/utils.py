@@ -1,5 +1,4 @@
 import hashlib
-import os
 import os.path as osp
 import pickle
 
@@ -12,8 +11,8 @@ from topomodelx.utils.sparse import from_sparse
 from torch_geometric.data import Data
 from torch_sparse import coalesce
 
-#from sklearn.model_selection import StratifiedKFold
-#from topobenchmarkx.data.datasets import CustomDataset
+# from sklearn.model_selection import StratifiedKFold
+# from topobenchmarkx.data.datasets import CustomDataset
 
 
 def get_complex_connectivity(complex, max_rank, signed=False):
@@ -53,16 +52,16 @@ def get_complex_connectivity(complex, max_rank, signed=False):
                 )
             except ValueError:
                 if connectivity_info == "incidence":
-                    connectivity[
-                        f"{connectivity_info}_{rank_idx}"
-                    ] = generate_zero_sparse_connectivity(
-                        m=practical_shape[rank_idx - 1], n=practical_shape[rank_idx]
+                    connectivity[f"{connectivity_info}_{rank_idx}"] = (
+                        generate_zero_sparse_connectivity(
+                            m=practical_shape[rank_idx - 1], n=practical_shape[rank_idx]
+                        )
                     )
                 else:
-                    connectivity[
-                        f"{connectivity_info}_{rank_idx}"
-                    ] = generate_zero_sparse_connectivity(
-                        m=practical_shape[rank_idx], n=practical_shape[rank_idx]
+                    connectivity[f"{connectivity_info}_{rank_idx}"] = (
+                        generate_zero_sparse_connectivity(
+                            m=practical_shape[rank_idx], n=practical_shape[rank_idx]
+                        )
                     )
     connectivity["shape"] = practical_shape
     return connectivity
@@ -88,7 +87,6 @@ def generate_zero_sparse_connectivity(m, n):
 
 def load_cell_complex_dataset(cfg):
     r"""Loads cell complex datasets."""
-    pass
 
 
 def load_simplicial_dataset(cfg):
@@ -117,7 +115,7 @@ def load_simplicial_dataset(cfg):
     }
     for rank_idx in range(max_rank + 1):
         try:
-            features["x_{}".format(rank_idx)] = torch.tensor(
+            features[f"x_{rank_idx}"] = torch.tensor(
                 np.stack(
                     list(
                         data.get_simplex_attributes(
@@ -127,7 +125,7 @@ def load_simplicial_dataset(cfg):
                 )
             )
         except:
-            features["x_{}".format(rank_idx)] = torch.tensor(
+            features[f"x_{rank_idx}"] = torch.tensor(
                 np.zeros((data.shape[rank_idx], 0))
             )
     features["y"] = torch.tensor(

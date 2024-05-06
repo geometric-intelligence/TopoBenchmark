@@ -27,5 +27,3 @@ class TorchGeometricDataset(torch_geometric.data.Dataset):
 
     def len(self):
         return len(self.data_lst)
-
-

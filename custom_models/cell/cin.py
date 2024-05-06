@@ -2,7 +2,6 @@
 
 import torch
 import torch.nn.functional as F
-
 from topomodelx.nn.cell.cwn_layer import CWNLayer
 
 
@@ -104,17 +103,17 @@ class CWN(torch.nn.Module):
             )
 
         return x_0, x_1, x_2
-    
+
 
 #### LAYERs ####
-    
+
 """Implementation of CWN layer from Bodnar et al.: Weisfeiler and Lehman Go Cellular: CW Networks."""
 
 import torch.nn as nn
 import torch.nn.functional as F
-
 from topomodelx.base.conv import Conv
 from torch_geometric.nn.models import MLP
+
 
 class CWNLayer(nn.Module):
     r"""Layer of a CW Network (CWN).
@@ -188,11 +187,10 @@ class CWNLayer(nn.Module):
         conv_0_to_1=None,
         aggregate_fn=None,
         update_fn=None,
-        eps=0.01
+        eps=0.01,
     ) -> None:
         super().__init__()
-        
-    
+
         self.conv_1_to_1 = (
             conv_1_to_1
             if conv_1_to_1 is not None
@@ -213,7 +211,7 @@ class CWNLayer(nn.Module):
         )
         self.mlp_arrow = MLP(
             [in_channels_1, in_channels_1, in_channels_1],
-            act='relu',
+            act="relu",
             act_first=False,
             norm=torch.nn.BatchNorm1d(out_channels),
             # norm_kwargs=self.norm_kwargs,
@@ -221,7 +219,7 @@ class CWNLayer(nn.Module):
 
         self.mlp = MLP(
             [in_channels_2 + in_channels_2, out_channels, out_channels],
-            act='relu',
+            act="relu",
             act_first=False,
             norm=torch.nn.BatchNorm1d(out_channels),
             # norm_kwargs=self.norm_kwargs,
@@ -316,11 +314,15 @@ class CWNLayer(nn.Module):
         )
         x_convolved_1_to_1 = self.mlp_arrow(x_convolved_1_to_1)
 
-        # 
-        x_convolved_0_to_1 = (1 + self.eps) * x_1 + self.conv_0_to_1(x_0, neighborhood_0_to_1)
+        #
+        x_convolved_0_to_1 = (1 + self.eps) * x_1 + self.conv_0_to_1(
+            x_0, neighborhood_0_to_1
+        )
 
-        x_aggregated = self.mlp(torch.cat([x_convolved_0_to_1, x_convolved_1_to_1], dim=-1))
-        #x_aggregated = self.aggregate_fn(x_convolved_1_to_1, x_convolved_0_to_1)
+        x_aggregated = self.mlp(
+            torch.cat([x_convolved_0_to_1, x_convolved_1_to_1], dim=-1)
+        )
+        # x_aggregated = self.aggregate_fn(x_convolved_1_to_1, x_convolved_0_to_1)
         return self.update_fn(x_aggregated, x_1)
 
 
@@ -332,7 +334,9 @@ class _CWNDefaultFirstConv(nn.Module):
     a protocol for the first convolutional step in CWN layer.
     """
 
-    def __init__(self, in_channels_1, in_channels_2, out_channels, eps: float = 0.) -> None:
+    def __init__(
+        self, in_channels_1, in_channels_2, out_channels, eps: float = 0.0
+    ) -> None:
         super().__init__()
         self.conv_1_to_1 = Conv(
             in_channels_1, out_channels, aggr_norm=False, update_func=None
@@ -343,14 +347,14 @@ class _CWNDefaultFirstConv(nn.Module):
 
         self.mlp = MLP(
             [in_channels_1 + in_channels_2, out_channels, out_channels],
-            act='relu',
+            act="relu",
             act_first=False,
             norm=torch.nn.BatchNorm1d(out_channels),
             # norm_kwargs=self.norm_kwargs,
         )
 
         self.eps = torch.nn.Parameter(torch.Tensor([eps]))
-        
+
     def forward(self, x_1, x_2, neighborhood_1_to_1, neighborhood_2_to_1):
         r"""Forward pass.
 
@@ -370,11 +374,9 @@ class _CWNDefaultFirstConv(nn.Module):
         torch.Tensor, shape = (n_{r}_cells, out_channels)
             Updated representations on the r-cells.
         """
-        # 
+        #
         x_up = F.elu(self.conv_1_to_1(x_1, neighborhood_1_to_1))
         x_up = (1 + self.eps) * x_1 + x_up
-
-
 
         x_coboundary = F.elu(self.conv_2_to_1(x_2, neighborhood_2_to_1))
         x_coboundary = (1 + self.eps) * x_1 + x_coboundary

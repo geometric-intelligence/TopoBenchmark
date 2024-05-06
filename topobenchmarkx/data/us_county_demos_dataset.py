@@ -1,14 +1,16 @@
 import os.path as osp
-from typing import Callable, List, Optional
-from omegaconf import DictConfig
+from collections.abc import Callable
+from typing import Optional
 
 import torch
+from omegaconf import DictConfig
 from torch_geometric.data import Data, InMemoryDataset
 from torch_geometric.io import fs
 
-from topobenchmarkx.io.load.split_utils import random_splitting
-from topobenchmarkx.io.load.download_utils import download_file_from_drive
 from topobenchmarkx.io.load.cornel_dataset import load_us_county_demos
+from topobenchmarkx.io.load.download_utils import download_file_from_drive
+from topobenchmarkx.io.load.split_utils import random_splitting
+
 
 class USCountyDemosDataset(InMemoryDataset):
     r"""
@@ -44,12 +46,12 @@ class USCountyDemosDataset(InMemoryDataset):
 
     URLS = {
         # 'contact-high-school': 'https://drive.google.com/open?id=1VA2P62awVYgluOIh1W4NZQQgkQCBk-Eu',
-        'US-county-demos': 'https://drive.google.com/file/d/1FNF_LbByhYNICPNdT6tMaJI9FxuSvvLK/view?usp=sharing',
+        "US-county-demos": "https://drive.google.com/file/d/1FNF_LbByhYNICPNdT6tMaJI9FxuSvvLK/view?usp=sharing",
     }
 
     FILE_FORMAT = {
-       # 'contact-high-school': 'tar.gz',
-        'US-county-demos': 'zip',
+        # 'contact-high-school': 'tar.gz',
+        "US-county-demos": "zip",
     }
 
     RAW_FILE_NAMES = {}
@@ -66,12 +68,12 @@ class USCountyDemosDataset(InMemoryDataset):
         use_node_attr: bool = False,
         use_edge_attr: bool = False,
     ) -> None:
-        self.name = name.replace('_', '-')
+        self.name = name.replace("_", "-")
         self.parameters = parameters
-        super().__init__(root, transform, pre_transform, pre_filter,
-                         force_reload=force_reload)
+        super().__init__(
+            root, transform, pre_transform, pre_filter, force_reload=force_reload
+        )
 
-    
         # Step 3:Load the processed data
         # After the data has been downloaded from source
         # Then preprocessed to obtain x,y and saved into processed folder
@@ -79,9 +81,9 @@ class USCountyDemosDataset(InMemoryDataset):
 
         # Load the processed data
         data, _, _ = fs.torch_load(self.processed_paths[0])
-        
-        # Map the loaded data into 
-        data = Data.from_dict(data)   
+
+        # Map the loaded data into
+        data = Data.from_dict(data)
 
         # Step 5: Create the splits and upload desired fold
         splits = random_splitting(data.y, parameters=self.parameters)
@@ -90,27 +92,25 @@ class USCountyDemosDataset(InMemoryDataset):
         data.val_mask = torch.from_numpy(splits["valid"])
         data.test_mask = torch.from_numpy(splits["test"])
 
-
         # Assign data object to self.data, to make it be prodessed by Dataset class
         self.data, self.slices = self.collate([data])
-        
-    
+
     @property
     def raw_dir(self) -> str:
-        return osp.join(self.root, self.name, 'raw')
+        return osp.join(self.root, self.name, "raw")
 
     @property
     def processed_dir(self) -> str:
-        return osp.join(self.root, self.name, 'processed')
+        return osp.join(self.root, self.name, "processed")
 
     @property
-    def raw_file_names(self) -> List[str]:
-        names = ['', f'_{self.parameters.year}']
-        return [f'{self.name}_{name}.txt' for name in names]
+    def raw_file_names(self) -> list[str]:
+        names = ["", f"_{self.parameters.year}"]
+        return [f"{self.name}_{name}.txt" for name in names]
 
     @property
     def processed_file_names(self) -> str:
-        return 'data.pt'
+        return "data.pt"
 
     def download(self) -> None:
         """
@@ -121,18 +121,20 @@ class USCountyDemosDataset(InMemoryDataset):
         """
 
         # Step 1: Download data from the source
-        self.url = self.URLS[self.name] 
+        self.url = self.URLS[self.name]
         self.file_format = self.FILE_FORMAT[self.name]
-        
+
         download_file_from_drive(
-            file_link=self.url, 
-            path_to_save=self.raw_dir, 
+            file_link=self.url,
+            path_to_save=self.raw_dir,
             dataset_name=self.name,
-            file_format=self.file_format
+            file_format=self.file_format,
         )
-        
+
         # Extract the downloaded file if it is compressed
-        fs.cp(f'{self.raw_dir}/{self.name}.{self.file_format}', self.raw_dir, extract=True)
+        fs.cp(
+            f"{self.raw_dir}/{self.name}.{self.file_format}", self.raw_dir, extract=True
+        )
 
         # Move the etracted files to the datasets/domain/dataset_name/raw/ directory
         for filename in fs.ls(osp.join(self.raw_dir, self.name)):
@@ -140,7 +142,7 @@ class USCountyDemosDataset(InMemoryDataset):
         fs.rm(osp.join(self.raw_dir, self.name))
 
         # Delete also f'{self.raw_dir}/{self.name}.{self.file_format}'
-        fs.rm(f'{self.raw_dir}/{self.name}.{self.file_format}')
+        fs.rm(f"{self.raw_dir}/{self.name}.{self.file_format}")
 
     def process(self) -> None:
         """
@@ -158,4 +160,4 @@ class USCountyDemosDataset(InMemoryDataset):
         self.save([data], self.processed_paths[0])
 
     def __repr__(self) -> str:
-        return f'{self.name}()'
+        return f"{self.name}()"

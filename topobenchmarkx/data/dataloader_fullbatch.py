@@ -69,11 +69,13 @@ def collate_fn(batch):
         # Generate batch_slice values for x_2, x_3, ...
         x_keys = [el for el in keys if ("x_" in el)]
         for x_key in x_keys:
-            cell_dim = int(x_key.split("_")[1])
-            current_number_of_nodes = data["x_0"].shape[0]
-            current_number_of_cells = data[x_key].shape[0]
+            #current_number_of_nodes = data["x_0"].shape[0]
+            
+            
+            if x_key != "x_0" and x_key != "x_hyperedges":
+                cell_dim = int(x_key.split("_")[1])
+                current_number_of_cells = data[x_key].shape[0]
 
-            if x_key != "x_0":
                 batch_idx_dict[f"batch_{cell_dim}"].append(
                     torch.tensor([[batch_idx] * current_number_of_cells])
                 )
@@ -81,18 +83,47 @@ def collate_fn(batch):
                 if running_idx.get(f"cell_running_idx_number_{cell_dim}") is None:
                     running_idx[
                         f"cell_running_idx_number_{cell_dim}"
-                    ] = current_number_of_nodes
+                    ] = current_number_of_cells #current_number_of_nodes
                 else:
-                    # Make sure the idx is contiguous and refer to approriate x_0 in settransformer
+                    # Make sure the idx is contiguous
                     data[f"x_{cell_dim}"] = (
                         data[f"x_{cell_dim}"]
                         + running_idx[f"cell_running_idx_number_{cell_dim}"]
                     ).long()
+
                     running_idx[
                         f"cell_running_idx_number_{cell_dim}"
-                    ] += current_number_of_nodes
+                    ] += current_number_of_cells #current_number_of_nodes
+            
+            elif x_key == "x_hyperedges":
+
+                cell_dim = x_key.split("_")[1]
+                current_number_of_hyperedges = data[x_key].shape[0]
+
+                batch_idx_dict[f"batch_hyperedges"].append(
+                    torch.tensor([[batch_idx] * current_number_of_hyperedges])
+                )
+
+                if running_idx.get(f"cell_running_idx_number_{cell_dim}") is None:
+                    running_idx[
+                        f"cell_running_idx_number_{cell_dim}"
+                    ] = current_number_of_hyperedges
+                else:
+                    # Make sure the idx is contiguous
+                    data[f"x_{cell_dim}"] = (
+                        data[f"x_{cell_dim}"]
+                        + running_idx[f"cell_running_idx_number_{cell_dim}"]
+                    ).long()
+
+                    running_idx[
+                        f"cell_running_idx_number_{cell_dim}"
+                    ] += current_number_of_hyperedges
+            else:
+                # Function Batch.from_data_list creates a running index automatically
+                pass
 
         data_list.append(data)
+
     batch = Batch.from_data_list(data_list)
 
     # Add batch slices to batch

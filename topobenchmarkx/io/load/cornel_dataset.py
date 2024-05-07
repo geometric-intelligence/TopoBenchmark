@@ -5,6 +5,20 @@ import torch_geometric
 
 
 def load_us_county_demos(path, year=2012):
+    r"""Load US County Demos dataset
+    
+    Parameters
+    ----------
+    path: str
+        Path to the dataset.
+    year: int
+        Year to load the features.
+    
+    Returns
+    -------
+    torch_geometric.data.Data
+        Data object of the graph for the US County Demos dataset.
+    """
     edges_df = pd.read_csv(f"{path}/county_graph.csv")
     stat = pd.read_csv(f"{path}/county_stats_{year}.csv", encoding="ISO-8859-1")
 

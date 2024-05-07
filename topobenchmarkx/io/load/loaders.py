@@ -267,7 +267,10 @@ class GraphLoader(AbstractLoader):
             )
 
             if self.transforms_config is not None:
-                dataset = Preprocessor(data_dir, dataset, self.transforms_config)
+                # force_reload=True because in this datasets many variables can be trated as y
+                dataset = Preprocessor(
+                    data_dir, dataset, self.transforms_config, force_reload=True
+                )
 
             # We need to map original dataset into custom one to make batching work
             dataset = CustomDataset([dataset[0]])

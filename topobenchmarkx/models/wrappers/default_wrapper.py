@@ -114,14 +114,18 @@ class SCNWrapper(DefaultWrapper):
         )
 
         # Propagate signal down
-        model_out["x_2"] = x_2
-        model_out["x_1"] = self.norm_1(
-            x_1 + self.agg_conv_1(model_out["x_2"], batch.incidence_2),
-            batch.batch_1,
-        )
-        model_out["x_0"] = self.norm_2(
-            x_0 + self.agg_conv_2(model_out["x_1"], batch.incidence_1), batch.batch
-        )
+        # model_out["x_2"] = x_2
+        # model_out["x_1"] = x_1
+        # model_out["x_0"] = x_0
+
+        # model_out["x_2"] = x_2
+        # model_out["x_1"] = self.norm_1(
+        #     x_1 + self.agg_conv_1(model_out["x_2"], batch.incidence_2),
+        #     batch.batch_1,
+        # )
+        # model_out["x_0"] = self.norm_2(
+        #     x_0 + self.agg_conv_2(model_out["x_1"], batch.incidence_1), batch.batch
+        # )
 
         return model_out
 

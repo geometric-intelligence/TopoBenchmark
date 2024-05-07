@@ -2,7 +2,7 @@ import torch
 import torch_geometric
 
 
-class ProjectionLifting(torch_geometric.transforms.BaseTransform):
+class ProjectionSum(torch_geometric.transforms.BaseTransform):
     r"""Lifts r-cell features to r+1-cells by projection.
 
     Parameters
@@ -33,7 +33,7 @@ class ProjectionLifting(torch_geometric.transforms.BaseTransform):
             if f"x_{elem}" not in data:
                 idx_to_project = 0 if elem == "hyperedges" else int(elem) - 1
                 data["x_" + elem] = torch.matmul(
-                    data["incidence_" + elem].t(),
+                    abs(data["incidence_" + elem].t()),
                     data[f"x_{idx_to_project}"],
                 )
         return data

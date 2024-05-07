@@ -7,7 +7,7 @@ from omegaconf import DictConfig
 from torch_geometric.data import Data, InMemoryDataset
 from torch_geometric.io import fs
 
-from topobenchmarkx.io.load.cornel_dataset import load_us_county_demos
+from topobenchmarkx.io.load.us_county_demos import load_us_county_demos
 from topobenchmarkx.io.load.download_utils import download_file_from_drive
 from topobenchmarkx.io.load.split_utils import random_splitting
 
@@ -92,6 +92,14 @@ class USCountyDemosDataset(InMemoryDataset):
         data.val_mask = torch.from_numpy(splits["valid"])
         data.test_mask = torch.from_numpy(splits["test"])
 
+        # Standardize the node features respecting train mask
+        data.x = (data.x - data.x[data.train_mask].mean(0)) / data.x[
+            data.train_mask
+        ].std(0)
+        data.y = (data.y - data.y[data.train_mask].mean(0)) / data.y[
+            data.train_mask
+        ].std(0)
+
         # Assign data object to self.data, to make it be prodessed by Dataset class
         self.data, self.slices = self.collate([data])
 
@@ -154,7 +162,9 @@ class USCountyDemosDataset(InMemoryDataset):
         Returns:
             None
         """
-        data = load_us_county_demos(self.raw_dir, year=self.parameters.year)
+        data = load_us_county_demos(
+            self.raw_dir, year=self.parameters.year, y_col=self.parameters.task_variable
+        )
 
         data = data if self.pre_transform is None else self.pre_transform(data)
         self.save([data], self.processed_paths[0])

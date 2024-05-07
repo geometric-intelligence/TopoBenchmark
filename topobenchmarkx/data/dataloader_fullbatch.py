@@ -92,9 +92,9 @@ def collate_fn(batch):
                         + running_idx[f"cell_running_idx_number_{cell_dim}"]
                     ).long()
 
-                    running_idx[f"cell_running_idx_number_{cell_dim}"] += (
-                        current_number_of_cells  # current_number_of_nodes
-                    )
+                    running_idx[
+                        f"cell_running_idx_number_{cell_dim}"
+                    ] += current_number_of_cells  # current_number_of_nodes
 
             elif x_key == "x_hyperedges":
                 cell_dim = x_key.split("_")[1]
@@ -115,9 +115,9 @@ def collate_fn(batch):
                         + running_idx[f"cell_running_idx_number_{cell_dim}"]
                     ).long()
 
-                    running_idx[f"cell_running_idx_number_{cell_dim}"] += (
-                        current_number_of_hyperedges
-                    )
+                    running_idx[
+                        f"cell_running_idx_number_{cell_dim}"
+                    ] += current_number_of_hyperedges
             else:
                 # Function Batch.from_data_list creates a running index automatically
                 pass

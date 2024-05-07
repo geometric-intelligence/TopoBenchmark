@@ -3,13 +3,13 @@ _target_: topobenchmarkx.models.network_module.NetworkModule
 feature_encoder:
   _target_: topobenchmarkx.models.encoders.default_encoders.BaseFeatureEncoder
   in_channels: ${infer_in_channels:${dataset}} # ${dataset.parameters.num_features}
-  out_channels: 128
+  out_channels: 32
 
 backbone:
   _target_: topomodelx.nn.simplicial.sccn.SCCN
   channels: ${model.feature_encoder.out_channels}
   max_rank: 1
-  n_layers: 1
+  n_layers: 2
   update_func: "sigmoid"
 
 loss:

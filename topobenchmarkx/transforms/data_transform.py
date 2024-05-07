@@ -16,7 +16,7 @@ from topobenchmarkx.transforms.data_manipulations.manipulations import (
 )
 from topobenchmarkx.transforms.feature_liftings.feature_liftings import (
     ConcatentionLifting,
-    ProjectionLifting,
+    ProjectionSum,
     SetLifting,
 )
 from topobenchmarkx.transforms.liftings.graph2cell import CellCyclesLifting
@@ -30,7 +30,6 @@ from topobenchmarkx.transforms.liftings.graph2simplicial import (
 )
 
 TRANSFORMS = {
-    ###
     # Graph -> Hypergraph
     "HypergraphKHopLifting": HypergraphKHopLifting,
     "HypergraphKNearestNeighborsLifting": HypergraphKNearestNeighborsLifting,
@@ -40,7 +39,7 @@ TRANSFORMS = {
     # Graph -> Cell Complex
     "CellCyclesLifting": CellCyclesLifting,
     # Feature Liftings
-    "ProjectionLifting": ProjectionLifting,
+    "ProjectionSum": ProjectionSum,
     "ConcatentionLifting": ConcatentionLifting,
     "SetLifting": SetLifting,
     # Data Manipulations

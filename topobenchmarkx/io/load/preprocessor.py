@@ -22,14 +22,22 @@ class Preprocessor(torch_geometric.data.InMemoryDataset):
         Additional arguments.
     """
 
-    def __init__(self, data_dir, data_list, transforms_config, **kwargs):
+    def __init__(
+        self, data_dir, data_list, transforms_config, force_reload=False, **kwargs
+    ):
         if isinstance(data_list, torch_geometric.data.Dataset):
             data_list = [data_list.get(idx) for idx in range(len(data_list))]
         elif isinstance(data_list, torch_geometric.data.Data):
             data_list = [data_list]
         self.data_list = data_list
         pre_transform = self.instantiate_pre_transform(data_dir, transforms_config)
-        super().__init__(self.processed_data_dir, None, pre_transform, **kwargs)
+        super().__init__(
+            self.processed_data_dir,
+            None,
+            pre_transform,
+            force_reload=force_reload,
+            **kwargs,
+        )
         self.save_transform_parameters()
         self.load(self.processed_paths[0])
 

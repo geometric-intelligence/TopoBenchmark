@@ -17,7 +17,7 @@ backbone:
   heads: 4 # For now we stuck to out_channels//heads
   concat: True
   skip_connection: True
-  n_layers: 1
+  n_layers: 4
   att_lift: False
 
 loss:

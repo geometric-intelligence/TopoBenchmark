@@ -274,11 +274,11 @@ class CANWrapper(DefaultWrapper):
         """Define logic for forward pass"""
         model_out = {"labels": batch.y, "batch": batch.batch}
         x_1 = self.backbone(
-            batch.x,
-            batch.x_1,
-            batch.adjacency_0.coalesce(),
-            batch.down_laplacian_1.coalesce(),
-            batch.up_laplacian_1.coalesce(),
+            x_0=batch.x_0,
+            x_1=batch.x_1,
+            adjacency_0=batch.adjacency_0.coalesce(),
+            down_laplacian_1=batch.down_laplacian_1.coalesce(),
+            up_laplacian_1=batch.up_laplacian_1.coalesce(),
         )
         x_0 = torch.sparse.mm(batch.incidence_1, x_1)
 
@@ -321,9 +321,9 @@ class CWNWrapper(DefaultWrapper):
             x_0=batch.x_0,
             x_1=batch.x_1,
             x_2=batch.x_2,
-            neighborhood_0_to_1=batch.incidence_1.T,
-            neighborhood_1_to_1=batch.adjacency_1,
-            neighborhood_2_to_1=batch.incidence_2,
+            incidence_1_t=batch.incidence_1.T,
+            adjacency_0=batch.adjacency_1,
+            incidence_2=batch.incidence_2,
         )
 
         model_out["x_0"] = torch.mm(
@@ -346,8 +346,8 @@ class CCXNWrapper(DefaultWrapper):
         x_0, x_1, x_2 = self.backbone(
             x_0=batch.x_0,
             x_1=batch.x_1,
-            neighborhood_0_to_0=batch.adjacency_0,
-            neighborhood_1_to_2=batch.incidence_2.T,
+            adjacency_0=batch.adjacency_0,
+            incidence_2_t=batch.incidence_2.T,
         )
         model_out["x_0"] = x_0
         model_out["x_1"] = x_1

@@ -64,6 +64,17 @@ def cache_fn(f):
 
 
 class PreNorm(nn.Module):
+    r"""Class to wrap together LayerNorm and a specified function.
+    
+    Parameters
+    ----------
+    dim: int
+        Size of the dimension to normalize.
+    fn: torch.nn.Module
+        Function after LayerNorm.
+    context_dim: int
+        Size of the context to normalize.
+    """
     def __init__(self, dim, fn, context_dim=None):
         super().__init__()
         self.fn = fn
@@ -71,6 +82,20 @@ class PreNorm(nn.Module):
         self.norm_context = nn.LayerNorm(context_dim) if exists(context_dim) else None
 
     def forward(self, x, **kwargs):
+        r"""Forward pass.
+        
+        Parameters
+        ----------
+        x: torch.Tensor
+            Input tensor.
+        kwargs: dict
+            Dictionary of keyword arguments.
+        
+        Returns
+        -------
+        torch.Tensor
+            Output tensor.
+        """
         x = self.norm(x)
 
         if exists(self.norm_context):
@@ -82,12 +107,28 @@ class PreNorm(nn.Module):
 
 
 class GEGLU(nn.Module):
+    r"""GEGLU activation function."""
     def forward(self, x):
+        r"""Forward pass.
+        
+        Parameters
+        ----------
+        x: torch.Tensor
+            Input tensor.
+        """
         x, gates = x.chunk(2, dim=-1)
         return x * F.gelu(gates)
 
-
 class FeedForward(nn.Module):
+    r"""Feedforward network.
+    
+    Parameters
+    ----------
+    dim: int
+        Size of the input dimension.
+    mult: int
+        Multiplier for the hidden dimension.
+    """
     def __init__(self, dim, mult=4):
         super().__init__()
         self.net = nn.Sequential(
@@ -95,10 +136,30 @@ class FeedForward(nn.Module):
         )
 
     def forward(self, x):
+        r"""Forward pass.
+        
+        Parameters
+        ----------
+        x: torch.Tensor
+            Input tensor.
+        """
         return self.net(x)
 
 
 class Attention(nn.Module):
+    r"""Attention function.
+    
+    Parameters
+    ----------
+    query_dim: int
+        Size of the query dimension.
+    context_dim: int
+        Size of the context dimension.
+    heads: int
+        Number of heads.
+    dim_head: int
+        Size for each head.
+    """
     def __init__(self, query_dim, context_dim=None, heads=8, dim_head=64):
         super().__init__()
         inner_dim = dim_head * heads
@@ -111,6 +172,22 @@ class Attention(nn.Module):
         self.to_out = nn.Linear(inner_dim, query_dim)
 
     def forward(self, x, context=None, mask=None):
+        r"""Forward pass.
+        
+        Parameters
+        ----------
+        x: torch.Tensor
+            Input tensor.
+        context: torch.Tensor
+            Context tensor.
+        mask: torch.Tensor
+            Mask for attention calculation purposes.
+        
+        Returns
+        -------
+        torch.Tensor
+            Output tensor.
+        """
         h = self.heads
 
         q = self.to_q(x)
@@ -139,12 +216,35 @@ class Attention(nn.Module):
 
 
 class Perceiver(nn.Module):
+    r"""Perceiver model.
+    
+    Parameters
+    ----------
+    depth: int
+        Number of layers to add to the model.
+    dim: int
+        Size of the input dimension.
+    num_latents: int
+        Number of latent vectors.
+    cross_heads: int
+        Number of heads for cross attention.
+    latent_heads: int
+        Number of heads for latent attention.
+    cross_dim_head: int
+        Size of the cross attention head.
+    latent_dim_head: int
+        Size of the latent attention head.
+    weight_tie_layers: bool
+        Whether to tie the weights of the layers.
+    decoder_ff: bool
+        Whether to use a feedforward network in the decoder.
+    """
     def __init__(
         self,
         *,
         depth,
         dim,
-        logits_dim=None,
+        # logits_dim=None,
         num_latents=1,
         cross_heads=1,
         latent_heads=8,
@@ -203,11 +303,22 @@ class Perceiver(nn.Module):
             PreNorm(queries_dim, FeedForward(queries_dim)) if decoder_ff else None
         )
 
-        self.to_logits = (
-            nn.Linear(queries_dim, logits_dim) if exists(logits_dim) else nn.Identity()
-        )
+        # self.to_logits = (
+        #     nn.Linear(queries_dim, logits_dim) if exists(logits_dim) else nn.Identity()
+        # )
 
     def forward(self, data, mask=None, queries=None):
+        r"""Forward pass.
+        
+        Parameters
+        ----------
+        data: torch.Tensor
+            Input tensor.
+        mask: torch.Tensor
+            Mask for attention calculation purposes.
+        queries: torch.Tensor
+            Queries tensor.
+        """
         b, *_, device = *data.shape, data.device
 
         x = repeat(self.latents, "n d -> b n d", b=b)

@@ -3,16 +3,15 @@ _target_: topobenchmarkx.models.network_module.NetworkModule
 feature_encoder:
   _target_: topobenchmarkx.models.encoders.default_encoders.BaseFeatureEncoder
   in_channels: ${infer_in_channels:${dataset}} #${dataset.parameters.num_features}
-  out_channels: 32
+  out_channels: 64
   selected_dimensions:
     - 1
 
 backbone:
   _target_: topomodelx.nn.simplicial.san.SAN
   in_channels: ${model.backbone.hidden_channels}
-  hidden_channels: 32
-  #out_channels: 16
-  n_filters: 4
+  hidden_channels: ${model.feature_encoder.out_channels}
+  n_filters: 2
   n_layers: 1
   order_harmonic: 1
   epsilon_harmonic: 1e-1
@@ -22,20 +21,11 @@ loss:
   task: ${dataset.parameters.task}
   loss_type: ${dataset.parameters.loss_type}
 
-# evaluator:
-#   _target_: topobenchmarkx.evaluators.evaluator.Evaluator
-#   metrics: [acc, rocauc]
-
 readout:
   _target_: topobenchmarkx.models.readouts.default_readouts.GNNBatchReadOut
   task_level: ${dataset.parameters.task_level}
   in_channels: ${model.backbone.hidden_channels}
   out_channels: ${dataset.parameters.num_classes}
-
-# readout_workaround:
-#   _target_: topobenchmarkx.models.readout_workaround.ReadOutWorkaround
-#   backbone_outputs: ["x_0"]
-
 
 backbone_wrapper:
   _target_: topobenchmarkx.models.wrappers.default_wrapper.SANWrapper
@@ -44,7 +34,7 @@ backbone_wrapper:
 optimizer:
   _target_: torch.optim.Adam
   _partial_: true
-  lr: 0.001 #0.01
+  lr: 0.001
   weight_decay: 0.0
 
 scheduler:

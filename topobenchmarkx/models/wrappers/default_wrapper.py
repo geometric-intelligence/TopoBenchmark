@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 import topomodelx
 import torch
 from torch_geometric.nn.norm import GraphNorm
+import torch.nn as nn   
 
 
 class DefaultWrapper(ABC, torch.nn.Module):
@@ -114,9 +115,9 @@ class SCNWrapper(DefaultWrapper):
         )
 
         # Propagate signal down
-        # model_out["x_2"] = x_2
-        # model_out["x_1"] = x_1
-        # model_out["x_0"] = x_0
+        model_out["x_2"] = x_2
+        model_out["x_1"] = x_1
+        model_out["x_0"] = x_0
 
         # model_out["x_2"] = x_2
         # model_out["x_1"] = self.norm_1(
@@ -315,8 +316,13 @@ class CWNDCMWrapper(DefaultWrapper):
 class CWNWrapper(DefaultWrapper):
     """Abstract class that provides an interface to loss logic within network"""
 
-    def __init__(self, backbone):
+    def __init__(self, backbone, **kwargs):
         super().__init__(backbone)
+        self.norm_0 = nn.LayerNorm(kwargs["out_channels"])
+        self.norm_1 = nn.LayerNorm(kwargs["out_channels"])
+        self.norm_2 = nn.LayerNorm(kwargs["out_channels"])
+        self.norm_outuputs = kwargs['normalize_outuputs'] 
+
 
     def __call__(self, batch):
         """Define logic for forward pass"""
@@ -330,9 +336,13 @@ class CWNWrapper(DefaultWrapper):
             incidence_2=batch.incidence_2,
         )
 
-        model_out["x_0"] = torch.mm(
-            batch.incidence_1, x_1
-        )  # + torch.mm(batch.incidence_1,torch.mm(batch.incidence_2, x_2))
+        if self.norm_outuputs:
+            x_0 = self.norm_0(x_0)
+            x_1 = self.norm_1(x_1)
+            x_2 = self.norm_2(x_2)
+        
+        model_out["x_0"] = x_0
+        # + torch.mm(batch.incidence_1,torch.mm(batch.incidence_2, x_2))
         model_out["x_1"] = x_1
         model_out["x_2"] = x_2
         return model_out

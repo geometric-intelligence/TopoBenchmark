@@ -12,7 +12,7 @@ backbone:
   in_channels_1: ${model.feature_encoder.out_channels}
   in_channels_2: ${model.feature_encoder.out_channels}
   hid_channels: ${model.feature_encoder.out_channels}
-  n_layers: 2
+  n_layers: 1
 
 loss:
   _target_: topobenchmarkx.models.losses.loss.DefaultLoss
@@ -28,6 +28,8 @@ readout:
 backbone_wrapper:
   _target_: topobenchmarkx.models.wrappers.default_wrapper.CWNWrapper
   _partial_: true
+  out_channels: ${model.feature_encoder.out_channels}
+  normalize_outuputs: False
 
 optimizer:
   _target_: torch.optim.Adam

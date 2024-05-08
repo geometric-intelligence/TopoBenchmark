@@ -110,15 +110,8 @@ def load_us_county_demos(path, year=2012, y_col="Election"):
     stat = stat.drop(columns=["DEM", "GOP", "FIPS"])
 
     # Prediction col
-
-    x_col = list(set(stat.columns).difference(set([y_col])))
-
-    # stat["MedianIncome"] = (
-    #     stat["MedianIncome"]
-    #     .apply(lambda x: x.replace(",", ""))
-    #     .to_numpy()
-    #     .astype(float)
-    # )
+    x_col = list(stat.columns)
+    x_col.remove(y_col)
 
     x = torch.tensor(stat[x_col].to_numpy(), dtype=torch.float32)
     y = torch.tensor(stat[y_col].to_numpy(), dtype=torch.float32)

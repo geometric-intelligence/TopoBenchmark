@@ -25,6 +25,6 @@ parameters:
 
   # Dataloader parameters
   batch_size: 128 # We have an issue with allowing multiple graphs in a batch due to sparse incidences
-  num_workers: 0
+  num_workers: 10
   pin_memory: False
 

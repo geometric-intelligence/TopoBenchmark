@@ -10,7 +10,7 @@ model_checkpoint:
   save_top_k: 1 # save k best models (determined by above metric)
   mode: null # "max" means higher metric value is better, can be also "min"
   auto_insert_metric_name: True # when True, the checkpoints filenames will contain the metric name
-  save_weights_only: False # if True, then only the model’s weights will be saved
+  save_weights_only: True # if True, then only the model’s weights will be saved
   every_n_train_steps: null # number of training steps between checkpoints
   train_time_interval: null # checkpoints are monitored at the specified time interval
   every_n_epochs: null # number of epochs between checkpoints

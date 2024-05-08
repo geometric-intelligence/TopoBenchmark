@@ -22,9 +22,6 @@ class NetworkModule(LightningModule):
         backbone_wrapper: torch.nn.Module,
         feature_encoder: Union[torch.nn.Module, None] = None,
         **kwargs,
-        # optimizer: torch.optim.Optimizer,
-        # scheduler: torch.optim.lr_scheduler,
-        # compile: bool,
     ) -> None:
         """Initialize a `NetworkModule`.
 
@@ -36,10 +33,11 @@ class NetworkModule(LightningModule):
         """
         super().__init__()
 
-        # this line allows to access init params with 'self.hparams' attribute
+        # This line allows to access init params with 'self.hparams' attribute
         # also ensures init params will be stored in ckpt
         self.save_hyperparameters(
-            logger=False, ignore=["train_dataset", "validation_dataset", "test_dataset"]
+            logger=False, 
+            ignore=[]
         )
 
         self.feature_encoder = feature_encoder

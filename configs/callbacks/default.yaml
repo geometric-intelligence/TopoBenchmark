@@ -12,6 +12,7 @@ model_checkpoint:
   mode: "${get_monitor_mode:${dataset.parameters.task}}"
   save_last: False
   auto_insert_metric_name: False
+  save_weights_only: True
 
 early_stopping:
   monitor: ${get_monitor_metric:${dataset.parameters.task},${dataset.parameters.monitor_metric}} #${callbacks.model_checkpoint.monitor}

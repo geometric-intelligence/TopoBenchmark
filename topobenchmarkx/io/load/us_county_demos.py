@@ -36,7 +36,17 @@ def load_us_county_demos(path, year=2012, y_col="Election"):
         "BachelorRate",
         "UnemploymentRate",
     ]
-    # Drop rows with missing values
+    
+    # Select columns, replace ',' with '.' and convert to numeric
+    stat = stat.loc[:, keep_cols]
+    stat["MedianIncome"] = stat["MedianIncome"].replace(',','.', regex=True)
+    stat = stat.apply(pd.to_numeric, errors='coerce')
+    
+    # Step 2: Substitute NaN values with column mean
+    for column in stat.columns:
+        if column != "FIPS":
+            mean_value = stat[column].mean()
+            stat[column].fillna(mean_value, inplace=True)
     stat = stat[keep_cols].dropna()
 
     # Delete edges that are not present in stat df
@@ -103,12 +113,12 @@ def load_us_county_demos(path, year=2012, y_col="Election"):
 
     x_col = list(set(stat.columns).difference(set([y_col])))
 
-    stat["MedianIncome"] = (
-        stat["MedianIncome"]
-        .apply(lambda x: x.replace(",", ""))
-        .to_numpy()
-        .astype(float)
-    )
+    # stat["MedianIncome"] = (
+    #     stat["MedianIncome"]
+    #     .apply(lambda x: x.replace(",", ""))
+    #     .to_numpy()
+    #     .astype(float)
+    # )
 
     x = torch.tensor(stat[x_col].to_numpy(), dtype=torch.float32)
     y = torch.tensor(stat[y_col].to_numpy(), dtype=torch.float32)

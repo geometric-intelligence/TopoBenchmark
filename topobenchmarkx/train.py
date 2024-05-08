@@ -1,6 +1,5 @@
-import os
-
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+import numpy as np
+import random
 from typing import Any, Optional
 
 import hydra
@@ -20,13 +19,13 @@ from topobenchmarkx.utils.config_resolvers import (
     infer_in_channels,
 )
 
-# OmegaConf.register_new_resolver("get_default_transform", get_default_transform)
-# OmegaConf.register_new_resolver("get_monitor_metric", get_monitor_metric)
-# OmegaConf.register_new_resolver("get_monitor_mode", get_monitor_mode)
-# OmegaConf.register_new_resolver("infer_in_channels", infer_in_channels)
-# OmegaConf.register_new_resolver(
-#     "parameter_multiplication", lambda x, y: int(int(x) * int(y))
-# )
+OmegaConf.register_new_resolver("get_default_transform", get_default_transform)
+OmegaConf.register_new_resolver("get_monitor_metric", get_monitor_metric)
+OmegaConf.register_new_resolver("get_monitor_mode", get_monitor_mode)
+OmegaConf.register_new_resolver("infer_in_channels", infer_in_channels)
+OmegaConf.register_new_resolver(
+    "parameter_multiplication", lambda x, y: int(int(x) * int(y))
+)
 from topobenchmarkx.data.dataloader_fullbatch import DefaultDataModule
 from topobenchmarkx.utils import (
     RankedLogger,
@@ -73,8 +72,15 @@ def train(cfg: DictConfig) -> tuple[dict[str, Any], dict[str, Any]]:
     """
 
     # Set seed for random number generators in pytorch, numpy and python.random
-    if cfg.get("seed"):
-        L.seed_everything(cfg.seed, workers=True)
+    #if cfg.get("seed"):
+    L.seed_everything(cfg.seed, workers=True)
+    # Seed for torch
+    torch.manual_seed(cfg.seed)
+    # Seed for numpy
+    np.random.seed(cfg.seed)
+    # Seed for python random
+    random.seed(cfg.seed)
+
 
     # Instantiate and load dataset
     dataset = hydra.utils.instantiate(cfg.dataset, _recursive_=False)
@@ -194,12 +200,6 @@ def main(cfg: DictConfig) -> Optional[float]:
 
 
 if __name__ == "__main__":
-    OmegaConf.register_new_resolver("get_default_transform", get_default_transform)
-    OmegaConf.register_new_resolver("get_monitor_metric", get_monitor_metric)
-    OmegaConf.register_new_resolver("get_monitor_mode", get_monitor_mode)
-    OmegaConf.register_new_resolver("infer_in_channels", infer_in_channels)
-    OmegaConf.register_new_resolver(
-        "parameter_multiplication", lambda x, y: int(int(x) * int(y))
-    )
+
     main()
 

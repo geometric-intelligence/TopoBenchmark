@@ -6,6 +6,17 @@ from topobenchmarkx.models.abstractions.encoder import AbstractInitFeaturesEncod
 
 
 class BaseEncoder(torch.nn.Module):
+    r"""Encoder class that uses two linear layers with GraphNorm, Relu activation function, and dropout between the two layers.
+    
+    Parameters
+    ----------
+    in_channels: int
+        Dimension of input features.
+    out_channels: int
+        Dimensions of output features.
+    dropout: float
+        Percentage of channels to discard between the two linear layers.
+    """
     def __init__(self, in_channels, out_channels, dropout=0):
         super().__init__()
         self.linear1 = torch.nn.Linear(in_channels, out_channels)
@@ -15,6 +26,21 @@ class BaseEncoder(torch.nn.Module):
         self.dropout = torch.nn.Dropout(dropout)
 
     def forward(self, x: torch.Tensor, batch: torch.Tensor) -> torch.Tensor:
+        r"""
+        Forward pass
+        
+        Parameters
+        ----------
+        x: torch.Tensor
+            Input tensor of dimensions [N, in_channels].
+        batch: torch.Tensor
+             The batch vector which assigns each element to a specific example.
+        
+        Returns
+        -------
+        torch.Tensor
+            Output tensor of shape [N, out_channels].
+        """
         x = self.linear1(x)
         x = self.BN(x, batch=batch) if batch.shape[0] > 0 else self.BN(x)
         x = self.dropout(self.relu(x))
@@ -23,6 +49,19 @@ class BaseEncoder(torch.nn.Module):
 
 
 class BaseFeatureEncoder(AbstractInitFeaturesEncoder):
+    r"""Encoder class to apply BaseEncoder to the features of higher order structures.
+    
+    Parameters
+    ----------
+    in_channels: list(int)
+        Input dimensions for the features.
+    out_channels: list(int)
+        Output dimensions for the features.
+    proj_dropout: float
+        Dropout for the BaseEncoders.
+    selected_dimensions: list(int)
+        List of indexes to apply the BaseEncoders to.
+    """
     def __init__(
         self, in_channels, out_channels, proj_dropout=0, selected_dimensions=None
     ):
@@ -44,6 +83,19 @@ class BaseFeatureEncoder(AbstractInitFeaturesEncoder):
             )
 
     def forward(self, data: torch_geometric.data.Data) -> torch_geometric.data.Data:
+        r"""
+        Forward pass
+        
+        Parameters
+        ----------
+        data: torch_geometric.data.Data
+            Input data object which should contain x_{i} features for each i in the selected_dimensions.
+        
+        Returns
+        -------
+        torch_geometric.data.Data
+            Output data object.
+        """
         if not hasattr(data, "x_0"):
             data.x_0 = data.x
 
@@ -58,6 +110,19 @@ from topobenchmarkx.models.encoders.perceiver import Perceiver
 
 
 class SetFeatureEncoder(AbstractInitFeaturesEncoder):
+    r"""Encoder class to apply BaseEncoder to the node features and Perceiver to the features of higher order structures.
+    
+    Parameters
+    ----------
+    in_channels: list(int)
+        Input dimensions for the features.
+    out_channels: list(int)
+        Output dimensions for the features.
+    proj_dropout: float
+        Dropout for the BaseEncoders.
+    selected_dimensions: list(int)
+        List of indexes to apply the BaseEncoders to.
+    """
     def __init__(
         self, in_channels, out_channels, proj_dropout=0, selected_dimensions=None
     ):
@@ -92,6 +157,19 @@ class SetFeatureEncoder(AbstractInitFeaturesEncoder):
                 )
 
     def forward(self, data: torch_geometric.data.Data) -> torch_geometric.data.Data:
+        r"""
+        Forward pass
+        
+        Parameters
+        ----------
+        data: torch_geometric.data.Data
+            Input data object which should contain x_{i} features for each i in the selected_dimensions.
+        
+        Returns
+        -------
+        torch_geometric.data.Data
+            Output data object.
+        """
         if not hasattr(data, "x_0"):
             data.x_0 = data.x
 

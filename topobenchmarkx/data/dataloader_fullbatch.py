@@ -10,6 +10,9 @@ from torch_sparse import SparseTensor
 
 
 class MyData(Data):
+    """
+    Data object class that overwrites some methods from torch_geometric.data.Data so that not only sparse matrices with adj in the name can work with the torch_geometric dataloaders.
+    """
     def is_valid(self, string):
         valid_names = ["adj", "incidence", "laplacian"]
         for name in valid_names:
@@ -47,7 +50,7 @@ def collate_fn(batch):
     args:
         batch - list of (tensor, label)
 
-    reutrn:
+    return:
         xs - a tensor of all examples in 'batch' after padding
         ys - a LongTensor of all labels in batch
     """

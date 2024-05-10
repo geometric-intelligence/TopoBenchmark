@@ -43,7 +43,7 @@ class TorchEvaluator:
         elif self.task == "multilabel classification":
             parameters = {"num_classes": kwargs["num_classes"]}
             parameters["task"] = "multilabel"
-            metric_names = kwargs["classification_metrics"]
+            metric_names = kwargs["classification_metrics"] 
 
         elif self.task == "regression":
             parameters = {}
@@ -52,9 +52,21 @@ class TorchEvaluator:
         else:
             raise ValueError(f"Invalid task {kwargs['task']}")
 
-        self.metrics = MetricCollection(
-            {name: METRICS[name](**parameters) for name in metric_names}
-        )
+        # self.metrics = MetricCollection(
+        #     {name: METRICS[name](**parameters) for name in metric_names}
+        # )
+
+        metrics = {}
+        for name in metric_names: 
+            if name in ["recall", "precision", "auroc"]:
+                metrics[name] = METRICS[name](average='macro', **parameters)
+            
+            else:
+                metrics[name] = METRICS[name](**parameters)
+        self.metrics = MetricCollection(metrics)
+        
+
+            
 
         self.best_metric = {}
 

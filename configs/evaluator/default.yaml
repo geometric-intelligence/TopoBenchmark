@@ -3,5 +3,5 @@ task: ${dataset.parameters.task}
 task_level: ${dataset.parameters.task_level}
 num_classes: ${dataset.parameters.num_classes}
 
-classification_metrics:  [accuracy] #Available options: accuracy, auroc, precision, recall
+classification_metrics:  [accuracy, precision, recall, auroc] #Available options: accuracy, auroc, precision, recall
 regression_metrics: [mae, mse] #Available options: mae, mse

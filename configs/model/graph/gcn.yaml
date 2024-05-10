@@ -3,7 +3,7 @@ _target_: topobenchmarkx.models.network_module.NetworkModule
 feature_encoder:
   _target_: topobenchmarkx.models.encoders.default_encoders.BaseFeatureEncoder
   in_channels: ${infer_in_channels:${dataset}} #${dataset.parameters.num_features}
-  out_channels: 32
+  out_channels: 64
 
 backbone:
   _target_: torch_geometric.nn.models.GCN
@@ -18,30 +18,22 @@ loss:
   task: ${dataset.parameters.task}
   loss_type: ${dataset.parameters.loss_type}
 
-# evaluator:
-#   _target_: topobenchmarkx.evaluators.evaluator.Evaluator
-#   metrics: [acc, rocauc]
-
 readout:
   _target_: topobenchmarkx.models.readouts.default_readouts.GNNBatchReadOut
   task_level: ${dataset.parameters.task_level}
   in_channels: ${model.backbone.hidden_channels}
   out_channels: ${dataset.parameters.num_classes}
 
-# readout_workaround:
-#   _target_: topobenchmarkx.models.readout_workaround.ReadOutWorkaround
-#   backbone_outputs: ["x_0"]
-
-
 backbone_wrapper:
   _target_: topobenchmarkx.models.wrappers.default_wrapper.GNNWrapper
   _partial_: true
+  out_channels: 64
 
 optimizer:
   _target_: torch.optim.Adam
   _partial_: true
-  lr: 0.001 #0.01
-  weight_decay: 0.0
+  lr: 0.01 #0.01
+  weight_decay: 0.
 
 scheduler:
   _target_: torch.optim.lr_scheduler.StepLR

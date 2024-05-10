@@ -29,7 +29,7 @@ def get_default_transform(data_domain, model):
         )
 
 
-def get_monitor_metric(task, loss):
+def get_monitor_metric(task, metric):
     r"""Get monitor metric for a given task and loss.
     
     Parameters
@@ -50,9 +50,9 @@ def get_monitor_metric(task, loss):
         If the task is invalid.
     """
     if task == "classification":
-        return "val/accuracy"
+        return f"val/{metric}"
     elif task == "regression":
-        return "val/" + loss
+        return f"val/{metric}"
     else:
         raise ValueError(f"Invalid task {task}")
 

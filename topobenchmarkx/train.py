@@ -119,6 +119,7 @@ def train(cfg: DictConfig) -> tuple[dict[str, Any], dict[str, Any]]:
         cfg.trainer,
         callbacks=callbacks,
         logger=logger,
+        num_sanity_val_steps=0,
     )
 
     object_dict = {

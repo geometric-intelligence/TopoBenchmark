@@ -3,5 +3,5 @@ transform_type: 'lifting'
 transform_name: "CellCyclesLifting"
 k_value: 1
 complex_dim: ${oc.select:dataset.parameters.max_dim_if_lifted,3}
-max_cell_length: null
+max_cell_length: 6
 preserve_edge_attr: ${oc.select:dataset.parameters.preserve_edge_attr_if_lifted,False}

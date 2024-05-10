@@ -3,7 +3,7 @@ _target_: lightning.pytorch.trainer.Trainer
 default_root_dir: ${paths.output_dir}
 
 min_epochs: 1 # prevents early stopping
-max_epochs: 5
+max_epochs: 1000
 #accumulate_grad_batches: 1 #${dataset.parameters.batch_size}
 
 accelerator: gpu
@@ -13,11 +13,11 @@ devices: [0]
 # precision: 16
 
 # perform a validation loop every N training epochs
-check_val_every_n_epoch: 5
+check_val_every_n_epoch: 50
 
 # set True to to ensure deterministic results
 # makes training slower but gives more reproducibility than just setting seeds
-deterministic: True
+deterministic: False
 
 # inference mode: Whether to use :func:`torch.inference_mode` or :func:`torch.no_grad`
 # during evaluation (``validate``/``test``/``predict``).

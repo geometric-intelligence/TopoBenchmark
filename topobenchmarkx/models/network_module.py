@@ -43,7 +43,10 @@ class NetworkModule(LightningModule):
         self.feature_encoder = feature_encoder
         self.backbone = backbone_wrapper(backbone)
         self.readout = readout
+        
+        # Evaluator
         self.evaluator = None
+        self.train_metrics_logged = False
 
         # loss function
         self.task_level = self.hparams["readout"].task_level
@@ -85,8 +88,6 @@ class NetworkModule(LightningModule):
         model_out = self.criterion(model_out)
         self.evaluator.update(model_out)
 
-        # model_out = self.criterion(model_out)
-
         return model_out
 
     def training_step(self, batch, batch_idx: int) -> torch.Tensor:
@@ -99,18 +100,6 @@ class NetworkModule(LightningModule):
         """
         self.state_str = "Training"
         model_out = self.model_step(batch)
-
-        # if self.task_level == "node":
-        #     # Keep only train data points
-        #     for key, val in model_out.items():
-        #         if key in ["logits", "labels"]:
-        #             model_out[key] = val[batch.train_mask]
-
-        # # Criterion
-        # model_out = self.criterion(model_out)
-
-        # # Evaluation
-        # self.evaluator.update(model_out)
 
         # Update and log metrics
         self.log(
@@ -239,9 +228,17 @@ class NetworkModule(LightningModule):
         Note that the validation step is within the train epoch. Hence here we have to log the train metrics
         before we reset the evaluator to start the validation loop.
         """
-
+        
         # Log train metrics and reset evaluator
         self.log_metrics(mode="train")
+        self.train_metrics_logged = True
+    
+    def on_train_epoch_end(self) -> None:
+        # Log train metrics and reset evaluator
+        if self.train_metrics_logged == False:
+            self.log_metrics(mode="train")
+            self.train_metrics_logged = True
+        
 
     def on_validation_epoch_end(self) -> None:
         """Lightning hook that is called when a test epoch ends."""
@@ -256,6 +253,7 @@ class NetworkModule(LightningModule):
     def on_train_epoch_start(self) -> None:
         """Lightning hook that is called when a test epoch ends."""
         self.evaluator.reset()
+        self.train_metrics_logged = False
 
     def on_val_epoch_start(self) -> None:
         """Lightning hook that is called when a test epoch ends."""

@@ -9,6 +9,7 @@ from omegaconf import DictConfig
 
 from topobenchmarkx.data.datasets import CustomDataset
 from topobenchmarkx.data.us_county_demos_dataset import USCountyDemosDataset
+from topobenchmarkx.data.heteriphilic_dataset import HeteroDataset
 from topobenchmarkx.io.load.loader import AbstractLoader
 from topobenchmarkx.io.load.preprocessor import Preprocessor
 from topobenchmarkx.io.load.split_utils import (
@@ -261,6 +262,22 @@ class GraphLoader(AbstractLoader):
 
         elif self.parameters.data_name in ["US-county-demos"]:
             dataset = USCountyDemosDataset(
+                root=self.parameters["data_dir"],
+                name=self.parameters["data_name"],
+                parameters=self.parameters,
+            )
+
+            if self.transforms_config is not None:
+                # force_reload=True because in this datasets many variables can be trated as y
+                dataset = Preprocessor(
+                    data_dir, dataset, self.transforms_config, force_reload=True
+                )
+
+            # We need to map original dataset into custom one to make batching work
+            dataset = CustomDataset([dataset[0]])
+        
+        elif self.parameters.data_name in ["amazon_ratings", "questions", "minesweeper","roman_empire", "tolokers"]:
+            dataset = HeteroDataset(
                 root=self.parameters["data_dir"],
                 name=self.parameters["data_name"],
                 parameters=self.parameters,

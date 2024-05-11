@@ -6,7 +6,6 @@ import hydra
 import lightning as L
 import rootutils
 
-rootutils.setup_root(__file__, indicator=".project-root", pythonpath=True)
 import torch
 from lightning import Callback, LightningModule, Trainer
 from lightning.pytorch.loggers import Logger
@@ -20,14 +19,6 @@ from topobenchmarkx.utils.config_resolvers import (
     infere_list_length,
 )
 
-OmegaConf.register_new_resolver("get_default_transform", get_default_transform)
-OmegaConf.register_new_resolver("get_monitor_metric", get_monitor_metric)
-OmegaConf.register_new_resolver("get_monitor_mode", get_monitor_mode)
-OmegaConf.register_new_resolver("infer_in_channels", infer_in_channels)
-OmegaConf.register_new_resolver("infere_list_length", infere_list_length)
-OmegaConf.register_new_resolver(
-    "parameter_multiplication", lambda x, y: int(int(x) * int(y))
-)
 from topobenchmarkx.data.dataloader_fullbatch import DefaultDataModule
 from topobenchmarkx.utils import (
     RankedLogger,
@@ -56,6 +47,16 @@ from topobenchmarkx.utils import (
 # more info: https://github.com/ashleve/rootutils
 # ------------------------------------------------------------------------------------ #
 
+rootutils.setup_root(__file__, indicator=".project-root", pythonpath=True)
+
+OmegaConf.register_new_resolver("get_default_transform", get_default_transform)
+OmegaConf.register_new_resolver("get_monitor_metric", get_monitor_metric)
+OmegaConf.register_new_resolver("get_monitor_mode", get_monitor_mode)
+OmegaConf.register_new_resolver("infer_in_channels", infer_in_channels)
+OmegaConf.register_new_resolver("infere_list_length", infere_list_length)
+OmegaConf.register_new_resolver(
+    "parameter_multiplication", lambda x, y: int(int(x) * int(y))
+)
 
 torch.set_num_threads(1)
 log = RankedLogger(__name__, rank_zero_only=True)

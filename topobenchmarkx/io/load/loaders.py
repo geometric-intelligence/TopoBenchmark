@@ -367,7 +367,7 @@ def manual_graph():
     for tetrahedron in tetrahedrons:
         for i in range(len(tetrahedron)):
             for j in range(i + 1, len(tetrahedron)):
-                edges.append([tetrahedron[i], tetrahedron[j]])
+                edges.append([tetrahedron[i], tetrahedron[j]]) # noqa: PERF401
 
     # Create a graph
     G = nx.Graph()
@@ -419,7 +419,7 @@ def manual_simple_graph():
     for tetrahedron in tetrahedrons:
         for i in range(len(tetrahedron)):
             for j in range(i + 1, len(tetrahedron)):
-                edges.append([tetrahedron[i], tetrahedron[j]])
+                edges.append([tetrahedron[i], tetrahedron[j]]) # noqa: PERF401
 
     # Create a graph
     G = nx.Graph()

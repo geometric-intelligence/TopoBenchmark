@@ -1,6 +1,6 @@
-import hydra
+import hydra # noqa: F401
 import torch
-from omegaconf import DictConfig
+from omegaconf import DictConfig # noqa: F401
 
 
 class DefaultLoss:
@@ -11,8 +11,7 @@ class DefaultLoss:
             self.criterion = torch.nn.CrossEntropyLoss()
 
         elif task == "regression":
-            self.criterion == torch.nn.mse()
-
+            self.criterion = torch.nn.mse()
         else:
             raise Exception("Loss is not defined")
 

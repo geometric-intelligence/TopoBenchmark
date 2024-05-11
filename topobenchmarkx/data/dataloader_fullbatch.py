@@ -313,7 +313,7 @@ class DefaultDataModule(LightningDataModule):
 
         :return: The test dataloader.
         """
-        if self.dataset_test == None:
+        if self.dataset_test is None:
             raise ValueError("There is no test dataloader.")
         return DataLoader(
             dataset=self.dataset_test,

@@ -275,17 +275,21 @@ class Perceiver(nn.Module):
             ]
         )
 
-        get_latent_attn = lambda: PreNorm(
-            latent_dim,
-            Attention(latent_dim, heads=latent_heads, dim_head=latent_dim_head),
-        )
-        get_latent_ff = lambda: PreNorm(latent_dim, FeedForward(latent_dim))
+        def get_latent_attn(): 
+            return PreNorm(
+                latent_dim,
+                Attention(latent_dim, heads=latent_heads, dim_head=latent_dim_head),
+            )
+
+        def get_latent_ff(): 
+            return PreNorm(latent_dim, FeedForward(latent_dim))
+        
         get_latent_attn, get_latent_ff = map(cache_fn, (get_latent_attn, get_latent_ff))
 
         self.layers = nn.ModuleList([])
         cache_args = {"_cache": weight_tie_layers}
 
-        for i in range(depth):
+        for _ in range(depth):
             self.layers.append(
                 nn.ModuleList(
                     [get_latent_attn(**cache_args), get_latent_ff(**cache_args)]
@@ -319,7 +323,7 @@ class Perceiver(nn.Module):
         queries: torch.Tensor
             Queries tensor.
         """
-        b, *_, device = *data.shape, data.device
+        b, *_ = *data.shape
 
         x = repeat(self.latents, "n d -> b n d", b=b)
 
@@ -361,3 +365,4 @@ class Perceiver(nn.Module):
         # final linear out
 
         # return x #self.to_logits(latents)
+        return

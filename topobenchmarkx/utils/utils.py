@@ -1,6 +1,6 @@
 import warnings
 from importlib.util import find_spec
-from typing import Any, Callable, Dict, Optional, Tuple
+from typing import Any, Callable, Optional
 
 from omegaconf import DictConfig
 
@@ -62,7 +62,7 @@ def task_wrapper(task_func: Callable) -> Callable:
     :return: The wrapped task function.
     """
 
-    def wrap(cfg: DictConfig) -> Tuple[Dict[str, Any], Dict[str, Any]]:
+    def wrap(cfg: DictConfig) -> tuple[dict[str, Any], dict[str, Any]]:
         # execute the task
         try:
             metric_dict, object_dict = task_func(cfg=cfg)
@@ -96,7 +96,7 @@ def task_wrapper(task_func: Callable) -> Callable:
 
 
 def get_metric_value(
-    metric_dict: Dict[str, Any], metric_name: Optional[str]
+    metric_dict: dict[str, Any], metric_name: Optional[str]
 ) -> Optional[float]:
     """Safely retrieves value of the metric logged in LightningModule.
 

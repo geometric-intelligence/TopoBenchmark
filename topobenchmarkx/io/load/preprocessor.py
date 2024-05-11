@@ -127,10 +127,8 @@ class Preprocessor(torch_geometric.data.InMemoryDataset):
 
             if saved_transform_parameters != self.transforms_parameters:
                 raise ValueError("Different transform parameters for the same data_dir")
-            else:
-                print(
-                    f"Transform parameters are the same, using existing data_dir: {self.processed_data_dir}"
-                )
+            
+            print(f"Transform parameters are the same, using existing data_dir: {self.processed_data_dir}")
 
     def process(self) -> None:
         r"""Process the data."""

@@ -212,7 +212,7 @@ class NetworkModule(LightningModule):
     def log_metrics(self, mode=None):
         """Log metrics."""
         metrics_dict = self.evaluator.compute()
-        for key in metrics_dict.keys():
+        for key in metrics_dict:
             self.log(
                 f"{mode}/{key}",
                 metrics_dict[key],
@@ -238,7 +238,7 @@ class NetworkModule(LightningModule):
     
     def on_train_epoch_end(self) -> None:
         # Log train metrics and reset evaluator
-        if self.train_metrics_logged == False:
+        if not self.train_metrics_logged:
             self.log_metrics(mode="train")
             self.train_metrics_logged = True
         

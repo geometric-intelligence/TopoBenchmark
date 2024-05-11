@@ -2,6 +2,8 @@
 
 import torch
 from topomodelx.nn.simplicial.sccnn_layer import SCCNNLayer
+from torch.nn.parameter import Parameter
+
 
 
 class SCCNNCusctom(torch.nn.Module):
@@ -97,9 +99,6 @@ class SCCNNCusctom(torch.nn.Module):
 
 # Layer
 """Simplicial Complex Convolutional Neural Network Layer."""
-import torch
-from torch.nn.parameter import Parameter
-
 
 class SCCNNLayer(torch.nn.Module):
     r"""Layer of a Simplicial Complex Convolutional Neural Network.

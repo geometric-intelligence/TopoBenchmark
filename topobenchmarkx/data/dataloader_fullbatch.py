@@ -125,6 +125,9 @@ def collate_fn(batch):
         data_list.append(data)
 
     batch = Batch.from_data_list(data_list)
+    
+    # Rename batch.batch to batch.batch_0 for consistency
+    batch["batch_0"] = batch.pop("batch")
 
     # Add batch slices to batch
     for key, value in batch_idx_dict.items():

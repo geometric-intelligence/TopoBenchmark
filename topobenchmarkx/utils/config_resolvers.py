@@ -198,3 +198,6 @@ def infer_in_channels(dataset):
             return [dataset.parameters.num_features]
         else:
             return [dataset.parameters.num_features[0]]
+
+def infere_list_length(list):
+    return len(list)

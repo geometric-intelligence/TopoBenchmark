@@ -2,7 +2,7 @@ _target_: topobenchmarkx.models.network_module.NetworkModule
 
 feature_encoder:
   _target_: topobenchmarkx.models.encoders.default_encoders.BaseFeatureEncoder
-  in_channels: ${infer_in_channels:${dataset}} #${dataset.parameters.num_features}
+  in_channels: ${infer_in_channels:${dataset}} 
   out_channels: 32
 
 backbone:
@@ -16,29 +16,30 @@ backbone:
   heads: 4
   concat: true
 
+backbone_wrapper:
+  _target_: topobenchmarkx.models.wrappers.default_wrapper.GNNWrapper
+  _partial_: true
+  out_channels: ${model.feature_encoder.out_channels}
+  num_cell_dimensions: ${infere_list_length:${model.feature_encoder.in_channels}}
+
+readout:
+  _target_: topobenchmarkx.models.readouts.readout.AbstractReadOut
+  readout_name: PropagateSignalDown #  Use <None> in case readout is not needed
+  hidden_dim: ${model.feature_encoder.out_channels}
+  num_cell_dimensions: ${infere_list_length:${model.feature_encoder.in_channels}}
+
+head_model:
+  _target_: topobenchmarkx.models.head_model.models.DefaultHead
+  task_level: ${dataset.parameters.task_level}
+  in_channels: ${model.feature_encoder.out_channels}
+  out_channels: ${dataset.parameters.num_classes}
+  pooling_type: sum
+
+
 loss:
   _target_: topobenchmarkx.models.losses.loss.DefaultLoss
   task: ${dataset.parameters.task}
   loss_type: ${dataset.parameters.loss_type}
-
-# evaluator:
-#   _target_: topobenchmarkx.evaluators.evaluator.Evaluator
-#   metrics: [acc, rocauc]
-
-readout:
-  _target_: topobenchmarkx.models.readouts.default_readouts.GNNBatchReadOut
-  task_level: ${dataset.parameters.task_level}
-  in_channels: ${model.backbone.hidden_channels}
-  out_channels: ${dataset.parameters.num_classes}
-
-# readout_workaround:
-#   _target_: topobenchmarkx.models.readout_workaround.ReadOutWorkaround
-#   backbone_outputs: ["x_0"]
-
-
-backbone_wrapper:
-  _target_: topobenchmarkx.models.wrappers.default_wrapper.GNNWrapper
-  _partial_: true
 
 optimizer:
   _target_: torch.optim.Adam

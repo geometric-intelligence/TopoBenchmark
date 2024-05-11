@@ -17,9 +17,10 @@ class NetworkModule(LightningModule):
     def __init__(
         self,
         backbone: torch.nn.Module,
-        readout: torch.nn.Module,
-        loss: torch.nn.Module,
         backbone_wrapper: torch.nn.Module,
+        readout: torch.nn.Module,
+        head_model: torch.nn.Module,
+        loss: torch.nn.Module,
         feature_encoder: Union[torch.nn.Module, None] = None,
         **kwargs,
     ) -> None:
@@ -43,13 +44,14 @@ class NetworkModule(LightningModule):
         self.feature_encoder = feature_encoder
         self.backbone = backbone_wrapper(backbone)
         self.readout = readout
+        self.head_model = head_model
         
         # Evaluator
         self.evaluator = None
         self.train_metrics_logged = False
 
-        # loss function
-        self.task_level = self.hparams["readout"].task_level
+        # Loss function
+        self.task_level = self.hparams["head_model"].task_level
         self.criterion = loss
 
         # Tracking best so far validation accuracy
@@ -76,15 +78,16 @@ class NetworkModule(LightningModule):
             - A tensor of predictions.
             - A tensor of target labels.
         """
-
+        # Pipeline 
         if self.feature_encoder:
             batch = self.feature_encoder(batch)
 
         model_out = self.forward(batch)
-        model_out = self.readout(model_out)
+        model_out = self.readout(model_out, batch)
+        model_out = self.head_model(model_out)
 
+        # Criterion and metric
         model_out = self.process_outputs(batch, model_out)
-
         model_out = self.criterion(model_out)
         self.evaluator.update(model_out)
 

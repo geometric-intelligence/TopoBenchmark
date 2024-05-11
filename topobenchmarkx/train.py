@@ -17,12 +17,14 @@ from topobenchmarkx.utils.config_resolvers import (
     get_monitor_metric,
     get_monitor_mode,
     infer_in_channels,
+    infere_list_length,
 )
 
 OmegaConf.register_new_resolver("get_default_transform", get_default_transform)
 OmegaConf.register_new_resolver("get_monitor_metric", get_monitor_metric)
 OmegaConf.register_new_resolver("get_monitor_mode", get_monitor_mode)
 OmegaConf.register_new_resolver("infer_in_channels", infer_in_channels)
+OmegaConf.register_new_resolver("infere_list_length", infere_list_length)
 OmegaConf.register_new_resolver(
     "parameter_multiplication", lambda x, y: int(int(x) * int(y))
 )

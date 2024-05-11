@@ -101,14 +101,12 @@ class BaseFeatureEncoder(AbstractInitFeaturesEncoder):
 
         for i in self.dimensions:
             if hasattr(data, f"x_{i}") and hasattr(self, f"encoder_{i}"):
-                batch = data.batch if i == 0 else getattr(data, f"batch_{i}")
+                batch = getattr(data, f"batch_{i}")
                 data[f"x_{i}"] = getattr(self, f"encoder_{i}")(data[f"x_{i}"], batch)
         return data
 
 
 from topobenchmarkx.models.encoders.perceiver import Perceiver
-
-
 class SetFeatureEncoder(AbstractInitFeaturesEncoder):
     r"""Encoder class to apply BaseEncoder to the node features and Perceiver to the features of higher order structures.
     

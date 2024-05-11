@@ -16,20 +16,29 @@ backbone:
 backbone_additional_params:
   hidden_channels: ${model.feature_encoder.out_channels}
 
+backbone_wrapper:
+  _target_: topobenchmarkx.models.wrappers.default_wrapper.CCXNWrapper
+  _partial_: true
+  out_channels: ${model.feature_encoder.out_channels}
+  num_cell_dimensions: ${infere_list_length:${model.feature_encoder.in_channels}}
+
+readout:
+  _target_: topobenchmarkx.models.readouts.readout.AbstractReadOut
+  readout_name: PropagateSignalDown #  Use <None> in case readout is not needed
+  hidden_dim: ${model.feature_encoder.out_channels}
+  num_cell_dimensions: ${infere_list_length:${model.feature_encoder.in_channels}}
+
+head_model:
+  _target_: topobenchmarkx.models.head_model.models.DefaultHead
+  task_level: ${dataset.parameters.task_level}
+  in_channels: ${model.feature_encoder.out_channels}
+  out_channels: ${dataset.parameters.num_classes}
+  pooling_type: sum
+
 loss:
   _target_: topobenchmarkx.models.losses.loss.DefaultLoss
   task: ${dataset.parameters.task}
   loss_type: ${dataset.parameters.loss_type}
-
-readout:
-  _target_: topobenchmarkx.models.readouts.default_readouts.GNNBatchReadOut
-  task_level: ${dataset.parameters.task_level}
-  in_channels: ${model.backbone_additional_params.hidden_channels}
-  out_channels: ${dataset.parameters.num_classes}
-
-backbone_wrapper:
-  _target_: topobenchmarkx.models.wrappers.default_wrapper.CCXNWrapper
-  _partial_: true
 
 optimizer:
   _target_: torch.optim.Adam

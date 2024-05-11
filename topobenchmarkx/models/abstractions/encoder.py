@@ -3,7 +3,6 @@ from abc import ABC, abstractmethod
 import torch
 import torch_geometric
 
-
 class AbstractInitFeaturesEncoder(torch.nn.Module):
     """abstract class that provides an interface to define a custom initial feature encoders"""
 

@@ -101,6 +101,7 @@ select = [
     "PERF", # performance rules
     "RUF", # miscellaneous rules
 ]
+fixable = ["ALL"]
 ignore = [
     "E501", # line too long
     "RET504" # Unnecessary assignment before return

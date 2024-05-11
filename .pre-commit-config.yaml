@@ -23,11 +23,11 @@ repos:
      hooks:
        - id: ruff
          #types_or: [ python, pyi, jupyter ]
-         types_or: [ python, pyi ]
+         types_or: [ python ]
          args: [ --fix ]
        - id: ruff-format
          #types_or: [ python, pyi, jupyter ]
-         types_or: [ python, pyi ]
+         types_or: [ python ]
 
    - repo: https://github.com/numpy/numpydoc
      rev: v1.6.0

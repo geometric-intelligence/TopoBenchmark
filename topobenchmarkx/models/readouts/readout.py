@@ -3,7 +3,7 @@ import torch_geometric
 from torch_geometric.utils import scatter
 
 
-from topobenchmarkx.models.readouts.simplicial_readouts import PropagateSignalDown
+from topobenchmarkx.models.readouts.readouts import PropagateSignalDown
 # Implemented Poolings
 READOUTS = {
     "PropagateSignalDown": PropagateSignalDown

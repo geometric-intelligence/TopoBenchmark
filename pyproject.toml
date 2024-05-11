@@ -101,7 +101,10 @@ select = [
     "PERF", # performance rules
     "RUF", # miscellaneous rules
 ]
-ignore = ["E501"] # line too long
+ignore = [
+    "E501", # line too long
+    "RET504" # Unnecessary assignment before return
+] 
 
 [tool.ruff.lint.pydocstyle]
 convention = "numpy"

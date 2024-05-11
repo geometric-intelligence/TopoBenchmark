@@ -5,7 +5,7 @@ from torch_geometric.nn import GCNConv
 
 class MLP(nn.Module):
     def __init__(self, layers_size, dropout=0.0, final_activation=False):
-        super(MLP, self).__init__()
+        super().__init__()
         layers = []
         for li in range(1, len(layers_size)):
             layers.append(nn.Dropout(p=dropout))
@@ -22,7 +22,7 @@ class MLP(nn.Module):
 
 class CW(nn.Module):
     def __init__(self, F_in, F_out):
-        super(CW, self).__init__()
+        super().__init__()
         self.har = nn.Linear(F_in, F_out)
         self.sol = GCNConv(F_in, F_out, add_self_loops=False)
         self.irr = GCNConv(F_in, F_out, add_self_loops=False)
@@ -36,7 +36,7 @@ class CW(nn.Module):
 
 class CWNDCM(nn.Module):
     def __init__(self, in_channels, n_layers=2, dropout=0.0, last_act=False):
-        super(CWNDCM, self).__init__()
+        super().__init__()
         self.d = dropout
         self.convs = nn.ModuleList()
         self.last_act = last_act

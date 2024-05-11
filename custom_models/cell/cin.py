@@ -3,6 +3,9 @@
 import torch
 import torch.nn.functional as F
 from topomodelx.nn.cell.cwn_layer import CWNLayer
+import torch.nn as nn
+from topomodelx.base.conv import Conv
+from torch_geometric.nn.models import MLP
 
 
 class CWN(torch.nn.Module):
@@ -108,11 +111,6 @@ class CWN(torch.nn.Module):
 #### LAYERs ####
 
 """Implementation of CWN layer from Bodnar et al.: Weisfeiler and Lehman Go Cellular: CW Networks."""
-
-import torch.nn as nn
-import torch.nn.functional as F
-from topomodelx.base.conv import Conv
-from torch_geometric.nn.models import MLP
 
 
 class CWNLayer(nn.Module):

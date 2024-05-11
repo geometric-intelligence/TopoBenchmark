@@ -19,7 +19,7 @@ class MLP(nn.Module):
         Normalization="bn",
         InputNorm=False,
     ):
-        super(MLP, self).__init__()
+        super().__init__()
 
         self.in_channels = in_channels
         self.hidden_channels = hidden_channels
@@ -134,7 +134,7 @@ class PlainMLP(nn.Module):
         Normalization="bn",
         InputNorm=False,
     ):
-        super(PlainMLP, self).__init__()
+        super().__init__()
         self.lins = nn.ModuleList()
 
         self.lins.append(nn.Linear(in_channels, hidden_channels))
@@ -148,7 +148,7 @@ class PlainMLP(nn.Module):
             lin.reset_parameters()
 
     def forward(self, x):
-        for i, lin in enumerate(self.lins[:-1]):
+        for lin in self.lins[:-1]:
             x = lin(x)
             x = F.relu(x, inplace=True)
             x = F.dropout(x, p=self.dropout, training=self.training)
@@ -448,7 +448,7 @@ class EDGNN(nn.Module):
             edge_index, _ = torch_geometric.utils.to_edge_index(edge_index)
         V, E = edge_index[0], edge_index[1]
         x0 = x
-        for i in range(self.nlayer):
+        for _ in range(self.nlayer):
             x = self.dropout(x)
             x = self.conv(x, V, E, x0)
             x = self.act(x)

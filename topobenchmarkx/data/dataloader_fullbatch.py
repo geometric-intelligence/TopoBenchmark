@@ -15,10 +15,7 @@ class MyData(Data):
     """
     def is_valid(self, string):
         valid_names = ["adj", "incidence", "laplacian"]
-        for name in valid_names:
-            if name in string:
-                return True
-        return False
+        return any(name in string for name in valid_names)
 
     def __cat_dim__(self, key: str, value: Any, *args, **kwargs) -> Any:
         if is_sparse(value) and self.is_valid(key):
@@ -33,13 +30,13 @@ def to_data_list(batch):
     """
     Workaround needed since torch_geometric doesn't work well with torch.sparse
     """
-    for key in batch.keys():
+    for key in batch:
         if batch[key].is_sparse:
             sparse_data = batch[key].coalesce()
             batch[key] = SparseTensor.from_torch_sparse_coo_tensor(sparse_data)
     data_list = batch.to_data_list()
     for i, data in enumerate(data_list):
-        for key in data.keys():
+        for key in data:
             if isinstance(data[key], SparseTensor):
                 data_list[i][key] = data[key].to_torch_sparse_coo_tensor()
     return data_list
@@ -272,7 +269,7 @@ class DefaultDataModule(LightningDataModule):
         self.dataset_train = dataset_train
         self.batch_size = batch_size
 
-        if dataset_val == None and dataset_test == None:
+        if dataset_val is None and dataset_test is None:
             # Transductive setting
             self.dataset_val = dataset_train
             self.dataset_test = dataset_train

@@ -103,8 +103,13 @@ select = [
 ]
 fixable = ["ALL"]
 ignore = [
-    "E501", # line too long
-    "RET504" # Unnecessary assignment before return
+    "E501",     # line too long
+    "RET504",   # Unnecessary assignment before return
+    "RET505",   # Unnecessary `elif` after `return` statement
+    "NPY002",   # Replace legacy `np.random.seed` call with `np.random.Generator`
+    "UP038",    # Use `X | Y` in `isinstance` call instead of `(X, Y)` -- not compatible with python 3.9 (even with __future__ import)
+    "W293",     # Does not allow to have empty lines in multiline comments
+    "PERF203",  # [TODO: fix all such issues] `try`-`except` within a loop incurs performance overhead
 ] 
 
 [tool.ruff.lint.pydocstyle]

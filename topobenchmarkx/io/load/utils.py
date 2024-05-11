@@ -124,7 +124,7 @@ def load_simplicial_dataset(cfg):
                     )
                 )
             )
-        except:
+        except Exception:
             features[f"x_{rank_idx}"] = torch.tensor(
                 np.zeros((data.shape[rank_idx], 0))
             )
@@ -225,7 +225,7 @@ def load_hypergraph_pickle_dataset(cfg):
     edge_idx = 0  # num_nodes
     node_list = []
     edge_list = []
-    for he in hypergraph.keys():
+    for he in hypergraph:
         cur_he = hypergraph[he]
         cur_size = len(cur_he)
 

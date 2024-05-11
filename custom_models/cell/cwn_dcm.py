@@ -40,7 +40,7 @@ class CWNDCM(nn.Module):
         self.d = dropout
         self.convs = nn.ModuleList()
         self.last_act = last_act
-        for li in range(n_layers):
+        for _ in range(n_layers):
             self.convs.append(CW(in_channels, in_channels))
 
     def forward(self, x, Ld, Lu):

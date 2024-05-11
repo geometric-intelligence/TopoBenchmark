@@ -32,7 +32,6 @@ class CustomDataset(torch_geometric.data.Dataset):
 
     def len(self):
         r"""Return length of the dataset.
-        
         Returns
         -------
         int
@@ -71,7 +70,6 @@ class TorchGeometricDataset(torch_geometric.data.Dataset):
 
     def len(self):
         r"""Return length of the dataset.
-        
         Returns
         -------
         int

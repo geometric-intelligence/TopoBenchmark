@@ -399,7 +399,7 @@ class SCCNNLayer(torch.nn.Module):
                 laplacian_up_2,
             ) = laplacian_all
 
-        num_nodes, num_edges, num_triangles = x_0.shape[0], x_1.shape[0], x_2.shape[0]
+        # num_nodes, num_edges, num_triangles = x_0.shape[0], x_1.shape[0], x_2.shape[0]
 
         b1, b2 = incidence_all
 

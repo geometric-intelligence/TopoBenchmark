@@ -188,15 +188,13 @@ class GraphLoader(AbstractLoader):
             dataset = load_graph_tudataset_split(dataset, self.parameters)
 
         elif self.parameters.data_name in ["ZINC"]:
-            datasets = []
-            for split in ["train", "val", "test"]:
-                datasets.append(
+            datasets = [
                     torch_geometric.datasets.ZINC(
                         root=self.parameters["data_dir"],
                         subset=True,
                         split=split,
-                    )
-                )
+                    ) for split in ["train", "val", "test"]
+            ]
 
             assert self.parameters.split_type == "fixed"
             # The splits are predefined

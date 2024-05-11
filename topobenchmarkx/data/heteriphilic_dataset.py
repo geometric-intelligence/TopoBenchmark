@@ -1,6 +1,6 @@
 import os.path as osp
 from collections.abc import Callable
-from typing import Optional
+from typing import Optional, ClassVar
 
 import torch
 from omegaconf import DictConfig
@@ -43,7 +43,7 @@ class HeteroDataset(InMemoryDataset):
 
     """
 
-    RAW_FILE_NAMES = {}
+    RAW_FILE_NAMES: ClassVar = {}
 
     def __init__(
         self,

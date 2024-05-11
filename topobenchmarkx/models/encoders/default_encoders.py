@@ -3,6 +3,7 @@ import torch_geometric
 from torch_geometric.nn.norm import GraphNorm
 
 from topobenchmarkx.models.abstractions.encoder import AbstractInitFeaturesEncoder
+from topobenchmarkx.models.encoders.perceiver import Perceiver
 
 
 class BaseEncoder(torch.nn.Module):
@@ -106,7 +107,6 @@ class BaseFeatureEncoder(AbstractInitFeaturesEncoder):
         return data
 
 
-from topobenchmarkx.models.encoders.perceiver import Perceiver
 class SetFeatureEncoder(AbstractInitFeaturesEncoder):
     r"""Encoder class to apply BaseEncoder to the node features and Perceiver to the features of higher order structures.
     

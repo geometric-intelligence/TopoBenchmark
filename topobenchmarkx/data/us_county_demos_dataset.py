@@ -1,6 +1,6 @@
 import os.path as osp
 from collections.abc import Callable
-from typing import Optional
+from typing import Optional, ClassVar
 
 import torch
 from omegaconf import DictConfig
@@ -44,17 +44,17 @@ class USCountyDemosDataset(InMemoryDataset):
 
     """
 
-    URLS = {
+    URLS: ClassVar = {
         # 'contact-high-school': 'https://drive.google.com/open?id=1VA2P62awVYgluOIh1W4NZQQgkQCBk-Eu',
         "US-county-demos": "https://drive.google.com/file/d/1FNF_LbByhYNICPNdT6tMaJI9FxuSvvLK/view?usp=sharing",
     }
 
-    FILE_FORMAT = {
+    FILE_FORMAT: ClassVar = {
         # 'contact-high-school': 'tar.gz',
         "US-county-demos": "zip",
     }
 
-    RAW_FILE_NAMES = {}
+    RAW_FILE_NAMES: ClassVar = {}
 
     def __init__(
         self,

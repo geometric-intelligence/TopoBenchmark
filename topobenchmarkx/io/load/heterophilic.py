@@ -31,5 +31,5 @@ def download_hetero_datasets(name, path):
         path2save = os.path.join(path, name)
         urllib.request.urlretrieve(url + name, path2save)
         print('Done!')
-    except:
-        raise Exception('''Download failed! Make sure you have stable Internet connection and enter the right name''')
+    except Exception as e:
+        raise Exception('''Download failed! Make sure you have stable Internet connection and enter the right name''') from e

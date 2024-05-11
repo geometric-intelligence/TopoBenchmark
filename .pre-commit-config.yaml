@@ -19,15 +19,15 @@ repos:
       - id: requirements-txt-fixer
 
    - repo: https://github.com/astral-sh/ruff-pre-commit
-     rev: v0.1.14
+     rev: v0.4.4
      hooks:
        - id: ruff
          #types_or: [ python, pyi, jupyter ]
-         types_or: [ python ]
+         types_or: [ python, pyi ]
          args: [ --fix ]
        - id: ruff-format
          #types_or: [ python, pyi, jupyter ]
-         types_or: [ python ]
+         types_or: [ python, pyi ]
 
    - repo: https://github.com/numpy/numpydoc
      rev: v1.6.0

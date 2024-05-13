@@ -3,12 +3,13 @@ from scipy.stats import friedmanchisquare, wilcoxon
 
 
 def signed_ranks_test(result1, result2):
-    """
-    Calculates the p-value for the Wilcoxon signed-rank test between the results of two models.
+    """Calculates the p-value for the Wilcoxon signed-rank test between the
+    results of two models.
 
     https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.wilcoxon.html
 
-    :param results: A 2xN numpy array with the results from the two models. N is the number of datasets over which the models have been tested on.
+    :param results: A 2xN numpy array with the results from the two models. N
+        is the number of datasets over which the models have been tested on.
     :return: The p-value of the test
     """
     xs = result1 - result2
@@ -16,12 +17,13 @@ def signed_ranks_test(result1, result2):
 
 
 def friedman_test(results):
-    """
-    Calculates the p-value of the Friedman test between M models on N datasets.
+    """Calculates the p-value of the Friedman test between M models on N
+    datasets.
 
     https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.friedmanchisquare.html
 
-    :param results: A MxN numpy array with the results of M models over N dataset
+    :param results: A MxN numpy array with the results of M models over N
+        dataset
     :return: The p-value of the test
     """
     res = [r for r in results]
@@ -29,14 +31,17 @@ def friedman_test(results):
 
 
 def compare_models(results, p_limit=0.05, verbose=False):
-    """
-    Compares different models. First it uses the Friedman test to check that the models are significantly different, then it uses pairwise comparisons to study the ranking of the models.
+    """Compares different models. First it uses the Friedman test to check that
+    the models are significantly different, then it uses pairwise comparisons
+    to study the ranking of the models.
 
-    :param results: A MxN numpy array with the results of M models over N dataset
+    :param results: A MxN numpy array with the results of M models over N
+        dataset
     :param p_limit: The limit below which a hypothesis is considered false
     :param verbose: Whether to print the results of the tests or not
     :return average_rank: The average ranks of the models
-    :return groups: List of lists with the groups of models that are statistically similar
+    :return groups: List of lists with the groups of models that are
+        statistically similar
     """
     M = results.shape[0]
 
@@ -56,8 +61,12 @@ def compare_models(results, p_limit=0.05, verbose=False):
         model_idx = np.where(np.argsort(average_ranks) == i)[0][0]
         group = [model_idx]
         while i + idx < M:
-            next_model_idx = np.where(np.argsort(average_ranks) == i + idx)[0][0]
-            p = signed_ranks_test(results[model_idx, :], results[model_idx + idx, :])
+            next_model_idx = np.where(np.argsort(average_ranks) == i + idx)[0][
+                0
+            ]
+            p = signed_ranks_test(
+                results[model_idx, :], results[model_idx + idx, :]
+            )
             if verbose:
                 print(
                     f"P-value for Wilcoxon test between models {model_idx} and {next_model_idx}: {p}"

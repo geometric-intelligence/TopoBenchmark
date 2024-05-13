@@ -78,9 +78,18 @@ all = ["TopoBenchmarkX[dev, doc]"]
 homepage="https://github.com/pyt-team/TopoBenchmarkX"
 repository="https://github.com/pyt-team/TopoBenchmarkX"
 
+[tool.black]
+line-length = 79  # PEP 8 standard for maximum line length
+target-version = ['py310']
+
+[tool.docformatter]
+wrap-summaries = 79
+wrap-descriptions = 79
+
 [tool.ruff]
 target-version = "py310"
 extend-include = ["*.ipynb"]
+line-length = 79  # PEP 8 standard for maximum line length
 
 [tool.ruff.format]
 docstring-code-format = false

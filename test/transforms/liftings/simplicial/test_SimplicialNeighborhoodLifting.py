@@ -16,7 +16,9 @@ class TestSimplicialNeighborhoodLifting:
         self.data = manual_simple_graph()
 
         # Initialise the SimplicialNeighborhoodLifting class
-        self.lifting_signed = SimplicialNeighborhoodLifting(complex_dim=3, signed=True)
+        self.lifting_signed = SimplicialNeighborhoodLifting(
+            complex_dim=3, signed=True
+        )
         self.lifting_unsigned = SimplicialNeighborhoodLifting(
             complex_dim=3, signed=False
         )
@@ -247,8 +249,11 @@ class TestSimplicialNeighborhoodLifting:
         )
 
         assert (
-            abs(expected_incidence_1) == lifted_data_unsigned.incidence_1.to_dense()
-        ).all(), "Something is wrong with unsigned incidence_1 (nodes to edges)."
+            abs(expected_incidence_1)
+            == lifted_data_unsigned.incidence_1.to_dense()
+        ).all(), (
+            "Something is wrong with unsigned incidence_1 (nodes to edges)."
+        )
         assert (
             expected_incidence_1 == lifted_data_signed.incidence_1.to_dense()
         ).all(), "Something is wrong with signed incidence_1 (nodes to edges)."
@@ -1309,11 +1314,14 @@ class TestSimplicialNeighborhoodLifting:
         )
 
         assert (
-            abs(expected_incidence_2) == lifted_data_unsigned.incidence_2.to_dense()
+            abs(expected_incidence_2)
+            == lifted_data_unsigned.incidence_2.to_dense()
         ).all(), "Something is wrong with unsigned incidence_2 (edges to triangles)."
         assert (
             expected_incidence_2 == lifted_data_signed.incidence_2.to_dense()
-        ).all(), "Something is wrong with signed incidence_2 (edges to triangles)."
+        ).all(), (
+            "Something is wrong with signed incidence_2 (edges to triangles)."
+        )
 
     def test_lifted_features_signed(self):
         # Test the lift_features method for signed case

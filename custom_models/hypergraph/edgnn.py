@@ -46,7 +46,9 @@ class MLP(nn.Module):
                 self.lins.append(nn.Linear(in_channels, hidden_channels))
                 self.normalizations.append(nn.BatchNorm1d(hidden_channels))
                 for _ in range(num_layers - 2):
-                    self.lins.append(nn.Linear(hidden_channels, hidden_channels))
+                    self.lins.append(
+                        nn.Linear(hidden_channels, hidden_channels)
+                    )
                     self.normalizations.append(nn.BatchNorm1d(hidden_channels))
                 self.lins.append(nn.Linear(hidden_channels, out_channels))
         elif Normalization == "ln":
@@ -65,7 +67,9 @@ class MLP(nn.Module):
                 self.lins.append(nn.Linear(in_channels, hidden_channels))
                 self.normalizations.append(nn.LayerNorm(hidden_channels))
                 for _ in range(num_layers - 2):
-                    self.lins.append(nn.Linear(hidden_channels, hidden_channels))
+                    self.lins.append(
+                        nn.Linear(hidden_channels, hidden_channels)
+                    )
                     self.normalizations.append(nn.LayerNorm(hidden_channels))
                 self.lins.append(nn.Linear(hidden_channels, out_channels))
         else:
@@ -78,7 +82,9 @@ class MLP(nn.Module):
                 self.lins.append(nn.Linear(in_channels, hidden_channels))
                 self.normalizations.append(nn.Identity())
                 for _ in range(num_layers - 2):
-                    self.lins.append(nn.Linear(hidden_channels, hidden_channels))
+                    self.lins.append(
+                        nn.Linear(hidden_channels, hidden_channels)
+                    )
                     self.normalizations.append(nn.Identity())
                 self.lins.append(nn.Linear(hidden_channels, out_channels))
 
@@ -88,7 +94,7 @@ class MLP(nn.Module):
         for lin in self.lins:
             lin.reset_parameters()
         for normalization in self.normalizations:
-            if not (normalization.__class__.__name__ == "Identity"):
+            if normalization.__class__.__name__ != "Identity":
                 normalization.reset_parameters()
 
     def forward(self, x):
@@ -245,7 +251,9 @@ class EquivSetConv(nn.Module):
 
 
 class JumpLinkConv(nn.Module):
-    def __init__(self, in_features, out_features, mlp_layers=2, aggr="add", alpha=0.5):
+    def __init__(
+        self, in_features, out_features, mlp_layers=2, aggr="add", alpha=0.5
+    ):
         super().__init__()
         self.W = MLP(
             in_features,
@@ -339,7 +347,10 @@ class MeanDegConv(nn.Module):
         )  # [E, C], reduce is 'mean' here as default
 
         deg_e = torch_scatter.scatter(
-            torch.ones(Xve.shape[0], device=Xve.device), edges, dim=-2, reduce="sum"
+            torch.ones(Xve.shape[0], device=Xve.device),
+            edges,
+            dim=-2,
+            reduce="sum",
         )
         Xe = torch.cat([Xe, torch.log(deg_e)[..., None]], -1)
 
@@ -350,7 +361,10 @@ class MeanDegConv(nn.Module):
         )  # [N, C]
 
         deg_v = torch_scatter.scatter(
-            torch.ones(Xev.shape[0], device=Xev.device), vertex, dim=-2, reduce="sum"
+            torch.ones(Xev.shape[0], device=Xev.device),
+            vertex,
+            dim=-2,
+            reduce="sum",
         )
         X = self.W3(torch.cat([Xv, X, X0, torch.log(deg_v)[..., None]], -1))
 
@@ -374,7 +388,7 @@ class EDGNN(nn.Module):
         normalization="None",
         AllSet_input_norm=False,
     ):
-        """EDGNN
+        """EDGNN.
 
         Args:
             num_features (int): number of input features
@@ -390,7 +404,6 @@ class EDGNN(nn.Module):
             aggregate (str, optional): aggregation method. Defaults to 'add'.
             normalization (str, optional): normalization method. Defaults to 'None'.
             AllSet_input_norm (bool, optional): whether to normalize input features. Defaults to False.
-
         """
         super().__init__()
         act = {"Id": nn.Identity(), "relu": nn.ReLU(), "prelu": nn.PReLU()}
@@ -402,8 +415,12 @@ class EDGNN(nn.Module):
         self.hidden_channels = self.in_channels
 
         self.mlp1_layers = MLP_num_layers
-        self.mlp2_layers = MLP_num_layers if MLP2_num_layers < 0 else MLP2_num_layers
-        self.mlp3_layers = MLP_num_layers if MLP3_num_layers < 0 else MLP3_num_layers
+        self.mlp2_layers = (
+            MLP_num_layers if MLP2_num_layers < 0 else MLP2_num_layers
+        )
+        self.mlp3_layers = (
+            MLP_num_layers if MLP3_num_layers < 0 else MLP3_num_layers
+        )
         self.nlayer = All_num_layers
         self.edconv_type = edconv_type
 

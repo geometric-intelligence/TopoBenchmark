@@ -1,5 +1,5 @@
 from collections import defaultdict
-from typing import Any, Optional
+from typing import Any
 
 import torch
 from lightning import LightningDataModule
@@ -10,9 +10,10 @@ from torch_sparse import SparseTensor
 
 
 class MyData(Data):
-    """
-    Data object class that overwrites some methods from torch_geometric.data.Data so that not only sparse matrices with adj in the name can work with the torch_geometric dataloaders.
-    """
+    """Data object class that overwrites some methods from
+    torch_geometric.data.Data so that not only sparse matrices with adj in the
+    name can work with the torch_geometric dataloaders."""
+
     def is_valid(self, string):
         valid_names = ["adj", "incidence", "laplacian"]
         return any(name in string for name in valid_names)
@@ -27,9 +28,8 @@ class MyData(Data):
 
 
 def to_data_list(batch):
-    """
-    Workaround needed since torch_geometric doesn't work well with torch.sparse
-    """
+    """Workaround needed since torch_geometric doesn't work well with
+    torch.sparse."""
     for key in batch:
         if batch[key].is_sparse:
             sparse_data = batch[key].coalesce()
@@ -78,7 +78,10 @@ def collate_fn(batch):
                     torch.tensor([[batch_idx] * current_number_of_cells])
                 )
 
-                if running_idx.get(f"cell_running_idx_number_{cell_dim}") is None:
+                if (
+                    running_idx.get(f"cell_running_idx_number_{cell_dim}")
+                    is None
+                ):
                     running_idx[f"cell_running_idx_number_{cell_dim}"] = (
                         current_number_of_cells  # current_number_of_nodes
                     )
@@ -89,9 +92,9 @@ def collate_fn(batch):
                         + running_idx[f"cell_running_idx_number_{cell_dim}"]
                     ).long()
 
-                    running_idx[
-                        f"cell_running_idx_number_{cell_dim}"
-                    ] += current_number_of_cells  # current_number_of_nodes
+                    running_idx[f"cell_running_idx_number_{cell_dim}"] += (
+                        current_number_of_cells  # current_number_of_nodes
+                    )
 
             elif x_key == "x_hyperedges":
                 cell_dim = x_key.split("_")[1]
@@ -101,7 +104,10 @@ def collate_fn(batch):
                     torch.tensor([[batch_idx] * current_number_of_hyperedges])
                 )
 
-                if running_idx.get(f"cell_running_idx_number_{cell_dim}") is None:
+                if (
+                    running_idx.get(f"cell_running_idx_number_{cell_dim}")
+                    is None
+                ):
                     running_idx[f"cell_running_idx_number_{cell_dim}"] = (
                         current_number_of_hyperedges
                     )
@@ -112,9 +118,9 @@ def collate_fn(batch):
                         + running_idx[f"cell_running_idx_number_{cell_dim}"]
                     ).long()
 
-                    running_idx[
-                        f"cell_running_idx_number_{cell_dim}"
-                    ] += current_number_of_hyperedges
+                    running_idx[f"cell_running_idx_number_{cell_dim}"] += (
+                        current_number_of_hyperedges
+                    )
             else:
                 # Function Batch.from_data_list creates a running index automatically
                 pass
@@ -122,7 +128,7 @@ def collate_fn(batch):
         data_list.append(data)
 
     batch = Batch.from_data_list(data_list)
-    
+
     # Rename batch.batch to batch.batch_0 for consistency
     batch["batch_0"] = batch.pop("batch")
 
@@ -132,108 +138,8 @@ def collate_fn(batch):
     return batch
 
 
-# class FullBatchDataModule(LightningDataModule):
-#     """
-
-#     Read the docs:
-#         https://lightning.ai/docs/pytorch/latest/data/datamodule.html
-#     """
-
-#     def __init__(
-#         self,
-#         dataset,
-#         batch_size: int = 64,
-#         num_workers: int = 0,
-#         pin_memory: bool = False,
-#     ) -> None:
-#         """Initialize a `MNISTDataModule`.
-
-#         :param data_dir: The data directory. Defaults to `"data/"`.
-#         :param train_val_test_split: The train, validation and test split. Defaults to `(55_000, 5_000, 10_000)`.
-#         :param batch_size: The batch size. Defaults to `64`.
-#         :param num_workers: The number of workers. Defaults to `0`.
-#         :param pin_memory: Whether to pin memory. Defaults to `False`.
-#         """
-#         super().__init__()
-
-#         # this line allows to access init params with 'self.hparams' attribute
-#         # also ensures init params will be stored in ckpt
-#         self.save_hyperparameters(logger=False)
-
-#         self.dataset = dataset
-#         self.batch_size = batch_size
-
-#     def train_dataloader(self) -> DataLoader:
-#         """Create and return the train dataloader.
-
-#         :return: The train dataloader.
-#         """
-#         return DataLoader(
-#             dataset=self.dataset,
-#             batch_size=1,
-#             num_workers=self.hparams.num_workers,
-#             pin_memory=self.hparams.pin_memory,
-#             # persistent_workers=True,
-#             shuffle=True,
-#             collate_fn=collate_fn,
-#         )
-
-#     def val_dataloader(self) -> DataLoader:
-#         """Create and return the validation dataloader.
-
-#         :return: The validation dataloader.
-#         """
-#         return DataLoader(
-#             dataset=self.dataset,
-#             batch_size=1,
-#             num_workers=self.hparams.num_workers,
-#             pin_memory=self.hparams.pin_memory,
-#             # persistent_workers=True,
-#             shuffle=False,
-#             collate_fn=collate_fn,
-#         )
-
-#     def test_dataloader(self) -> DataLoader:
-#         """Create and return the test dataloader.
-
-#         :return: The test dataloader.
-#         """
-#         return DataLoader(
-#             dataset=self.dataset,
-#             batch_size=1,
-#             num_workers=self.hparams.num_workers,
-#             pin_memory=self.hparams.pin_memory,
-#             # persistent_workers=True,
-#             shuffle=False,
-#             collate_fn=collate_fn,
-#         )
-
-#     def teardown(self, stage: Optional[str] = None) -> None:
-#         """Lightning hook for cleaning up after `trainer.fit()`, `trainer.validate()`,
-#         `trainer.test()`, and `trainer.predict()`.
-
-#         :param stage: The stage being torn down. Either `"fit"`, `"validate"`, `"test"`, or `"predict"`.
-#             Defaults to ``None``.
-#         """
-
-#     def state_dict(self) -> dict[Any, Any]:
-#         """Called when saving a checkpoint. Implement to generate and save the datamodule state.
-
-#         :return: A dictionary containing the datamodule state that you want to save.
-#         """
-#         return {}
-
-#     def load_state_dict(self, state_dict: dict[str, Any]) -> None:
-#         """Called when loading a checkpoint. Implement to reload datamodule state given datamodule
-#         `state_dict()`.
-
-#         :param state_dict: The datamodule state returned by `self.state_dict()`.
-#         """
-
-
 class DefaultDataModule(LightningDataModule):
-    """
-    Initializes the DefaultDataModule class.
+    """Initializes the DefaultDataModule class.
 
     Args:
         dataset_train: The training dataset.
@@ -263,8 +169,10 @@ class DefaultDataModule(LightningDataModule):
 
         # this line allows to access init params with 'self.hparams' attribute
         # also ensures init params will be stored in ckpt
-        self.save_hyperparameters(logger=False, ignore=["dataset_train", "dataset_val", "dataset_test"])
-
+        self.save_hyperparameters(
+            logger=False,
+            ignore=["dataset_train", "dataset_val", "dataset_test"],
+        )
 
         self.dataset_train = dataset_train
         self.batch_size = batch_size
@@ -324,24 +232,27 @@ class DefaultDataModule(LightningDataModule):
             collate_fn=collate_fn,
         )
 
-    def teardown(self, stage: Optional[str] = None) -> None:
-        """Lightning hook for cleaning up after `trainer.fit()`, `trainer.validate()`,
-        `trainer.test()`, and `trainer.predict()`.
+    def teardown(self, stage: str | None = None) -> None:
+        """Lightning hook for cleaning up after `trainer.fit()`,
+        `trainer.validate()`, `trainer.test()`, and `trainer.predict()`.
 
         :param stage: The stage being torn down. Either `"fit"`, `"validate"`, `"test"`, or `"predict"`.
             Defaults to ``None``.
         """
 
     def state_dict(self) -> dict[Any, Any]:
-        """Called when saving a checkpoint. Implement to generate and save the datamodule state.
+        """Called when saving a checkpoint. Implement to generate and save the
+        datamodule state.
 
-        :return: A dictionary containing the datamodule state that you want to save.
+        :return: A dictionary containing the datamodule state that you want to
+            save.
         """
         return {}
 
     def load_state_dict(self, state_dict: dict[str, Any]) -> None:
-        """Called when loading a checkpoint. Implement to reload datamodule state given datamodule
-        `state_dict()`.
+        """Called when loading a checkpoint. Implement to reload datamodule
+        state given datamodule `state_dict()`.
 
-        :param state_dict: The datamodule state returned by `self.state_dict()`.
+        :param state_dict: The datamodule state returned by
+            `self.state_dict()`.
         """

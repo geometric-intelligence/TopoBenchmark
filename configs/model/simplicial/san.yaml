@@ -36,7 +36,6 @@ head_model:
   out_channels: ${dataset.parameters.num_classes}
   pooling_type: sum
 
-
 loss:
   _target_: topobenchmarkx.models.losses.loss.DefaultLoss
   task: ${dataset.parameters.task}

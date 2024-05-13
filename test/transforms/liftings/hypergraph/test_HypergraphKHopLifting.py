@@ -3,7 +3,9 @@
 import torch
 
 from topobenchmarkx.io.load.loaders import manual_graph
-from topobenchmarkx.transforms.liftings.graph2hypergraph import HypergraphKHopLifting
+from topobenchmarkx.transforms.liftings.graph2hypergraph import (
+    HypergraphKHopLifting,
+)
 
 
 class TestHypergraphKHopLifting:
@@ -38,7 +40,8 @@ class TestHypergraphKHopLifting:
         )
 
         assert (
-            expected_incidence_1 == lifted_data_k1.incidence_hyperedges.to_dense()
+            expected_incidence_1
+            == lifted_data_k1.incidence_hyperedges.to_dense()
         ).all(), "Something is wrong with incidence_hyperedges (k=1)."
         assert (
             expected_n_hyperedges == lifted_data_k1.num_hyperedges
@@ -63,7 +66,8 @@ class TestHypergraphKHopLifting:
         )
 
         assert (
-            expected_incidence_1 == lifted_data_k2.incidence_hyperedges.to_dense()
+            expected_incidence_1
+            == lifted_data_k2.incidence_hyperedges.to_dense()
         ).all(), "Something is wrong with incidence_hyperedges (k=2)."
         assert (
             expected_n_hyperedges == lifted_data_k2.num_hyperedges

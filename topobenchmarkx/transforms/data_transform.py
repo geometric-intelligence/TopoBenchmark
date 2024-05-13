@@ -57,7 +57,8 @@ TRANSFORMS = {
 
 
 class DataTransform(torch_geometric.transforms.BaseTransform):
-    """Abstract class that provides an interface to define a custom data lifting.
+    """Abstract class that provides an interface to define a custom data
+    lifting.
 
     Parameters
     ----------
@@ -74,10 +75,14 @@ class DataTransform(torch_geometric.transforms.BaseTransform):
         self.parameters = kwargs
 
         self.transform = (
-            TRANSFORMS[transform_name](**kwargs) if transform_name is not None else None
+            TRANSFORMS[transform_name](**kwargs)
+            if transform_name is not None
+            else None
         )
 
-    def forward(self, data: torch_geometric.data.Data) -> torch_geometric.data.Data:
+    def forward(
+        self, data: torch_geometric.data.Data
+    ) -> torch_geometric.data.Data:
         """Forward pass of the lifting.
 
         Parameters

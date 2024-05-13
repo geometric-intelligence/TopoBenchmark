@@ -5,7 +5,6 @@ import rootutils
 from lightning import LightningDataModule, LightningModule, Trainer
 from lightning.pytorch.loggers import Logger
 from omegaconf import DictConfig
-
 from src.utils import (
     RankedLogger,
     extras,
@@ -39,11 +38,13 @@ log = RankedLogger(__name__, rank_zero_only=True)
 def evaluate(cfg: DictConfig) -> tuple[dict[str, Any], dict[str, Any]]:
     """Evaluates given checkpoint on a datamodule testset.
 
-    This method is wrapped in optional @task_wrapper decorator, that controls the behavior during
-    failure. Useful for multiruns, saving info about the crash, etc.
+    This method is wrapped in optional @task_wrapper decorator, that controls
+    the behavior during failure. Useful for multiruns, saving info about the
+    crash, etc.
 
     :param cfg: DictConfig configuration composed by Hydra.
-    :return: tuple[dict, dict] with metrics and dict with all instantiated objects.
+    :return: tuple[dict, dict] with metrics and dict with all instantiated
+        objects.
     """
     assert cfg.ckpt_path
 
@@ -82,7 +83,9 @@ def evaluate(cfg: DictConfig) -> tuple[dict[str, Any], dict[str, Any]]:
     return metric_dict, object_dict
 
 
-@hydra.main(version_base="1.3", config_path="../configs", config_name="eval.yaml")
+@hydra.main(
+    version_base="1.3", config_path="../configs", config_name="eval.yaml"
+)
 def main(cfg: DictConfig) -> None:
     """Main entry point for evaluation.
 

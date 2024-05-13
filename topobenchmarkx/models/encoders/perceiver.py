@@ -65,7 +65,7 @@ def cache_fn(f):
 
 class PreNorm(nn.Module):
     r"""Class to wrap together LayerNorm and a specified function.
-    
+
     Parameters
     ----------
     dim: int
@@ -75,22 +75,25 @@ class PreNorm(nn.Module):
     context_dim: int
         Size of the context to normalize.
     """
+
     def __init__(self, dim, fn, context_dim=None):
         super().__init__()
         self.fn = fn
         self.norm = nn.LayerNorm(dim)
-        self.norm_context = nn.LayerNorm(context_dim) if exists(context_dim) else None
+        self.norm_context = (
+            nn.LayerNorm(context_dim) if exists(context_dim) else None
+        )
 
     def forward(self, x, **kwargs):
         r"""Forward pass.
-        
+
         Parameters
         ----------
         x: torch.Tensor
             Input tensor.
         kwargs: dict
             Dictionary of keyword arguments.
-        
+
         Returns
         -------
         torch.Tensor
@@ -108,9 +111,10 @@ class PreNorm(nn.Module):
 
 class GEGLU(nn.Module):
     r"""GEGLU activation function."""
+
     def forward(self, x):
         r"""Forward pass.
-        
+
         Parameters
         ----------
         x: torch.Tensor
@@ -119,9 +123,10 @@ class GEGLU(nn.Module):
         x, gates = x.chunk(2, dim=-1)
         return x * F.gelu(gates)
 
+
 class FeedForward(nn.Module):
     r"""Feedforward network.
-    
+
     Parameters
     ----------
     dim: int
@@ -129,6 +134,7 @@ class FeedForward(nn.Module):
     mult: int
         Multiplier for the hidden dimension.
     """
+
     def __init__(self, dim, mult=4):
         super().__init__()
         self.net = nn.Sequential(
@@ -137,7 +143,7 @@ class FeedForward(nn.Module):
 
     def forward(self, x):
         r"""Forward pass.
-        
+
         Parameters
         ----------
         x: torch.Tensor
@@ -148,7 +154,7 @@ class FeedForward(nn.Module):
 
 class Attention(nn.Module):
     r"""Attention function.
-    
+
     Parameters
     ----------
     query_dim: int
@@ -160,6 +166,7 @@ class Attention(nn.Module):
     dim_head: int
         Size for each head.
     """
+
     def __init__(self, query_dim, context_dim=None, heads=8, dim_head=64):
         super().__init__()
         inner_dim = dim_head * heads
@@ -173,7 +180,7 @@ class Attention(nn.Module):
 
     def forward(self, x, context=None, mask=None):
         r"""Forward pass.
-        
+
         Parameters
         ----------
         x: torch.Tensor
@@ -182,7 +189,7 @@ class Attention(nn.Module):
             Context tensor.
         mask: torch.Tensor
             Mask for attention calculation purposes.
-        
+
         Returns
         -------
         torch.Tensor
@@ -194,7 +201,9 @@ class Attention(nn.Module):
         context = default(context, x)
         k, v = self.to_kv(context).chunk(2, dim=-1)
 
-        q, k, v = map(lambda t: rearrange(t, "b n (h d) -> (b h) n d", h=h), (q, k, v))
+        q, k, v = map(
+            lambda t: rearrange(t, "b n (h d) -> (b h) n d", h=h), (q, k, v)
+        )
 
         sim = einsum("b i d, b j d -> b i j", q, k) * self.scale
 
@@ -217,7 +226,7 @@ class Attention(nn.Module):
 
 class Perceiver(nn.Module):
     r"""Perceiver model.
-    
+
     Parameters
     ----------
     depth: int
@@ -239,6 +248,7 @@ class Perceiver(nn.Module):
     decoder_ff: bool
         Whether to use a feedforward network in the decoder.
     """
+
     def __init__(
         self,
         *,
@@ -267,7 +277,10 @@ class Perceiver(nn.Module):
                 PreNorm(
                     latent_dim,
                     Attention(
-                        latent_dim, dim, heads=cross_heads, dim_head=cross_dim_head
+                        latent_dim,
+                        dim,
+                        heads=cross_heads,
+                        dim_head=cross_dim_head,
                     ),
                     context_dim=dim,
                 ),
@@ -275,16 +288,20 @@ class Perceiver(nn.Module):
             ]
         )
 
-        def get_latent_attn(): 
+        def get_latent_attn():
             return PreNorm(
                 latent_dim,
-                Attention(latent_dim, heads=latent_heads, dim_head=latent_dim_head),
+                Attention(
+                    latent_dim, heads=latent_heads, dim_head=latent_dim_head
+                ),
             )
 
-        def get_latent_ff(): 
+        def get_latent_ff():
             return PreNorm(latent_dim, FeedForward(latent_dim))
-        
-        get_latent_attn, get_latent_ff = map(cache_fn, (get_latent_attn, get_latent_ff))
+
+        get_latent_attn, get_latent_ff = map(
+            cache_fn, (get_latent_attn, get_latent_ff)
+        )
 
         self.layers = nn.ModuleList([])
         cache_args = {"_cache": weight_tie_layers}
@@ -292,19 +309,27 @@ class Perceiver(nn.Module):
         for _ in range(depth):
             self.layers.append(
                 nn.ModuleList(
-                    [get_latent_attn(**cache_args), get_latent_ff(**cache_args)]
+                    [
+                        get_latent_attn(**cache_args),
+                        get_latent_ff(**cache_args),
+                    ]
                 )
             )
 
         self.decoder_cross_attn = PreNorm(
             queries_dim,
             Attention(
-                queries_dim, latent_dim, heads=cross_heads, dim_head=cross_dim_head
+                queries_dim,
+                latent_dim,
+                heads=cross_heads,
+                dim_head=cross_dim_head,
             ),
             context_dim=latent_dim,
         )
         self.decoder_ff = (
-            PreNorm(queries_dim, FeedForward(queries_dim)) if decoder_ff else None
+            PreNorm(queries_dim, FeedForward(queries_dim))
+            if decoder_ff
+            else None
         )
 
         # self.to_logits = (
@@ -313,7 +338,7 @@ class Perceiver(nn.Module):
 
     def forward(self, data, mask=None, queries=None):
         r"""Forward pass.
-        
+
         Parameters
         ----------
         data: torch.Tensor
@@ -365,4 +390,4 @@ class Perceiver(nn.Module):
         # final linear out
 
         # return x #self.to_logits(latents)
-        return
+        return None

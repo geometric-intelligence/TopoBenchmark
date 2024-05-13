@@ -1,6 +1,7 @@
 import warnings
+from collections.abc import Callable
 from importlib.util import find_spec
-from typing import Any, Callable, Optional
+from typing import Any
 
 from omegaconf import DictConfig
 
@@ -26,7 +27,9 @@ def extras(cfg: DictConfig) -> None:
 
     # disable python warnings
     if cfg.extras.get("ignore_warnings"):
-        log.info("Disabling python warnings! <cfg.extras.ignore_warnings=True>")
+        log.info(
+            "Disabling python warnings! <cfg.extras.ignore_warnings=True>"
+        )
         warnings.filterwarnings("ignore")
 
     # prompt user to input tags from command line if none are provided in the config
@@ -36,12 +39,15 @@ def extras(cfg: DictConfig) -> None:
 
     # pretty print config tree using Rich library
     if cfg.extras.get("print_config"):
-        log.info("Printing config tree with Rich! <cfg.extras.print_config=True>")
+        log.info(
+            "Printing config tree with Rich! <cfg.extras.print_config=True>"
+        )
         rich_utils.print_config_tree(cfg, resolve=True, save_to_file=True)
 
 
 def task_wrapper(task_func: Callable) -> Callable:
-    """Optional decorator that controls the failure behavior when executing the task function.
+    """Optional decorator that controls the failure behavior when executing the
+    task function.
 
     This wrapper can be used to:
         - make sure loggers are closed even if the task function raises an exception (prevents multirun failure)
@@ -96,8 +102,8 @@ def task_wrapper(task_func: Callable) -> Callable:
 
 
 def get_metric_value(
-    metric_dict: dict[str, Any], metric_name: Optional[str]
-) -> Optional[float]:
+    metric_dict: dict[str, Any], metric_name: str | None
+) -> float | None:
     """Safely retrieves value of the metric logged in LightningModule.
 
     :param metric_dict: A dict containing metric values.

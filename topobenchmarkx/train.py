@@ -1,25 +1,18 @@
-import numpy as np
 import random
-from typing import Any, Optional
+from typing import Any
 
 import hydra
 import lightning as L
+import numpy as np
 import rootutils
 
+rootutils.setup_root(__file__, indicator=".project-root", pythonpath=True)
 import torch
 from lightning import Callback, LightningModule, Trainer
 from lightning.pytorch.loggers import Logger
 from omegaconf import DictConfig, OmegaConf
 
-from topobenchmarkx.utils.config_resolvers import (
-    get_default_transform,
-    get_monitor_metric,
-    get_monitor_mode,
-    infer_in_channels,
-    infere_list_length,
-)
-
-from topobenchmarkx.data.dataloader_fullbatch import DefaultDataModule
+from topobenchmarkx.data.dataloaders import DefaultDataModule
 from topobenchmarkx.utils import (
     RankedLogger,
     extras,
@@ -28,6 +21,13 @@ from topobenchmarkx.utils import (
     instantiate_loggers,
     log_hyperparameters,
     task_wrapper,
+)
+from topobenchmarkx.utils.config_resolvers import (
+    get_default_transform,
+    get_monitor_metric,
+    get_monitor_mode,
+    infer_in_channels,
+    infere_list_length,
 )
 
 # ------------------------------------------------------------------------------------ #
@@ -47,7 +47,6 @@ from topobenchmarkx.utils import (
 # more info: https://github.com/ashleve/rootutils
 # ------------------------------------------------------------------------------------ #
 
-rootutils.setup_root(__file__, indicator=".project-root", pythonpath=True)
 
 OmegaConf.register_new_resolver("get_default_transform", get_default_transform)
 OmegaConf.register_new_resolver("get_monitor_metric", get_monitor_metric)
@@ -64,18 +63,19 @@ log = RankedLogger(__name__, rank_zero_only=True)
 
 @task_wrapper
 def train(cfg: DictConfig) -> tuple[dict[str, Any], dict[str, Any]]:
-    """Trains the model. Can additionally evaluate on a testset, using best weights obtained during
-    training.
+    """Trains the model. Can additionally evaluate on a testset, using best
+    weights obtained during training.
 
-    This method is wrapped in optional @task_wrapper decorator, that controls the behavior during
-    failure. Useful for multiruns, saving info about the crash, etc.
+    This method is wrapped in optional @task_wrapper decorator, that controls
+    the behavior during failure. Useful for multiruns, saving info about the
+    crash, etc.
 
     :param cfg: A DictConfig configuration composed by Hydra.
     :return: A tuple with metrics and dict with all instantiated objects.
     """
 
     # Set seed for random number generators in pytorch, numpy and python.random
-    #if cfg.get("seed"):
+    # if cfg.get("seed"):
     L.seed_everything(cfg.seed, workers=True)
     # Seed for torch
     torch.manual_seed(cfg.seed)
@@ -83,7 +83,6 @@ def train(cfg: DictConfig) -> tuple[dict[str, Any], dict[str, Any]]:
     np.random.seed(cfg.seed)
     # Seed for python random
     random.seed(cfg.seed)
-
 
     # Instantiate and load dataset
     dataset = hydra.utils.instantiate(cfg.dataset, _recursive_=False)
@@ -140,7 +139,9 @@ def train(cfg: DictConfig) -> tuple[dict[str, Any], dict[str, Any]]:
 
     if cfg.get("train"):
         log.info("Starting training!")
-        trainer.fit(model=model, datamodule=datamodule, ckpt_path=cfg.get("ckpt_path"))
+        trainer.fit(
+            model=model, datamodule=datamodule, ckpt_path=cfg.get("ckpt_path")
+        )
 
     train_metrics = trainer.callback_metrics
 
@@ -148,7 +149,9 @@ def train(cfg: DictConfig) -> tuple[dict[str, Any], dict[str, Any]]:
         log.info("Starting testing!")
         ckpt_path = trainer.checkpoint_callback.best_model_path
         if ckpt_path == "":
-            log.warning("Best ckpt not found! Using current weights for testing...")
+            log.warning(
+                "Best ckpt not found! Using current weights for testing..."
+            )
             ckpt_path = None
         trainer.test(model=model, datamodule=datamodule, ckpt_path=ckpt_path)
         log.info(f"Best ckpt path: {ckpt_path}")
@@ -164,8 +167,8 @@ def train(cfg: DictConfig) -> tuple[dict[str, Any], dict[str, Any]]:
 def count_number_of_parameters(
     model: torch.nn.Module, only_trainable: bool = True
 ) -> int:
-    """
-    Counts the number of trainable params. If all params, specify only_trainable = False.
+    """Counts the number of trainable params. If all params, specify
+    only_trainable = False.
 
     Ref:
         - https://discuss.pytorch.org/t/how-do-i-check-the-number-of-parameters-of-a-model/4325/9?u=brando_miranda
@@ -173,15 +176,19 @@ def count_number_of_parameters(
     :return:
     """
     if only_trainable:
-        num_params: int = sum(p.numel() for p in model.parameters() if p.requires_grad)
+        num_params: int = sum(
+            p.numel() for p in model.parameters() if p.requires_grad
+        )
     else:  # counts trainable and none-traibale
         num_params: int = sum(p.numel() for p in model.parameters() if p)
     assert num_params > 0, f"Err: {num_params=}"
     return int(num_params)
 
 
-@hydra.main(version_base="1.3", config_path="../configs", config_name="train.yaml")
-def main(cfg: DictConfig) -> Optional[float]:
+@hydra.main(
+    version_base="1.3", config_path="../configs", config_name="train.yaml"
+)
+def main(cfg: DictConfig) -> float | None:
     """Main entry point for training.
 
     :param cfg: DictConfig configuration composed by Hydra.
@@ -204,6 +211,4 @@ def main(cfg: DictConfig) -> Optional[float]:
 
 
 if __name__ == "__main__":
-
     main()
-

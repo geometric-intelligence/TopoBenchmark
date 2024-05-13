@@ -5,7 +5,7 @@
 defaults:
   - _self_
   - dataset: PROTEINS_TU #us_country_demos
-  - model: hypergraph/allsettransformer #hypergraph/unignn2 #allsettransformer
+  - model: simplicial/sccn #hypergraph/unignn2 #allsettransformer
   - evaluator: default
   - callbacks: default
   - logger: wandb # set logger here or use command line (e.g. `python train.py logger=tensorboard`)

@@ -1,18 +1,16 @@
 from abc import ABC, abstractmethod
 
-import topomodelx
 import torch
-from torch_geometric.nn.norm import GraphNorm
-import torch.nn as nn   
-
+import torch.nn as nn
 
 
 class DefaultWrapper(ABC, torch.nn.Module):
-    """Abstract class that provides an interface to handle the network output"""
+    """Abstract class that provides an interface to handle the network
+    output."""
 
     def __init__(self, backbone, **kwargs):
         super().__init__()
-        self.backbone = backbone 
+        self.backbone = backbone
         out_channels = kwargs["out_channels"]
         self.dimensions = range(kwargs["num_cell_dimensions"])
 
@@ -24,84 +22,100 @@ class DefaultWrapper(ABC, torch.nn.Module):
             )
 
     def __call__(self, batch):
-        """Define logic for forward pass"""
+        """Define logic for forward pass."""
         model_out = self.forward(batch)
         model_out = self.residual_connection(model_out=model_out, batch=batch)
         return model_out
 
     def residual_connection(self, model_out, batch):
         for i in self.dimensions:
-            if (f"x_{i}" in batch) and hasattr(self, f"ln_{i}") and (f"x_{i}" in model_out):
+            if (
+                (f"x_{i}" in batch)
+                and hasattr(self, f"ln_{i}")
+                and (f"x_{i}" in model_out)
+            ):
                 residual = model_out[f"x_{i}"] + batch[f"x_{i}"]
                 model_out[f"x_{i}"] = getattr(self, f"ln_{i}")(residual)
         return model_out
-    
+
     @abstractmethod
     def forward(self, batch):
-        """Define handling output here"""
+        """Define handling output here."""
+
 
 class GNNWrapper(DefaultWrapper):
-    """Abstract class that provides an interface to loss logic within network"""
+    """Abstract class that provides an interface to loss logic within
+    network."""
 
     # def __init__(self, backbone, **kwargs):
     #     super().__init__(backbone)
 
     def forward(self, batch):
-        """Define logic for forward pass"""
+        """Define logic for forward pass."""
         x_0 = self.backbone(batch.x_0, batch.edge_index)
 
         model_out = {"labels": batch.y, "batch_0": batch.batch_0}
         model_out["x_0"] = x_0
-        
+
         return model_out
 
 
 class HypergraphWrapper(DefaultWrapper):
-    """Abstract class that provides an interface to loss logic within network"""
+    """Abstract class that provides an interface to loss logic within
+    network."""
 
     def forward(self, batch):
-        """Define logic for forward pass"""
+        """Define logic for forward pass."""
         x_0, x_1 = self.backbone(batch.x_0, batch.incidence_hyperedges)
         model_out = {"labels": batch.y, "batch_0": batch.batch_0}
         model_out["x_0"] = x_0
         model_out["hyperedge"] = x_1
-        
+
         return model_out
 
 
 class SANWrapper(DefaultWrapper):
-    """Abstract class that provides an interface to loss logic within network"""
+    """Abstract class that provides an interface to loss logic within
+    network."""
 
     def forward(self, batch):
-        """Define logic for forward pass"""
-        x_1 = self.backbone(batch.x_1, batch.up_laplacian_1, batch.down_laplacian_1)
+        """Define logic for forward pass."""
+        x_1 = self.backbone(
+            batch.x_1, batch.up_laplacian_1, batch.down_laplacian_1
+        )
 
         model_out = {"labels": batch.y, "batch_0": batch.batch_0}
         model_out["x_0"] = torch.sparse.mm(batch.incidence_1, x_1)
         model_out["x_1"] = x_1
         return model_out
 
+
 class SCNWrapper(DefaultWrapper):
-    """Abstract class that provides an interface to loss logic within network"""
+    """Abstract class that provides an interface to loss logic within
+    network."""
 
     def forward(self, batch):
-        """Define logic for forward pass"""
-    
-        
+        """Define logic for forward pass."""
+
         laplacian_0 = self.normalize_matrix(batch.hodge_laplacian_0)
         laplacian_1 = self.normalize_matrix(batch.hodge_laplacian_1)
         laplacian_2 = self.normalize_matrix(batch.hodge_laplacian_2)
         x_0, x_1, x_2 = self.backbone(
-            batch.x_0, batch.x_1, batch.x_2, laplacian_0, laplacian_1, laplacian_2
+            batch.x_0,
+            batch.x_1,
+            batch.x_2,
+            laplacian_0,
+            laplacian_1,
+            laplacian_2,
         )
-        
+
         model_out = {"labels": batch.y, "batch_0": batch.batch_0}
         model_out["x_2"] = x_2
         model_out["x_1"] = x_1
         model_out["x_0"] = x_0
 
         return model_out
-    
+
     def normalize_matrix(self, matrix):
         matrix_ = matrix.to_dense()
         n, _ = matrix_.shape
@@ -117,14 +131,16 @@ class SCNWrapper(DefaultWrapper):
             diag_indices, diag_sum, matrix_.shape, device=matrix.device
         ).coalesce()
         normalized_matrix = diag_matrix @ (matrix @ diag_matrix)
-        return normalized_matrix 
+        return normalized_matrix
+
 
 class SCCNNWrapper(DefaultWrapper):
-    """Abstract class that provides an interface to loss logic within network"""
+    """Abstract class that provides an interface to loss logic within
+    network."""
 
     def forward(self, batch):
-        """Define logic for forward pass"""
-        
+        """Define logic for forward pass."""
+
         x_all = (batch.x_0, batch.x_1, batch.x_2)
         laplacian_all = (
             batch.hodge_laplacian_0,
@@ -136,22 +152,23 @@ class SCCNNWrapper(DefaultWrapper):
 
         incidence_all = (batch.incidence_1, batch.incidence_2)
         x_0, x_1, x_2 = self.backbone(x_all, laplacian_all, incidence_all)
-        
+
         model_out = {"labels": batch.y, "batch_0": batch.batch_0}
-        
+
         model_out["x_0"] = x_0
         model_out["x_1"] = x_1
         model_out["x_2"] = x_2
-    
+
         return model_out
 
 
 class SCCNWrapper(DefaultWrapper):
-    """Abstract class that provides an interface to loss logic within network"""
+    """Abstract class that provides an interface to loss logic within
+    network."""
 
     def forward(self, batch):
-        """Define logic for forward pass"""
-        
+        """Define logic for forward pass."""
+
         features = {
             f"rank_{r}": batch[f"x_{r}"]
             for r in range(self.backbone.layers[0].max_rank + 1)
@@ -169,30 +186,37 @@ class SCCNWrapper(DefaultWrapper):
         # TODO: First decide which strategy is the best then make code general
         model_out = {"labels": batch.y, "batch_0": batch.batch_0}
         if len(output) == 3:
-            x_0, x_1, x_2 = output["rank_0"], output["rank_1"], output["rank_2"]
-           
+            x_0, x_1, x_2 = (
+                output["rank_0"],
+                output["rank_1"],
+                output["rank_2"],
+            )
+
             model_out["x_2"] = x_2
             model_out["x_1"] = x_1
             model_out["x_0"] = x_0
 
         elif len(output) == 2:
             x_0, x_1 = output["rank_0"], output["rank_1"]
-            
+
             model_out["x_1"] = x_1
             model_out["x_0"] = x_0
-    
+
         else:
-            raise ValueError(f"Invalid number of output tensors: {len(output)}")
+            raise ValueError(
+                f"Invalid number of output tensors: {len(output)}"
+            )
 
         return model_out
 
 
 class CANWrapper(DefaultWrapper):
-    """Abstract class that provides an interface to loss logic within network"""
+    """Abstract class that provides an interface to loss logic within
+    network."""
 
     def forward(self, batch):
-        """Define logic for forward pass"""
-        
+        """Define logic for forward pass."""
+
         x_1 = self.backbone(
             x_0=batch.x_0,
             x_1=batch.x_1,
@@ -200,7 +224,7 @@ class CANWrapper(DefaultWrapper):
             down_laplacian_1=batch.down_laplacian_1.coalesce(),
             up_laplacian_1=batch.up_laplacian_1.coalesce(),
         )
-        
+
         model_out = {"labels": batch.y, "batch_0": batch.batch_0}
         model_out["x_1"] = x_1
         model_out["x_0"] = torch.sparse.mm(batch.incidence_1, x_1)
@@ -208,30 +232,32 @@ class CANWrapper(DefaultWrapper):
 
 
 class CWNDCMWrapper(DefaultWrapper):
-    """Abstract class that provides an interface to loss logic within network"""
+    """Abstract class that provides an interface to loss logic within
+    network."""
 
     def forward(self, batch):
-        """Define logic for forward pass"""
-        
+        """Define logic for forward pass."""
+
         x_1 = self.backbone(
             batch.x_1,
             batch.down_laplacian_1.coalesce(),
             batch.up_laplacian_1.coalesce(),
         )
-        
+
         model_out = {"labels": batch.y, "batch_0": batch.batch_0}
-        
+
         model_out["x_1"] = x_1
-        model_out["x_0"] =  torch.sparse.mm(batch.incidence_1, x_1)
+        model_out["x_0"] = torch.sparse.mm(batch.incidence_1, x_1)
         return model_out
 
 
 class CWNWrapper(DefaultWrapper):
-    """Abstract class that provides an interface to loss logic within network"""
+    """Abstract class that provides an interface to loss logic within
+    network."""
 
     def forward(self, batch):
-        """Define logic for forward pass"""
-        
+        """Define logic for forward pass."""
+
         x_0, x_1, x_2 = self.backbone(
             x_0=batch.x_0,
             x_1=batch.x_1,
@@ -249,18 +275,19 @@ class CWNWrapper(DefaultWrapper):
 
 
 class CCXNWrapper(DefaultWrapper):
-    """Abstract class that provides an interface to loss logic within network"""
+    """Abstract class that provides an interface to loss logic within
+    network."""
 
     def forward(self, batch):
-        """Define logic for forward pass"""
-        
+        """Define logic for forward pass."""
+
         x_0, x_1, x_2 = self.backbone(
             x_0=batch.x_0,
             x_1=batch.x_1,
             adjacency_0=batch.adjacency_0,
             incidence_2_t=batch.incidence_2.T,
         )
-        
+
         model_out = {"labels": batch.y, "batch_0": batch.batch_0}
         model_out["x_0"] = x_0
         model_out["x_1"] = x_1

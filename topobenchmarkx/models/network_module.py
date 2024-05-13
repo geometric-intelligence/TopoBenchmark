@@ -1,4 +1,4 @@
-from typing import Any, Union
+from typing import Any
 
 import torch
 from lightning import LightningModule
@@ -21,7 +21,7 @@ class NetworkModule(LightningModule):
         readout: torch.nn.Module,
         head_model: torch.nn.Module,
         loss: torch.nn.Module,
-        feature_encoder: Union[torch.nn.Module, None] = None,
+        feature_encoder: torch.nn.Module | None = None,
         **kwargs,
     ) -> None:
         """Initialize a `NetworkModule`.
@@ -36,16 +36,13 @@ class NetworkModule(LightningModule):
 
         # This line allows to access init params with 'self.hparams' attribute
         # also ensures init params will be stored in ckpt
-        self.save_hyperparameters(
-            logger=False, 
-            ignore=[]
-        )
+        self.save_hyperparameters(logger=False, ignore=[])
 
         self.feature_encoder = feature_encoder
         self.backbone = backbone_wrapper(backbone)
         self.readout = readout
         self.head_model = head_model
-        
+
         # Evaluator
         self.evaluator = None
         self.train_metrics_logged = False
@@ -68,7 +65,9 @@ class NetworkModule(LightningModule):
         """
         return self.backbone(batch)
 
-    def model_step(self, batch) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+    def model_step(
+        self, batch
+    ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         """Perform a single model step on a batch of data.
 
         :param batch: A batch of data (a tuple) containing the input tensor of images and target labels.
@@ -78,7 +77,7 @@ class NetworkModule(LightningModule):
             - A tensor of predictions.
             - A tensor of target labels.
         """
-        # Pipeline 
+        # Pipeline
         if self.feature_encoder:
             batch = self.feature_encoder(batch)
 
@@ -94,10 +93,11 @@ class NetworkModule(LightningModule):
         return model_out
 
     def training_step(self, batch, batch_idx: int) -> torch.Tensor:
-        """Perform a single training step on a batch of data from the training set.
+        """Perform a single training step on a batch of data from the training
+        set.
 
-        :param batch: A batch of data (a tuple) containing the input tensor of images and target
-            labels.
+        :param batch: A batch of data (a tuple) containing the input tensor of
+            images and target labels.
         :param batch_idx: The index of the current batch.
         :return: A tensor of losses between model predictions and targets.
         """
@@ -120,10 +120,11 @@ class NetworkModule(LightningModule):
     def validation_step(
         self, batch: tuple[torch.Tensor, torch.Tensor], batch_idx: int
     ) -> None:
-        """Perform a single validation step on a batch of data from the validation set.
+        """Perform a single validation step on a batch of data from the
+        validation set.
 
-        :param batch: A batch of data (a tuple) containing the input tensor of images and target
-            labels.
+        :param batch: A batch of data (a tuple) containing the input tensor of
+            images and target labels.
         :param batch_idx: The index of the current batch.
         """
         self.state_str = "Validation"
@@ -158,8 +159,8 @@ class NetworkModule(LightningModule):
     ) -> None:
         """Perform a single test step on a batch of data from the test set.
 
-        :param batch: A batch of data (a tuple) containing the input tensor of images and target
-            labels.
+        :param batch: A batch of data (a tuple) containing the input tensor of
+            images and target labels.
         :param batch_idx: The index of the current batch.
         """
         self.state_str = "Test"
@@ -224,24 +225,24 @@ class NetworkModule(LightningModule):
         self.evaluator.reset()
 
     def on_validation_epoch_start(self) -> None:
-        """According pytorch lightning documentation, this hook is called at the beginning of the validation epoch.
+        """According pytorch lightning documentation, this hook is called at
+        the beginning of the validation epoch.
 
         https://lightning.ai/docs/pytorch/stable/common/lightning_module.html#hooks
 
         Note that the validation step is within the train epoch. Hence here we have to log the train metrics
         before we reset the evaluator to start the validation loop.
         """
-        
+
         # Log train metrics and reset evaluator
         self.log_metrics(mode="train")
         self.train_metrics_logged = True
-    
+
     def on_train_epoch_end(self) -> None:
         # Log train metrics and reset evaluator
         if not self.train_metrics_logged:
             self.log_metrics(mode="train")
             self.train_metrics_logged = True
-        
 
     def on_validation_epoch_end(self) -> None:
         """Lightning hook that is called when a test epoch ends."""
@@ -267,11 +268,12 @@ class NetworkModule(LightningModule):
         self.evaluator.reset()
 
     def setup(self, stage: str) -> None:
-        """Lightning hook that is called at the beginning of fit (train + validate), validate,
-        test, or predict.
+        """Lightning hook that is called at the beginning of fit (train +
+        validate), validate, test, or predict.
 
-        This is a good hook when you need to build models dynamically or adjust something about
-        them. This hook is called on every process when using DDP.
+        This is a good hook when you need to build models dynamically or adjust
+        something about them. This hook is called on every process when using
+        DDP.
 
         :param stage: Either `"fit"`, `"validate"`, `"test"`, or `"predict"`.
         """
@@ -279,8 +281,9 @@ class NetworkModule(LightningModule):
             self.net = torch.compile(self.net)
 
     def configure_optimizers(self) -> dict[str, Any]:
-        """Choose what optimizers and learning-rate schedulers to use in your optimization.
-        Normally you'd need one. But in the case of GANs or similar you might have multiple.
+        """Choose what optimizers and learning-rate schedulers to use in your
+        optimization. Normally you'd need one. But in the case of GANs or
+        similar you might have multiple.
 
         Examples:
             https://lightning.ai/docs/pytorch/latest/common/lightning_module.html#configure-optimizers

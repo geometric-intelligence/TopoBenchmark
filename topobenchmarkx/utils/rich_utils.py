@@ -29,7 +29,8 @@ def print_config_tree(
     resolve: bool = False,
     save_to_file: bool = False,
 ) -> None:
-    """Prints the contents of a DictConfig as a tree structure using the Rich library.
+    """Prints the contents of a DictConfig as a tree structure using the Rich
+    library.
 
     :param cfg: A DictConfig composed by Hydra.
     :param print_order: Determines in what order config components are printed. Default is ``("data", "model",
@@ -80,7 +81,8 @@ def print_config_tree(
 
 @rank_zero_only
 def enforce_tags(cfg: DictConfig, save_to_file: bool = False) -> None:
-    """Prompts user to input tags from command line if no tags are provided in config.
+    """Prompts user to input tags from command line if no tags are provided in
+    config.
 
     :param cfg: A DictConfig composed by Hydra.
     :param save_to_file: Whether to export tags to the hydra output folder. Default is ``False``.
@@ -89,8 +91,12 @@ def enforce_tags(cfg: DictConfig, save_to_file: bool = False) -> None:
         if "id" in HydraConfig().cfg.hydra.job:
             raise ValueError("Specify tags before launching a multirun!")
 
-        log.warning("No tags provided in config. Prompting user to input tags...")
-        tags = Prompt.ask("Enter a list of comma separated tags", default="dev")
+        log.warning(
+            "No tags provided in config. Prompting user to input tags..."
+        )
+        tags = Prompt.ask(
+            "Enter a list of comma separated tags", default="dev"
+        )
         tags = [t.strip() for t in tags.split(",") if t != ""]
 
         with open_dict(cfg):

@@ -1,18 +1,12 @@
 import torch
 import torch_geometric
-from torch_geometric.utils import scatter
 
-
-from topobenchmarkx.models.readouts.readouts import PropagateSignalDown
-# Implemented Poolings
-READOUTS = {
-    "PropagateSignalDown": PropagateSignalDown
-}
+from . import READOUTS
 
 
 class AbstractReadOut(torch.nn.Module):
     r"""Readout layer for GNNs that operates on the batch level.
-    
+
     Parameters
     ----------
     in_channels: int
@@ -24,10 +18,8 @@ class AbstractReadOut(torch.nn.Module):
     pooling_type: str
         Pooling type, either "max", "sum", or "mean". Specifies the type of pooling operation to be used for the graph-level embedding.
     """
-    def __init__(
-        self,
-        **kwargs
-    ):
+
+    def __init__(self, **kwargs):
         super().__init__()
 
         self.signal_readout = kwargs["readout_name"] != "None"
@@ -37,12 +29,12 @@ class AbstractReadOut(torch.nn.Module):
 
     def forward(self, model_out: dict, batch: torch_geometric.data.Data):
         r"""Forward pass.
-        
+
         Parameters
         ----------
         model_out: dict
             Dictionary containing the model output.
-        
+
         Returns
         -------
         dict
@@ -53,7 +45,3 @@ class AbstractReadOut(torch.nn.Module):
             model_out = self.readout(model_out, batch)
 
         return model_out
-    
-    
-
-    

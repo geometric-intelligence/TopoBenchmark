@@ -8,12 +8,12 @@ feature_encoder:
 backbone:
   _target_: topomodelx.nn.simplicial.sccn.SCCN
   channels: ${model.feature_encoder.out_channels}
-  max_rank: 1
+  max_rank: 2
   n_layers: 1
   update_func: "sigmoid"
 
 backbone_wrapper:
-  _target_: topobenchmarkx.models.wrappers.default_wrapper.SCCNNWrapper
+  _target_: topobenchmarkx.models.wrappers.default_wrapper.SCCNWrapper
   _partial_: true
   out_channels: ${model.feature_encoder.out_channels}
   num_cell_dimensions: ${infere_list_length:${model.feature_encoder.in_channels}}

@@ -1,20 +1,19 @@
 import os.path as osp
 from collections.abc import Callable
-from typing import Optional, ClassVar
+from typing import ClassVar
 
 import torch
 from omegaconf import DictConfig
 from torch_geometric.data import Data, InMemoryDataset
 from torch_geometric.io import fs
 
-from topobenchmarkx.io.load.us_county_demos import load_us_county_demos
 from topobenchmarkx.io.load.download_utils import download_file_from_drive
 from topobenchmarkx.io.load.split_utils import random_splitting
+from topobenchmarkx.io.load.us_county_demos import load_us_county_demos
 
 
 class USCountyDemosDataset(InMemoryDataset):
-    r"""
-    Dataset class for US County Demographics dataset.
+    r"""Dataset class for US County Demographics dataset.
 
     Args:
         root (str): Root directory where the dataset will be saved.
@@ -41,7 +40,6 @@ class USCountyDemosDataset(InMemoryDataset):
         URLS (dict): Dictionary containing the URLs for downloading the dataset.
         FILE_FORMAT (dict): Dictionary containing the file formats for the dataset.
         RAW_FILE_NAMES (dict): Dictionary containing the raw file names for the dataset.
-
     """
 
     URLS: ClassVar = {
@@ -61,9 +59,9 @@ class USCountyDemosDataset(InMemoryDataset):
         root: str,
         name: str,
         parameters: DictConfig,
-        transform: Optional[Callable] = None,
-        pre_transform: Optional[Callable] = None,
-        pre_filter: Optional[Callable] = None,
+        transform: Callable | None = None,
+        pre_transform: Callable | None = None,
+        pre_filter: Callable | None = None,
         force_reload: bool = True,
         use_node_attr: bool = False,
         use_edge_attr: bool = False,
@@ -71,7 +69,11 @@ class USCountyDemosDataset(InMemoryDataset):
         self.name = name.replace("_", "-")
         self.parameters = parameters
         super().__init__(
-            root, transform, pre_transform, pre_filter, force_reload=force_reload
+            root,
+            transform,
+            pre_transform,
+            pre_filter,
+            force_reload=force_reload,
         )
 
         # Step 3:Load the processed data
@@ -121,8 +123,8 @@ class USCountyDemosDataset(InMemoryDataset):
         return "data.pt"
 
     def download(self) -> None:
-        """
-        Downloads the dataset from the specified URL and saves it to the raw directory.
+        """Downloads the dataset from the specified URL and saves it to the raw
+        directory.
 
         Raises:
             FileNotFoundError: If the dataset URL is not found.
@@ -141,7 +143,9 @@ class USCountyDemosDataset(InMemoryDataset):
 
         # Extract the downloaded file if it is compressed
         fs.cp(
-            f"{self.raw_dir}/{self.name}.{self.file_format}", self.raw_dir, extract=True
+            f"{self.raw_dir}/{self.name}.{self.file_format}",
+            self.raw_dir,
+            extract=True,
         )
 
         # Move the etracted files to the datasets/domain/dataset_name/raw/ directory
@@ -153,8 +157,7 @@ class USCountyDemosDataset(InMemoryDataset):
         fs.rm(f"{self.raw_dir}/{self.name}.{self.file_format}")
 
     def process(self) -> None:
-        """
-        Process the data for the dataset.
+        """Process the data for the dataset.
 
         This method loads the US county demographics data, applies any pre-processing transformations if specified,
         and saves the processed data to the appropriate location.
@@ -163,7 +166,9 @@ class USCountyDemosDataset(InMemoryDataset):
             None
         """
         data = load_us_county_demos(
-            self.raw_dir, year=self.parameters.year, y_col=self.parameters.task_variable
+            self.raw_dir,
+            year=self.parameters.year,
+            y_col=self.parameters.task_variable,
         )
 
         data = data if self.pre_transform is None else self.pre_transform(data)

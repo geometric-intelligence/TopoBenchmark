@@ -1,18 +1,18 @@
 def get_default_transform(data_domain, model):
     r"""Get default transform for a given data domain and model.
-    
+
     Parameters
     ----------
     data_domain: str
         Data domain.
     model: str
         Model name. Should be in the format "model_domain/name".
-        
+
     Returns
     -------
     str
         Default transform.
-    
+
     Raises
     ------
     ValueError
@@ -31,27 +31,25 @@ def get_default_transform(data_domain, model):
 
 def get_monitor_metric(task, metric):
     r"""Get monitor metric for a given task and loss.
-    
+
     Parameters
     ----------
     task: str
         Task, either "classification" or "regression".
     loss: str
         Name of the loss function.
-    
+
     Returns
     -------
     str
         Monitor metric.
-    
+
     Raises
     ------
     ValueError
         If the task is invalid.
     """
-    if task == "classification":
-        return f"val/{metric}"
-    elif task == "regression":
+    if task == "classification" or task == "regression":
         return f"val/{metric}"
     else:
         raise ValueError(f"Invalid task {task}")
@@ -59,17 +57,17 @@ def get_monitor_metric(task, metric):
 
 def get_monitor_mode(task):
     r"""Get monitor mode for a given task.
-    
+
     Parameters
     ----------
     task: str
         Task, either "classification" or "regression".
-    
+
     Returns
     -------
     str
         Monitor mode, either "max" or "min".
-    
+
     Raises
     ------
     ValueError
@@ -85,25 +83,26 @@ def get_monitor_mode(task):
 
 def infer_in_channels(dataset):
     r"""Infer the number of input channels for a given dataset.
-    
+
     Parameters
     ----------
     dataset: torch_geometric.data.Dataset
         Input dataset.
-    
+
     Returns
     -------
     list
         List with dimensions of the input channels.
     """
+
     def find_complex_lifting(dataset):
         r"""Find if there is a complex lifting in the dataset.
-        
+
         Parameters
         ----------
         dataset: torch_geometric.data.Dataset
             Input dataset.
-        
+
         Returns
         -------
         bool
@@ -125,14 +124,14 @@ def infer_in_channels(dataset):
 
     def check_for_type_feature_lifting(dataset, lifting):
         r"""Check the type of feature lifting in the dataset.
-        
+
         Parameters
         ----------
         dataset: torch_geometric.data.Dataset
             Input dataset.
         lifting: str
             Name of the complex lifting.
-        
+
         Returns
         -------
         str
@@ -171,19 +170,23 @@ def infer_in_channels(dataset):
         else:
             if not dataset.transforms[lifting].preserve_edge_attr:
                 if feature_lifting == "projection":
-                    return [dataset.parameters.num_features[0]] * dataset.transforms[
-                        lifting
-                    ].complex_dim
+                    return [
+                        dataset.parameters.num_features[0]
+                    ] * dataset.transforms[lifting].complex_dim
                 elif feature_lifting == "concatenation":
                     return_value = [dataset.parameters.num_features]
-                    for i in range(2, dataset.transforms[lifting].complex_dim + 1):
-                        return_value += [int(dataset.parameters.num_features * i)]
+                    for i in range(
+                        2, dataset.transforms[lifting].complex_dim + 1
+                    ):
+                        return_value += [
+                            int(dataset.parameters.num_features * i)
+                        ]
 
                     return return_value
                 else:
-                    return [dataset.parameters.num_features] * dataset.transforms[
-                        lifting
-                    ].complex_dim
+                    return [
+                        dataset.parameters.num_features
+                    ] * dataset.transforms[lifting].complex_dim
 
             else:
                 return list(dataset.parameters.num_features) + [
@@ -198,6 +201,7 @@ def infer_in_channels(dataset):
             return [dataset.parameters.num_features]
         else:
             return [dataset.parameters.num_features[0]]
+
 
 def infere_list_length(list):
     return len(list)

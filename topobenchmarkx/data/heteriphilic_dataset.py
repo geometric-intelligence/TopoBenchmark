@@ -1,19 +1,21 @@
 import os.path as osp
 from collections.abc import Callable
-from typing import Optional, ClassVar
+from typing import ClassVar
 
 import torch
 from omegaconf import DictConfig
 from torch_geometric.data import Data, InMemoryDataset
 from torch_geometric.io import fs
 
-from topobenchmarkx.io.load.heterophilic import download_hetero_datasets, load_heterophilic_data
+from topobenchmarkx.io.load.heterophilic import (
+    download_hetero_datasets,
+    load_heterophilic_data,
+)
 from topobenchmarkx.io.load.split_utils import random_splitting
 
 
 class HeteroDataset(InMemoryDataset):
-    r"""
-    Dataset class for US County Demographics dataset.
+    r"""Dataset class for US County Demographics dataset.
 
     Args:
         root (str): Root directory where the dataset will be saved.
@@ -40,7 +42,6 @@ class HeteroDataset(InMemoryDataset):
         URLS (dict): Dictionary containing the URLs for downloading the dataset.
         FILE_FORMAT (dict): Dictionary containing the file formats for the dataset.
         RAW_FILE_NAMES (dict): Dictionary containing the raw file names for the dataset.
-
     """
 
     RAW_FILE_NAMES: ClassVar = {}
@@ -50,17 +51,21 @@ class HeteroDataset(InMemoryDataset):
         root: str,
         name: str,
         parameters: DictConfig,
-        transform: Optional[Callable] = None,
-        pre_transform: Optional[Callable] = None,
-        pre_filter: Optional[Callable] = None,
+        transform: Callable | None = None,
+        pre_transform: Callable | None = None,
+        pre_filter: Callable | None = None,
         force_reload: bool = True,
         use_node_attr: bool = False,
         use_edge_attr: bool = False,
     ) -> None:
-        self.name = name #.replace("_", "-")
+        self.name = name  # .replace("_", "-")
         self.parameters = parameters
         super().__init__(
-            root, transform, pre_transform, pre_filter, force_reload=force_reload
+            root,
+            transform,
+            pre_transform,
+            pre_filter,
+            force_reload=force_reload,
         )
 
         # Step 3:Load the processed data
@@ -97,15 +102,15 @@ class HeteroDataset(InMemoryDataset):
     @property
     def processed_file_names(self) -> str:
         return "data.pt"
-    
+
     @property
     def raw_file_names(self) -> list[str]:
-        """Spefify the downloaded raw fine name"""
+        """Spefify the downloaded raw fine name."""
         return [f"{self.name}.npz"]
 
     def download(self) -> None:
-        """
-        Downloads the dataset from the specified URL and saves it to the raw directory.
+        """Downloads the dataset from the specified URL and saves it to the raw
+        directory.
 
         Raises:
             FileNotFoundError: If the dataset URL is not found.
@@ -115,8 +120,7 @@ class HeteroDataset(InMemoryDataset):
         download_hetero_datasets(name=self.name, path=self.raw_dir)
 
     def process(self) -> None:
-        """
-        Process the data for the dataset.
+        """Process the data for the dataset.
 
         This method loads the US county demographics data, applies any pre-processing transformations if specified,
         and saves the processed data to the appropriate location.
@@ -124,7 +128,7 @@ class HeteroDataset(InMemoryDataset):
         Returns:
             None
         """
-    
+
         data = load_heterophilic_data(name=self.name, path=self.raw_dir)
         data = data if self.pre_transform is None else self.pre_transform(data)
         self.save([data], self.processed_paths[0])

@@ -4,7 +4,7 @@ from torch_geometric.utils import scatter
 
 class DefaultHead(torch.nn.Module):
     r"""Head model.
-    
+
     Parameters
     ----------
     in_channels: int
@@ -16,6 +16,7 @@ class DefaultHead(torch.nn.Module):
     pooling_type: str
         Pooling type, either "max", "sum", or "mean". Specifies the type of pooling operation to be used for the graph-level embedding.
     """
+
     def __init__(
         self,
         in_channels: int,
@@ -31,15 +32,15 @@ class DefaultHead(torch.nn.Module):
 
         assert pooling_type in ["max", "sum", "mean"], "Invalid pooling_type"
         self.pooling_type = pooling_type
-        
+
     def forward(self, model_out: dict):
         r"""Forward pass.
-        
+
         Parameters
         ----------
         model_out: dict
             Dictionary containing the model output.
-        
+
         Returns
         -------
         dict

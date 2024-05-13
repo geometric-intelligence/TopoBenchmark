@@ -19,7 +19,8 @@ FEATURE_LIFTINGS = {
 
 
 class GraphLifting(torch_geometric.transforms.BaseTransform):
-    r"""Abstract class for lifting graph topologies to higher-order topological domains.
+    r"""Abstract class for lifting graph topologies to higher-order topological
+    domains.
 
     Parameters
     ----------
@@ -54,7 +55,9 @@ class GraphLifting(torch_geometric.transforms.BaseTransform):
         """
         raise NotImplementedError
 
-    def forward(self, data: torch_geometric.data.Data) -> torch_geometric.data.Data:
+    def forward(
+        self, data: torch_geometric.data.Data
+    ) -> torch_geometric.data.Data:
         r"""Applies the full lifting (topology + features) to the input data.
 
         Parameters
@@ -70,7 +73,9 @@ class GraphLifting(torch_geometric.transforms.BaseTransform):
         initial_data = data.to_dict()
         lifted_topology = self.lift_topology(data)
         lifted_topology = self.feature_lifting(lifted_topology)
-        lifted_data = torch_geometric.data.Data(**initial_data, **lifted_topology)
+        lifted_data = torch_geometric.data.Data(
+            **initial_data, **lifted_topology
+        )
         return lifted_data
 
     def _data_has_edge_attr(self, data: torch_geometric.data.Data) -> bool:
@@ -88,7 +93,9 @@ class GraphLifting(torch_geometric.transforms.BaseTransform):
         """
         return hasattr(data, "edge_attr") and data.edge_attr is not None
 
-    def _generate_graph_from_data(self, data: torch_geometric.data.Data) -> nx.Graph:
+    def _generate_graph_from_data(
+        self, data: torch_geometric.data.Data
+    ) -> nx.Graph:
         r"""Generates a NetworkX graph from the input data object.
 
         Parameters
@@ -102,7 +109,10 @@ class GraphLifting(torch_geometric.transforms.BaseTransform):
             The generated NetworkX graph.
         """
         # Check if data object have edge_attr, return list of tuples as [(node_id, {'features':data}, 'dim':1)] or ??
-        nodes = [(n, dict(features=data.x[n], dim=0)) for n in range(data.x.shape[0])]
+        nodes = [
+            (n, dict(features=data.x[n], dim=0))
+            for n in range(data.x.shape[0])
+        ]
 
         if self.preserve_edge_attr and self._data_has_edge_attr(data):
             # In case edge features are given, assign features to every edge
@@ -125,7 +135,9 @@ class GraphLifting(torch_geometric.transforms.BaseTransform):
             # If edge_attr is not present, return list list of edges
             edges = [
                 (i.item(), j.item())
-                for i, j in zip(data.edge_index[0], data.edge_index[1], strict=False)
+                for i, j in zip(
+                    data.edge_index[0], data.edge_index[1], strict=False
+                )
             ]
             self.contains_edge_attr = False
         graph = nx.Graph()

@@ -9,6 +9,7 @@ class CustomDataset(torch_geometric.data.Dataset):
     data_lst: list
         List of torch_geometric.data.Data objects .
     """
+
     def __init__(self, data_lst):
         super().__init__()
         self.data_lst = data_lst
@@ -32,6 +33,7 @@ class CustomDataset(torch_geometric.data.Dataset):
 
     def len(self):
         r"""Return length of the dataset.
+
         Returns
         -------
         int
@@ -48,6 +50,7 @@ class TorchGeometricDataset(torch_geometric.data.Dataset):
     data_lst: list
         List of torch_geometric.data.Data objects .
     """
+
     def __init__(self, data_lst):
         super().__init__()
         self.data_lst = data_lst
@@ -70,6 +73,7 @@ class TorchGeometricDataset(torch_geometric.data.Dataset):
 
     def len(self):
         r"""Return length of the dataset.
+
         Returns
         -------
         int

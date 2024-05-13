@@ -17,7 +17,8 @@ class ProjectionSum(torch_geometric.transforms.BaseTransform):
     def lift_features(
         self, data: torch_geometric.data.Data | dict
     ) -> torch_geometric.data.Data | dict:
-        r"""Projects r-cell features of a graph to r+1-cell structures using the incidence matrix.
+        r"""Projects r-cell features of a graph to r+1-cell structures using the
+        incidence matrix.
 
         Parameters
         ----------
@@ -27,8 +28,11 @@ class ProjectionSum(torch_geometric.transforms.BaseTransform):
         Returns
         -------
         torch_geometric.data.Data | dict
-            The lifted data."""
-        keys = sorted([key.split("_")[1] for key in data if "incidence" in key])
+            The lifted data.
+        """
+        keys = sorted(
+            [key.split("_")[1] for key in data if "incidence" in key]
+        )
         for elem in keys:
             if f"x_{elem}" not in data:
                 idx_to_project = 0 if elem == "hyperedges" else int(elem) - 1
@@ -72,7 +76,8 @@ class ConcatentionLifting(torch_geometric.transforms.BaseTransform):
     def lift_features(
         self, data: torch_geometric.data.Data | dict
     ) -> torch_geometric.data.Data | dict:
-        r"""Concatenates r-cell features to r+1-cell structures using the incidence matrix.
+        r"""Concatenates r-cell features to r+1-cell structures using the
+        incidence matrix.
 
         Parameters
         ----------
@@ -82,9 +87,12 @@ class ConcatentionLifting(torch_geometric.transforms.BaseTransform):
         Returns
         -------
         torch_geometric.data.Data | dict
-            The lifted data."""
+            The lifted data.
+        """
 
-        keys = sorted([key.split("_")[1] for key in data if "incidence" in key])
+        keys = sorted(
+            [key.split("_")[1] for key in data if "incidence" in key]
+        )
         for elem in keys:
             if f"x_{elem}" not in data:
                 idx_to_project = 0 if elem == "hyperedges" else int(elem) - 1
@@ -141,7 +149,8 @@ class SetLifting(torch_geometric.transforms.BaseTransform):
     def lift_features(
         self, data: torch_geometric.data.Data | dict
     ) -> torch_geometric.data.Data | dict:
-        r"""Concatenates r-cell features to r+1-cell structures using the incidence matrix.
+        r"""Concatenates r-cell features to r+1-cell structures using the
+        incidence matrix.
 
         Parameters
         ----------
@@ -151,12 +160,15 @@ class SetLifting(torch_geometric.transforms.BaseTransform):
         Returns
         -------
         torch_geometric.data.Data | dict
-            The lifted data."""
+            The lifted data.
+        """
 
-        keys = sorted([key.split("_")[1] for key in data if "incidence" in key])
+        keys = sorted(
+            [key.split("_")[1] for key in data if "incidence" in key]
+        )
         for elem in keys:
             if f"x_{elem}" not in data:
-                #idx_to_project = 0 if elem == "hyperedges" else int(elem) - 1
+                # idx_to_project = 0 if elem == "hyperedges" else int(elem) - 1
                 incidence = data["incidence_" + elem]
                 _, n = incidence.shape
 

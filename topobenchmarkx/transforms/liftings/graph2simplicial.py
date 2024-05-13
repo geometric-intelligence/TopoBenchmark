@@ -71,20 +71,29 @@ class Graph2SimplicialLifting(GraphLifting):
             simplicial_complex, self.complex_dim, signed=self.signed
         )
         lifted_topology["x_0"] = torch.stack(
-            list(simplicial_complex.get_simplex_attributes("features", 0).values())
+            list(
+                simplicial_complex.get_simplex_attributes(
+                    "features", 0
+                ).values()
+            )
         )
         # If new edges have been added during the lifting process, we discard the edge attributes
         if self.contains_edge_attr and simplicial_complex.shape[1] == (
             graph.number_of_edges()
         ):
             lifted_topology["x_1"] = torch.stack(
-                list(simplicial_complex.get_simplex_attributes("features", 1).values())
+                list(
+                    simplicial_complex.get_simplex_attributes(
+                        "features", 1
+                    ).values()
+                )
             )
         return lifted_topology
 
 
 class SimplicialNeighborhoodLifting(Graph2SimplicialLifting):
-    r"""Lifts graphs to simplicial complex domain by considering k-hop neighborhoods.
+    r"""Lifts graphs to simplicial complex domain by considering k-hop
+    neighborhoods.
 
     Parameters
     ----------
@@ -99,7 +108,8 @@ class SimplicialNeighborhoodLifting(Graph2SimplicialLifting):
         self.max_k_simplices = max_k_simplices
 
     def lift_topology(self, data: torch_geometric.data.Data) -> dict:
-        r"""Lifts the topology of a graph to simplicial complex domain by considering k-hop neighborhoods.
+        r"""Lifts the topology of a graph to simplicial complex domain by
+        considering k-hop neighborhoods.
 
         Parameters
         ----------
@@ -117,7 +127,9 @@ class SimplicialNeighborhoodLifting(Graph2SimplicialLifting):
         simplices = [set() for _ in range(2, self.complex_dim + 1)]
         for n in range(graph.number_of_nodes()):
             # Find 1-hop node n neighbors
-            neighbors, _, _, _ = torch_geometric.utils.k_hop_subgraph(n, 1, edge_index)
+            neighbors, _, _, _ = torch_geometric.utils.k_hop_subgraph(
+                n, 1, edge_index
+            )
             if n not in neighbors:
                 neighbors.append(n)
             neighbors = neighbors.numpy()
@@ -135,7 +147,8 @@ class SimplicialNeighborhoodLifting(Graph2SimplicialLifting):
 
 
 class SimplicialCliqueLifting(Graph2SimplicialLifting):
-    r"""Lifts graphs to simplicial complex domain by identifying the cliques as k-simplices.
+    r"""Lifts graphs to simplicial complex domain by identifying the cliques as
+    k-simplices.
 
     Parameters
     ----------
@@ -147,7 +160,8 @@ class SimplicialCliqueLifting(Graph2SimplicialLifting):
         super().__init__(**kwargs)
 
     def lift_topology(self, data: torch_geometric.data.Data) -> dict:
-        r"""Lifts the topology of a graph to a simplicial complex by identifying the cliques as k-simplices.
+        r"""Lifts the topology of a graph to a simplicial complex by identifying
+        the cliques as k-simplices.
 
         Parameters
         ----------

@@ -23,14 +23,21 @@ class Preprocessor(torch_geometric.data.InMemoryDataset):
     """
 
     def __init__(
-        self, data_dir, data_list, transforms_config, force_reload=False, **kwargs
+        self,
+        data_dir,
+        data_list,
+        transforms_config,
+        force_reload=False,
+        **kwargs,
     ):
         if isinstance(data_list, torch_geometric.data.Dataset):
             data_list = [data_list.get(idx) for idx in range(len(data_list))]
         elif isinstance(data_list, torch_geometric.data.Data):
             data_list = [data_list]
         self.data_list = data_list
-        pre_transform = self.instantiate_pre_transform(data_dir, transforms_config)
+        pre_transform = self.instantiate_pre_transform(
+            data_dir, transforms_config
+        )
         super().__init__(
             self.processed_data_dir,
             None,
@@ -84,7 +91,9 @@ class Preprocessor(torch_geometric.data.InMemoryDataset):
         pre_transforms = torch_geometric.transforms.Compose(
             list(pre_transforms_dict.values())
         )
-        self.set_processed_data_dir(pre_transforms_dict, data_dir, transforms_config)
+        self.set_processed_data_dir(
+            pre_transforms_dict, data_dir, transforms_config
+        )
         return pre_transforms
 
     def set_processed_data_dir(
@@ -109,7 +118,9 @@ class Preprocessor(torch_geometric.data.InMemoryDataset):
         }
         params_hash = make_hash(transforms_parameters)
         self.transforms_parameters = ensure_serializable(transforms_parameters)
-        self.processed_data_dir = os.path.join(*[data_dir, repo_name, f"{params_hash}"])
+        self.processed_data_dir = os.path.join(
+            *[data_dir, repo_name, f"{params_hash}"]
+        )
 
     def save_transform_parameters(self) -> None:
         r"""Save the transform parameters."""
@@ -126,9 +137,13 @@ class Preprocessor(torch_geometric.data.InMemoryDataset):
                 saved_transform_parameters = json.load(f)
 
             if saved_transform_parameters != self.transforms_parameters:
-                raise ValueError("Different transform parameters for the same data_dir")
-            
-            print(f"Transform parameters are the same, using existing data_dir: {self.processed_data_dir}")
+                raise ValueError(
+                    "Different transform parameters for the same data_dir"
+                )
+
+            print(
+                f"Transform parameters are the same, using existing data_dir: {self.processed_data_dir}"
+            )
 
     def process(self) -> None:
         r"""Process the data."""

@@ -57,7 +57,8 @@ class HypergraphKHopLifting(Graph2HypergraphLifting):
         self.k = k_value
 
     def lift_topology(self, data: torch_geometric.data.Data) -> dict:
-        r"""Lifts the topology of a graph to hypergraph domain by considering k-hop neighborhoods.
+        r"""Lifts the topology of a graph to hypergraph domain by considering
+        k-hop neighborhoods.
 
         Parameters
         ----------
@@ -79,13 +80,17 @@ class HypergraphKHopLifting(Graph2HypergraphLifting):
         edge_index = torch_geometric.utils.to_undirected(data.edge_index)
 
         # Detect isolated nodes
-        isolated_nodes = [i for i in range(num_nodes) if i not in edge_index[0]]
+        isolated_nodes = [
+            i for i in range(num_nodes) if i not in edge_index[0]
+        ]
         if len(isolated_nodes) > 0:
             # Add completely isolated nodes to the edge_index
             edge_index = torch.cat(
                 [
                     edge_index,
-                    torch.tensor([isolated_nodes, isolated_nodes], dtype=torch.long),
+                    torch.tensor(
+                        [isolated_nodes, isolated_nodes], dtype=torch.long
+                    ),
                 ],
                 dim=1,
             )
@@ -125,7 +130,8 @@ class HypergraphKNearestNeighborsLifting(Graph2HypergraphLifting):
         self.transform = torch_geometric.transforms.KNNGraph(self.k, self.loop)
 
     def lift_topology(self, data: torch_geometric.data.Data) -> dict:
-        r"""Lifts the topology of a graph to hypergraph domain by considering k-nearest neighbors.
+        r"""Lifts the topology of a graph to hypergraph domain by considering
+        k-nearest neighbors.
 
         Parameters
         ----------

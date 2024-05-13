@@ -46,7 +46,9 @@ class Graph2CellLifting(GraphLifting):
         """
         raise NotImplementedError
 
-    def _get_lifted_topology(self, cell_complex: CellComplex, graph: nx.Graph) -> dict:
+    def _get_lifted_topology(
+        self, cell_complex: CellComplex, graph: nx.Graph
+    ) -> dict:
         r"""Returns the lifted topology.
 
         Parameters
@@ -61,7 +63,9 @@ class Graph2CellLifting(GraphLifting):
         dict
             The lifted topology.
         """
-        lifted_topology = get_complex_connectivity(cell_complex, self.complex_dim)
+        lifted_topology = get_complex_connectivity(
+            cell_complex, self.complex_dim
+        )
         lifted_topology["x_0"] = torch.stack(
             list(cell_complex.get_cell_attributes("features", 0).values())
         )
@@ -112,7 +116,9 @@ class CellCyclesLifting(Graph2CellLifting):
         cycles = [cycle for cycle in cycles if len(cycle) != 1]
         # Eliminate cycles that are greater than the max_cell_lenght
         if self.max_cell_length is not None:
-            cycles = [cycle for cycle in cycles if len(cycle) <= self.max_cell_length]
+            cycles = [
+                cycle for cycle in cycles if len(cycle) <= self.max_cell_length
+            ]
         if len(cycles) != 0:
             cell_complex.add_cells_from(cycles, rank=self.complex_dim)
         return self._get_lifted_topology(cell_complex, G)

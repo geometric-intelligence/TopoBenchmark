@@ -16,8 +16,12 @@ class TestHypergraphKNearestNeighborsLifting:
         self.data = manual_graph()
 
         # Initialise the HypergraphKNearestNeighborsLifting class
-        self.lifting_k2 = HypergraphKNearestNeighborsLifting(k_value=2, loop=True)
-        self.lifting_k3 = HypergraphKNearestNeighborsLifting(k_value=3, loop=True)
+        self.lifting_k2 = HypergraphKNearestNeighborsLifting(
+            k_value=2, loop=True
+        )
+        self.lifting_k3 = HypergraphKNearestNeighborsLifting(
+            k_value=3, loop=True
+        )
 
     def test_lift_topology(self):
         # Test the lift_topology method
@@ -40,7 +44,8 @@ class TestHypergraphKNearestNeighborsLifting:
         )
 
         assert (
-            expected_incidence_1 == lifted_data_k2.incidence_hyperedges.to_dense()
+            expected_incidence_1
+            == lifted_data_k2.incidence_hyperedges.to_dense()
         ).all(), "Something is wrong with incidence_hyperedges (k=2)."
         assert (
             expected_n_hyperedges == lifted_data_k2.num_hyperedges
@@ -65,7 +70,8 @@ class TestHypergraphKNearestNeighborsLifting:
         )
 
         assert (
-            expected_incidence_1 == lifted_data_k3.incidence_hyperedges.to_dense()
+            expected_incidence_1
+            == lifted_data_k3.incidence_hyperedges.to_dense()
         ).all(), "Something is wrong with incidence_hyperedges (k=3)."
         assert (
             expected_n_hyperedges == lifted_data_k3.num_hyperedges

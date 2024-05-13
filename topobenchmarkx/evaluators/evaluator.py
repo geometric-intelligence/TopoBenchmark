@@ -6,7 +6,8 @@ from topobenchmarkx.evaluators.metrics import METRICS
 
 
 class TorchEvaluator:
-    r"""Evaluator class that is responsible for computing the metrics for a given task.
+    r"""Evaluator class that is responsible for computing the metrics for a
+    given task.
 
      Parameters
      ----------
@@ -24,7 +25,6 @@ class TorchEvaluator:
          In "regression" scenario, the following arguments are expected:
          - regression_metrics : list
              A list of regression metrics to be computed.
-
     """
 
     def __init__(self, task, **kwargs):
@@ -43,7 +43,7 @@ class TorchEvaluator:
         elif self.task == "multilabel classification":
             parameters = {"num_classes": kwargs["num_classes"]}
             parameters["task"] = "multilabel"
-            metric_names = kwargs["classification_metrics"] 
+            metric_names = kwargs["classification_metrics"]
 
         elif self.task == "regression":
             parameters = {}
@@ -57,16 +57,13 @@ class TorchEvaluator:
         # )
 
         metrics = {}
-        for name in metric_names: 
+        for name in metric_names:
             if name in ["recall", "precision", "auroc"]:
-                metrics[name] = METRICS[name](average='macro', **parameters)
-            
+                metrics[name] = METRICS[name](average="macro", **parameters)
+
             else:
                 metrics[name] = METRICS[name](**parameters)
         self.metrics = MetricCollection(metrics)
-        
-
-            
 
         self.best_metric = {}
 
@@ -81,7 +78,6 @@ class TorchEvaluator:
                 The model predictions.
             - labels : torch.Tensor
                 The ground truth labels.
-
         """
         preds = model_out["logits"].cpu()
         target = model_out["labels"].cpu()
@@ -111,12 +107,17 @@ class TorchEvaluator:
     def reset(
         self,
     ):
-        """Reset the metrics. This method should be called after each epoch"""
+        """Reset the metrics.
+
+        This method should be called after each epoch
+        """
         self.metrics.reset()
 
 
 if __name__ == "__main__":
     evaluator = TorchEvaluator(
-        task="classification", num_classes=3, classification_metrics=["accuracy"]
+        task="classification",
+        num_classes=3,
+        classification_metrics=["accuracy"],
     )
     print(evaluator.task)

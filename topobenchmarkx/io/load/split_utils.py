@@ -9,9 +9,9 @@ from topobenchmarkx.data.datasets import CustomDataset
 
 # Generate splits in different fasions
 def k_fold_split(labels, parameters):
-    """
-    Returns train and valid indices as in K-Fold Cross-Validation. If the split already exists
-    it loads it automatically, otherwise it creates the split file for the subsequent runs.
+    """Returns train and valid indices as in K-Fold Cross-Validation. If the
+    split already exists it loads it automatically, otherwise it creates the
+    split file for the subsequent runs.
 
     Parameters
     ----------
@@ -48,13 +48,22 @@ def k_fold_split(labels, parameters):
 
         skf = StratifiedKFold(n_splits=k, shuffle=True, random_state=42)
 
-        for fold_n, (train_idx, valid_idx) in enumerate(skf.split(x_idx, labels)):
-            split_idx = {"train": train_idx, "valid": valid_idx, "test": valid_idx}
+        for fold_n, (train_idx, valid_idx) in enumerate(
+            skf.split(x_idx, labels)
+        ):
+            split_idx = {
+                "train": train_idx,
+                "valid": valid_idx,
+                "test": valid_idx,
+            }
 
             # Check that all nodes/graph have been assigned to some split
             assert np.all(
                 np.sort(
-                    np.array(split_idx["train"].tolist() + split_idx["valid"].tolist())
+                    np.array(
+                        split_idx["train"].tolist()
+                        + split_idx["valid"].tolist()
+                    )
                 )
                 == np.sort(np.arange(len(labels)))
             ), "Not every sample has been loaded."
@@ -282,8 +291,8 @@ def load_graph_tudataset_split(dataset, cfg):
             f"split_type {cfg.split_type} not valid. Choose either 'test' or 'k-fold'"
         )
 
-    train_dataset, val_dataset, test_dataset = assing_train_val_test_mask_to_graphs(
-        dataset, split_idx
+    train_dataset, val_dataset, test_dataset = (
+        assing_train_val_test_mask_to_graphs(dataset, split_idx)
     )
 
     return [train_dataset, val_dataset, test_dataset]

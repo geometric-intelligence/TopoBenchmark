@@ -21,8 +21,9 @@ backbone:
   att_lift: False
 
 backbone_wrapper:
-  _target_: topobenchmarkx.models.wrappers.default_wrapper.CANWrapper
+  _target_: topobenchmarkx.models.wrappers.CANWrapper
   _partial_: true
+  wrapper_name: CANWrapper
   out_channels: ${model.feature_encoder.out_channels}
   num_cell_dimensions: ${infere_list_length:${model.feature_encoder.selected_dimensions}}
 

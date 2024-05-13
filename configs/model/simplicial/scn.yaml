@@ -17,8 +17,9 @@ backbone:
   n_layers: 1
 
 backbone_wrapper:
-  _target_: topobenchmarkx.models.wrappers.default_wrapper.SCNWrapper
+  _target_: topobenchmarkx.models.wrappers.SCNWrapper
   _partial_: true
+  wrapper_name: SCNWrapper
   out_channels: ${model.feature_encoder.out_channels}
   num_cell_dimensions: ${infere_list_length:${model.feature_encoder.selected_dimensions}}
 

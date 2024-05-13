@@ -14,8 +14,9 @@ backbone:
   act: relu
 
 backbone_wrapper:
-  _target_: topobenchmarkx.models.wrappers.default_wrapper.GNNWrapper
+  _target_: topobenchmarkx.models.wrappers.GNNWrapper
   _partial_: true
+  wrapper_name: GNNWrapper
   out_channels: ${model.feature_encoder.out_channels}
   num_cell_dimensions: ${infere_list_length:${model.feature_encoder.in_channels}}
 

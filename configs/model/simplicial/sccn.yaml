@@ -13,8 +13,9 @@ backbone:
   update_func: "sigmoid"
 
 backbone_wrapper:
-  _target_: topobenchmarkx.models.wrappers.default_wrapper.SCCNWrapper
+  _target_: topobenchmarkx.models.wrappers.SCCNWrapper
   _partial_: true
+  wrapper_name: SCCNWrapper
   out_channels: ${model.feature_encoder.out_channels}
   num_cell_dimensions: ${infere_list_length:${model.feature_encoder.in_channels}}
 

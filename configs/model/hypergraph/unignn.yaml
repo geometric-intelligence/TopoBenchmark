@@ -7,8 +7,9 @@ backbone:
   n_layers: 1
 
 backbone_wrapper:
-  _target_: topobenchmarkx.models.wrappers.default_wrapper.HypergraphWrapper
+  _target_: topobenchmarkx.models.wrappers.HypergraphWrapper
   _partial_: true
+  wrapper_name: HypergraphWrapper
   out_channels: ${model.feature_encoder.out_channels}
   num_cell_dimensions: ${infere_list_length:${model.feature_encoder.in_channels}}
 

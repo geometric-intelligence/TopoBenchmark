@@ -18,8 +18,9 @@ backbone:
   epsilon_harmonic: 1e-1
 
 backbone_wrapper:
-  _target_: topobenchmarkx.models.wrappers.default_wrapper.SANWrapper
+  _target_: topobenchmarkx.models.wrappers.SANWrapper
   _partial_: true
+  wrapper_name: SANWrapper
   out_channels: ${model.feature_encoder.out_channels}
   num_cell_dimensions: ${infere_list_length:${model.feature_encoder.selected_dimensions}}
 

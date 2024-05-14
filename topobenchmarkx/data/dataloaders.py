@@ -30,11 +30,12 @@ class DomainData(Data):
 def to_data_list(batch):
     """Workaround needed since torch_geometric doesn't work well with
     torch.sparse."""
-    for key in batch:
+    for key in batch.keys():
         if batch[key].is_sparse:
             sparse_data = batch[key].coalesce()
             batch[key] = SparseTensor.from_torch_sparse_coo_tensor(sparse_data)
     data_list = batch.to_data_list()
+    
     for i, data in enumerate(data_list):
         for key in data:
             if isinstance(data[key], SparseTensor):
@@ -65,10 +66,9 @@ def collate_fn(batch):
                 value = value.coalesce()
             data[key] = value
 
-        # Generate batch_slice values for x_2, x_3, ...
+        # Generate batch_slice values for x_1, x_2, x_3, ...
         x_keys = [el for el in keys if ("x_" in el)]
         for x_key in x_keys:
-            # current_number_of_nodes = data["x_0"].shape[0]
             if x_key != "x_0": 
                 if x_key != "x_hyperedges":
                     cell_dim = int(x_key.split("_")[1])
@@ -86,12 +86,12 @@ def collate_fn(batch):
                     is None
                 ):
                     running_idx[f"cell_running_idx_number_{cell_dim}"] = (
-                        current_number_of_cells  # current_number_of_nodes
+                        current_number_of_cells  
                     )
                 
                 else:
                     running_idx[f"cell_running_idx_number_{cell_dim}"] += (
-                        current_number_of_cells  # current_number_of_nodes
+                        current_number_of_cells  
                     )
 
         data_list.append(data)
@@ -104,6 +104,11 @@ def collate_fn(batch):
     # Add batch slices to batch
     for key, value in batch_idx_dict.items():
         batch[key] = torch.cat(value, dim=1).squeeze(0).long()
+    
+    # Ensure shape is torch.Tensor
+    # "shape" describes the number of n_cells in each graph
+    batch["shape"] = torch.Tensor(batch["shape"]).long()
+    to_data_list(batch)
     return batch
 
 

@@ -108,7 +108,7 @@ def collate_fn(batch):
     # Ensure shape is torch.Tensor
     # "shape" describes the number of n_cells in each graph
     batch["shape"] = torch.Tensor(batch["shape"]).long()
-    to_data_list(batch)
+
     return batch
 
 

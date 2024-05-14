@@ -180,7 +180,7 @@ class NodeDegrees(torch_geometric.transforms.BaseTransform):
         """
         field_to_process = [
             key
-            for key in data
+            for key in data.keys()
             for field_substring in self.parameters["selected_fields"]
             if field_substring in key and key != "incidence_0"
         ]
@@ -211,10 +211,16 @@ class NodeDegrees(torch_geometric.transforms.BaseTransform):
             assert (
                 field == "edge_index"
             ), "Following logic of finding degrees is only implemented for edge_index"
+            
+            # Get number of nodes
+            if data.get("num_nodes", None):
+                max_num_nodes = data["num_nodes"]
+            else:
+                max_num_nodes = data["x"].shape[0] 
             degrees = (
                 torch_geometric.utils.to_dense_adj(
                     data[field],
-                    max_num_nodes=data["x"].shape[0],  # data["num_nodes"]
+                    max_num_nodes=max_num_nodes,
                 )
                 .squeeze(0)
                 .sum(1)

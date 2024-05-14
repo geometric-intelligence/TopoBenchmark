@@ -1,8 +1,9 @@
-import topomodelx
 import torch
+import torch_geometric
+import topomodelx
+from topobenchmarkx.models.readouts.readout import AbstractReadOut
 
-
-class PropagateSignalDown(torch.nn.Module):
+class PropagateSignalDown(AbstractReadOut):
     def __init__(self, **kwargs):
         super().__init__()
 
@@ -27,10 +28,7 @@ class PropagateSignalDown(torch.nn.Module):
                 torch.nn.Linear(2 * hidden_dim, hidden_dim),
             )
 
-    def __call__(self, model_out, batch):
-        return self.forward(model_out, batch)
-
-    def forward(self, model_out, batch):
+    def forward(self, model_out: dict, batch: torch_geometric.data.Data):
         for i in self.dimensions:
             x_i = getattr(self, f"agg_conv_{i}")(
                 model_out[f"x_{i}"], batch[f"incidence_{i}"]

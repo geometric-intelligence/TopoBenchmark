@@ -107,7 +107,9 @@ def collate_fn(batch):
     
     # Ensure shape is torch.Tensor
     # "shape" describes the number of n_cells in each graph
-    batch["shape"] = torch.Tensor(batch["shape"]).long()
+    if batch.get("shape") is not None:
+        cell_statistics = batch.pop("shape")
+        batch["cell_statistics"] = torch.Tensor(cell_statistics).long()
 
     return batch
 

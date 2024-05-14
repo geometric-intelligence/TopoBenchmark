@@ -58,7 +58,7 @@ class NetworkModule(LightningModule):
         self.metric_collector_val2 = []
         self.metric_collector_test = []
 
-    def forward(self, batch) -> dict:
+    def forward(self, batch: Data) -> dict:
         """Perform a forward pass through the model `self.backbone`.
 
         :param x: A tensor of images.
@@ -67,7 +67,7 @@ class NetworkModule(LightningModule):
         return self.backbone(batch)
 
     def model_step(
-        self, batch
+        self, batch: Data
     ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         """Perform a single model step on a batch of data.
 
@@ -78,22 +78,29 @@ class NetworkModule(LightningModule):
             - A tensor of predictions.
             - A tensor of target labels.
         """
-        # Pipeline
-        if self.feature_encoder:
-            batch = self.feature_encoder(batch)
 
+        # Feature Encoder
+        batch = self.feature_encoder(batch)
+        
+        # Domain model
         model_out = self.forward(batch)
+        
+        # Readout
         model_out = self.readout(model_out=model_out, batch=batch)
+        
+        # Head model
         model_out = self.head_model(model_out=model_out, batch=batch)
 
-        # Loss and metric
+        # Loss
         model_out = self.process_outputs(model_out=model_out, batch=batch)
+        
+        # Metric
         model_out = self.loss(model_out=model_out, batch=batch)
         self.evaluator.update(model_out)
 
         return model_out
 
-    def training_step(self, batch, batch_idx: int) -> torch.Tensor:
+    def training_step(self, batch: tuple[torch.Tensor, torch.Tensor], batch_idx: int) -> torch.Tensor:
         """Perform a single training step on a batch of data from the training
         set.
 

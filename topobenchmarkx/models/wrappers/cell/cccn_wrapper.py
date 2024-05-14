@@ -1,7 +1,7 @@
 import torch
 from topobenchmarkx.models.wrappers.wrapper import DefaultWrapper
 
-class CWNDCMWrapper(DefaultWrapper):
+class CCCNWrapper(DefaultWrapper):
     """Abstract class that provides an interface to loss logic within
     network."""
 

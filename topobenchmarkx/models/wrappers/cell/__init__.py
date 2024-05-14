@@ -1,5 +1,5 @@
 from topobenchmarkx.models.wrappers.cell.can_wrapper import CANWrapper
-from topobenchmarkx.models.wrappers.cell.cwndcm_wrapper import CWNDCMWrapper
+from topobenchmarkx.models.wrappers.cell.cccn_wrapper import CCCNWrapper
 from topobenchmarkx.models.wrappers.cell.cwn_wrapper import CWNWrapper
 from topobenchmarkx.models.wrappers.cell.ccxn_wrapper import CCXNWrapper
 
@@ -10,7 +10,7 @@ from topobenchmarkx.models.wrappers.cell.ccxn_wrapper import CCXNWrapper
 
 __all__ = [
     "CANWrapper",
-    "CWNDCMWrapper",
+    "CCCNWrapper",
     "CWNWrapper",
     "CCXNWrapper",
 

@@ -2,7 +2,7 @@ from topobenchmarkx.models.wrappers.wrapper import DefaultWrapper
 from topobenchmarkx.models.wrappers.graph import GNNWrapper
 from topobenchmarkx.models.wrappers.hypergraph import HypergraphWrapper
 from topobenchmarkx.models.wrappers.simplicial import SANWrapper, SCNWrapper, SCCNNWrapper, SCCNWrapper
-from topobenchmarkx.models.wrappers.cell import CANWrapper, CWNDCMWrapper, CWNWrapper, CCXNWrapper
+from topobenchmarkx.models.wrappers.cell import CANWrapper, CCCNWrapper, CWNWrapper, CCXNWrapper
 
 # ... import other readout classes here
 # For example:
@@ -20,7 +20,7 @@ __all__ = [
     "SCCNNWrapper",
     "SCCNWrapper",
     "CANWrapper",
-    "CWNDCMWrapper",
+    "CCCNWrapper",
     "CWNWrapper",
     "CCXNWrapper",
     # "OtherWrapper1",

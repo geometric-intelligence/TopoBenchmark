@@ -27,8 +27,8 @@ backbone_wrapper:
   num_cell_dimensions: ${infere_list_length:${model.feature_encoder.in_channels}}
 
 readout:
-  _target_: topobenchmarkx.models.readouts.readout.AbstractReadOut
-  readout_name: None #  Use <None> in case readout is not needed
+  _target_: topobenchmarkx.models.readouts.${model.readout.readout_name}
+  readout_name: NoReadOut #  Use <NoReadOut> in case readout is not needed Options: PropagateSignalDown
   hidden_dim: None
   num_cell_dimensions: None
 

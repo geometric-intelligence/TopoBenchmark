@@ -1,8 +1,9 @@
 import torch
+import torch_geometric
 from torch_geometric.utils import scatter
+from topobenchmarkx.models.head_models.head_model import AbstractHeadModel
 
-
-class DefaultHead(torch.nn.Module):
+class ZeroCellModel(AbstractHeadModel):
     r"""Head model.
 
     Parameters
@@ -23,31 +24,34 @@ class DefaultHead(torch.nn.Module):
         out_channels: int,
         task_level: str,
         pooling_type: str = "sum",
+        **kwargs,
     ):
-        super().__init__()
-        self.linear = torch.nn.Linear(in_channels, out_channels)
+        super().__init__(in_channels, out_channels)
 
         assert task_level in ["graph", "node"], "Invalid task_level"
         self.task_level = task_level
 
         assert pooling_type in ["max", "sum", "mean"], "Invalid pooling_type"
         self.pooling_type = pooling_type
-
-    def forward(self, model_out: dict):
+    
+   
+    def forward(self, model_out: dict, batch: torch_geometric.data.Data):
         r"""Forward pass.
 
         Parameters
         ----------
         model_out: dict
             Dictionary containing the model output.
+        batch: torch_geometric.data.Data
+            Batch object containing the batched domain data.
 
         Returns
         -------
-        dict
-            Dictionary containing the updated model output. Resulting key is "logits".
+        x: torch.Tensor
+            Output tensor over which the final linear layer is applied.
         """
         x = model_out["x_0"]
-        batch = model_out["batch_0"]
+        batch = batch["batch_0"]
         if self.task_level == "graph":
             if self.pooling_type == "max":
                 x = scatter(x, batch, dim=0, reduce="max")
@@ -58,5 +62,4 @@ class DefaultHead(torch.nn.Module):
             elif self.pooling_type == "sum":
                 x = scatter(x, batch, dim=0, reduce="sum")
 
-        model_out["logits"] = self.linear(x)
-        return model_out
+        return x

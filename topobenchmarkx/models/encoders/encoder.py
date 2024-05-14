@@ -4,12 +4,15 @@ import torch
 import torch_geometric
 
 
-class AbstractInitFeaturesEncoder(torch.nn.Module):
-    """Abstract class that provides an interface to define a custom initial
-    feature encoders."""
+class AbstractFeatureEncoder(torch.nn.Module):
+    """Abstract class that provides an interface to define a custom feature encoder."""
 
-    def __init__(self):
+    def __init__(self, **kwargs):
+        super().__init__()
         return
+
+    def __call__(self, data):
+        return self.forward(data)
 
     @abstractmethod
     def forward(

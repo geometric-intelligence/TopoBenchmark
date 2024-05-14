@@ -1,33 +1,17 @@
-import torch
+import torch_geometric
+from abc import ABC, abstractmethod
 
-
-class DefaultLoss:
+class AbstractltLoss(ABC):
     """Abstract class that provides an interface to loss logic within
     netowrk."""
 
-    def __init__(self, task, loss_type=None):
-        self.task = task
-        if task == "classification" and loss_type == "cross_entropy":
-            self.criterion = torch.nn.CrossEntropyLoss()
+    def __init__(self,):
+        super().__init__()
 
-        elif task == "regression" and loss_type == "mse":
-            self.criterion = torch.nn.MSELoss()
-
-        elif task == "regression" and loss_type == "mae":
-            self.criterion = torch.nn.L1Loss()
-
-        else:
-            raise Exception("Loss is not defined")
-
-    def __call__(self, model_output):
+    def __call__(self, model_out: dict, batch: torch_geometric.data.Data) -> dict:
         """Loss logic based on model_output."""
-
-        logits = model_output["logits"]
-        target = model_output["labels"]
-
-        if self.task == "regression":
-            target = target.unsqueeze(1)
-
-        model_output["loss"] = self.criterion(logits, target)
-
-        return model_output
+        return self.forward(model_out, batch)
+    
+    @abstractmethod
+    def forward(self, model_out: dict, batch: torch_geometric.data.Data): 
+        pass

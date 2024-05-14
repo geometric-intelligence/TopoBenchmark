@@ -6,8 +6,8 @@ from topobenchmarkx.models.wrappers.cell import CANWrapper, CWNDCMWrapper, CWNWr
 
 # ... import other readout classes here
 # For example:
-# from topobenchmarkx.models.readouts.other_readout_1 import OtherWrapper1
-# from topobenchmarkx.models.readouts.other_readout_2 import OtherWrapper2
+# from topobenchmarkx.models.wrappers.other_wrapper_1 import OtherWrapper1
+# from topobenchmarkx.models.wrappers.other_wrapper_2 import OtherWrapper2
 
 
 # Export all wrappers

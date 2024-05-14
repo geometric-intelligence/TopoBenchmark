@@ -6,6 +6,7 @@ class PropagateSignalDown(torch.nn.Module):
     def __init__(self, **kwargs):
         super().__init__()
 
+        self.name = kwargs["readout_name"]
         self.dimensions = range(kwargs["num_cell_dimensions"] - 1, 0, -1)
         hidden_dim = kwargs["hidden_dim"]
 
@@ -40,3 +41,6 @@ class PropagateSignalDown(torch.nn.Module):
             )
 
         return model_out
+
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}(num_cell_dimensions={len(self.dimensions)}, hidden_dim={self.hidden_dim}, readout_name={self.name}"

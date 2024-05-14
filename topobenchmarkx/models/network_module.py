@@ -3,6 +3,7 @@ from typing import Any
 import torch
 from lightning import LightningModule
 from torchmetrics import MeanMetric
+from torch_geometric.data import Data
 
 # import topomodelx
 
@@ -49,7 +50,7 @@ class NetworkModule(LightningModule):
 
         # Loss function
         self.task_level = self.hparams["head_model"].task_level
-        self.criterion = loss
+        self.loss = loss
 
         # Tracking best so far validation accuracy
         self.val_acc_best = MeanMetric()
@@ -82,12 +83,12 @@ class NetworkModule(LightningModule):
             batch = self.feature_encoder(batch)
 
         model_out = self.forward(batch)
-        model_out = self.readout(model_out, batch)
-        model_out = self.head_model(model_out)
+        model_out = self.readout(model_out=model_out, batch=batch)
+        model_out = self.head_model(model_out=model_out, batch=batch)
 
-        # Criterion and metric
-        model_out = self.process_outputs(batch, model_out)
-        model_out = self.criterion(model_out)
+        # Loss and metric
+        model_out = self.process_outputs(model_out=model_out, batch=batch)
+        model_out = self.loss(model_out=model_out, batch=batch)
         self.evaluator.update(model_out)
 
         return model_out
@@ -130,20 +131,6 @@ class NetworkModule(LightningModule):
         self.state_str = "Validation"
         model_out = self.model_step(batch)
 
-        # # Keep only validation data points
-        # if self.task_level == "node":
-        #     for key, val in model_out.items():
-        #         # if key not in ["loss", "hyperedge"]:
-        #         if key in ["logits", "labels"]:
-        #             model_out[key] = val[batch.val_mask]
-
-        # # Criterion
-        # model_out = self.criterion(model_out)
-
-        # # Evaluation
-        # self.evaluator.update(model_out)
-        # self.metric_collector_val.append((model_out["logits"], model_out["labels"]))
-
         # Log Loss
         self.log(
             "val/loss",
@@ -166,15 +153,6 @@ class NetworkModule(LightningModule):
         self.state_str = "Test"
         model_out = self.model_step(batch)
 
-        # if self.task_level == "node":
-        #     # Keep only test data points
-        #     for key, val in model_out.items():
-        #         if key in ["logits", "labels"]:
-        #             model_out[key] = val[batch.test_mask]
-
-        # # Criterion
-        # model_out = self.criterion(model_out)
-
         # Log loss
         self.log(
             "test/loss",
@@ -185,11 +163,7 @@ class NetworkModule(LightningModule):
             batch_size=1,
         )
 
-        # Evaluation
-        # self.evaluator.update(model_out)
-        # self.metric_collector_test.append((model_out["logits"], model_out["labels"]))
-
-    def process_outputs(self, batch, model_out: dict) -> dict:
+    def process_outputs(self, model_out: dict, batch: Data) -> dict:
         """Process model outputs."""
 
         # Get the correct mask
@@ -307,36 +281,6 @@ class NetworkModule(LightningModule):
             }
         return {"optimizer": optimizer}
 
-
-# Collect validation statistics
-# self.val_acc_best.update(model_out["metrics"]["acc"])
-# self.metric_collector.append(model_out["metrics"]["acc"])
-
-
-# def on_train_start(self) -> None:
-#     """Lightning hook that is called when training begins."""
-#     # by default lightning executes validation step sanity checks before training starts,
-#     # so it's worth to make sure validation metrics don't store results from these checks
-#     # self.val_loss.reset()
-#     # self.val_acc.reset()
-#     self.val_acc_best.reset()
-
-
-# def on_validation_epoch_end(self) -> None:
-#     "Lightning hook that is called when a validation epoch ends."
-#     pass
-# self.criterion = torch.nn.CrossEntropyLoss()
-
-# self.evaluator = evaluator
-# # metric objects for calculating and averaging accuracy across batches
-# self.train_acc = Accuracy(task="multiclass", num_classes=7)
-# self.val_acc = Accuracy(task="multiclass", num_classes=7)
-# self.test_acc = Accuracy(task="multiclass", num_classes=7)
-
-# for averaging loss across batches
-# self.train_loss = MeanMetric()
-# self.val_loss = MeanMetric()
-# self.test_loss = MeanMetric()
 
 if __name__ == "__main__":
     _ = NetworkModule(None, None, None, None)

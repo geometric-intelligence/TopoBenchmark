@@ -1,7 +1,11 @@
 _target_: topobenchmarkx.models.network_module.NetworkModule
 
+model_name: sccnn 
+model_domain: simplicial
+
 feature_encoder:
-  _target_: topobenchmarkx.models.encoders.default_encoders.BaseFeatureEncoder
+  _target_: topobenchmarkx.models.encoders.${model.feature_encoder.encoder_name}
+  encoder_name: AllCellFeatureEncoder
   in_channels: ${infer_in_channels:${dataset}} #${dataset.parameters.num_features}
   out_channels: 32
   selected_dimensions:
@@ -39,15 +43,16 @@ readout:
   num_cell_dimensions: ${infere_list_length:${model.feature_encoder.selected_dimensions}}
 
 head_model:
-  _target_: topobenchmarkx.models.head_model.models.DefaultHead
-  task_level: ${dataset.parameters.task_level}
+  _target_: topobenchmarkx.models.head_models.${model.head_model.head_model_name}
+  head_model_name: ZeroCellModel
   in_channels: ${model.feature_encoder.out_channels}
   out_channels: ${dataset.parameters.num_classes}
+  task_level: ${dataset.parameters.task_level}
   pooling_type: sum
 
 
 loss:
-  _target_: topobenchmarkx.models.losses.loss.DefaultLoss
+  _target_: topobenchmarkx.models.losses.DefaultLoss
   task: ${dataset.parameters.task}
   loss_type: ${dataset.parameters.loss_type}
 

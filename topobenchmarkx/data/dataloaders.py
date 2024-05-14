@@ -9,7 +9,7 @@ from torch_geometric.utils import is_sparse
 from torch_sparse import SparseTensor
 
 
-class MyData(Data):
+class DomainData(Data):
     """Data object class that overwrites some methods from
     torch_geometric.data.Data so that not only sparse matrices with adj in the
     name can work with the torch_geometric dataloaders."""
@@ -59,7 +59,7 @@ def collate_fn(batch):
 
     for batch_idx, b in enumerate(batch):
         values, keys = b[0], b[1]
-        data = MyData()
+        data = DomainData()
         for key, value in zip(keys, values, strict=False):
             if is_sparse(value):
                 value = value.coalesce()
@@ -69,9 +69,12 @@ def collate_fn(batch):
         x_keys = [el for el in keys if ("x_" in el)]
         for x_key in x_keys:
             # current_number_of_nodes = data["x_0"].shape[0]
+            if x_key != "x_0": 
+                if x_key != "x_hyperedges":
+                    cell_dim = int(x_key.split("_")[1])
+                else:
+                    cell_dim = x_key.split("_")[1]
 
-            if x_key != "x_0" and x_key != "x_hyperedges":
-                cell_dim = int(x_key.split("_")[1])
                 current_number_of_cells = data[x_key].shape[0]
 
                 batch_idx_dict[f"batch_{cell_dim}"].append(
@@ -85,45 +88,11 @@ def collate_fn(batch):
                     running_idx[f"cell_running_idx_number_{cell_dim}"] = (
                         current_number_of_cells  # current_number_of_nodes
                     )
+                
                 else:
-                    # Make sure the idx is contiguous
-                    data[f"x_{cell_dim}"] = (
-                        data[f"x_{cell_dim}"]
-                        + running_idx[f"cell_running_idx_number_{cell_dim}"]
-                    ).long()
-
                     running_idx[f"cell_running_idx_number_{cell_dim}"] += (
                         current_number_of_cells  # current_number_of_nodes
                     )
-
-            elif x_key == "x_hyperedges":
-                cell_dim = x_key.split("_")[1]
-                current_number_of_hyperedges = data[x_key].shape[0]
-
-                batch_idx_dict["batch_hyperedges"].append(
-                    torch.tensor([[batch_idx] * current_number_of_hyperedges])
-                )
-
-                if (
-                    running_idx.get(f"cell_running_idx_number_{cell_dim}")
-                    is None
-                ):
-                    running_idx[f"cell_running_idx_number_{cell_dim}"] = (
-                        current_number_of_hyperedges
-                    )
-                else:
-                    # Make sure the idx is contiguous
-                    data[f"x_{cell_dim}"] = (
-                        data[f"x_{cell_dim}"]
-                        + running_idx[f"cell_running_idx_number_{cell_dim}"]
-                    ).long()
-
-                    running_idx[f"cell_running_idx_number_{cell_dim}"] += (
-                        current_number_of_hyperedges
-                    )
-            else:
-                # Function Batch.from_data_list creates a running index automatically
-                pass
 
         data_list.append(data)
 

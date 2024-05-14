@@ -5,10 +5,7 @@ from lightning import LightningModule
 from torchmetrics import MeanMetric
 from torch_geometric.data import Data
 
-# import topomodelx
-
-
-class NetworkModule(LightningModule):
+class TopologicalNetworkModule(LightningModule):
     """A `LightningModule` implements 8 key methods:
 
     Docs:
@@ -290,4 +287,4 @@ class NetworkModule(LightningModule):
 
 
 if __name__ == "__main__":
-    _ = NetworkModule(None, None, None, None)
+    _ = TopologicalNetworkModule(None, None, None, None)

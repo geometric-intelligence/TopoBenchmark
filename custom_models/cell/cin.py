@@ -4,7 +4,6 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from topomodelx.base.conv import Conv
-from topomodelx.nn.cell.cwn_layer import CWNLayer
 from torch_geometric.nn.models import MLP
 
 

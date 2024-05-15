@@ -1,4 +1,4 @@
-_target_: topobenchmarkx.models.network_module.NetworkModule
+_target_: topobenchmarkx.models.TopologicalNetworkModule
 
 model_name: gat
 model_domain: graph
@@ -8,6 +8,7 @@ feature_encoder:
   encoder_name: AllCellFeatureEncoder
   in_channels: ${infer_in_channels:${dataset}} 
   out_channels: 32
+  proj_dropout: 0.0
 
 backbone:
   _target_: torch_geometric.nn.models.GAT

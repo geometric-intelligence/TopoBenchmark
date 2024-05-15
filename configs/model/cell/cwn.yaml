@@ -1,4 +1,4 @@
-_target_: topobenchmarkx.models.network_module.NetworkModule
+_target_: topobenchmarkx.models.TopologicalNetworkModule
 
 model_name: cwn
 model_domain: cell
@@ -7,7 +7,7 @@ feature_encoder:
   _target_: topobenchmarkx.models.encoders.${model.feature_encoder.encoder_name}
   encoder_name: AllCellFeatureEncoder
   in_channels: ${infer_in_channels:${dataset}} #${dataset.parameters.num_features}
-  out_channels: 32
+  out_channels: 64
   proj_dropout: 0.0
 
 backbone:
@@ -16,7 +16,7 @@ backbone:
   in_channels_1: ${model.feature_encoder.out_channels}
   in_channels_2: ${model.feature_encoder.out_channels}
   hid_channels: ${model.feature_encoder.out_channels}
-  n_layers: 1
+  n_layers: 4
 
 backbone_wrapper:
   _target_: topobenchmarkx.models.wrappers.CWNWrapper
@@ -27,7 +27,7 @@ backbone_wrapper:
 
 readout:
   _target_: topobenchmarkx.models.readouts.${model.readout.readout_name}
-  readout_name: PropagateSignalDown #  Use <NoReadOut> in case readout is not needed Options: PropagateSignalDown
+  readout_name: NoReadOut #  Use <NoReadOut> in case readout is not needed Options: PropagateSignalDown
   hidden_dim: ${model.feature_encoder.out_channels}
   num_cell_dimensions: ${infere_list_length:${model.feature_encoder.in_channels}}
 

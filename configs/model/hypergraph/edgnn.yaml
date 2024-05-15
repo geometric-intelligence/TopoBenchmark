@@ -1,4 +1,4 @@
-_target_: topobenchmarkx.models.network_module.NetworkModule
+_target_: topobenchmarkx.models.TopologicalNetworkModule
 
 model_name: edgnn
 model_domain: hypergraph
@@ -8,6 +8,7 @@ feature_encoder:
   encoder_name: AllCellFeatureEncoder
   in_channels: ${infer_in_channels:${dataset}} #${dataset.parameters.num_features}
   out_channels: 16
+  proj_dropout: 0.0
 
 backbone:
   _target_: custom_models.hypergraph.edgnn.EDGNN

@@ -45,6 +45,10 @@ dependencies=[
     "lightning==2.2.1",
     "einops==0.7.0",
     "wandb==0.16.4",
+    "tabulate",
+    "ipykernel",
+    "notebook",
+    "jupyterlab",
     "rich",
     "rootutils",
     "pytest",
@@ -167,4 +171,5 @@ checks = [
 exclude = [
     '\.undocumented_method$',
     '\.__init__$',
+    '\.__repr__$',
 ]

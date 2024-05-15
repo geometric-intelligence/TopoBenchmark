@@ -22,6 +22,7 @@ from topobenchmarkx.utils import (
     log_hyperparameters,
     task_wrapper,
 )
+
 from topobenchmarkx.utils.config_resolvers import (
     get_default_transform,
     get_monitor_metric,

@@ -19,7 +19,7 @@ parameters:
   monitor_metric: accuracy
   task_level: node
   data_seed: 0
-  split_type: k-fold #'k-fold' # either k-fold or test
+  split_type: random #'k-fold' # either k-fold or test
   k: 10 # for k-Fold Cross-Validation
 
   # Dataloader parameters

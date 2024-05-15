@@ -1,7 +1,10 @@
 _target_: topobenchmarkx.io.load.loaders.GraphLoader
 
+# USE python train.py dataset.transforms.one_hot_node_degree_features.degrees_fields=x to run this config
+
 defaults:
-  - transforms/data_manipulations: node_feat_to_float
+  #- transforms/data_manipulations: node_feat_to_float
+  - transforms/data_manipulations@transforms.one_hot_node_degree_features: one_hot_node_degree_features
   - transforms: ${get_default_transform:graph,${model}}
 
 # Data definition
@@ -13,7 +16,8 @@ parameters:
   data_split_dir: ${paths.data_dir}data_splits/${dataset.parameters.data_name}
 
   # Dataset parameters
-  num_features: 1 # here basically I specify the initial num features in mutang at x aka x_0
+  num_features: 21 # torch_geometric ZINC dataset has 21 atom types
+  max_node_degree: 20 # Use it to one_hot encode node degrees. Additional parameter to run dataset.transforms.one_hot_node_degree_features.degrees_fields=x
   num_classes: 1
   task: regression
   loss_type: mse

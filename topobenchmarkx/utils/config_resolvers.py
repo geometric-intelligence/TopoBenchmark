@@ -168,11 +168,14 @@ def infer_in_channels(dataset):
                     lifting
                 ].complex_dim
         else:
-            if not dataset.transforms[lifting].preserve_edge_attr:
+            # Case when the dataset has not edge attributes
+            if dataset.transforms[lifting].preserve_edge_attr == False:
+                
                 if feature_lifting == "projection":
                     return [
                         dataset.parameters.num_features[0]
                     ] * dataset.transforms[lifting].complex_dim
+                
                 elif feature_lifting == "concatenation":
                     return_value = [dataset.parameters.num_features]
                     for i in range(
@@ -183,6 +186,7 @@ def infer_in_channels(dataset):
                         ]
 
                     return return_value
+                
                 else:
                     return [
                         dataset.parameters.num_features

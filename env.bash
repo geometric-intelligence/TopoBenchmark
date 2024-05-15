@@ -1,33 +1,20 @@
 # #!/bin/bash
 
-# set -e
+#conda create -n topox python=3.11.3
+#conda activate topox
 
-# # Step 1: Upgrade pip
-# pip install --upgrade pip
-
-# # Step 2: Install dependencies
-# yes | pip install -e '.[all]'
-# yes | pip install --no-dependencies git+https://github.com/pyt-team/TopoNetX.git
-# yes | pip install --no-dependencies git+https://github.com/pyt-team/TopoModelX.git
-# yes | pip install torch==2.0.1 --extra-index-url https://download.pytorch.org/whl/cu115
-# yes | pip install torch-scatter torch-sparse -f https://data.pyg.org/whl/torch-2.0.1+cu115.html
-# yes | pip install torch-cluster -f https://data.pyg.org/whl/torch-2.0.0+cu115.html
-# yes | pip install lightning>=2.0.0
-# yes | pip install numpy pre-commit jupyterlab notebook ipykernel
-
-
-yes | conda create -n topox python=3.11.3
-conda activate topox
-
+pip install --upgrade pip
 pip install -e '.[all]'
 
-yes | pip install --no-dependencies git+https://github.com/pyt-team/TopoNetX.git
-yes | pip install --no-dependencies git+https://github.com/pyt-team/TopoModelX.git
+pip install git+https://github.com/pyt-team/TopoNetX.git
+pip install git+https://github.com/pyt-team/TopoModelX.git
+pip install git+https://github.com/pyt-team/TopoEmbedX.git
 
-yes | pip install torch==2.0.1 --extra-index-url https://download.pytorch.org/whl/cu115
-yes | pip install torch-scatter torch-sparse -f https://data.pyg.org/whl/torch-2.0.1+cu115.html
-yes | pip install torch-cluster -f https://data.pyg.org/whl/torch-2.0.0+cu115.html
-yes | pip install numpy pre-commit jupyterlab notebook ipykernel
+CUDA="cu115" # if available, select the CUDA version suitable for your system
+             # e.g. cpu, cu102, cu111, cu113, cu115
+pip install torch==2.0.1 --extra-index-url https://download.pytorch.org/whl/${CUDA}
+pip install torch-scatter torch-sparse -f https://data.pyg.org/whl/torch-2.0.1+${CUDA}.html
+pip install torch-cluster -f https://data.pyg.org/whl/torch-2.0.0+${CUDA}.html
 
 pytest
 

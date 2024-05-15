@@ -62,10 +62,42 @@ class TestCollateFunction:
         ----------
         None
         """
+        def check_shape(batch, elems, key):
+            """Check that the batched data has the expected shape."""
+            if 'x_' in key or 'x'==key:
+                rows = 0
+                for i in range(len(elems)):
+                    rows += elems[i][key].shape[0]
+                assert batch[key].shape[0] == rows
+                assert batch[key].shape[1] == elems[0][key].shape[1]
+            elif 'edge_index' in key:
+                cols = 0
+                for i in range(len(elems)):
+                    cols += elems[i][key].shape[1]
+                assert batch[key].shape[0] == 2
+                assert batch[key].shape[1] == cols
+            elif 'batch_' in key:
+                rows = 0
+                n = int(key.split('_')[1])
+                for i in range(len(elems)):
+                    rows += elems[i][f'x_{n}'].shape[0]
+                assert batch[key].shape[0] == rows
+            elif key in elems[0].keys():
+                for i in range(len(batch[key].shape)):
+                    i_elems = 0
+                    for j in range(len(elems)):
+                        i_elems += elems[j][key].shape[i]
+                    assert batch[key].shape[i] == i_elems
+                    
         def check_separation(matrix, n_elems_0_row, n_elems_0_col):
             """Check that the matrix is separated into two parts diagonally concatenated."""
             assert torch.all(matrix[:n_elems_0_row, n_elems_0_col:] == 0)
             assert torch.all(matrix[n_elems_0_row:, :n_elems_0_col] == 0)
+            
+        def check_values(matrix, m1, m2):
+            """Check that the values in the matrix are the same as the values in the original data."""
+            assert torch.allclose(matrix[:m1.shape[0], :m1.shape[1]], m1)
+            assert torch.allclose(matrix[m1.shape[0]:, m1.shape[1]:], m2)
             
         
         batch = next(iter(self.val_dataloader))
@@ -73,33 +105,24 @@ class TestCollateFunction:
         for i in range(self.batch_size):
             elems.append(self.val_dataset.data_lst[i])
 
-        # Check that the batched data has the expected shape
+        # Check shape
         for key in batch.keys():
-            if key in elems[0].keys():
-                if 'x_' in key or 'x'==key:
-                    assert batch[key].shape[0] == elems[0][key].shape[0]+elems[1][key].shape[0]
-                    assert batch[key].shape[1] == elems[0][key].shape[1]
-                elif 'edge_index' in key:
-                    assert batch[key].shape[0] == 2
-                    assert batch[key].shape[1] == elems[0][key].shape[1]+elems[1][key].shape[1]
-                else:
-                    for i in range(len(batch[key].shape)):
-                        assert batch[key].shape[i] == elems[0][key].shape[i]+elems[1][key].shape[i]
-            else:
-                if 'batch_' in key:
-                    i = int(key.split('_')[1])
-                    assert batch[key].shape[0] == elems[0][f'x_{i}'].shape[0]+elems[1][f'x_{i}'].shape[0]
+            check_shape(batch, elems, key)
 
-        # Check that the batched data is separated correctly
-        for key in batch.keys():
-            if 'incidence_' in key:
-                i = int(key.split('_')[1])
-                if i==0:
-                    n0_row = 1
-                else:
-                    n0_row = torch.sum(batch[f'batch_{i-1}']==0)
-                n0_col = torch.sum(batch[f'batch_{i}']==0)
-                check_separation(batch[key].to_dense(), n0_row, n0_col)
+        # Check that the batched data is separated correctly and the values are correct
+        if self.batch_size == 2:
+            for key in batch.keys():
+                if 'incidence_' in key:
+                    i = int(key.split('_')[1])
+                    if i==0:
+                        n0_row = 1
+                    else:
+                        n0_row = torch.sum(batch[f'batch_{i-1}']==0)
+                    n0_col = torch.sum(batch[f'batch_{i}']==0)
+                    check_separation(batch[key].to_dense(), n0_row, n0_col)
+                    check_values(batch[key].to_dense(), 
+                                 elems[0][key].to_dense(), 
+                                 elems[1][key].to_dense())
 
         # Check that going back to a list of data gives the same data
         batch_list = to_data_list(batch)

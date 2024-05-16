@@ -14,7 +14,7 @@ backbone:
   _target_: topomodelx.nn.hypergraph.allset_transformer.AllSetTransformer
   in_channels: ${model.feature_encoder.out_channels}
   hidden_channels: ${model.feature_encoder.out_channels}
-  n_layers: 1
+  n_layers: 4
   heads: 4
   dropout: 0.
   mlp_num_layers: 1

@@ -1,7 +1,7 @@
 # #!/bin/bash
 
-conda create -n topoxx python=3.11.3
-conda activate topoxx
+#conda create -n topoxx python=3.11.3
+#conda activate topoxx
 
 pip install --upgrade pip
 pip install -e '.[all]'

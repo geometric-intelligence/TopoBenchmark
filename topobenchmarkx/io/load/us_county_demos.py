@@ -7,19 +7,12 @@ import torch_geometric
 def load_us_county_demos(path, year=2012, y_col="Election"):
     r"""Load US County Demos dataset.
 
-    Parameters
-    ----------
-    path: str
-        Path to the dataset.
-    year: int
-        Year to load the features.
-    y_col: str
-        Column to use as label.
-
-    Returns
-    -------
-    torch_geometric.data.Data
-        Data object of the graph for the US County Demos dataset.
+    Args:
+        path (str): Path to the dataset.
+        year (int, optional): Year to load the features. (default: 2012)
+        y_col (str, optional): Column to use as label. Can be one of ['Election', 'MedianIncome', 'MigraRate', 'BirthRate', 'DeathRate', 'BachelorRate', 'UnemploymentRate']. (default: "Election") 
+    Returns:
+        torch_geometric.data.Data: Data object of the graph for the US County Demos dataset.
     """
 
     edges_df = pd.read_csv(f"{path}/county_graph.csv")

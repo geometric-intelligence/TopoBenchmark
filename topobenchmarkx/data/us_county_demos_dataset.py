@@ -19,21 +19,21 @@ class USCountyDemosDataset(InMemoryDataset):
         root (str): Root directory where the dataset will be saved.
         name (str): Name of the dataset.
         parameters (DictConfig): Configuration parameters for the dataset.
-        transform (Optional[Callable]): A function/transform that takes in an
+        transform (Callable, optional): A function/transform that takes in an
             `torch_geometric.data.Data` object and returns a transformed version.
-            The transform function is applied to the loaded data before saving it.
-        pre_transform (Optional[Callable]): A function/transform that takes in an
+            The transform function is applied to the loaded data before saving it. (default: None)
+        pre_transform (Callable, optional): A function/transform that takes in an
             `torch_geometric.data.Data` object and returns a transformed version.
             The pre_transform function is applied to the data before the transform
-            function is applied.
-        pre_filter (Optional[Callable]): A function that takes in an
+            function is applied. (default: None)
+        pre_filter (Callable, optional): A function that takes in an
             `torch_geometric.data.Data` object and returns a boolean value
-            indicating whether the data object should be included in the dataset.
-        force_reload (bool): If set to True, the dataset will be re-downloaded
+            indicating whether the data object should be included in the dataset. (default: None)
+        force_reload (bool, optional): If set to True, the dataset will be re-downloaded
             even if it already exists on disk. (default: True)
-        use_node_attr (bool): If set to True, the node attributes will be included
+        use_node_attr (bool, optional): If set to True, the node attributes will be included
             in the dataset. (default: False)
-        use_edge_attr (bool): If set to True, the edge attributes will be included
+        use_edge_attr (bool, optional): If set to True, the edge attributes will be included
             in the dataset. (default: False)
 
     Attributes:
@@ -76,18 +76,13 @@ class USCountyDemosDataset(InMemoryDataset):
             force_reload=force_reload,
         )
 
-        # Step 3:Load the processed data
-        # After the data has been downloaded from source
-        # Then preprocessed to obtain x,y and saved into processed folder
-        # We can now load the processed data from processed folder
-
         # Load the processed data
         data, _, _ = fs.torch_load(self.processed_paths[0])
 
         # Map the loaded data into
         data = Data.from_dict(data)
 
-        # Step 5: Create the splits and upload desired fold
+        # Create the splits and upload desired fold
         splits = random_splitting(data.y, parameters=self.parameters)
         # Assign train val test masks to the graph
         data.train_mask = torch.from_numpy(splits["train"])
@@ -104,6 +99,9 @@ class USCountyDemosDataset(InMemoryDataset):
 
         # Assign data object to self.data, to make it be prodessed by Dataset class
         self.data, self.slices = self.collate([data])
+        
+    def __repr__(self) -> str:
+        return f"{self.name}(self.root={self.root}, self.name={self.name}, self.parameters={self.parameters}, self.transform={self.transform}, self.pre_transform={self.pre_transform}, self.pre_filter={self.pre_filter}, self.force_reload={self.force_reload}, self.use_node_attr={self.use_node_attr}, self.use_edge_attr={self.use_edge_attr})" 
 
     @property
     def raw_dir(self) -> str:
@@ -123,7 +121,7 @@ class USCountyDemosDataset(InMemoryDataset):
         return "data.pt"
 
     def download(self) -> None:
-        """Downloads the dataset from the specified URL and saves it to the raw
+        r"""Downloads the dataset from the specified URL and saves it to the raw
         directory.
 
         Raises:
@@ -157,13 +155,10 @@ class USCountyDemosDataset(InMemoryDataset):
         fs.rm(f"{self.raw_dir}/{self.name}.{self.file_format}")
 
     def process(self) -> None:
-        """Process the data for the dataset.
+        r"""Process the data for the dataset.
 
         This method loads the US county demographics data, applies any pre-processing transformations if specified,
         and saves the processed data to the appropriate location.
-
-        Returns:
-            None
         """
         data = load_us_county_demos(
             self.raw_dir,
@@ -173,6 +168,3 @@ class USCountyDemosDataset(InMemoryDataset):
 
         data = data if self.pre_transform is None else self.pre_transform(data)
         self.save([data], self.processed_paths[0])
-
-    def __repr__(self) -> str:
-        return f"{self.name}()"

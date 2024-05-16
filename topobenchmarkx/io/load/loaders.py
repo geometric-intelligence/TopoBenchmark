@@ -28,29 +28,24 @@ from topobenchmarkx.io.load.utils import (
 class CellComplexLoader(AbstractLoader):
     r"""Loader for cell complex datasets.
 
-    Parameters
-    ----------
-    parameters : DictConfig
-        Configuration parameters.
+    Args:
+        parameters (DictConfig): Configuration parameters.
     """
 
     def __init__(self, parameters: DictConfig):
         super().__init__(parameters)
         self.parameters = parameters
+        
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}(parameters={self.parameters})"
 
     def load(
         self,
     ) -> CustomDataset:
         r"""Load cell complex dataset.
 
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        CustomDataset
-            CustomDataset object containing the loaded data.
+        Returns:
+            CustomDataset: CustomDataset object containing the loaded data.
         """
         data = load_cell_complex_dataset(self.parameters)
         dataset = CustomDataset([data])
@@ -60,29 +55,24 @@ class CellComplexLoader(AbstractLoader):
 class SimplicialLoader(AbstractLoader):
     r"""Loader for simplicial datasets.
 
-    Parameters
-    ----------
-    parameters : DictConfig
-        Configuration parameters.
+    Args:
+        parameters (DictConfig): Configuration parameters.
     """
 
     def __init__(self, parameters: DictConfig):
         super().__init__(parameters)
         self.parameters = parameters
+    
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}(parameters={self.parameters})"
 
     def load(
         self,
     ) -> CustomDataset:
         r"""Load simplicial dataset.
 
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        CustomDataset
-            CustomDataset object containing the loaded data.
+        Returns:
+            CustomDataset: CustomDataset object containing the loaded data.
         """
         data = load_simplicial_dataset(self.parameters)
         dataset = CustomDataset([data])
@@ -92,30 +82,26 @@ class SimplicialLoader(AbstractLoader):
 class HypergraphLoader(AbstractLoader):
     r"""Loader for hypergraph datasets.
 
-    Parameters
-    ----------
-    parameters : DictConfig
-        Configuration parameters.
+    Args:
+        parameters (DictConfig): Configuration parameters.
+        transforms (DictConfig, optional): The parameters for the transforms to be applied to the dataset. (default: None)
     """
 
     def __init__(self, parameters: DictConfig, transforms=None):
         super().__init__(parameters)
         self.parameters = parameters
         self.transforms_config = transforms
+    
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}(parameters={self.parameters}, transforms={self.transforms_config})"
 
     def load(
         self,
     ) -> CustomDataset:
         r"""Load hypergraph dataset.
-
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        CustomDataset
-            CustomDataset object containing the loaded data.
+        
+        Returns:
+            CustomDataset: CustomDataset object containing the loaded data.
         """
         data = load_hypergraph_pickle_dataset(self.parameters)
         data = load_split(data, self.parameters)
@@ -126,29 +112,38 @@ class HypergraphLoader(AbstractLoader):
 class GraphLoader(AbstractLoader):
     r"""Loader for graph datasets.
 
-    Parameters
-    ----------
-    parameters : DictConfig
-        Configuration parameters.
+    Args:
+        parameters (DictConfig): Configuration parameters. The parameters must contain the following keys:
+            - data_dir (str): The directory where the dataset is stored.
+            - data_name (str): The name of the dataset.
+            - data_type (str): The type of the dataset.
+            - split_type (str): The type of split to be used. It can be "fixed", "random", or "k-fold".
+            
+            If split_type is "random", the parameters must also contain the following keys:
+                - data_seed (int): The seed for the split.
+                - data_split_dir (str): The directory where the split is stored.
+                - train_prop (float): The proportion of the training set.
+            If split_type is "k-fold", the parameters must also contain the following keys:
+                - data_split_dir (str): The directory where the split is stored.
+                - k (int): The number of folds.
+                - data_seed (int): The seed for the split.
+            The parameters can be defined in a yaml file and then loaded using `omegaconf.OmegaConf.load('path/to/dataset/config.yaml')`.
+        transforms (DictConfig, optional): The parameters for the transforms to be applied to the dataset. The parameters for a transformation can be defined in a yaml file and then loaded using `omegaconf.OmegaConf.load('path/to/transform/config.yaml'). (default: None)
     """
-
     def __init__(self, parameters: DictConfig, transforms=None):
         super().__init__(parameters)
         self.parameters = parameters
         # Still not instantiated
         self.transforms_config = transforms
+        
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}(parameters={self.parameters}, transforms={self.transforms_config})"
 
     def load(self) -> CustomDataset:
         r"""Load graph dataset.
 
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        CustomDataset
-            CustomDataset object containing the loaded data.
+        Returns:
+            CustomDataset: CustomDataset object containing the loaded data.
         """
         data_dir = os.path.join(
             self.parameters["data_dir"], self.parameters["data_name"]
@@ -322,10 +317,9 @@ class GraphLoader(AbstractLoader):
 class ManualGraphLoader(AbstractLoader):
     r"""Loader for manual graph datasets.
 
-    Parameters
-    ----------
-    parameters : DictConfig
-        Configuration parameters.
+    Args:
+        parameters (DictConfig): Configuration parameters.
+        transforms (DictConfig, optional): The parameters for the transforms to be applied to the dataset. (default: None)
     """
 
     def __init__(self, parameters: DictConfig, transforms=None):
@@ -333,18 +327,15 @@ class ManualGraphLoader(AbstractLoader):
         self.parameters = parameters
         # Still not instantiated
         self.transforms_config = transforms
+        
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}(parameters={self.parameters}, transforms={self.transforms_config})"
 
     def load(self) -> CustomDataset:
         r"""Load manual graph dataset.
 
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        CustomDataset
-            CustomDataset object containing the loaded data.
+        Returns:
+            CustomDataset: CustomDataset object containing the loaded data.
         """
         data = manual_graph()
 

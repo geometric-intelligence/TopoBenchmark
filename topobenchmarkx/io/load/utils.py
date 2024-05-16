@@ -18,19 +18,12 @@ from torch_sparse import coalesce
 def get_complex_connectivity(complex, max_rank, signed=False):
     r"""Gets the connectivity matrices for the complex.
 
-    Parameters
-    ----------
-    complex : topnetx.CellComplex, topnetx.SimplicialComplex
-        Cell complex.
-    max_rank : int
-        Maximum rank of the complex.
-    signed : bool
-        If True, returns signed connectivity matrices.
-
+    Args:
+        complex (topnetx.CellComplex, topnetx.SimplicialComplex): Cell complex.
+        max_rank (int): Maximum rank of the complex.
+        signed (bool, optional): If True, returns signed connectivity matrices. (default: False)
     Returns
-    -------
-    dict
-        Dictionary containing the connectivity matrices.
+        dict: Dictionary containing the connectivity matrices.
     """
     practical_shape = list(
         np.pad(list(complex.shape), (0, max_rank + 1 - len(complex.shape)))
@@ -72,37 +65,32 @@ def get_complex_connectivity(complex, max_rank, signed=False):
 def generate_zero_sparse_connectivity(m, n):
     r"""Generates a zero sparse connectivity matrix.
 
-    Parameters
-    ----------
-    m : int
-        Number of rows.
-    n : int
-        Number of columns.
-
-    Returns
-    -------
-    torch.sparse_coo_tensor
-        Zero sparse connectivity matrix.
+    Args:
+        m (int): Number of rows.
+        n (int): Number of columns.
+    Returns:
+        torch.sparse_coo_tensor: Zero sparse connectivity matrix.
     """
     return torch.sparse_coo_tensor((m, n)).coalesce()
 
 
 def load_cell_complex_dataset(cfg):
-    r"""Loads cell complex datasets."""
+    r"""Loads cell complex datasets.
+    
+    Args:
+        cfg (DictConfig): Configuration parameters.
+    """
 
 
 def load_simplicial_dataset(cfg):
     r"""Loads simplicial datasets.
 
-    Parameters
-    ----------
-    cfg : DictConfig
-        Configuration parameters.
+    Args:
+        cfg (DictConfig): Configuration parameters. It needs to contain the following keys:
+            - data_name (str): Name of the dataset.
 
-    Returns
-    -------
-    torch_geometric.data.Data
-        Simplicial dataset.
+    Returns:
+        torch_geometric.data.Data: Simplicial dataset.
     """
     if cfg["data_name"] != "KarateClub":
         return NotImplementedError
@@ -186,15 +174,11 @@ def load_simplicial_dataset(cfg):
 def load_hypergraph_pickle_dataset(cfg):
     r"""Loads hypergraph datasets from pickle files.
 
-    Parameters
-    ----------
-    cfg : DictConfig
-        Configuration parameters.
+    Args:
+        cfg (DictConfig): Configuration parameters.
 
-    Returns
-    -------
-    torch_geometric.data.Data
-        Hypergraph dataset.
+    Returns:
+        torch_geometric.data.Data: Hypergraph dataset.
     """
     data_dir = cfg["data_dir"]
     print(f"Loading {cfg['data_domain']} dataset name: {cfg['data_name']}")
@@ -294,15 +278,12 @@ def load_hypergraph_pickle_dataset(cfg):
 def get_Planetoid_pyg(cfg):
     r"""Loads Planetoid graph datasets from torch_geometric.
 
-    Parameters
-    ----------
-    cfg : DictConfig
-        Configuration parameters.
-
-    Returns
-    -------
-    torch_geometric.data.Data
-        Graph dataset.
+    Args:
+        cfg (DictConfig): Configuration parameters. It needs to contain the following keys:
+            - data_dir (str): Path to the directory containing the data.
+            - data_name (str): Name of the dataset.
+    Returns:
+        torch_geometric.data.Data: Graph dataset.
     """
     data_dir, data_name = cfg["data_dir"], cfg["data_name"]
     dataset = torch_geometric.datasets.Planetoid(data_dir, data_name)
@@ -314,15 +295,12 @@ def get_Planetoid_pyg(cfg):
 def get_TUDataset_pyg(cfg):
     r"""Loads TU graph datasets from torch_geometric.
 
-    Parameters
-    ----------
-    cfg : DictConfig
-        Configuration parameters.
-
-    Returns
-    -------
-    list
-        List containing the graph dataset.
+    Args:
+        cfg (DictConfig): Configuration parameters. It needs to contain the following keys:
+            - data_dir (str): Path to the directory containing the data.
+            - data_name (str): Name of the dataset.
+    Returns:
+        list: List containing the graphs in the dataset.
     """
     data_dir, data_name = cfg["data_dir"], cfg["data_name"]
     dataset = torch_geometric.datasets.TUDataset(root=data_dir, name=data_name)
@@ -333,15 +311,10 @@ def get_TUDataset_pyg(cfg):
 def ensure_serializable(obj):
     r"""Ensures that the object is serializable.
 
-    Parameters
-    ----------
-    obj : object
-        Object to ensure serializability.
-
-    Returns
-    -------
-    object
-        Object that is serializable.
+    Args:
+        obj (object): Object to ensure serializability.
+    Returns:
+        object: Object that is serializable.
     """
     if isinstance(obj, dict):
         for key, value in obj.items():
@@ -364,15 +337,10 @@ def make_hash(o):
     contains only other hashable types (including any lists, tuples, sets, and
     dictionaries).
 
-    Parameters
-    ----------
-    o : dict, list, tuple, set
-        Object to hash.
-
-    Returns
-    -------
-    int
-        Hash of the object.
+    Args:
+        o (dict, list, tuple, set): Object to hash.
+    Returns:
+        int: Hash of the object.
     """
     sha1 = hashlib.sha1()
     sha1.update(str.encode(str(o)))

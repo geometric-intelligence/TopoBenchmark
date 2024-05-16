@@ -7,6 +7,14 @@ import torch_geometric
 
 
 def load_heterophilic_data(name, path):
+    r"""Load a heterophilic dataset from a .npz file.
+    
+    Args:
+        name (str): The name of the dataset.
+        path (str): The path to the directory containing the dataset file.
+    Returns:
+        torch_geometric.data.Data: The dataset.
+    """
     file_name = f"{name}.npz"
 
     data = np.load(os.path.join(path, file_name))
@@ -26,6 +34,14 @@ def load_heterophilic_data(name, path):
 
 
 def download_hetero_datasets(name, path):
+    r"""Download a heterophilic dataset from the OpenGSL repository.
+    
+    Args:
+        name (str): The name of the dataset.
+        path (str): The path to the directory where the dataset will be saved.
+    Raises:
+        Exception: If the download fails.
+    """
     url = "https://github.com/OpenGSL/HeterophilousDatasets/raw/main/data/"
     name = f"{name}.npz"
     try:

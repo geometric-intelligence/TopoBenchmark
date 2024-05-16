@@ -10,15 +10,17 @@ from torch_sparse import SparseTensor
 
 
 class DomainData(Data):
-    """Data object class that overwrites some methods from
-    torch_geometric.data.Data so that not only sparse matrices with adj in the
-    name can work with the torch_geometric dataloaders."""
-
+    r"""Data object class that overwrites some methods from
+    `torch_geometric.data.Data` so that not only sparse matrices with adj in the
+    name can work with the `torch_geometric` dataloaders."""
+    
     def is_valid(self, string):
+        r"""Check if the string contains any of the valid names."""
         valid_names = ["adj", "incidence", "laplacian"]
         return any(name in string for name in valid_names)
 
     def __cat_dim__(self, key: str, value: Any, *args, **kwargs) -> Any:
+        r"""Overwrite the `__cat_dim__` method to handle sparse matrices to handle the names specified in `is_valid`."""
         if is_sparse(value) and self.is_valid(key):
             return (0, 1)
         elif "index" in key or key == "face":
@@ -28,8 +30,7 @@ class DomainData(Data):
 
 
 def to_data_list(batch):
-    """Workaround needed since torch_geometric doesn't work well with
-    torch.sparse."""
+    """Workaround needed since `torch_geometric` doesn't work when using `torch.sparse` instead of `torch_sparse`."""
     for key in batch.keys():
         if batch[key].is_sparse:
             sparse_data = batch[key].coalesce()
@@ -43,13 +44,13 @@ def to_data_list(batch):
 
 
 def collate_fn(batch):
-    """
-    args:
-        batch - list of (tensor, label)
+    r"""This function overwrites the `torch_geometric.data.DataLoader` collate function to use the `DomainData` class. This ensures that the `torch_geometric` dataloaders work with sparse matrices that are not necessarily named `adj`. The function also generates the batch slices for the different cell dimensions.
+    
+    Args:
+        batch (list): List of data objects (e.g., `torch_geometric.data.Data`).
 
-    return:
-        xs - a tensor of all examples in 'batch' after padding
-        ys - a LongTensor of all labels in batch
+    Returns:
+        torch_geometric.data.Batch: A `torch_geometric.data.Batch` object.
     """
     data_list = []
     batch_idx_dict = defaultdict(list)
@@ -114,15 +115,15 @@ def collate_fn(batch):
 
 
 class DefaultDataModule(LightningDataModule):
-    """Initializes the DefaultDataModule class.
+    r"""This class takes care of returning the dataloaders for the training, validation, and test datasets. It also handles the collate function. The class is designed to work with the `torch` dataloaders.
 
     Args:
-        dataset_train: The training dataset.
-        dataset_val: The validation dataset (optional).
-        dataset_test: The test dataset (optional).
-        batch_size: The batch size for the dataloader.
-        num_workers: The number of worker processes to use for data loading.
-        pin_memory: If True, the data loader will copy tensors into pinned memory before returning them.
+        dataset_train (CustomDataset): The training dataset.
+        dataset_val (CustomDataset, optional): The validation dataset. (default: None)
+        dataset_test (CustomDataset, optional): The test dataset. (default: None)
+        batch_size (int, optional): The batch size for the dataloader. (default: 1)
+        num_workers (int, optional): The number of worker processes to use for data loading. (default: 0)
+        pin_memory (bool, optional): If True, the data loader will copy tensors into pinned memory before returning them. (default: False)
 
     Returns:
         None
@@ -162,11 +163,15 @@ class DefaultDataModule(LightningDataModule):
         else:
             self.dataset_val = dataset_val
             self.dataset_test = dataset_test
+            
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}(dataset_train={self.dataset_train}, dataset_val={self.dataset_val}, dataset_test={self.dataset_test}, batch_size={self.batch_size}, num_workers={self.hparams.num_workers}, pin_memory={self.hparams.pin_memory})"
 
     def train_dataloader(self) -> DataLoader:
-        """Create and return the train dataloader.
+        r"""Create and return the train dataloader.
 
-        :return: The train dataloader.
+        Returns:
+            torch.utils.data.DataLoader: The train dataloader.
         """
         return DataLoader(
             dataset=self.dataset_train,
@@ -178,9 +183,10 @@ class DefaultDataModule(LightningDataModule):
         )
 
     def val_dataloader(self) -> DataLoader:
-        """Create and return the validation dataloader.
+        r"""Create and return the validation dataloader.
 
-        :return: The validation dataloader.
+        Returns:
+            torch.utils.data.DataLoader: The validation dataloader.
         """
         return DataLoader(
             dataset=self.dataset_val,
@@ -192,9 +198,10 @@ class DefaultDataModule(LightningDataModule):
         )
 
     def test_dataloader(self) -> DataLoader:
-        """Create and return the test dataloader.
+        r"""Create and return the test dataloader.
 
-        :return: The test dataloader.
+        Returns:
+            torch.utils.data.DataLoader: The test dataloader.
         """
         if self.dataset_test is None:
             raise ValueError("There is no test dataloader.")
@@ -208,26 +215,26 @@ class DefaultDataModule(LightningDataModule):
         )
 
     def teardown(self, stage: str | None = None) -> None:
-        """Lightning hook for cleaning up after `trainer.fit()`,
+        r"""Lightning hook for cleaning up after `trainer.fit()`,
         `trainer.validate()`, `trainer.test()`, and `trainer.predict()`.
 
-        :param stage: The stage being torn down. Either `"fit"`, `"validate"`, `"test"`, or `"predict"`.
-            Defaults to ``None``.
+        Args:
+            stage (str, optional): The stage being torn down. Either `"fit"`, `"validate"`, `"test"`, or `"predict"`. (default: None)
         """
 
     def state_dict(self) -> dict[Any, Any]:
-        """Called when saving a checkpoint. Implement to generate and save the
+        r"""Called when saving a checkpoint. Implement to generate and save the
         datamodule state.
 
-        :return: A dictionary containing the datamodule state that you want to
-            save.
+        Returns:
+            dict: A dictionary containing the datamodule state that you want to save.
         """
         return {}
 
     def load_state_dict(self, state_dict: dict[str, Any]) -> None:
-        """Called when loading a checkpoint. Implement to reload datamodule
+        r"""Called when loading a checkpoint. Implement to reload datamodule
         state given datamodule `state_dict()`.
 
-        :param state_dict: The datamodule state returned by
-            `self.state_dict()`.
+        Args:
+            state_dict (dict): The datamodule state. This is the object returned by `state_dict()`.
         """

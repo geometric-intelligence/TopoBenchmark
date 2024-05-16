@@ -4,39 +4,34 @@ import torch_geometric
 class CustomDataset(torch_geometric.data.Dataset):
     r"""Custom dataset to return all the values added to the dataset object.
 
-    Parameters
-    ----------
-    data_lst: list
-        List of torch_geometric.data.Data objects .
+    Args:
+        data_lst (list[torch_geometric.data.Data]): List of torch_geometric.data.Data objects.
     """
 
     def __init__(self, data_lst):
         super().__init__()
         self.data_lst = data_lst
 
+    def __repr__(self):
+        return f"{self.__class__.__name__}(data_lst={self.data_lst})"
+    
     def get(self, idx):
         r"""Get data object from data list.
 
-        Parameters
-        ----------
-        idx: int
-            Index of the data object to get.
+        Args:
+            idx (int): Index of the data object to get.
 
-        Returns
-        -------
-        tuple
-            tuple containing a list of all the values for the data and the keys corresponding to the values.
+        Returns:
+            tuple: tuple containing a list of all the values for the data and the corresponding keys.
         """
         data = self.data_lst[idx]
         keys = list(data.keys())
         return ([data[key] for key in keys], keys)
 
     def len(self):
-        r"""Return length of the dataset.
+        r"""Return the length of the dataset.
 
-        Returns
-        -------
-        int
-            Length of the dataset.
+        Returns:
+            int: Length of the dataset.
         """
         return len(self.data_lst)

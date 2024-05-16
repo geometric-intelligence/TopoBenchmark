@@ -5,7 +5,7 @@ import requests
 
 # Function to extract file ID from Google Drive URL
 def get_file_id_from_url(url):
-    """Extracts the file ID from a Google Drive file URL.
+    r"""Extracts the file ID from a Google Drive file URL.
 
     Args:
         url (str): The Google Drive file URL.
@@ -35,7 +35,7 @@ def get_file_id_from_url(url):
 def download_file_from_drive(
     file_link, path_to_save, dataset_name, file_format="tar.gz"
 ):
-    """Downloads a file from a Google Drive link and saves it to the specified
+    r"""Downloads a file from a Google Drive link and saves it to the specified
     path.
 
     Args:

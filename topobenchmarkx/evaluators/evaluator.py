@@ -9,22 +9,15 @@ class TorchEvaluator:
     r"""Evaluator class that is responsible for computing the metrics for a
     given task.
 
-     Parameters
-     ----------
-    task : str
-         The task type. It can be either "classification" or "regression".
+    Args:
+        task (str): The task type. It can be either "classification" or "regression".
+        **kwargs : Additional arguments for the class. The arguments depend on the task.
+            In "classification" scenario, the following arguments are expected:
+            - num_classes (int): The number of classes.
+            - classification_metrics (list[str]): A list of classification metrics to be computed.
 
-     **kwargs :
-         Additional arguments for the class. The arguments depend on the task.
-         In "classification" scenario, the following arguments are expected:
-         - num_classes : int
-             The number of classes.
-         - classification_metrics : list
-             A list of classification metrics to be computed.
-
-         In "regression" scenario, the following arguments are expected:
-         - regression_metrics : list
-             A list of regression metrics to be computed.
+            In "regression" scenario, the following arguments are expected:
+            - regression_metrics (list[str]): A list of regression metrics to be computed.
     """
 
     def __init__(self, task, **kwargs):
@@ -67,17 +60,18 @@ class TorchEvaluator:
 
         self.best_metric = {}
 
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}(task={self.task})"
+        
     def update(self, model_out: dict):
-        """Update the metrics with the model output.
+        r"""Update the metrics with the model output.
 
-        Parameters
-        ----------
-        model_out : dict
-            The model output. It should contain the following keys:
-            - logits : torch.Tensor
-                The model predictions.
-            - labels : torch.Tensor
-                The ground truth labels.
+        Args:
+            model_out (dict): The model output. It should contain the following keys:
+                - logits : torch.Tensor
+                    The model predictions.
+                - labels : torch.Tensor
+                    The ground truth labels.
         """
         preds = model_out["logits"].cpu()
         target = model_out["labels"].cpu()
@@ -92,21 +86,14 @@ class TorchEvaluator:
             raise ValueError(f"Invalid task {self.task}")
 
     def compute(self):
-        """Compute the metrics.
+        r"""Compute the metrics.
 
-        Returns
-        -------
-        res_dict : dict
-            A dictionary containing the computed metrics.
+        Args:
+            res_dict (dict): A dictionary containing the computed metrics.
         """
+        return self.metrics.compute()
 
-        res_dict = self.metrics.compute()
-
-        return res_dict
-
-    def reset(
-        self,
-    ):
+    def reset(self):
         """Reset the metrics.
 
         This method should be called after each epoch

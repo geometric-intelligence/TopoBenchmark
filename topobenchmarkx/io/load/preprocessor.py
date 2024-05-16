@@ -10,16 +10,12 @@ from topobenchmarkx.io.load.utils import ensure_serializable, make_hash
 class Preprocessor(torch_geometric.data.InMemoryDataset):
     r"""Preprocessor for datasets.
 
-    Parameters
-    ----------
-    data_dir : str
-        Path to the directory containing the data.
-    data_list : list
-        List of data objects.
-    transforms_config : DictConfig
-        Configuration parameters for the transforms.
-    **kwargs: optional
-        Additional arguments.
+    Args:
+        data_dir (str): Path to the directory containing the data.
+        data_list (list): List of data objects.
+        transforms_config (DictConfig): Configuration parameters for the transforms.
+        force_reload (bool): Whether to force reload the data. (default: False)
+        **kwargs: Optional additional arguments.
     """
 
     def __init__(
@@ -47,15 +43,16 @@ class Preprocessor(torch_geometric.data.InMemoryDataset):
         )
         self.save_transform_parameters()
         self.load(self.processed_paths[0])
+        
+    def __repr__(self):
+        return f"{self.__class__.__name__}(data_dir={self.root}, data_list={self.data_list}, processed_data_dir={self.processed_data_dir}, processed_file_names={self.processed_file_names})"
 
     @property
     def processed_dir(self) -> str:
         r"""Return the path to the processed directory.
 
-        Returns
-        -------
-        str
-            Path to the processed directory.
+        Returns:
+            str: Path to the processed directory.
         """
         return self.root
 
@@ -64,9 +61,7 @@ class Preprocessor(torch_geometric.data.InMemoryDataset):
         r"""Return the name of the processed file.
 
         Returns
-        -------
-        str
-            Name of the processed file.
+            str: Name of the processed file.
         """
         return "data.pt"
 
@@ -75,17 +70,11 @@ class Preprocessor(torch_geometric.data.InMemoryDataset):
     ) -> torch_geometric.transforms.Compose:
         r"""Instantiate the pre-transforms.
 
-        Parameters
-        ----------
-        data_dir : str
-            Path to the directory containing the data.
-        transforms_config : DictConfig
-            Configuration parameters for the transforms.
-
-        Returns
-        -------
-        torch_geometric.transforms.Compose
-            Pre-transform object.
+        Parameters:
+            data_dir (str): Path to the directory containing the data.
+            transforms_config (DictConfig): Configuration parameters for the transforms.
+        Returns:
+            torch_geometric.transforms.Compose: Pre-transform object.
         """
         pre_transforms_dict = hydra.utils.instantiate(transforms_config)
         pre_transforms = torch_geometric.transforms.Compose(
@@ -101,14 +90,10 @@ class Preprocessor(torch_geometric.data.InMemoryDataset):
     ) -> None:
         r"""Set the processed data directory.
 
-        Parameters
-        ----------
-        pre_transforms_dict : dict
-            Dictionary containing the pre-transforms.
-        data_dir : str
-            Path to the directory containing the data.
-        transforms_config : DictConfig
-            Configuration parameters for the transforms.
+        Args:
+            pre_transforms_dict (dict): Dictionary containing the pre-transforms.
+            data_dir (str): Path to the directory containing the data.
+            transforms_config (DictConfig): Configuration parameters for the transforms.
         """
         # Use self.transform_parameters to define unique save/load path for each transform parameters
         repo_name = "_".join(list(transforms_config.keys()))

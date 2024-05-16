@@ -1,7 +1,7 @@
 _target_: topobenchmarkx.models.TopologicalNetworkModule
 
 mdoel_name: scn 
-model_type: simplicial
+model_domain: simplicial
 
 feature_encoder:
   _target_: topobenchmarkx.models.encoders.${model.feature_encoder.encoder_name}

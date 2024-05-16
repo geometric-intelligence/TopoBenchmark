@@ -1,7 +1,7 @@
 _target_: topobenchmarkx.models.TopologicalNetworkModule
 
 model_name: unignn2
-mode_domain: hypergraph
+model_domain: hypergraph
 
 feature_encoder:
   _target_: topobenchmarkx.models.encoders.${model.feature_encoder.encoder_name}

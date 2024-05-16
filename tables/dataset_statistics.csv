@@ -1,0 +1,7 @@
+,num_hyperedges,zero_cell,one_cell,two_cell,three_cell,dataset,domain
+0,0,3224,9483,6266,0,US-county-demos,cell
+1,0,2708,5278,2648,0,Cora,cell
+2,0,3327,4552,1663,0,citeseer,cell
+3,0,19717,44324,23605,0,PubMed,cell
+4,0,277864,298985,33121,0,ZINC,cell
+5,0,22662,32927,10266,0,roman_empire,cell

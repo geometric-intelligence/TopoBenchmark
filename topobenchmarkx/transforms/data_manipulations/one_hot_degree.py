@@ -5,14 +5,10 @@ from torch_geometric.utils import one_hot
 class OneHotDegree(torch_geometric.transforms.BaseTransform):
     r"""Adds the node degree as one hot encodings to the node features.
 
-    Parameters
-    ----------
-    max_degree : int
-        The maximum degree of the graph.
-    cat : bool, optional
-        If set to `True`, the one hot encodings are concatenated to the node features.
+    Args:
+        max_degree (int): The maximum degree of the graph.
+        cat (bool, optional): If set to `True`, the one hot encodings are concatenated to the node features. (default: False)
     """
-
     def __init__(
         self,
         max_degree: int,
@@ -20,6 +16,9 @@ class OneHotDegree(torch_geometric.transforms.BaseTransform):
     ) -> None:
         self.max_degree = max_degree
         self.cat = cat
+        
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}(max_degree={self.max_degree}, cat={self.cat})"
 
     def forward(
         self,
@@ -29,19 +28,12 @@ class OneHotDegree(torch_geometric.transforms.BaseTransform):
     ) -> torch_geometric.data.Data:
         r"""Apply the transform to the input data.
 
-        Parameters
-        ----------
-        data : torch_geometric.data.Data
-            The input data.
-        degrees_field : str
-            The field containing the node degrees.
-        features_field : str
-            The field containing the node features.
-
-        Returns
-        -------
-        torch_geometric.data.Data
-            The transformed data.
+        Args:
+            data (torch_geometric.data.Data): The input data.
+            degrees_field (str): The field containing the node degrees.
+            features_field (str): The field containing the node features.
+        Returns:
+            torch_geometric.data.Data: The transformed data.
         """
         assert data.edge_index is not None
 
@@ -60,6 +52,3 @@ class OneHotDegree(torch_geometric.transforms.BaseTransform):
             data[features_field] = deg
 
         return data
-
-    def __repr__(self) -> str:
-        return f"{self.__class__.__name__}({self.max_degree})"

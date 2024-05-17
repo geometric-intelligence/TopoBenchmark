@@ -102,7 +102,7 @@ class USCountyDemosDataset(InMemoryDataset):
         self.data, self.slices = self.collate([data])
         
     def __repr__(self) -> str:
-        return f"{self.name}(self.root={self.root}, self.name={self.name}, self.parameters={self.parameters}, self.transform={self.transform}, self.pre_transform={self.pre_transform}, self.pre_filter={self.pre_filter}, self.force_reload={self.force_reload}, self.use_node_attr={self.use_node_attr}, self.use_edge_attr={self.use_edge_attr})" 
+        return f"{self.name}(self.root={self.root}, self.name={self.name}, self.parameters={self.parameters}, self.transform={self.transform}, self.pre_transform={self.pre_transform}, self.pre_filter={self.pre_filter}, self.force_reload={self.force_reload})" 
 
     @property
     def raw_dir(self) -> str:

@@ -4,10 +4,8 @@ import torch_geometric
 class NodeDegrees(torch_geometric.transforms.BaseTransform):
     r"""A transform that calculates the node degrees of the input graph.
 
-    Parameters
-    ----------
-    **kwargs : optional
-        Parameters for the transform.
+    Args:
+        kwargs (optional): Parameters for the base transform.
     """
 
     def __init__(self, **kwargs):
@@ -15,18 +13,16 @@ class NodeDegrees(torch_geometric.transforms.BaseTransform):
         self.type = "node_degrees"
         self.parameters = kwargs
 
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}(type={self.type!r}, parameters={self.parameters!r})"
+
     def forward(self, data: torch_geometric.data.Data):
         r"""Apply the transform to the input data.
 
-        Parameters
-        ----------
-        data : torch_geometric.data.Data
-            The input data.
-
-        Returns
-        -------
-        torch_geometric.data.Data
-            The transformed data.
+        Args:
+            data (torch_geometric.data.Data): The input data.
+        Returns:
+            torch_geometric.data.Data: The transformed data.
         """
         field_to_process = [
             key
@@ -44,16 +40,11 @@ class NodeDegrees(torch_geometric.transforms.BaseTransform):
     ) -> torch_geometric.data.Data:
         r"""Calculate the node degrees of the input data.
 
-        Parameters
-        ----------
-        data : torch_geometric.data.Data
-            The input data.
-        field : str
-            The field to calculate the node degrees.
-
-        Returns
-        -------
-        torch_geometric.data.Data
+        Args:
+            data (torch_geometric.data.Data): The input data.
+            field (str): The field to calculate the node degrees.
+        Returns:
+            torch_geometric.data.Data: The transformed data.
         """
         if data[field].is_sparse:
             degrees = abs(data[field].to_dense()).sum(1)

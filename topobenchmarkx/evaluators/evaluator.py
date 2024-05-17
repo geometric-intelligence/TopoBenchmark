@@ -61,7 +61,7 @@ class TorchEvaluator:
         self.best_metric = {}
 
     def __repr__(self) -> str:
-        return f"{self.__class__.__name__}(task={self.task})"
+        return f"{self.__class__.__name__}(task={self.task}, metrics={self.metrics})"
         
     def update(self, model_out: dict):
         r"""Update the metrics with the model output.

@@ -20,33 +20,27 @@ __all__ = [
 class Graph2SimplicialLifting(GraphLifting):
     r"""Abstract class for lifting graphs to simplicial complexes.
 
-    Parameters
-    ----------
-    complex_dim : int, optional
-        The dimension of the simplicial complex to be generated. Default is 2.
-    **kwargs : optional
-        Additional arguments for the class.
+    Args:
+        complex_dim (int, optional): The maximum dimension of the simplicial complex to be generated. (default: 2)
+        kwargs (optional): Additional arguments for the class.
     """
-
     def __init__(self, complex_dim=2, **kwargs):
         super().__init__(**kwargs)
         self.complex_dim = complex_dim
         self.type = "graph2simplicial"
         self.signed = kwargs.get("signed", False)
+    
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}(complex_dim={self.complex_dim!r}, type={self.type!r}, signed={self.signed!r})"
 
     @abstractmethod
     def lift_topology(self, data: torch_geometric.data.Data) -> dict:
         r"""Lifts the topology of a graph to simplicial complex domain.
 
-        Parameters
-        ----------
-        data : torch_geometric.data.Data
-            The input data to be lifted.
-
-        Returns
-        -------
-        dict
-            The lifted topology.
+        Args:
+            data (torch_geometric.data.Data): The input data to be lifted.
+        Returns:
+            dict: The lifted topology.
         """
         raise NotImplementedError
 
@@ -55,17 +49,11 @@ class Graph2SimplicialLifting(GraphLifting):
     ) -> dict:
         r"""Returns the lifted topology.
 
-        Parameters
-        ----------
-        simplicial_complex : SimplicialComplex
-            The simplicial complex.
-        graph : nx.Graph
-            The input graph.
-
-        Returns
-        -------
-        dict
-            The lifted topology.
+        Args:
+            simplicial_complex (SimplicialComplex): The simplicial complex.
+            graph (nx.Graph): The input graph.
+        Returns:
+            dict: The lifted topology.
         """
         lifted_topology = get_complex_connectivity(
             simplicial_complex, self.complex_dim, signed=self.signed
@@ -93,33 +81,27 @@ class Graph2SimplicialLifting(GraphLifting):
 
 class SimplicialNeighborhoodLifting(Graph2SimplicialLifting):
     r"""Lifts graphs to simplicial complex domain by considering k-hop
-    neighborhoods.
+    neighborhoods. For each node its neighborhood is selected and then all the possible simplices, when considering the neighborhood as a clique, are added to the simplicial complex. For this reason this lifting does not conserve the initial graph topology.
 
-    Parameters
-    ----------
-    max_k_simplices : int, optional
-        The maximum number of k-simplices to consider. Default is 5000.
-    **kwargs : optional
-        Additional arguments for the class.
+    Args:
+        max_k_simplices (int, optional): The maximum number of k-simplices to consider. (default: 5000)
+        kwargs (optional): Additional arguments for the class.
     """
-
     def __init__(self, max_k_simplices=5000, **kwargs):
         super().__init__(**kwargs)
         self.max_k_simplices = max_k_simplices
+    
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}(max_k_simplices={self.max_k_simplices!r})"
 
     def lift_topology(self, data: torch_geometric.data.Data) -> dict:
         r"""Lifts the topology of a graph to simplicial complex domain by
         considering k-hop neighborhoods.
 
-        Parameters
-        ----------
-        data : torch_geometric.data.Data
-            The input data to be lifted.
-
-        Returns
-        -------
-        dict
-            The lifted topology.
+        Args:
+            data (torch_geometric.data.Data): The input data to be lifted.
+        Returns:
+            dict: The lifted topology.
         """
         graph = self._generate_graph_from_data(data)
         simplicial_complex = SimplicialComplex(graph)
@@ -147,13 +129,10 @@ class SimplicialNeighborhoodLifting(Graph2SimplicialLifting):
 
 
 class SimplicialCliqueLifting(Graph2SimplicialLifting):
-    r"""Lifts graphs to simplicial complex domain by identifying the cliques as
-    k-simplices.
+    r"""Lifts graphs to simplicial complex domain by identifying the cliques as k-simplices, considering also all the combinations with lower rank.
 
-    Parameters
-    ----------
-    **kwargs : optional
-        Additional arguments for the class.
+    Args:
+        kwargs (optional): Additional arguments for the class.
     """
 
     def __init__(self, **kwargs):
@@ -163,15 +142,10 @@ class SimplicialCliqueLifting(Graph2SimplicialLifting):
         r"""Lifts the topology of a graph to a simplicial complex by identifying
         the cliques as k-simplices.
 
-        Parameters
-        ----------
-        data : torch_geometric.data.Data
-            The input data to be lifted.
-
-        Returns
-        -------
-        dict
-            The lifted topology.
+        Args:
+            data (torch_geometric.data.Data): The input data to be lifted.
+        Returns:
+            dict: The lifted topology.
         """
         graph = self._generate_graph_from_data(data)
         simplicial_complex = SimplicialComplex(graph)

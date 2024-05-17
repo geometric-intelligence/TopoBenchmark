@@ -1,11 +1,16 @@
 from topobenchmarkx.models.wrappers.wrapper import DefaultWrapper
 
 class SCCNNWrapper(DefaultWrapper):
-    """Abstract class that provides an interface to loss logic within
-    network."""
+    r"""Wrapper for the SCCNN model. This wrapper defines the forward pass of the model. The SCCNN model returns the embeddings of the cells of rank 0, 1, and 2."""
 
     def forward(self, batch):
-        """Define logic for forward pass."""
+        r"""Forward pass for the SCCNN wrapper.
+        
+        Args:
+            batch (torch_geometric.data.Data): Batch object containing the batched data.
+        Returns:
+            dict: Dictionary containing the updated model output.
+        """
 
         x_all = (batch.x_0, batch.x_1, batch.x_2)
         laplacian_all = (

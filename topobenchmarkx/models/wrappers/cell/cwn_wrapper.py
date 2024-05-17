@@ -1,11 +1,16 @@
 from topobenchmarkx.models.wrappers.wrapper import DefaultWrapper
 
 class CWNWrapper(DefaultWrapper):
-    """Abstract class that provides an interface to loss logic within
-    network."""
+    r"""Wrapper for the CWN model. This wrapper defines the forward pass of the model. The CWN model returns the embeddings of the cells of rank 0, 1, and 2."""
 
     def forward(self, batch):
-        """Define logic for forward pass."""
+        r"""Forward pass for the CWN wrapper.
+        
+        Args:
+            batch (torch_geometric.data.Data): Batch object containing the batched domain data.
+        Returns:
+            dict: Dictionary containing the updated model output.
+        """
 
         x_0, x_1, x_2 = self.backbone(
             x_0=batch.x_0,

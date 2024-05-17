@@ -24,7 +24,7 @@ parameters:
   monitor_metric: mae
   task_level: graph
   data_seed: 0
-  split_type: 'fixed' # either k-fold or test
+  split_type: 'fixed' # ZINC accept only <fixed> split
   #k: 10 # for k-Fold Cross-Validation
 
   # Dataloader parameters

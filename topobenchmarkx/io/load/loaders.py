@@ -305,7 +305,7 @@ class GraphLoader(AbstractLoader):
                     data_dir,
                     dataset,
                     self.transforms_config,
-                    force_reload=True,
+                    force_reload=False,
                 )
 
             # We need to map original dataset into custom one to make batching work

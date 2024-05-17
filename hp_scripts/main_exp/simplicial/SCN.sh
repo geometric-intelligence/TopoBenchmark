@@ -1,114 +1,137 @@
-# Create a logger file in the same repo to keep track of the experiments executed 
+# Description: Main experiment script for GCN model.
+# ----Node regression datasets: US County Demographics----
+task_variables=( 'Election' 'MedianIncome' 'MigraRate' 'BirthRate' 'DeathRate' 'BachelorRate' 'UnemploymentRate' )
 
-# SCN model - Fixed split
-python train.py \
-    dataset=ZINC \
-    model=simplicial/scn \
-    model.backbone.n_layers=1,2,4 \
-    model.feature_encoder.out_channels=16,64 \
-    model.optimizer.lr=0.01,0.001 \
-    dataset.parameters.batch_size=128 \
-    dataset.parameters.data_seed=0,3 \
-    dataset.transforms.graph2simplicial_lifting.complex_dim=3 \
-    dataset.transforms.graph2simplicial_lifting.signed=False \
-    trainer=default \
-    trainer.check_val_every_n_epoch=5 \
-    callbacks.early_stopping.patience=10 \
-    callbacks.early_stopping.min_delta=0.005 \
-    logger.wandb.project=topobenchmark_22Apr2024 \
+for task_variable in ${task_variables[*]} 
+do 
+  python train.py \
+    dataset=us_country_demos \
+    dataset.parameters.data_seed=0,3,5,7,9 \
+    dataset.parameters.task_variable=$task_variable \
+    model=hypergraph/edgnn \
+    model.feature_encoder.out_channels=32,64,128 \
+    model.feature_encoder.proj_dropout=0.25,0.5 \
+    model.backbone.n_layers=1,2,3,4 \
+    model.optimizer.lr="0.01,0.001" \
+    model.readout.readout_name=NoReadOut \
+    dataset.transforms.graph2simplicial_lifting.signed=True \
+    trainer.max_epochs=1000 \
+    trainer.min_epochs=500 \
+    trainer.check_val_every_n_epoch=1 \
+    callbacks.early_stopping.patience=50 \
+    logger.wandb.project=TopoBenchmarkX_Simplicial \
+    tags="[MainExperiment]" \
     --multirun
+    
+done
 
-# Batch size = 1
-python train.py \
-    dataset=cocitation_cora \
-    model=simplicial/scn \
-    model.optimizer.lr=0.01,0.001 \
-    model.feature_encoder.out_channels=32,64 \
+# ----Cocitation datasets----
+datasets=( 'cocitation_cora' 'cocitation_citeseer' 'cocitation_pubmed' )
+
+for dataset in ${datasets[*]}
+do
+  python train.py \
+    dataset=$dataset \
+    dataset.parameters.data_seed=0,3,5,7,9 \
+    model=hypergraph/edgnn \
+    model.feature_encoder.out_channels=32,64,128 \
+    model.feature_encoder.proj_dropout=0.25,0.5 \
     model.backbone.n_layers=1,2 \
-    dataset.parameters.data_seed=0,3,5 \
-    dataset.transforms.graph2simplicial_lifting.complex_dim=3 \
-    dataset.transforms.graph2simplicial_lifting.signed=False \
-    trainer=default \
-    trainer.check_val_every_n_epoch=5 \
-    callbacks.early_stopping.patience=10 \
-    logger.wandb.project=topobenchmark_22Apr2024 \
+    model.optimizer.lr="0.01,0.001" \
+    trainer.max_epochs=500 \
+    trainer.min_epochs=50 \
+    trainer.check_val_every_n_epoch=1 \
+    callbacks.early_stopping.patience=25 \
+    logger.wandb.project=TopoBenchmarkX_Simplicial \
+    tags="[MainExperiment]" \
     --multirun
+done
 
+# ----Graph regression dataset----
+# Train on ZINC dataset
 python train.py \
-    dataset=cocitation_citeseer \
-    model=simplicial/scn \
-    model.optimizer.lr=0.01,0.001 \
-    model.feature_encoder.out_channels=32,64 \
-    model.backbone.n_layers=1,2 \
-    dataset.parameters.data_seed=0,3,5 \
-    dataset.transforms.graph2simplicial_lifting.complex_dim=3 \
-    dataset.transforms.graph2simplicial_lifting.signed=False \
-    trainer=default \
-    trainer.check_val_every_n_epoch=5 \
-    callbacks.early_stopping.patience=10 \
-    logger.wandb.project=topobenchmark_22Apr2024 \
-    --multirun
+  dataset=ZINC \
+  seed=42,3,5,23,150 \
+  model=hypergraph/edgnn \
+  model.optimizer.lr=0.01,0.001 \
+  model.optimizer.weight_decay=0 \
+  model.feature_encoder.out_channels=32,64,128 \
+  model.backbone.n_layers=2,4 \
+  model.feature_encoder.proj_dropout=0.25,0.5 \
+  dataset.parameters.batch_size=128,256 \
+  dataset.transforms.one_hot_node_degree_features.degrees_fields=x \
+  dataset.parameters.data_seed=0 \
+  logger.wandb.project=TopoBenchmarkX_Simplicial \
+  trainer.max_epochs=500 \
+  trainer.min_epochs=50 \
+  callbacks.early_stopping.min_delta=0.005 \
+  trainer.check_val_every_n_epoch=5 \
+  callbacks.early_stopping.patience=10 \
+  tags="[MainExperiment]" \
+  --multirun
 
+# ----TU graph datasets----
+# MUTAG have very few samples, so we use a smaller batch size
+# Train on MUTAG dataset
 python train.py \
-    dataset=cocitation_pubmed \
-    model=simplicial/scn \
-    model.optimizer.lr=0.01,0.001 \
-    model.feature_encoder.out_channels=32,64 \
-    model.backbone.n_layers=1,2 \
-    dataset.parameters.data_seed=0,3,5 \
-    dataset.transforms.graph2simplicial_lifting.complex_dim=3 \
-    dataset.transforms.graph2simplicial_lifting.signed=False \
-    trainer=default \
-    trainer.check_val_every_n_epoch=5 \
-    callbacks.early_stopping.patience=10 \
-    logger.wandb.project=topobenchmark_22Apr2024 \
-    --multirun
+  dataset=MUTAG \
+  model=hypergraph/edgnn \
+  model.optimizer.lr=0.01,0.001 \
+  model.feature_encoder.out_channels=32,64,128 \
+  model.backbone.n_layers=1,2,3,4 \
+  model.feature_encoder.proj_dropout=0.25,0.5 \
+  dataset.parameters.data_seed=0,3,5 \
+  dataset.parameters.batch_size=32,64 \
+  trainer.max_epochs=500 \
+  trainer.min_epochs=50 \
+  trainer.check_val_every_n_epoch=1 \
+  logger.wandb.project=TopoBenchmarkX_Simplicial \
+  callbacks.early_stopping.patience=25 \
+  tags="[MainExperiment]" \
+  --multirun
 
-# Vary batch size
-python train.py \
-    dataset=PROTEINS_TU \
-    model=simplicial/scn \
-    model.optimizer.lr=0.01,0.001 \
-    model.feature_encoder.out_channels=16,64 \
-    model.backbone.n_layers=1,2 \
-    dataset.parameters.batch_size=32 \
-    dataset.parameters.data_seed=0,3,5 \
-    dataset.transforms.graph2simplicial_lifting.complex_dim=3 \
-    dataset.transforms.graph2simplicial_lifting.signed=False \
-    trainer=default \
-    trainer.check_val_every_n_epoch=5 \
-    callbacks.early_stopping.patience=10 \
-    logger.wandb.project=topobenchmark_22Apr2024 \
-    --multirun
+# Train rest of the TU graph datasets
+datasets=( 'PROTEINS_TU' 'NCI1' 'NCI109' 'REDDIT-BINARY' 'IMDB-BINARY' 'IMDB-MULTI' )
 
-python train.py \
-    dataset=NCI1 \
-    model=simplicial/scn \
+for dataset in ${datasets[*]}
+do
+  python train.py \
+    dataset=$dataset \
+    model=hypergraph/edgnn \
     model.optimizer.lr=0.01,0.001 \
-    model.feature_encoder.out_channels=16,64 \
-    model.backbone.n_layers=1,2 \
-    dataset.parameters.batch_size=32 \
+    model.feature_encoder.out_channels=32,64,128 \
+    model.backbone.n_layers=1,2,3,4 \
+    model.feature_encoder.proj_dropout=0.25,0.5 \
     dataset.parameters.data_seed=0,3,5 \
-    dataset.transforms.graph2simplicial_lifting.complex_dim=3 \
-    dataset.transforms.graph2simplicial_lifting.signed=False \
-    trainer=default \
+    dataset.parameters.batch_size=128,256 \
+    logger.wandb.project=TopoBenchmarkX_Simplicial \
+    trainer.max_epochs=500 \
+    trainer.min_epochs=50 \
     trainer.check_val_every_n_epoch=5 \
     callbacks.early_stopping.patience=10 \
-    logger.wandb.project=topobenchmark_22Apr2024 \
     --multirun
+done
 
-python train.py \
-    dataset=MUTAG \
-    model=simplicial/scn \
+# ----Heterophilic datasets----
+
+datasets=( roman_empire amazon_ratings tolokers minesweeper questions )
+
+for dataset in ${datasets[*]}
+do
+  python train.py \
+    dataset=$dataset \
+    model=hypergraph/edgnn \
     model.optimizer.lr=0.01,0.001 \
-    model.feature_encoder.out_channels=16,64 \
-    model.backbone.n_layers=1,2 \
-    dataset.parameters.batch_size=32 \
+    model.feature_encoder.out_channels=32,64,128 \
+    model.backbone.n_layers=1,2,3,4 \
+    model.feature_encoder.proj_dropout=0.25,0.5 \
     dataset.parameters.data_seed=0,3,5 \
-    dataset.transforms.graph2simplicial_lifting.complex_dim=3 \
-    dataset.transforms.graph2simplicial_lifting.signed=False \
-    trainer=default \
-    trainer.check_val_every_n_epoch=5 \
-    callbacks.early_stopping.patience=10 \
-    logger.wandb.project=topobenchmark_22Apr2024 \
+    dataset.parameters.batch_size=128,256 \
+    logger.wandb.project=TopoBenchmarkX_Simplicial \
+    trainer.max_epochs=1000 \
+    trainer.min_epochs=50 \
+    trainer.check_val_every_n_epoch=1 \
+    callbacks.early_stopping.patience=50 \
+    tags="[MainExperiment]" \
     --multirun
+done

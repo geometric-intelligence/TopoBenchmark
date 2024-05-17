@@ -8,10 +8,10 @@ do
     dataset=us_country_demos \
     dataset.parameters.data_seed=0,3,5,7,9 \
     dataset.parameters.task_variable=$task_variable \
-    model=hypergraph/allsettransformer \
+    model=hypergraph/edgnn \
     model.feature_encoder.out_channels=32,64,128 \
     model.feature_encoder.proj_dropout=0.25,0.5 \
-    model.backbone.n_layers="1,2,3,4" \
+    model.backbone.All_num_layers=1,2,3,4 \
     model.optimizer.lr="0.01,0.001" \
     trainer.max_epochs=1000 \
     trainer.min_epochs=500 \
@@ -31,10 +31,10 @@ do
   python train.py \
     dataset=$dataset \
     dataset.parameters.data_seed=0,3,5,7,9 \
-    model=hypergraph/allsettransformer \
-    model.feature_encoder.out_channels="32,64,128" \
+    model=hypergraph/edgnn \
+    model.feature_encoder.out_channels=32,64,128 \
     model.feature_encoder.proj_dropout=0.25,0.5 \
-    model.backbone.n_layers="1,2" \
+    model.backbone.All_num_layers="1,2" \
     model.optimizer.lr="0.01,0.001" \
     trainer.max_epochs=500 \
     trainer.min_epochs=50 \
@@ -50,11 +50,11 @@ done
 python train.py \
   dataset=ZINC \
   seed=42,3,5,23,150 \
-  model=hypergraph/allsettransformer \
+  model=hypergraph/edgnn \
   model.optimizer.lr=0.01,0.001 \
   model.optimizer.weight_decay=0 \
   model.feature_encoder.out_channels=32,64,128 \
-  model.backbone.n_layers=2,4 \
+  model.backbone.All_num_layers=2,4 \
   model.feature_encoder.proj_dropout=0.25,0.5 \
   dataset.parameters.batch_size=128,256 \
   dataset.transforms.one_hot_node_degree_features.degrees_fields=x \
@@ -68,16 +68,15 @@ python train.py \
   tags="[MainExperiment]" \
   --multirun
 
-
 # ----TU graph datasets----
 # MUTAG have very few samples, so we use a smaller batch size
 # Train on MUTAG dataset
 python train.py \
   dataset=MUTAG \
-  model=hypergraph/allsettransformer \
+  model=hypergraph/edgnn \
   model.optimizer.lr=0.01,0.001 \
   model.feature_encoder.out_channels=32,64,128 \
-  model.backbone.n_layers=1,2,3,4 \
+  model.backbone.All_num_layers=1,2,3,4 \
   model.feature_encoder.proj_dropout=0.25,0.5 \
   dataset.parameters.data_seed=0,3,5 \
   dataset.parameters.batch_size=32,64 \
@@ -96,10 +95,10 @@ for dataset in ${datasets[*]}
 do
   python train.py \
     dataset=$dataset \
-    model=hypergraph/allsettransformer \
+    model=hypergraph/edgnn \
     model.optimizer.lr=0.01,0.001 \
     model.feature_encoder.out_channels=32,64,128 \
-    model.backbone.n_layers=1,2,3,4 \
+    model.backbone.All_num_layers=1,2,3,4 \
     model.feature_encoder.proj_dropout=0.25,0.5 \
     dataset.parameters.data_seed=0,3,5 \
     dataset.parameters.batch_size=128,256 \
@@ -119,10 +118,10 @@ for dataset in ${datasets[*]}
 do
   python train.py \
     dataset=$dataset \
-    model=hypergraph/allsettransformer \
+    model=hypergraph/edgnn \
     model.optimizer.lr=0.01,0.001 \
     model.feature_encoder.out_channels=32,64,128 \
-    model.backbone.n_layers=1,2,3,4 \
+    model.backbone.All_num_layers=1,2,3,4 \
     model.feature_encoder.proj_dropout=0.25,0.5 \
     dataset.parameters.data_seed=0,3,5 \
     dataset.parameters.batch_size=128,256 \

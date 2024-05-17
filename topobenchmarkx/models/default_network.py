@@ -68,7 +68,7 @@ class TopologicalNetworkModule(LightningModule):
     ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         """Perform a single model step on a batch of data.
 
-        :param batch: A batch of data (a tuple) containing the input tensor of images and target labels.
+        :param batch: A batch of domain data.
 
         :return: A tuple containing (in order):
             - A tensor of losses.

@@ -5,11 +5,14 @@ import torch_geometric
 
 
 class AbstractFeatureEncoder(torch.nn.Module):
-    """Abstract class that provides an interface to define a custom feature encoder."""
+    r"""Abstract class that provides an interface to define a custom feature encoder."""
 
     def __init__(self, **kwargs):
         super().__init__()
         return
+    
+    def __repr__(self):
+        return f"{self.__class__.__name__}()"
 
     def __call__(self, data):
         return self.forward(data)
@@ -18,11 +21,10 @@ class AbstractFeatureEncoder(torch.nn.Module):
     def forward(
         self, data: torch_geometric.data.Data
     ) -> torch_geometric.data.Data:
-        """Forward pass of the feature encoder model.
+        r"""Forward pass of the feature encoder model.
 
-        Parameters:
-            :data: torch_geometric.data.Data
-
+        Args:
+            data (torch_geometric.data.Data): Input data object which should contain x features.
         Returns:
-            :data: torch_geometric.data.Data
+            torch_geometric.data.Data: Output data object with updated x features.
         """

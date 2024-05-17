@@ -3,16 +3,12 @@ import torch_geometric
 from abc import abstractmethod
 
 class AbstractHeadModel(torch.nn.Module):
-    r"""Head model.
+    r"""Abstract head model class.
 
-    Parameters
-    ----------
-    in_channels: int
-        Input dimension.
-    out_channels: int
-        Output dimension.
+    Args:
+        in_channels (int): Input dimension.
+        out_channels (int): Output dimension.
     """
-
     def __init__(
         self,
         in_channels: int,
@@ -21,6 +17,9 @@ class AbstractHeadModel(torch.nn.Module):
     ):
         super().__init__()
         self.linear = torch.nn.Linear(in_channels, out_channels)
+        
+    def __repr__(self):
+        return f"{self.__class__.__name__}(in_channels={self.linear.in_features}, out_channels={self.linear.out_features})"
     
     def __call__(self, model_out: dict, batch: torch_geometric.data.Data) -> dict:
         x = self.forward(model_out, batch)
@@ -29,19 +28,13 @@ class AbstractHeadModel(torch.nn.Module):
     
     @abstractmethod
     def forward(self, model_out: dict, batch: torch_geometric.data.Data):
-        r"""Forward pass.
+        r"""Forward pass of the head model.
 
-        Parameters
-        ----------
-        model_out: dict
-            Dictionary containing the model output.
-        batch: torch_geometric.data.Data
-            Batch object containing the batched domain data.
-
-        Returns
-        -------
-        x: torch.Tensor
-            Output tensor over which the final linear layer is applied.
+        Args:
+            model_out (dict): Dictionary containing the model output.
+            batch (torch_geometric.data.Data): Batch object containing the batched domain data.
+        Returns:
+            torch.Tensor: Output tensor over which the final linear layer is applied.
         """
         pass
         

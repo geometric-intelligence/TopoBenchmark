@@ -8,7 +8,6 @@ from torch import einsum, nn
 
 # helpers
 
-
 def exists(val):
     return val is not None
 
@@ -66,14 +65,10 @@ def cache_fn(f):
 class PreNorm(nn.Module):
     r"""Class to wrap together LayerNorm and a specified function.
 
-    Parameters
-    ----------
-    dim: int
-        Size of the dimension to normalize.
-    fn: torch.nn.Module
-        Function after LayerNorm.
-    context_dim: int
-        Size of the context to normalize.
+    Args:
+        dim (int): Size of the dimension to normalize.
+        fn (torch.nn.Module): Function after LayerNorm.
+        context_dim (int, optional): Size of the context to normalize. (default: None)
     """
 
     def __init__(self, dim, fn, context_dim=None):
@@ -83,21 +78,18 @@ class PreNorm(nn.Module):
         self.norm_context = (
             nn.LayerNorm(context_dim) if exists(context_dim) else None
         )
-
+    
+    def __repr__(self):
+        return f"{self.__class__.__name__}(dim={self.norm.normalized_shape[0]}, fn={self.fn}, context_dim={self.norm_context.normalized_shape[0] if exists(self.norm_context) else None})"
+    
     def forward(self, x, **kwargs):
-        r"""Forward pass.
+        r"""Forward pass of the PreNorm class.
 
-        Parameters
-        ----------
-        x: torch.Tensor
-            Input tensor.
-        kwargs: dict
-            Dictionary of keyword arguments.
-
-        Returns
-        -------
-        torch.Tensor
-            Output tensor.
+        Args:
+            x (torch.Tensor): Input tensor.
+            **kwargs: Additional arguments. If context_dim is not None the context tensor should be passed.
+        Returns:
+            torch.Tensor: Output tensor.
         """
         x = self.norm(x)
 
@@ -113,60 +105,53 @@ class GEGLU(nn.Module):
     r"""GEGLU activation function."""
 
     def forward(self, x):
-        r"""Forward pass.
+        r"""Forward pass of the GEGLU activation function.
 
-        Parameters
-        ----------
-        x: torch.Tensor
-            Input tensor.
+        Args:
+            x (torch.Tensor): Input tensor.
+        Returns:
+            torch.Tensor: Output tensor.
         """
         x, gates = x.chunk(2, dim=-1)
         return x * F.gelu(gates)
 
 
 class FeedForward(nn.Module):
-    r"""Feedforward network.
+    r"""Feedforward network with two linear layers and GEGLU activation function in between.
 
-    Parameters
-    ----------
-    dim: int
-        Size of the input dimension.
-    mult: int
-        Multiplier for the hidden dimension.
+    Args:
+        dim (int): Size of the input dimension.
+        mult (int, optional): Multiplier for the hidden dimension. (default: 4)
     """
-
     def __init__(self, dim, mult=4):
         super().__init__()
         self.net = nn.Sequential(
             nn.Linear(dim, dim * mult * 2), GEGLU(), nn.Linear(dim * mult, dim)
         )
-
+    
+    def __repr__(self):
+        return f"{self.__class__.__name__}(dim={self.net[0].in_features}, mult={self.net[0].out_features // self.net[0].in_features})"
+    
     def forward(self, x):
-        r"""Forward pass.
+        r"""Forward pass of the FeedForward class.
 
-        Parameters
-        ----------
-        x: torch.Tensor
-            Input tensor.
+        Args:
+            x (torch.Tensor): Input tensor.
+        Returns:
+            torch.Tensor: Output tensor.
         """
         return self.net(x)
 
 
 class Attention(nn.Module):
-    r"""Attention function.
+    r"""Attention class to calculate the attention weights.
 
-    Parameters
-    ----------
-    query_dim: int
-        Size of the query dimension.
-    context_dim: int
-        Size of the context dimension.
-    heads: int
-        Number of heads.
-    dim_head: int
-        Size for each head.
+    Args:
+        query_dim (int): Size of the query dimension.
+        context_dim (int, optional): Size of the context dimension. (default: None)
+        heads (int, optional): Number of heads. (default: 8)
+        dim_head (int, optional): Size for each head. (default: 64)
     """
-
     def __init__(self, query_dim, context_dim=None, heads=8, dim_head=64):
         super().__init__()
         inner_dim = dim_head * heads
@@ -178,22 +163,18 @@ class Attention(nn.Module):
         self.to_kv = nn.Linear(context_dim, inner_dim * 2, bias=False)
         self.to_out = nn.Linear(inner_dim, query_dim)
 
+    def __repr__(self):
+        return f"{self.__class__.__name__}(query_dim={self.to_q.in_features}, context_dim={self.to_kv.in_features // 2}, heads={self.heads}, dim_head={self.to_q.out_features // self.heads})"
+    
     def forward(self, x, context=None, mask=None):
-        r"""Forward pass.
+        r"""Forward pass of the Attention class.
 
-        Parameters
-        ----------
-        x: torch.Tensor
-            Input tensor.
-        context: torch.Tensor
-            Context tensor.
-        mask: torch.Tensor
-            Mask for attention calculation purposes.
-
-        Returns
-        -------
-        torch.Tensor
-            Output tensor.
+        Args:
+            x (torch.Tensor): Input tensor.
+            context (torch.Tensor, optional): Context tensor. (default: None)
+            mask (torch.Tensor, optional): Mask for attention calculation purposes. (default: None)
+        Returns:
+            torch.Tensor: Output tensor.
         """
         h = self.heads
 
@@ -225,28 +206,18 @@ class Attention(nn.Module):
 
 
 class Perceiver(nn.Module):
-    r"""Perceiver model.
+    r"""Perceiver model. For more information https://arxiv.org/abs/2103.03206.
 
-    Parameters
-    ----------
-    depth: int
-        Number of layers to add to the model.
-    dim: int
-        Size of the input dimension.
-    num_latents: int
-        Number of latent vectors.
-    cross_heads: int
-        Number of heads for cross attention.
-    latent_heads: int
-        Number of heads for latent attention.
-    cross_dim_head: int
-        Size of the cross attention head.
-    latent_dim_head: int
-        Size of the latent attention head.
-    weight_tie_layers: bool
-        Whether to tie the weights of the layers.
-    decoder_ff: bool
-        Whether to use a feedforward network in the decoder.
+    Args:
+        depth (int): Number of layers to add to the model.
+        dim (int): Size of the input dimension.
+        num_latents (int, optional): Number of latent vectors. (default: 1)
+        cross_heads (int, optional): Number of heads for cross attention. (default: 1)
+        latent_heads (int, optional): Number of heads for latent attention. (default: 8)
+        cross_dim_head (int, optional): Size of the cross attention head. (default: 64)
+        latent_dim_head (int, optional): Size of the latent attention head. (default: 64)
+        weight_tie_layers (bool, optional): Whether to tie the weights of the layers. (default: False)
+        decoder_ff (bool, optional): Whether to use a feedforward network in the decoder. (default: False)
     """
 
     def __init__(
@@ -332,21 +303,31 @@ class Perceiver(nn.Module):
             else None
         )
 
+        self.dim = dim
+        self.num_latents = num_latents
+        self.cross_heads = cross_heads
+        self.latent_heads = latent_heads
+        self.cross_dim_head = cross_dim_head
+        self.latent_dim_head = latent_dim_head
+        self.weight_tie_layers = weight_tie_layers
+        self.decoder_ff = decoder_ff
+        
         # self.to_logits = (
         #     nn.Linear(queries_dim, logits_dim) if exists(logits_dim) else nn.Identity()
         # )
+    
+    def __repr__(self):
+        return f"{self.__class__.__name__}(depth={len(self.layers)}, dim={self.dim}, num_latents={self.num_latents}, cross_heads={self.cross_heads}, latent_heads={self.latent_heads}, cross_dim_head={self.cross_dim_head}, latent_dim_head={self.latent_dim_head}, weight_tie_layers={self.weight_tie_layers}, decoder_ff={self.decoder_ff}"
 
     def forward(self, data, mask=None, queries=None):
-        r"""Forward pass.
+        r"""Forward pass of the Perceiver model.
 
-        Parameters
-        ----------
-        data: torch.Tensor
-            Input tensor.
-        mask: torch.Tensor
-            Mask for attention calculation purposes.
-        queries: torch.Tensor
-            Queries tensor.
+        Args:
+            data (torch.Tensor): Input tensor.
+            mask (torch.Tensor, optional): Mask for attention calculation purposes. (default: None)
+            queries (torch.Tensor, optional): Queries tensor. (default: None)
+        Returns:
+            torch.Tensor: Output tensor.
         """
         b, *_ = *data.shape
 

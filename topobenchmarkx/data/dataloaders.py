@@ -165,7 +165,7 @@ class DefaultDataModule(LightningDataModule):
             self.dataset_test = dataset_test
             
     def __repr__(self) -> str:
-        return f"{self.__class__.__name__}(dataset_train={self.dataset_train}, dataset_val={self.dataset_val}, dataset_test={self.dataset_test}, batch_size={self.batch_size}, num_workers={self.hparams.num_workers}, pin_memory={self.hparams.pin_memory})"
+        return f"{self.__class__.__name__}(dataset_train={self.dataset_train}, dataset_val={self.dataset_val}, dataset_test={self.dataset_test}, batch_size={self.batch_size})"
 
     def train_dataloader(self) -> DataLoader:
         r"""Create and return the train dataloader.

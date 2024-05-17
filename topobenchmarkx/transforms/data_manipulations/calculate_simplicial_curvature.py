@@ -2,31 +2,27 @@ import torch
 import torch_geometric
 
 class CalculateSimplicialCurvature(torch_geometric.transforms.BaseTransform):
-    """A transform that calculates the simplicial curvature of the input graph.
+    r"""A transform that calculates the simplicial curvature of the input graph.
 
-    Parameters
-    ----------
-    **kwargs : optional
-        Parameters for the transform.
+    Args:
+        kwargs (optional): Parameters for the transform.
     """
 
     def __init__(self, **kwargs):
         super().__init__()
         self.type = "simplicial_curvature"
         self.parameters = kwargs
+        
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}(type={self.type!r}, parameters={self.parameters!r})"
 
     def forward(self, data: torch_geometric.data.Data):
-        """Apply the transform to the input data.
+        r"""Apply the transform to the input data.
 
-        Parameters
-        ----------
-        data : torch_geometric.data.Data
-            The input data.
-
-        Returns
-        -------
-        torch_geometric.data.Data
-            The transformed data.
+        Args:
+            data (torch_geometric.data.Data): The input data.
+        Returns:
+            torch_geometric.data.Data: The transformed data.
         """
         data = self.one_cell_curvature(data)
         data = self.zero_cell_curvature(data)
@@ -37,17 +33,12 @@ class CalculateSimplicialCurvature(torch_geometric.transforms.BaseTransform):
         self,
         data: torch_geometric.data.Data,
     ) -> torch_geometric.data.Data:
-        """Calculate the zero cell curvature of the input data.
+        r"""Calculate the zero cell curvature of the input data.
 
-        Parameters
-        ----------
-        data : torch_geometric.data.Data
-            The input data.
-
-        Returns
-        -------
-        torch_geometric.data.Data
-            Data with the zero cell curvature.
+        Args:
+            data (torch_geometric.data.Data): The input data.
+        Returns:
+            torch_geometric.data.Data: Data with the zero cell curvature.
         """
         data["0_cell_curvature"] = torch.mm(
             abs(data["incidence_1"]), data["1_cell_curvature"]
@@ -60,15 +51,10 @@ class CalculateSimplicialCurvature(torch_geometric.transforms.BaseTransform):
     ) -> torch_geometric.data.Data:
         r"""Calculate the one cell curvature of the input data.
 
-        Parameters
-        ----------
-        data : torch_geometric.data.Data
-            The input data.
-
-        Returns
-        -------
-        torch_geometric.data.Data
-            Data with the one cell curvature.
+        Args:
+            data (torch_geometric.data.Data): The input data.
+        Returns:
+            torch_geometric.data.Data: Data with the one cell curvature.
         """
         data["1_cell_curvature"] = (
             4
@@ -83,15 +69,10 @@ class CalculateSimplicialCurvature(torch_geometric.transforms.BaseTransform):
     ) -> torch_geometric.data.Data:
         r"""Calculate the two cell curvature of the input data.
 
-        Parameters
-        ----------
-        data : torch_geometric.data.Data
-            The input data.
-
-        Returns
-        -------
-        torch_geometric.data.Data
-            Data with the two cell curvature.
+        Args:
+            data (torch_geometric.data.Data): The input data.
+        Returns:
+            torch_geometric.data.Data: Data with the two cell curvature.
         """
         # Term 1 is simply the degree of the 2-cell (i.e. each triangle belong to n tetrahedrons)
         term1 = data["2_cell_degrees"]

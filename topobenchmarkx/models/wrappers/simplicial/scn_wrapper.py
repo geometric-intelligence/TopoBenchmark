@@ -2,11 +2,16 @@ import torch
 from topobenchmarkx.models.wrappers.wrapper import DefaultWrapper
 
 class SCNWrapper(DefaultWrapper):
-    """Abstract class that provides an interface to loss logic within
-    network."""
+    r"""Wrapper for the SCNW model. This wrapper defines the forward pass of the model. The SCNW model returns the embeddings of the cells of rank 0, 1, and 2."""
 
     def forward(self, batch):
-        """Define logic for forward pass."""
+        r"""Forward pass for the SCNW wrapper.
+        
+        Args:
+            batch (torch_geometric.data.Data): Batch object containing the batched data.
+        Returns:
+            dict: Dictionary containing the updated model output.
+        """
 
         laplacian_0 = self.normalize_matrix(batch.hodge_laplacian_0)
         laplacian_1 = self.normalize_matrix(batch.hodge_laplacian_1)
@@ -28,6 +33,13 @@ class SCNWrapper(DefaultWrapper):
         return model_out
 
     def normalize_matrix(self, matrix):
+        r"""Normalize the input matrix. The normalization is performed using the diagonal matrix of the inverse square root of the sum of the absolute values of the rows.
+        
+        Args:
+            matrix (torch.sparse.FloatTensor): Input matrix to be normalized.
+        Returns:
+            torch.sparse.FloatTensor: Normalized matrix.
+        """
         matrix_ = matrix.to_dense()
         n, _ = matrix_.shape
         abs_matrix = abs(matrix_)

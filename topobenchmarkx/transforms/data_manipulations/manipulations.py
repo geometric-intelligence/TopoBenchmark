@@ -5,51 +5,55 @@ from torch_geometric.utils import one_hot
 
 
 class IdentityTransform(torch_geometric.transforms.BaseTransform):
-    r"""An identity transform that does nothing to the input data."""
+    r"""An identity transform that does nothing to the input data.
+
+    Args:
+        kwargs (optional): Parameters for the base transform.
+    """
 
     def __init__(self, **kwargs):
         super().__init__()
         self.type = "domain2domain"
         self.parameters = kwargs
+        
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}(type={self.type!r}, parameters={self.parameters!r})"
 
     def forward(self, data: torch_geometric.data.Data):
         r"""Apply the transform to the input data.
 
-        Parameters
-        ----------
-        data : torch_geometric.data.Data
-            The input data.
-
-        Returns
-        -------
-        torch_geometric.data.Data
-            The (un)transformed data.
+        Args:
+            data (torch_geometric.data.Data): The input data.
+        Returns:
+            torch_geometric.data.Data: The same data.
         """
         return data
 
 
 class InfereKNNConnectivity(torch_geometric.transforms.BaseTransform):
     r"""A transform that generates the k-nearest neighbor connectivity of the
-    input point cloud."""
+    input point cloud.
+
+    Args:
+        kwargs (optional): Parameters for the base transform.
+    """
 
     def __init__(self, **kwargs):
         super().__init__()
         self.type = "infere_knn_connectivity"
         self.parameters = kwargs
 
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}(type={self.type!r}, parameters={self.parameters!r})"
+    
     def forward(self, data: torch_geometric.data.Data):
         r"""Apply the transform to the input data.
-
-        Parameters
-        ----------
-        data : torch_geometric.data.Data
-            The input data.
-        Returns
-        -------
-        torch_geometric.data.Data
-            The transformed data.
+        
+        Args:
+            data (torch_geometric.data.Data): The input data.
+        Returns:
+            torch_geometric.data.Data: The transformed data.
         """
-
         edge_index = knn_graph(data.x, **self.parameters["args"])
 
         # Remove duplicates
@@ -59,24 +63,27 @@ class InfereKNNConnectivity(torch_geometric.transforms.BaseTransform):
 
 class InfereRadiusConnectivity(torch_geometric.transforms.BaseTransform):
     r"""A transform that generates the radius connectivity of the input point
-    cloud."""
+    cloud.
+
+    Args:
+        kwargs (optional): Parameters for the base transform.
+    """
 
     def __init__(self, **kwargs):
         super().__init__()
         self.type = "infere_radius_connectivity"
         self.parameters = kwargs
 
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}(type={self.type!r}, parameters={self.parameters!r})"
+    
     def forward(self, data: torch_geometric.data.Data):
         r"""Apply the transform to the input data.
 
-        Parameters
-        ----------
-        data : torch_geometric.data.Data
-            The input data.
-        Returns
-        -------
-        torch_geometric.data.Data
-            The transformed data.
+        Args:
+            data (torch_geometric.data.Data): The input data.
+        Returns:
+            torch_geometric.data.Data: The transformed data.
         """
         data.edge_index = radius_graph(data.x, **self.parameters["args"])
         return data
@@ -86,10 +93,10 @@ class EqualGausFeatures(torch_geometric.transforms.BaseTransform):
     r"""A transform that generates equal Gaussian features for all nodes in the
     input graph.
 
-    Parameters
-    ----------
-    **kwargs : optional
-        Parameters for the transform.
+    Args:
+        mean (float): The mean of the Gaussian distribution.
+        std (float): The standard deviation of the Gaussian distribution.
+        num_features (int): The number of features to generate.
     """
 
     def __init__(self, **kwargs):
@@ -104,18 +111,16 @@ class EqualGausFeatures(torch_geometric.transforms.BaseTransform):
             mean=self.mean, std=self.std, size=(1, self.feature_vector)
         )
 
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}(type={self.type!r}, mean={self.mean!r}, std={self.std!r}, feature_vector={self.feature_vector!r}"
+    
     def forward(self, data: torch_geometric.data.Data):
         r"""Apply the transform to the input data.
 
-        Parameters
-        ----------
-        data : torch_geometric.data.Data
-            The input data.
-
-        Returns
-        -------
-        torch_geometric.data.Data
-            The transformed data.
+        Args:
+            data (torch_geometric.data.Data): The input data.
+        Returns:
+            torch_geometric.data.Data: The transformed data.
         """
         data.x = self.feature_vector.expand(data.num_nodes, -1)
         return data
@@ -123,29 +128,25 @@ class EqualGausFeatures(torch_geometric.transforms.BaseTransform):
 
 class NodeFeaturesToFloat(torch_geometric.transforms.BaseTransform):
     r"""A transform that converts the node features of the input graph to float.
-
-    Parameters
-    ----------
-    **kwargs : optional
-        Parameters for the transform.
+    
+    Args:
+        kwargs (optional): Parameters for the base transform.
     """
 
     def __init__(self, **kwargs):
         super().__init__()
         self.type = "map_node_features_to_float"
+        
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}(type={self.type!r})"
 
     def forward(self, data: torch_geometric.data.Data):
         r"""Apply the transform to the input data.
 
-        Parameters
-        ----------
-        data : torch_geometric.data.Data
-            The input data.
-
-        Returns
-        -------
-        torch_geometric.data.Data
-            The transformed data.
+        Args:
+            data (torch_geometric.data.Data): The input data.
+        Returns:
+            torch_geometric.data.Data: The transformed data.
         """
         data.x = data.x.float()
         return data
@@ -154,29 +155,25 @@ class NodeFeaturesToFloat(torch_geometric.transforms.BaseTransform):
 class NodeDegrees(torch_geometric.transforms.BaseTransform):
     r"""A transform that calculates the node degrees of the input graph.
 
-    Parameters
-    ----------
-    **kwargs : optional
-        Parameters for the transform.
+    Args:
+        kwargs (optional): Parameters for the base transform.
     """
 
     def __init__(self, **kwargs):
         super().__init__()
         self.type = "node_degrees"
         self.parameters = kwargs
+    
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}(type={self.type!r}, parameters={self.parameters!r}"
 
     def forward(self, data: torch_geometric.data.Data):
         r"""Apply the transform to the input data.
 
-        Parameters
-        ----------
-        data : torch_geometric.data.Data
-            The input data.
-
-        Returns
-        -------
-        torch_geometric.data.Data
-            The transformed data.
+        Args:
+            data (torch_geometric.data.Data): The input data.
+        Returns:
+            torch_geometric.data.Data: The transformed data.
         """
         field_to_process = [
             key
@@ -194,16 +191,11 @@ class NodeDegrees(torch_geometric.transforms.BaseTransform):
     ) -> torch_geometric.data.Data:
         r"""Calculate the node degrees of the input data.
 
-        Parameters
-        ----------
-        data : torch_geometric.data.Data
-            The input data.
-        field : str
-            The field to calculate the node degrees.
-
-        Returns
-        -------
-        torch_geometric.data.Data
+        Args:
+            data (torch_geometric.data.Data): The input data.
+            field (str): The field to calculate the node degrees.
+        Returns:
+            torch_geometric.data.Data: The transformed data.
         """
         if data[field].is_sparse:
             degrees = abs(data[field].to_dense()).sum(1)
@@ -241,10 +233,8 @@ class KeepOnlyConnectedComponent(torch_geometric.transforms.BaseTransform):
     """A transform that keeps only the largest connected components of the
     input graph.
 
-    Parameters
-    ----------
-    **kwargs : optional
-        Parameters for the transform.
+    Args:
+        kwargs (optional): Parameters for the base transform.
     """
 
     def __init__(self, **kwargs):
@@ -252,18 +242,16 @@ class KeepOnlyConnectedComponent(torch_geometric.transforms.BaseTransform):
         self.type = "keep_connected_component"
         self.parameters = kwargs
 
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}(type={self.type!r}, parameters={self.parameters!r})"
+    
     def forward(self, data: torch_geometric.data.Data):
         """Apply the transform to the input data.
 
-        Parameters
-        ----------
-        data : torch_geometric.data.Data
-            The input data.
-
-        Returns
-        -------
-        torch_geometric.data.Data
-            The transformed data.
+        Args:
+            data (torch_geometric.data.Data): The input data.
+        Returns:
+            torch_geometric.data.Data: The transformed data.
         """
         from torch_geometric.transforms import LargestConnectedComponents
 
@@ -279,10 +267,8 @@ class KeepOnlyConnectedComponent(torch_geometric.transforms.BaseTransform):
 class CalculateSimplicialCurvature(torch_geometric.transforms.BaseTransform):
     """A transform that calculates the simplicial curvature of the input graph.
 
-    Parameters
-    ----------
-    **kwargs : optional
-        Parameters for the transform.
+    Args:
+        kwargs (optional): Parameters for the base transform.
     """
 
     def __init__(self, **kwargs):
@@ -290,18 +276,16 @@ class CalculateSimplicialCurvature(torch_geometric.transforms.BaseTransform):
         self.type = "simplicial_curvature"
         self.parameters = kwargs
 
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}(type={self.type!r}, parameters={self.parameters!r}"
+    
     def forward(self, data: torch_geometric.data.Data):
         """Apply the transform to the input data.
 
-        Parameters
-        ----------
-        data : torch_geometric.data.Data
-            The input data.
-
-        Returns
-        -------
-        torch_geometric.data.Data
-            The transformed data.
+        Args:
+            data (torch_geometric.data.Data): The input data.
+        Returns:
+            torch_geometric.data.Data: The transformed data.
         """
         data = self.one_cell_curvature(data)
         data = self.zero_cell_curvature(data)
@@ -314,15 +298,10 @@ class CalculateSimplicialCurvature(torch_geometric.transforms.BaseTransform):
     ) -> torch_geometric.data.Data:
         """Calculate the zero cell curvature of the input data.
 
-        Parameters
-        ----------
-        data : torch_geometric.data.Data
-            The input data.
-
-        Returns
-        -------
-        torch_geometric.data.Data
-            Data with the zero cell curvature.
+        Args:
+            data (torch_geometric.data.Data): The input data.
+        Returns:
+            torch_geometric.data.Data: Data with the zero cell curvature added as a field.
         """
         data["0_cell_curvature"] = torch.mm(
             abs(data["incidence_1"]), data["1_cell_curvature"]
@@ -335,15 +314,10 @@ class CalculateSimplicialCurvature(torch_geometric.transforms.BaseTransform):
     ) -> torch_geometric.data.Data:
         r"""Calculate the one cell curvature of the input data.
 
-        Parameters
-        ----------
-        data : torch_geometric.data.Data
-            The input data.
-
-        Returns
-        -------
-        torch_geometric.data.Data
-            Data with the one cell curvature.
+        Args:
+            data (torch_geometric.data.Data): The input data.
+        Returns:
+            torch_geometric.data.Data: Data with the one cell curvature added as a field.
         """
         data["1_cell_curvature"] = (
             4
@@ -358,15 +332,10 @@ class CalculateSimplicialCurvature(torch_geometric.transforms.BaseTransform):
     ) -> torch_geometric.data.Data:
         r"""Calculate the two cell curvature of the input data.
 
-        Parameters
-        ----------
-        data : torch_geometric.data.Data
-            The input data.
-
-        Returns
-        -------
-        torch_geometric.data.Data
-            Data with the two cell curvature.
+        Args:
+            data (torch_geometric.data.Data): The input data.
+        Returns:
+            torch_geometric.data.Data: Data with the two cell curvature added as a field.
         """
         # Term 1 is simply the degree of the 2-cell (i.e. each triangle belong to n tetrahedrons)
         term1 = data["2_cell_degrees"]
@@ -391,10 +360,8 @@ class OneHotDegreeFeatures(torch_geometric.transforms.BaseTransform):
     r"""A transform that adds the node degree as one hot encodings to the node
     features.
 
-    Parameters
-    ----------
-    **kwargs : optional
-        Parameters for the transform.
+    Args:
+        kwargs (optional): Parameters for the base transform.
     """
 
     def __init__(self, **kwargs):
@@ -404,18 +371,16 @@ class OneHotDegreeFeatures(torch_geometric.transforms.BaseTransform):
         self.features_fields = kwargs["features_fields"]
         self.transform = OneHotDegree(max_degree=kwargs["max_degrees"])
 
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}(type={self.type!r}, degrees_field={self.deg_field!r}, features_field={self.features_fields!r}"
+    
     def forward(self, data: torch_geometric.data.Data):
         r"""Apply the transform to the input data.
 
-        Parameters
-        ----------
-        data : torch_geometric.data.Data
-            The input data.
-
-        Returns
-        -------
-        torch_geometric.data.Data
-            The transformed data.
+        Args:
+            data (torch_geometric.data.Data): The input data.
+        Returns:
+            torch_geometric.data.Data: The transformed data.
         """
         data = self.transform.forward(
             data,
@@ -429,12 +394,9 @@ class OneHotDegreeFeatures(torch_geometric.transforms.BaseTransform):
 class OneHotDegree(torch_geometric.transforms.BaseTransform):
     r"""Adds the node degree as one hot encodings to the node features.
 
-    Parameters
-    ----------
-    max_degree : int
-        The maximum degree of the graph.
-    cat : bool, optional
-        If set to `True`, the one hot encodings are concatenated to the node features.
+    Args:
+        max_degree (int): The maximum degree of the graph.
+        cat (bool, optional): Whether to concatenate the one hot encoding to the node features. (default: False)
     """
 
     def __init__(
@@ -445,6 +407,9 @@ class OneHotDegree(torch_geometric.transforms.BaseTransform):
         self.max_degree = max_degree
         self.cat = cat
 
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}(max_degree={self.max_degree}, cat={self.cat})"
+    
     def forward(
         self,
         data: torch_geometric.data.Data,
@@ -453,19 +418,12 @@ class OneHotDegree(torch_geometric.transforms.BaseTransform):
     ) -> torch_geometric.data.Data:
         r"""Apply the transform to the input data.
 
-        Parameters
-        ----------
-        data : torch_geometric.data.Data
-            The input data.
-        degrees_field : str
-            The field containing the node degrees.
-        features_field : str
-            The field containing the node features.
-
-        Returns
-        -------
-        torch_geometric.data.Data
-            The transformed data.
+        Args:
+            data (torch_geometric.data.Data): The input data.
+            degrees_field (str): The field containing the node degrees.
+            features_field (str): The field containing the node features.
+        Returns:
+            torch_geometric.data.Data: The transformed data.
         """
         assert data.edge_index is not None
 
@@ -492,10 +450,8 @@ class OneHotDegree(torch_geometric.transforms.BaseTransform):
 class KeepSelectedDataFields(torch_geometric.transforms.BaseTransform):
     r"""A transform that keeps only the selected fields of the input data.
 
-    Parameters
-    ----------
-    **kwargs : optional
-        Parameters for the transform.
+    Args:
+        kwargs (optional): Parameters for the base transform.
     """
 
     def __init__(self, **kwargs):
@@ -503,18 +459,16 @@ class KeepSelectedDataFields(torch_geometric.transforms.BaseTransform):
         self.type = "keep_selected_data_fields"
         self.parameters = kwargs
 
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}(type={self.type!r}, parameters={self.parameters!r}"
+    
     def forward(self, data: torch_geometric.data.Data):
         r"""Apply the transform to the input data.
 
-        Parameters
-        ----------
-        data : torch_geometric.data.Data
-            The input data.
-
-        Returns
-        -------
-        torch_geometric.data.Data
-            The transformed data.
+        Args:
+            data (torch_geometric.data.Data): The input data.
+        Returns:
+            torch_geometric.data.Data: The transformed data.
         """
         # Keeps all the fields
         fields_to_keep = (

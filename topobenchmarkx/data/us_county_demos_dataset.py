@@ -101,6 +101,12 @@ class USCountyDemosDataset(InMemoryDataset):
         # Assign data object to self.data, to make it be prodessed by Dataset class
         self.data, self.slices = self.collate([data])
         
+        # Make sure the dataset will be reloaded during next run 
+        shutil.rmtree(self.raw_dir)
+        # Get parent dir of self.processed_paths[0]
+        processed_dir = os.path.abspath(os.path.join(self.processed_paths[0], os.pardir))
+        shutil.rmtree(processed_dir)
+        
     def __repr__(self) -> str:
         return f"{self.name}(self.root={self.root}, self.name={self.name}, self.parameters={self.parameters}, self.transform={self.transform}, self.pre_transform={self.pre_transform}, self.pre_filter={self.pre_filter}, self.force_reload={self.force_reload})" 
 
@@ -153,24 +159,6 @@ class USCountyDemosDataset(InMemoryDataset):
         
         # Delete osp.join(folder, self.name) dir
         shutil.rmtree(osp.join(folder, self.name))
-
-
-        #os.rename(osp.join(folder, self.name), self.raw_dir)
-        
-        
-        # # Extract the downloaded file if it is compressed
-        # fs.cp(f"{self.raw_dir}/{self.name}.{self.file_format}",
-        #     f"{self.raw_dir}/{self.name}.{self.file_format}",
-        #     self.raw_dir,
-        #     extract=True,
-        # )
-        # # Move the etracted files to the datasets/domain/dataset_name/raw/ directory
-        # for filename in fs.ls(osp.join(self.raw_dir, self.name)):
-        #     fs.mv(filename, osp.join(self.raw_dir, osp.basename(filename)))
-        # fs.rm(osp.join(self.raw_dir, self.name))
-
-        # # Delete also f'{self.raw_dir}/{self.name}.{self.file_format}'
-        # fs.rm(f"{self.raw_dir}/{self.name}.{self.file_format}")
         
 
     def process(self) -> None:

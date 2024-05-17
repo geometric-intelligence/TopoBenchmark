@@ -127,6 +127,19 @@ def train(cfg: DictConfig) -> tuple[dict[str, Any], dict[str, Any]]:
         "two_cell": 0,
         "three_cell": 0,
     }
+
+    cell_dict = {
+        "3":0,
+        "4":0,
+        "5":0,
+        "6":0,
+        "7":0,
+        "8":0,
+        "9":0,
+        "10":0,
+        "greater_than_10":0
+
+    }
     
     for loader in dataloaders:
         for batch in loader:
@@ -145,7 +158,12 @@ def train(cfg: DictConfig) -> tuple[dict[str, Any], dict[str, Any]]:
                 dict_collector["one_cell"] += batch.x_1.shape[0]
                 dict_collector["two_cell"] += batch.x_2.shape[0]
                 cell_sizes, cell_counts = torch.unique(batch.incidence_2.to_dense().sum(0), return_counts=True)
-
+                cell_sizes = cell_sizes.long()
+                for i in range(len(cell_sizes)):
+                    if cell_sizes[i].item() > 10:
+                        cell_dict["greater_than_10"] += cell_counts[i].item()
+                    else: 
+                        cell_dict[str(cell_sizes[i].item())] += cell_counts[i].item()
     
     # Get current working dir
     filename = f"{cfg.paths['root_dir']}/tables/dataset_statistics.csv"
@@ -165,34 +183,37 @@ def train(cfg: DictConfig) -> tuple[dict[str, Any], dict[str, Any]]:
         # write to csv file
         df_saved.to_csv(filename)
     
-    # if cfg.model.model_domain == "cell":   
-    #     filename = f"{cfg.paths['root_dir']}/tables/cell_statistics.csv"
-    #     # Create a dict from two arrays
-    #     cell_dict = dict(zip(cell_sizes.long().tolist(), cell_counts.long().tolist()))
+    if cfg.model.model_domain == "cell":   
+        filename = f"{cfg.paths['root_dir']}/tables/cell_statistics.csv"
+        # Create a dict from two arrays
+        # cell_dict = dict(zip(cell_sizes.long().tolist(), cell_counts.long().tolist()))
+        # keys = list(cell_dict.keys())
+        # for key in keys:
+        #     cell_dict[str(key)] = cell_dict.pop(key)
 
-    #     # Check if there are cells size of which greater than 10
-    #     n_large_cells = 0
-    #     subset_keys = [key for key in sorted(cell_dict.keys()) if key > 10]
+        # # Check if there are cells size of which greater than 10
+        # n_large_cells = 0
+        # subset_keys = [key for key in sorted(cell_dict.keys()) if int(key) > 10]
         
-    #     for key in subset_keys:
-    #         n_large_cells += cell_dict.pop(key)
+        # for key in subset_keys:
+        #     n_large_cells += cell_dict.pop(key)
         
-    #     cell_dict["greater_than_10"] = n_large_cells
+        # cell_dict["greater_than_10"] = n_large_cells
 
-    #     cell_dict['dataset'] = cfg.dataset.parameters.data_name
-    #     cell_dict['domain'] = cfg.model.model_domain
+        cell_dict['dataset'] = cfg.dataset.parameters.data_name
+        cell_dict['domain'] = cfg.model.model_domain
 
-    #     df = pd.DataFrame.from_dict(cell_dict, orient='index')
-    #     if not os.path.exists(filename) == True:
-    #         # Save to csv file such as methods .... is a header
-    #         df.T.to_csv(filename, header=True)
-    #     else:
-    #         # read csv file with deader
-    #         df_saved = pd.read_csv(filename, index_col=0)
-    #         # add new row
-    #         df_saved = df_saved._append(df.T, ignore_index=True)
-    #         # write to csv file
-    #         df_saved.to_csv(filename)
+        df = pd.DataFrame.from_dict(cell_dict, orient='index')
+        if not os.path.exists(filename) == True:
+            # Save to csv file such as methods .... is a header
+            df.T.to_csv(filename, header=True)
+        else:
+            # read csv file with deader
+            df_saved = pd.read_csv(filename, index_col=0)
+            # add new row
+            df_saved = df_saved._append(df.T, ignore_index=True)
+            # write to csv file
+            df_saved.to_csv(filename)
  
         
     return 

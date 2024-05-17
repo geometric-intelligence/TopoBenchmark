@@ -1,11 +1,12 @@
+import os
 import os.path as osp
 from collections.abc import Callable
 from typing import ClassVar
-
+import shutil
 import torch
 from omegaconf import DictConfig
-from torch_geometric.data import Data, InMemoryDataset
-from torch_geometric.io import fs
+from torch_geometric.data import Data, InMemoryDataset, extract_zip
+# from torch_geometric.io import fs
 
 from topobenchmarkx.io.load.download_utils import download_file_from_drive
 from topobenchmarkx.io.load.split_utils import random_splitting
@@ -62,7 +63,7 @@ class USCountyDemosDataset(InMemoryDataset):
         transform: Callable | None = None,
         pre_transform: Callable | None = None,
         pre_filter: Callable | None = None,
-        force_reload: bool = True,
+        #force_reload: bool = True,
         use_node_attr: bool = False,
         use_edge_attr: bool = False,
     ) -> None:
@@ -73,14 +74,14 @@ class USCountyDemosDataset(InMemoryDataset):
             transform,
             pre_transform,
             pre_filter,
-            force_reload=force_reload,
+            #force_reload=force_reload,
         )
 
         # Load the processed data
-        data, _, _ = fs.torch_load(self.processed_paths[0])
-
+        data, _ = torch.load(self.processed_paths[0])
+    
         # Map the loaded data into
-        data = Data.from_dict(data)
+        data = Data.from_dict(data) if isinstance(data, dict) else data
 
         # Create the splits and upload desired fold
         splits = random_splitting(data.y, parameters=self.parameters)
@@ -113,8 +114,8 @@ class USCountyDemosDataset(InMemoryDataset):
 
     @property
     def raw_file_names(self) -> list[str]:
-        names = ["", f"_{self.parameters.year}"]
-        return [f"{self.name}_{name}.txt" for name in names]
+        #names = ["county", f"{self.parameters.year}"]
+        return [f"county_graph.csv", f"county_stats_{self.parameters.year}.csv"]
 
     @property
     def processed_file_names(self) -> str:
@@ -139,20 +140,38 @@ class USCountyDemosDataset(InMemoryDataset):
             file_format=self.file_format,
         )
 
-        # Extract the downloaded file if it is compressed
-        fs.cp(
-            f"{self.raw_dir}/{self.name}.{self.file_format}",
-            self.raw_dir,
-            extract=True,
-        )
+        folder = self.raw_dir
+        filename = f"{self.name}.{self.file_format}"
+        path = osp.join(folder, filename)
+        extract_zip(path, folder)
+        # Delete zip file
+        os.unlink(path)
+        #shutil.rmtree(path)
+        # Move files from osp.join(folder, self.name) to folder
+        for file in os.listdir(osp.join(folder, self.name)):
+            shutil.move(osp.join(folder, self.name, file), folder)
+        
+        # Delete osp.join(folder, self.name) dir
+        shutil.rmtree(osp.join(folder, self.name))
 
-        # Move the etracted files to the datasets/domain/dataset_name/raw/ directory
-        for filename in fs.ls(osp.join(self.raw_dir, self.name)):
-            fs.mv(filename, osp.join(self.raw_dir, osp.basename(filename)))
-        fs.rm(osp.join(self.raw_dir, self.name))
 
-        # Delete also f'{self.raw_dir}/{self.name}.{self.file_format}'
-        fs.rm(f"{self.raw_dir}/{self.name}.{self.file_format}")
+        #os.rename(osp.join(folder, self.name), self.raw_dir)
+        
+        
+        # # Extract the downloaded file if it is compressed
+        # fs.cp(f"{self.raw_dir}/{self.name}.{self.file_format}",
+        #     f"{self.raw_dir}/{self.name}.{self.file_format}",
+        #     self.raw_dir,
+        #     extract=True,
+        # )
+        # # Move the etracted files to the datasets/domain/dataset_name/raw/ directory
+        # for filename in fs.ls(osp.join(self.raw_dir, self.name)):
+        #     fs.mv(filename, osp.join(self.raw_dir, osp.basename(filename)))
+        # fs.rm(osp.join(self.raw_dir, self.name))
+
+        # # Delete also f'{self.raw_dir}/{self.name}.{self.file_format}'
+        # fs.rm(f"{self.raw_dir}/{self.name}.{self.file_format}")
+        
 
     def process(self) -> None:
         r"""Process the data for the dataset.

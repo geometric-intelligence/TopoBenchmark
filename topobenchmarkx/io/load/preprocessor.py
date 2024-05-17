@@ -7,6 +7,10 @@ import torch_geometric
 from topobenchmarkx.io.load.utils import ensure_serializable, make_hash
 
 
+from torch_geometric.data.dataset import *
+
+
+
 class Preprocessor(torch_geometric.data.InMemoryDataset):
     r"""Preprocessor for datasets.
 
@@ -34,11 +38,14 @@ class Preprocessor(torch_geometric.data.InMemoryDataset):
         pre_transform = self.instantiate_pre_transform(
             data_dir, transforms_config
         )
+        # Torch geometric introduces force_reload from 2.5.0 version, but there is weird bug
+        self.force_reload = force_reload
+
         super().__init__(
             self.processed_data_dir,
             None,
             pre_transform,
-            force_reload=force_reload,
+            #force_reload=force_reload,
             **kwargs,
         )
         self.save_transform_parameters()
@@ -139,3 +146,42 @@ class Preprocessor(torch_geometric.data.InMemoryDataset):
 
         assert isinstance(self._data, torch_geometric.data.Data)
         self.save(self.data_list, self.processed_paths[0])
+
+    def _process(self):
+        f = osp.join(self.processed_dir, 'pre_transform.pt')
+        if osp.exists(f) and torch.load(f) != _repr(self.pre_transform):
+            warnings.warn(
+                f"The `pre_transform` argument differs from the one used in "
+                f"the pre-processed version of this dataset. If you want to "
+                f"make use of another pre-processing technique, make sure to "
+                f"delete '{self.processed_dir}' first")
+
+        f = osp.join(self.processed_dir, 'pre_filter.pt')
+        if osp.exists(f) and torch.load(f) != _repr(self.pre_filter):
+            warnings.warn(
+                "The `pre_filter` argument differs from the one used in "
+                "the pre-processed version of this dataset. If you want to "
+                "make use of another pre-fitering technique, make sure to "
+                "delete '{self.processed_dir}' first")
+
+        if not self.force_reload and files_exist(self.processed_paths):
+            return
+
+        if self.log and 'pytest' not in sys.modules:
+            print('Processing...', file=sys.stderr)
+
+        makedirs(self.processed_dir)
+        self.process()
+
+        path = osp.join(self.processed_dir, 'pre_transform.pt')
+        torch.save(_repr(self.pre_transform), path)
+        path = osp.join(self.processed_dir, 'pre_filter.pt')
+        torch.save(_repr(self.pre_filter), path)
+
+        if self.log and 'pytest' not in sys.modules:
+            print('Done!', file=sys.stderr)
+    
+def _repr(obj: Any) -> str:
+    if obj is None:
+        return 'None'
+    return re.sub('(<.*?)\\s.*(>)', r'\1\2', str(obj))

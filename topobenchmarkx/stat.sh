@@ -1,7 +1,7 @@
 
 # Description: Main experiment script for GCN model.
 # ----Node regression datasets: US County Demographics----
-models=( 'simplicial/scn' 'cell/cwn' 'hypergraph/unignn2' )
+models=( 'cell/cwn' )
 for model in ${models[*]}
 do
 
@@ -32,7 +32,7 @@ python dataset_statistics.py \
 
 # ----Heterophilic datasets----
 
-datasets=( roman_empire amazon_ratings tolokers questions minesweeper )
+datasets=( roman_empire amazon_ratings minesweeper )
 
 for dataset in ${datasets[*]}
 do
@@ -49,7 +49,7 @@ python dataset_statistics.py \
   model=$model
 
 # Train rest of the TU graph datasets
-datasets=( 'PROTEINS_TU' 'NCI1' 'NCI109' 'REDDIT-BINARY' 'IMDB-BINARY' 'IMDB-MULTI') # 
+datasets=( 'PROTEINS_TU' 'NCI1' 'NCI109' 'IMDB-BINARY' 'IMDB-MULTI') # 
 
 for dataset in ${datasets[*]}
 do

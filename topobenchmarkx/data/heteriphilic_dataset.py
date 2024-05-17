@@ -5,7 +5,7 @@ from typing import ClassVar
 import torch
 from omegaconf import DictConfig
 from torch_geometric.data import Data, InMemoryDataset
-from torch_geometric.io import fs
+#from torch_geometric.io import fs
 
 from topobenchmarkx.io.load.heterophilic import (
     download_hetero_datasets,
@@ -52,7 +52,7 @@ class HeteroDataset(InMemoryDataset):
         transform: Callable | None = None,
         pre_transform: Callable | None = None,
         pre_filter: Callable | None = None,
-        force_reload: bool = True,
+        #force_reload: bool = True,
         use_node_attr: bool = False,
         use_edge_attr: bool = False,
     ) -> None:
@@ -63,11 +63,11 @@ class HeteroDataset(InMemoryDataset):
             transform,
             pre_transform,
             pre_filter,
-            force_reload=force_reload,
+            #force_reload=force_reload,
         )
 
         # Load the processed data
-        data, _, _ = fs.torch_load(self.processed_paths[0])
+        data, _, _ = torch.load(self.processed_paths[0])
 
         # Map the loaded data into
         data = Data.from_dict(data)

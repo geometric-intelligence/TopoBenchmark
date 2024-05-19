@@ -6,8 +6,8 @@ model_domain: simplicial
 feature_encoder:
   _target_: topobenchmarkx.models.encoders.${model.feature_encoder.encoder_name}
   encoder_name: AllCellFeatureEncoder
-  in_channels: ${infer_in_channels:${dataset}} #${dataset.parameters.num_features}
-  out_channels: 32
+  in_channels: ${infer_in_channels:${dataset}} 
+  out_channels: 128
   proj_dropout: 0.0
   selected_dimensions:
     - 0
@@ -28,7 +28,7 @@ backbone:
   sc_order: 3
   aggr_norm: False
   update_func: "sigmoid"
-  n_layers: 1
+  n_layers: 4
 
 backbone_wrapper:
   _target_: topobenchmarkx.models.wrappers.SCCNNWrapper

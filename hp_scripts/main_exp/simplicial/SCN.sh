@@ -8,12 +8,12 @@ do
     dataset=us_country_demos \
     dataset.parameters.data_seed=0,3,5,7,9 \
     dataset.parameters.task_variable=$task_variable \
-    model=hypergraph/edgnn \
+    model=simplicial/scn \
     model.feature_encoder.out_channels=32,64,128 \
     model.feature_encoder.proj_dropout=0.25,0.5 \
     model.backbone.n_layers=1,2,3,4 \
     model.optimizer.lr="0.01,0.001" \
-    model.readout.readout_name=NoReadOut \
+    model.readout.readout_name="NoReadOut,PropagateSignalDown" \
     dataset.transforms.graph2simplicial_lifting.signed=True \
     trainer.max_epochs=1000 \
     trainer.min_epochs=500 \
@@ -33,11 +33,13 @@ do
   python train.py \
     dataset=$dataset \
     dataset.parameters.data_seed=0,3,5,7,9 \
-    model=hypergraph/edgnn \
+    model=simplicial/scn \
     model.feature_encoder.out_channels=32,64,128 \
     model.feature_encoder.proj_dropout=0.25,0.5 \
     model.backbone.n_layers=1,2 \
     model.optimizer.lr="0.01,0.001" \
+    model.readout.readout_name="NoReadOut,PropagateSignalDown" \
+    dataset.transforms.graph2simplicial_lifting.signed=True \
     trainer.max_epochs=500 \
     trainer.min_epochs=50 \
     trainer.check_val_every_n_epoch=1 \
@@ -52,13 +54,15 @@ done
 python train.py \
   dataset=ZINC \
   seed=42,3,5,23,150 \
-  model=hypergraph/edgnn \
+  model=simplicial/scn \
   model.optimizer.lr=0.01,0.001 \
   model.optimizer.weight_decay=0 \
   model.feature_encoder.out_channels=32,64,128 \
   model.backbone.n_layers=2,4 \
   model.feature_encoder.proj_dropout=0.25,0.5 \
   dataset.parameters.batch_size=128,256 \
+  model.readout.readout_name="NoReadOut,PropagateSignalDown" \
+  dataset.transforms.graph2simplicial_lifting.signed=True \
   dataset.transforms.one_hot_node_degree_features.degrees_fields=x \
   dataset.parameters.data_seed=0 \
   logger.wandb.project=TopoBenchmarkX_Simplicial \
@@ -75,13 +79,15 @@ python train.py \
 # Train on MUTAG dataset
 python train.py \
   dataset=MUTAG \
-  model=hypergraph/edgnn \
+  model=simplicial/scn \
   model.optimizer.lr=0.01,0.001 \
   model.feature_encoder.out_channels=32,64,128 \
   model.backbone.n_layers=1,2,3,4 \
   model.feature_encoder.proj_dropout=0.25,0.5 \
-  dataset.parameters.data_seed=0,3,5 \
+  dataset.parameters.data_seed=0,3,5,7,9 \
   dataset.parameters.batch_size=32,64 \
+  model.readout.readout_name="NoReadOut,PropagateSignalDown" \
+  dataset.transforms.graph2simplicial_lifting.signed=True \
   trainer.max_epochs=500 \
   trainer.min_epochs=50 \
   trainer.check_val_every_n_epoch=1 \
@@ -91,19 +97,21 @@ python train.py \
   --multirun
 
 # Train rest of the TU graph datasets
-datasets=( 'PROTEINS_TU' 'NCI1' 'NCI109' 'REDDIT-BINARY' 'IMDB-BINARY' 'IMDB-MULTI' )
+datasets=( 'PROTEINS_TU' 'NCI1' 'NCI109' )
 
 for dataset in ${datasets[*]}
 do
   python train.py \
     dataset=$dataset \
-    model=hypergraph/edgnn \
+    model=simplicial/scn \
     model.optimizer.lr=0.01,0.001 \
     model.feature_encoder.out_channels=32,64,128 \
     model.backbone.n_layers=1,2,3,4 \
     model.feature_encoder.proj_dropout=0.25,0.5 \
-    dataset.parameters.data_seed=0,3,5 \
+    dataset.parameters.data_seed=0,3,5,7,9 \
     dataset.parameters.batch_size=128,256 \
+    model.readout.readout_name="NoReadOut,PropagateSignalDown" \
+    dataset.transforms.graph2simplicial_lifting.signed=True \
     logger.wandb.project=TopoBenchmarkX_Simplicial \
     trainer.max_epochs=500 \
     trainer.min_epochs=50 \
@@ -113,20 +121,22 @@ do
 done
 
 # ----Heterophilic datasets----
-
-datasets=( roman_empire amazon_ratings tolokers minesweeper questions )
+# datasets=( roman_empire minesweeper )
+datasets=( roman_empire minesweeper )
 
 for dataset in ${datasets[*]}
 do
   python train.py \
     dataset=$dataset \
-    model=hypergraph/edgnn \
+    model=simplicial/scn \
     model.optimizer.lr=0.01,0.001 \
     model.feature_encoder.out_channels=32,64,128 \
     model.backbone.n_layers=1,2,3,4 \
     model.feature_encoder.proj_dropout=0.25,0.5 \
-    dataset.parameters.data_seed=0,3,5 \
-    dataset.parameters.batch_size=128,256 \
+    dataset.parameters.data_seed=0,3,5,7,9 \
+    model.readout.readout_name="NoReadOut,PropagateSignalDown" \
+    dataset.transforms.graph2simplicial_lifting.signed=True \
+    dataset.parameters.batch_size=1 \
     logger.wandb.project=TopoBenchmarkX_Simplicial \
     trainer.max_epochs=1000 \
     trainer.min_epochs=50 \

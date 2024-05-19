@@ -7,7 +7,7 @@ feature_encoder:
   _target_: topobenchmarkx.models.encoders.${model.feature_encoder.encoder_name}
   encoder_name: AllCellFeatureEncoder
   in_channels: ${infer_in_channels:${dataset}} #${dataset.parameters.num_features}
-  out_channels: 64
+  out_channels: 128
   proj_dropout: 0.0
 
 backbone:

@@ -78,7 +78,7 @@ python train.py \
   model.feature_encoder.out_channels=32,64,128 \
   model.backbone.All_num_layers=1,2,3,4 \
   model.feature_encoder.proj_dropout=0.25,0.5 \
-  dataset.parameters.data_seed=0,3,5 \
+  dataset.parameters.data_seed=0,3,5,7,9 \
   dataset.parameters.batch_size=32,64 \
   trainer.max_epochs=500 \
   trainer.min_epochs=50 \
@@ -100,7 +100,7 @@ do
     model.feature_encoder.out_channels=32,64,128 \
     model.backbone.All_num_layers=1,2,3,4 \
     model.feature_encoder.proj_dropout=0.25,0.5 \
-    dataset.parameters.data_seed=0,3,5 \
+    dataset.parameters.data_seed=0,3,5,7,9 \
     dataset.parameters.batch_size=128,256 \
     logger.wandb.project=TopoBenchmarkX_Hypergraph \
     trainer.max_epochs=500 \

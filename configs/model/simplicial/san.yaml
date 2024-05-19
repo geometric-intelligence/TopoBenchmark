@@ -7,7 +7,7 @@ feature_encoder:
   _target_: topobenchmarkx.models.encoders.${model.feature_encoder.encoder_name}
   encoder_name: AllCellFeatureEncoder
   in_channels: ${infer_in_channels:${dataset}} #${dataset.parameters.num_features}
-  out_channels: 64
+  out_channels: 128
   proj_dropout: 0.0
   selected_dimensions:
     - 0
@@ -18,7 +18,7 @@ backbone:
   in_channels: ${model.backbone.hidden_channels}
   hidden_channels: ${model.feature_encoder.out_channels}
   n_filters: 2
-  n_layers: 1
+  n_layers: 4
   order_harmonic: 1
   epsilon_harmonic: 1e-1
 

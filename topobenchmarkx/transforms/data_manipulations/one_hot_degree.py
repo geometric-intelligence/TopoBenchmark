@@ -13,6 +13,7 @@ class OneHotDegree(torch_geometric.transforms.BaseTransform):
         self,
         max_degree: int,
         cat: bool = False,
+        **kwargs,
     ) -> None:
         self.max_degree = max_degree
         self.cat = cat

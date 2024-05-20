@@ -3,7 +3,7 @@ _target_: topobenchmarkx.io.load.loaders.GraphLoader
 # USE python train.py dataset.transforms.one_hot_node_degree_features.degrees_fields=x to run this config
 
 defaults:
-  #- transforms/data_manipulations: node_feat_to_float
+  - transforms/data_manipulations: node_degrees
   - transforms/data_manipulations@transforms.one_hot_node_degree_features: one_hot_node_degree_features
   - transforms: ${get_default_transform:graph,${model}}
 

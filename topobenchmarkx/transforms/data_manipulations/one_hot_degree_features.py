@@ -15,7 +15,7 @@ class OneHotDegreeFeatures(torch_geometric.transforms.BaseTransform):
         self.type = "one_hot_degree_features"
         self.deg_field = kwargs["degrees_fields"]
         self.features_fields = kwargs["features_fields"]
-        self.transform = OneHotDegree(max_degree=kwargs["max_degrees"])
+        self.transform = OneHotDegree(**kwargs)
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}(type={self.type!r}, degrees_field={self.deg_field!r}, features_field={self.features_fields!r})"

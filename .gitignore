@@ -164,6 +164,7 @@ cython_debug/
 
 # Data
 /datasets/
+/big_csv/
 /notebooks/*.csv
 notebooks/tmp
 *.pickle

@@ -45,8 +45,12 @@ def compare_models(results, p_limit=0.05, verbose=False):
     """
     M = results.shape[0]
 
-    average_ranks = np.mean(np.argsort(-results2, axis=0) + 1, axis=1)
-
+    sorted_indices = np.argsort(-results, axis=0)
+    ranks = np.empty_like(sorted_indices)
+    for i in range(ranks.shape[1]):
+        ranks[sorted_indices[:, i], i] = np.arange(len(results))+1
+    average_ranks = np.mean(ranks, axis=1)
+    
     friedman_result = friedman_test(results)
     if friedman_result > p_limit:
         if verbose:
@@ -65,7 +69,7 @@ def compare_models(results, p_limit=0.05, verbose=False):
                 0
             ]
             p = signed_ranks_test(
-                results[model_idx, :], results[model_idx + idx, :]
+                results[model_idx, :], results[next_model_idx, :]
             )
             if verbose:
                 print(

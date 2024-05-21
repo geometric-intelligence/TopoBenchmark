@@ -5,25 +5,20 @@ import torch_geometric
 
 
 def load_us_county_demos(path, year=2012, y_col="Election"):
-    r"""Load US County Demos dataset
-    
-    Parameters
-    ----------
-    path: str
-        Path to the dataset.
-    year: int
-        Year to load the features.
-    y_col: str
-        Column to use as label.
-    
-    Returns
-    -------
-    torch_geometric.data.Data
-        Data object of the graph for the US County Demos dataset.
+    r"""Load US County Demos dataset.
+
+    Args:
+        path (str): Path to the dataset.
+        year (int, optional): Year to load the features. (default: 2012)
+        y_col (str, optional): Column to use as label. Can be one of ['Election', 'MedianIncome', 'MigraRate', 'BirthRate', 'DeathRate', 'BachelorRate', 'UnemploymentRate']. (default: "Election") 
+    Returns:
+        torch_geometric.data.Data: Data object of the graph for the US County Demos dataset.
     """
-    
+
     edges_df = pd.read_csv(f"{path}/county_graph.csv")
-    stat = pd.read_csv(f"{path}/county_stats_{year}.csv", encoding="ISO-8859-1")
+    stat = pd.read_csv(
+        f"{path}/county_stats_{year}.csv", encoding="ISO-8859-1"
+    )
 
     keep_cols = [
         "FIPS",
@@ -36,12 +31,12 @@ def load_us_county_demos(path, year=2012, y_col="Election"):
         "BachelorRate",
         "UnemploymentRate",
     ]
-    
+
     # Select columns, replace ',' with '.' and convert to numeric
     stat = stat.loc[:, keep_cols]
-    stat["MedianIncome"] = stat["MedianIncome"].replace(',','.', regex=True)
-    stat = stat.apply(pd.to_numeric, errors='coerce')
-    
+    stat["MedianIncome"] = stat["MedianIncome"].replace(",", ".", regex=True)
+    stat = stat.apply(pd.to_numeric, errors="coerce")
+
     # Step 2: Substitute NaN values with column mean
     for column in stat.columns:
         if column != "FIPS":
@@ -58,7 +53,9 @@ def load_us_county_demos(path, year=2012, y_col="Election"):
     edges_df = edges_df[src_ & dst_]
 
     # Remove rows from stat df where edges_df['SRC'] or edges_df['DST'] are not present
-    stat = stat[stat["FIPS"].isin(edges_df["SRC"]) & stat["FIPS"].isin(edges_df["DST"])]
+    stat = stat[
+        stat["FIPS"].isin(edges_df["SRC"]) & stat["FIPS"].isin(edges_df["DST"])
+    ]
     stat = stat.reset_index(drop=True)
 
     # Remove rows where SRC == DST
@@ -91,7 +88,9 @@ def load_us_county_demos(path, year=2012, y_col="Election"):
     )
 
     # Remove isolated nodes (Note: this function maps the nodes to [0, ..., num_nodes] automatically)
-    edge_index, _, mask = torch_geometric.utils.remove_isolated_nodes(edge_index)
+    edge_index, _, mask = torch_geometric.utils.remove_isolated_nodes(
+        edge_index
+    )
 
     # Conver mask to index
     index = np.arange(mask.size(0))[mask]
@@ -104,7 +103,9 @@ def load_us_county_demos(path, year=2012, y_col="Election"):
     stat["FIPS"] = stat.reset_index()["index"]
 
     # Create Election variable
-    stat["Election"] = (stat["DEM"] - stat["GOP"]) / (stat["DEM"] + stat["GOP"])
+    stat["Election"] = (stat["DEM"] - stat["GOP"]) / (
+        stat["DEM"] + stat["GOP"]
+    )
 
     # Drop DEM and GOP columns and FIPS
     stat = stat.drop(columns=["DEM", "GOP", "FIPS"])

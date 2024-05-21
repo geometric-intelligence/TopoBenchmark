@@ -5,8 +5,7 @@ import requests
 
 # Function to extract file ID from Google Drive URL
 def get_file_id_from_url(url):
-    """
-    Extracts the file ID from a Google Drive file URL.
+    r"""Extracts the file ID from a Google Drive file URL.
 
     Args:
         url (str): The Google Drive file URL.
@@ -21,10 +20,14 @@ def get_file_id_from_url(url):
     query_params = parse_qs(parsed_url.query)
     if "id" in query_params:  # Case 1: URL format contains '?id='
         file_id = query_params["id"][0]
-    elif "file/d/" in parsed_url.path:  # Case 2: URL format contains '/file/d/'
+    elif (
+        "file/d/" in parsed_url.path
+    ):  # Case 2: URL format contains '/file/d/'
         file_id = parsed_url.path.split("/")[3]
     else:
-        raise ValueError("The provided URL is not a valid Google Drive file URL.")
+        raise ValueError(
+            "The provided URL is not a valid Google Drive file URL."
+        )
     return file_id
 
 
@@ -32,8 +35,8 @@ def get_file_id_from_url(url):
 def download_file_from_drive(
     file_link, path_to_save, dataset_name, file_format="tar.gz"
 ):
-    """
-    Downloads a file from a Google Drive link and saves it to the specified path.
+    r"""Downloads a file from a Google Drive link and saves it to the specified
+    path.
 
     Args:
         file_link (str): The Google Drive link of the file to download.

@@ -6,25 +6,18 @@ from topobenchmarkx.evaluators.metrics import METRICS
 
 
 class TorchEvaluator:
-    r"""Evaluator class that is responsible for computing the metrics for a given task.
+    r"""Evaluator class that is responsible for computing the metrics for a
+    given task.
 
-     Parameters
-     ----------
-    task : str
-         The task type. It can be either "classification" or "regression".
+    Args:
+        task (str): The task type. It can be either "classification" or "regression".
+        **kwargs : Additional arguments for the class. The arguments depend on the task.
+            In "classification" scenario, the following arguments are expected:
+            - num_classes (int): The number of classes.
+            - classification_metrics (list[str]): A list of classification metrics to be computed.
 
-     **kwargs :
-         Additional arguments for the class. The arguments depend on the task.
-         In "classification" scenario, the following arguments are expected:
-         - num_classes : int
-             The number of classes.
-         - classification_metrics : list
-             A list of classification metrics to be computed.
-
-         In "regression" scenario, the following arguments are expected:
-         - regression_metrics : list
-             A list of regression metrics to be computed.
-
+            In "regression" scenario, the following arguments are expected:
+            - regression_metrics (list[str]): A list of regression metrics to be computed.
     """
 
     def __init__(self, task, **kwargs):
@@ -43,7 +36,7 @@ class TorchEvaluator:
         elif self.task == "multilabel classification":
             parameters = {"num_classes": kwargs["num_classes"]}
             parameters["task"] = "multilabel"
-            metric_names = kwargs["classification_metrics"] 
+            metric_names = kwargs["classification_metrics"]
 
         elif self.task == "regression":
             parameters = {}
@@ -57,31 +50,28 @@ class TorchEvaluator:
         # )
 
         metrics = {}
-        for name in metric_names: 
+        for name in metric_names:
             if name in ["recall", "precision", "auroc"]:
-                metrics[name] = METRICS[name](average='macro', **parameters)
-            
+                metrics[name] = METRICS[name](average="macro", **parameters)
+
             else:
                 metrics[name] = METRICS[name](**parameters)
         self.metrics = MetricCollection(metrics)
-        
-
-            
 
         self.best_metric = {}
 
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}(task={self.task}, metrics={self.metrics})"
+        
     def update(self, model_out: dict):
-        """Update the metrics with the model output.
+        r"""Update the metrics with the model output.
 
-        Parameters
-        ----------
-        model_out : dict
-            The model output. It should contain the following keys:
-            - logits : torch.Tensor
-                The model predictions.
-            - labels : torch.Tensor
-                The ground truth labels.
-
+        Args:
+            model_out (dict): The model output. It should contain the following keys:
+                - logits : torch.Tensor
+                    The model predictions.
+                - labels : torch.Tensor
+                    The ground truth labels.
         """
         preds = model_out["logits"].cpu()
         target = model_out["labels"].cpu()
@@ -96,27 +86,25 @@ class TorchEvaluator:
             raise ValueError(f"Invalid task {self.task}")
 
     def compute(self):
-        """Compute the metrics.
+        r"""Compute the metrics.
 
-        Returns
-        -------
-        res_dict : dict
-            A dictionary containing the computed metrics.
+        Args:
+            res_dict (dict): A dictionary containing the computed metrics.
         """
+        return self.metrics.compute()
 
-        res_dict = self.metrics.compute()
+    def reset(self):
+        """Reset the metrics.
 
-        return res_dict
-
-    def reset(
-        self,
-    ):
-        """Reset the metrics. This method should be called after each epoch"""
+        This method should be called after each epoch
+        """
         self.metrics.reset()
 
 
 if __name__ == "__main__":
     evaluator = TorchEvaluator(
-        task="classification", num_classes=3, classification_metrics=["accuracy"]
+        task="classification",
+        num_classes=3,
+        classification_metrics=["accuracy"],
     )
     print(evaluator.task)

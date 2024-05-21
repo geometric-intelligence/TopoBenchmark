@@ -1,7 +1,10 @@
 import logging
-from typing import Mapping, Optional
+from collections.abc import Mapping
 
-from lightning_utilities.core.rank_zero import rank_prefixed_message, rank_zero_only
+from lightning_utilities.core.rank_zero import (
+    rank_prefixed_message,
+    rank_zero_only,
+)
 
 
 class RankedLogger(logging.LoggerAdapter):
@@ -11,31 +14,37 @@ class RankedLogger(logging.LoggerAdapter):
         self,
         name: str = __name__,
         rank_zero_only: bool = False,
-        extra: Optional[Mapping[str, object]] = None,
+        extra: Mapping[str, object] | None = None,
     ) -> None:
-        """Initializes a multi-GPU-friendly python command line logger that logs on all processes
-        with their rank prefixed in the log message.
+        r"""Initializes a multi-GPU-friendly python command line logger that
+        logs on all processes with their rank prefixed in the log message.
 
-        :param name: The name of the logger. Default is ``__name__``.
-        :param rank_zero_only: Whether to force all logs to only occur on the rank zero process. Default is `False`.
-        :param extra: (Optional) A dict-like object which provides contextual information. See `logging.LoggerAdapter`.
+        Args:
+            name (str, optional): The name of the logger. (default: __name__)
+            rank_zero_only (bool, optional): Whether to force all logs to only occur on the rank zero process. (default: False)
+            extra (Mapping[str, object], optional): A dict-like object which provides contextual information. See `logging.LoggerAdapter`. (default: None)
         """
         logger = logging.getLogger(name)
         super().__init__(logger=logger, extra=extra)
         self.rank_zero_only = rank_zero_only
+        
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}(name={self.logger.name!r}, rank_zero_only={self.rank_zero_only!r}, extra={self.extra})"
 
     def log(
-        self, level: int, msg: str, rank: Optional[int] = None, *args, **kwargs
+        self, level: int, msg: str, rank: int | None = None, *args, **kwargs
     ) -> None:
-        """Delegate a log call to the underlying logger, after prefixing its message with the rank
-        of the process it's being logged from. If `'rank'` is provided, then the log will only
-        occur on that rank/process.
+        r"""Delegate a log call to the underlying logger, after prefixing its
+        message with the rank of the process it's being logged from. If
+        `'rank'` is provided, then the log will only occur on that
+        rank/process.
 
-        :param level: The level to log at. Look at `logging.__init__.py` for more information.
-        :param msg: The message to log.
-        :param rank: The rank to log at.
-        :param args: Additional args to pass to the underlying logging function.
-        :param kwargs: Any additional keyword args to pass to the underlying logging function.
+        Args:
+            level (int): The level to log at. Look at `logging.__init__.py` for more information.
+            msg (str): The message to log.
+            rank (int, optional): The rank to log at. (default: None)
+            args: Additional args to pass to the underlying logging function.
+            kwargs: Any additional keyword args to pass to the underlying logging function.
         """
         if self.isEnabledFor(level):
             msg, kwargs = self.process(msg, kwargs)
@@ -49,7 +58,5 @@ class RankedLogger(logging.LoggerAdapter):
                 if current_rank == 0:
                     self.logger.log(level, msg, *args, **kwargs)
             else:
-                if rank is None:
-                    self.logger.log(level, msg, *args, **kwargs)
-                elif current_rank == rank:
+                if rank is None or current_rank == rank:
                     self.logger.log(level, msg, *args, **kwargs)

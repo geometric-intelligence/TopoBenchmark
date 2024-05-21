@@ -8,8 +8,8 @@ import torch_geometric
 from omegaconf import DictConfig
 
 from topobenchmarkx.data.datasets import CustomDataset
-from topobenchmarkx.data.us_county_demos_dataset import USCountyDemosDataset
 from topobenchmarkx.data.heteriphilic_dataset import HeteroDataset
+from topobenchmarkx.data.us_county_demos_dataset import USCountyDemosDataset
 from topobenchmarkx.io.load.loader import AbstractLoader
 from topobenchmarkx.io.load.preprocessor import Preprocessor
 from topobenchmarkx.io.load.split_utils import (
@@ -28,29 +28,24 @@ from topobenchmarkx.io.load.utils import (
 class CellComplexLoader(AbstractLoader):
     r"""Loader for cell complex datasets.
 
-    Parameters
-    ----------
-    parameters : DictConfig
-        Configuration parameters.
+    Args:
+        parameters (DictConfig): Configuration parameters.
     """
 
     def __init__(self, parameters: DictConfig):
         super().__init__(parameters)
         self.parameters = parameters
+        
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}(parameters={self.parameters})"
 
     def load(
         self,
     ) -> CustomDataset:
         r"""Load cell complex dataset.
 
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        CustomDataset
-            CustomDataset object containing the loaded data.
+        Returns:
+            CustomDataset: CustomDataset object containing the loaded data.
         """
         data = load_cell_complex_dataset(self.parameters)
         dataset = CustomDataset([data])
@@ -60,29 +55,24 @@ class CellComplexLoader(AbstractLoader):
 class SimplicialLoader(AbstractLoader):
     r"""Loader for simplicial datasets.
 
-    Parameters
-    ----------
-    parameters : DictConfig
-        Configuration parameters.
+    Args:
+        parameters (DictConfig): Configuration parameters.
     """
 
     def __init__(self, parameters: DictConfig):
         super().__init__(parameters)
         self.parameters = parameters
+    
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}(parameters={self.parameters})"
 
     def load(
         self,
     ) -> CustomDataset:
         r"""Load simplicial dataset.
 
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        CustomDataset
-            CustomDataset object containing the loaded data.
+        Returns:
+            CustomDataset: CustomDataset object containing the loaded data.
         """
         data = load_simplicial_dataset(self.parameters)
         dataset = CustomDataset([data])
@@ -92,30 +82,26 @@ class SimplicialLoader(AbstractLoader):
 class HypergraphLoader(AbstractLoader):
     r"""Loader for hypergraph datasets.
 
-    Parameters
-    ----------
-    parameters : DictConfig
-        Configuration parameters.
+    Args:
+        parameters (DictConfig): Configuration parameters.
+        transforms (DictConfig, optional): The parameters for the transforms to be applied to the dataset. (default: None)
     """
 
     def __init__(self, parameters: DictConfig, transforms=None):
         super().__init__(parameters)
         self.parameters = parameters
         self.transforms_config = transforms
+    
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}(parameters={self.parameters}, transforms={self.transforms_config})"
 
     def load(
         self,
     ) -> CustomDataset:
         r"""Load hypergraph dataset.
-
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        CustomDataset
-            CustomDataset object containing the loaded data.
+        
+        Returns:
+            CustomDataset: CustomDataset object containing the loaded data.
         """
         data = load_hypergraph_pickle_dataset(self.parameters)
         data = load_split(data, self.parameters)
@@ -126,29 +112,38 @@ class HypergraphLoader(AbstractLoader):
 class GraphLoader(AbstractLoader):
     r"""Loader for graph datasets.
 
-    Parameters
-    ----------
-    parameters : DictConfig
-        Configuration parameters.
+    Args:
+        parameters (DictConfig): Configuration parameters. The parameters must contain the following keys:
+            - data_dir (str): The directory where the dataset is stored.
+            - data_name (str): The name of the dataset.
+            - data_type (str): The type of the dataset.
+            - split_type (str): The type of split to be used. It can be "fixed", "random", or "k-fold".
+            
+            If split_type is "random", the parameters must also contain the following keys:
+                - data_seed (int): The seed for the split.
+                - data_split_dir (str): The directory where the split is stored.
+                - train_prop (float): The proportion of the training set.
+            If split_type is "k-fold", the parameters must also contain the following keys:
+                - data_split_dir (str): The directory where the split is stored.
+                - k (int): The number of folds.
+                - data_seed (int): The seed for the split.
+            The parameters can be defined in a yaml file and then loaded using `omegaconf.OmegaConf.load('path/to/dataset/config.yaml')`.
+        transforms (DictConfig, optional): The parameters for the transforms to be applied to the dataset. The parameters for a transformation can be defined in a yaml file and then loaded using `omegaconf.OmegaConf.load('path/to/transform/config.yaml'). (default: None)
     """
-
     def __init__(self, parameters: DictConfig, transforms=None):
         super().__init__(parameters)
         self.parameters = parameters
         # Still not instantiated
         self.transforms_config = transforms
+        
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}(parameters={self.parameters}, transforms={self.transforms_config})"
 
     def load(self) -> CustomDataset:
         r"""Load graph dataset.
 
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        CustomDataset
-            CustomDataset object containing the loaded data.
+        Returns:
+            CustomDataset: CustomDataset object containing the loaded data.
         """
         data_dir = os.path.join(
             self.parameters["data_dir"], self.parameters["data_name"]
@@ -163,7 +158,9 @@ class GraphLoader(AbstractLoader):
                 name=self.parameters["data_name"],
             )
             if self.transforms_config is not None:
-                dataset = Preprocessor(data_dir, dataset, self.transforms_config)
+                dataset = Preprocessor(
+                    data_dir, dataset, self.transforms_config
+                )
 
             dataset = load_graph_cocitation_split(dataset, self.parameters)
 
@@ -184,16 +181,19 @@ class GraphLoader(AbstractLoader):
                 use_node_attr=False,
             )
             if self.transforms_config is not None:
-                dataset = Preprocessor(data_dir, dataset, self.transforms_config)
+                dataset = Preprocessor(
+                    data_dir, dataset, self.transforms_config
+                )
             dataset = load_graph_tudataset_split(dataset, self.parameters)
 
         elif self.parameters.data_name in ["ZINC"]:
             datasets = [
-                    torch_geometric.datasets.ZINC(
-                        root=self.parameters["data_dir"],
-                        subset=True,
-                        split=split,
-                    ) for split in ["train", "val", "test"]
+                torch_geometric.datasets.ZINC(
+                    root=self.parameters["data_dir"],
+                    subset=True,
+                    split=split,
+                )
+                for split in ["train", "val", "test"]
             ]
 
             assert self.parameters.split_type == "fixed"
@@ -221,7 +221,9 @@ class GraphLoader(AbstractLoader):
                 )
 
             # Split back the into train/val/test datasets
-            dataset = assing_train_val_test_mask_to_graphs(joined_dataset, split_idx)
+            dataset = assing_train_val_test_mask_to_graphs(
+                joined_dataset, split_idx
+            )
 
         elif self.parameters.data_name in ["AQSOL"]:
             datasets = []
@@ -256,7 +258,9 @@ class GraphLoader(AbstractLoader):
                 )
 
             # Split back the into train/val/test datasets
-            dataset = assing_train_val_test_mask_to_graphs(joined_dataset, split_idx)
+            dataset = assing_train_val_test_mask_to_graphs(
+                joined_dataset, split_idx
+            )
 
         elif self.parameters.data_name in ["US-county-demos"]:
             dataset = USCountyDemosDataset(
@@ -268,13 +272,22 @@ class GraphLoader(AbstractLoader):
             if self.transforms_config is not None:
                 # force_reload=True because in this datasets many variables can be trated as y
                 dataset = Preprocessor(
-                    data_dir, dataset, self.transforms_config, force_reload=True
+                    data_dir,
+                    dataset,
+                    self.transforms_config,
+                    force_reload=True,
                 )
 
             # We need to map original dataset into custom one to make batching work
             dataset = CustomDataset([dataset[0]])
-        
-        elif self.parameters.data_name in ["amazon_ratings", "questions", "minesweeper","roman_empire", "tolokers"]:
+
+        elif self.parameters.data_name in [
+            "amazon_ratings",
+            "questions",
+            "minesweeper",
+            "roman_empire",
+            "tolokers",
+        ]:
             dataset = HeteroDataset(
                 root=self.parameters["data_dir"],
                 name=self.parameters["data_name"],
@@ -284,7 +297,10 @@ class GraphLoader(AbstractLoader):
             if self.transforms_config is not None:
                 # force_reload=True because in this datasets many variables can be trated as y
                 dataset = Preprocessor(
-                    data_dir, dataset, self.transforms_config, force_reload=True
+                    data_dir,
+                    dataset,
+                    self.transforms_config,
+                    force_reload=False,
                 )
 
             # We need to map original dataset into custom one to make batching work
@@ -301,10 +317,9 @@ class GraphLoader(AbstractLoader):
 class ManualGraphLoader(AbstractLoader):
     r"""Loader for manual graph datasets.
 
-    Parameters
-    ----------
-    parameters : DictConfig
-        Configuration parameters.
+    Args:
+        parameters (DictConfig): Configuration parameters.
+        transforms (DictConfig, optional): The parameters for the transforms to be applied to the dataset. (default: None)
     """
 
     def __init__(self, parameters: DictConfig, transforms=None):
@@ -312,18 +327,15 @@ class ManualGraphLoader(AbstractLoader):
         self.parameters = parameters
         # Still not instantiated
         self.transforms_config = transforms
+        
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}(parameters={self.parameters}, transforms={self.transforms_config})"
 
     def load(self) -> CustomDataset:
         r"""Load manual graph dataset.
 
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        CustomDataset
-            CustomDataset object containing the loaded data.
+        Returns:
+            CustomDataset: CustomDataset object containing the loaded data.
         """
         data = manual_graph()
 
@@ -331,7 +343,9 @@ class ManualGraphLoader(AbstractLoader):
             data_dir = os.path.join(
                 self.parameters["data_dir"], self.parameters["data_name"]
             )
-            processor_dataset = Preprocessor(data_dir, data, self.transforms_config)
+            processor_dataset = Preprocessor(
+                data_dir, data, self.transforms_config
+            )
 
         dataset = CustomDataset([processor_dataset[0]])
         return dataset
@@ -367,7 +381,7 @@ def manual_graph():
     for tetrahedron in tetrahedrons:
         for i in range(len(tetrahedron)):
             for j in range(i + 1, len(tetrahedron)):
-                edges.append([tetrahedron[i], tetrahedron[j]]) # noqa: PERF401
+                edges.append([tetrahedron[i], tetrahedron[j]])  # noqa: PERF401
 
     # Create a graph
     G = nx.Graph()
@@ -381,7 +395,11 @@ def manual_graph():
     edge_list = torch.Tensor(list(G.edges())).T.long()
 
     # Generate feature from 0 to 9
-    x = torch.tensor([1, 5, 10, 50, 100, 500, 1000, 5000, 10000]).unsqueeze(1).float()
+    x = (
+        torch.tensor([1, 5, 10, 50, 100, 500, 1000, 5000, 10000])
+        .unsqueeze(1)
+        .float()
+    )
 
     data = torch_geometric.data.Data(
         x=x,
@@ -419,7 +437,7 @@ def manual_simple_graph():
     for tetrahedron in tetrahedrons:
         for i in range(len(tetrahedron)):
             for j in range(i + 1, len(tetrahedron)):
-                edges.append([tetrahedron[i], tetrahedron[j]]) # noqa: PERF401
+                edges.append([tetrahedron[i], tetrahedron[j]])  # noqa: PERF401
 
     # Create a graph
     G = nx.Graph()

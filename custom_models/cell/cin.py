@@ -1,9 +1,8 @@
 """CWN class."""
 
 import torch
-import torch.nn.functional as F
-from topomodelx.nn.cell.cwn_layer import CWNLayer
 import torch.nn as nn
+import torch.nn.functional as F
 from topomodelx.base.conv import Conv
 from torch_geometric.nn.models import MLP
 
@@ -65,7 +64,8 @@ class CWN(torch.nn.Module):
         neighborhood_2_to_1,
         neighborhood_0_to_1,
     ):
-        """Forward computation through projection, convolutions, linear layers and average pooling.
+        """Forward computation through projection, convolutions, linear layers
+        and average pooling.
 
         Parameters
         ----------
@@ -192,15 +192,21 @@ class CWNLayer(nn.Module):
         self.conv_1_to_1 = (
             conv_1_to_1
             if conv_1_to_1 is not None
-            else _CWNDefaultFirstConv(in_channels_1, in_channels_2, out_channels)
+            else _CWNDefaultFirstConv(
+                in_channels_1, in_channels_2, out_channels
+            )
         )
         self.conv_0_to_1 = (
             conv_0_to_1
             if conv_0_to_1 is not None
-            else _CWNDefaultSecondConv(in_channels_0, in_channels_1, out_channels)
+            else _CWNDefaultSecondConv(
+                in_channels_0, in_channels_1, out_channels
+            )
         )
         self.aggregate_fn = (
-            aggregate_fn if aggregate_fn is not None else _CWNDefaultAggregate()
+            aggregate_fn
+            if aggregate_fn is not None
+            else _CWNDefaultAggregate()
         )
         self.update_fn = (
             update_fn
@@ -325,11 +331,10 @@ class CWNLayer(nn.Module):
 
 
 class _CWNDefaultFirstConv(nn.Module):
-    r"""
-    Default implementation of the first convolutional step in CWNLayer.
+    r"""Default implementation of the first convolutional step in CWNLayer.
 
-    The self.forward method of this module must be treated as
-    a protocol for the first convolutional step in CWN layer.
+    The self.forward method of this module must be treated as a protocol for
+    the first convolutional step in CWN layer.
     """
 
     def __init__(
@@ -383,11 +388,10 @@ class _CWNDefaultFirstConv(nn.Module):
 
 
 class _CWNDefaultSecondConv(nn.Module):
-    r"""
-    Default implementation of the second convolutional step in CWNLayer.
+    r"""Default implementation of the second convolutional step in CWNLayer.
 
-    The self.forward method of this module must be treated as
-    a protocol for the second convolutional step in CWN layer.
+    The self.forward method of this module must be treated as a protocol for
+    the second convolutional step in CWN layer.
     """
 
     def __init__(self, in_channels_0, out_channels) -> None:
@@ -417,11 +421,10 @@ class _CWNDefaultSecondConv(nn.Module):
 
 
 class _CWNDefaultAggregate(nn.Module):
-    r"""
-    Default implementation of an aggregation step in CWNLayer.
+    r"""Default implementation of an aggregation step in CWNLayer.
 
-    The self.forward method of this module must be treated as
-    a protocol for the aggregation step in CWN layer.
+    The self.forward method of this module must be treated as a protocol for
+    the aggregation step in CWN layer.
     """
 
     def __init__(self) -> None:

@@ -17,51 +17,43 @@ __all__ = [
 class Graph2CellLifting(GraphLifting):
     r"""Abstract class for lifting graphs to cell complexes.
 
-    Parameters
-    ----------
-    complex_dim : int, optional
-        The dimension of the cell complex to be generated. Default is 2.
-    **kwargs : optional
-        Additional arguments for the class.
+    Args:
+        complex_dim (int, optional): The dimension of the cell complex to be generated. (default: 2)
+        kwargs (optional): Additional arguments for the class.
     """
-
     def __init__(self, complex_dim=2, **kwargs):
         super().__init__(**kwargs)
         self.complex_dim = complex_dim
         self.type = "graph2cell"
+    
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}(complex_dim={self.complex_dim!r}, type={self.type!r})"
 
     @abstractmethod
     def lift_topology(self, data: torch_geometric.data.Data) -> dict:
         r"""Lifts the topology of a graph to cell complex domain.
 
-        Parameters
-        ----------
-        data : torch_geometric.data.Data
-            The input data to be lifted.
-
-        Returns
-        -------
-        dict
-            The lifted topology.
+        Args:
+            data (torch_geometric.data.Data): The input data to be lifted.
+        Returns:
+            dict: The lifted topology.
         """
         raise NotImplementedError
 
-    def _get_lifted_topology(self, cell_complex: CellComplex, graph: nx.Graph) -> dict:
+    def _get_lifted_topology(
+        self, cell_complex: CellComplex, graph: nx.Graph
+    ) -> dict:
         r"""Returns the lifted topology.
 
-        Parameters
-        ----------
-        cell_complex : CellComplex
-            The cell complex.
-        graph : nx.Graph
-            The input graph.
-
-        Returns
-        -------
-        dict
-            The lifted topology.
+        Args:
+            cell_complex (CellComplex): The cell complex.
+            graph (nx.Graph): The input graph.
+        Returns:
+            dict: The lifted topology.
         """
-        lifted_topology = get_complex_connectivity(cell_complex, self.complex_dim)
+        lifted_topology = get_complex_connectivity(
+            cell_complex, self.complex_dim
+        )
         lifted_topology["x_0"] = torch.stack(
             list(cell_complex.get_cell_attributes("features", 0).values())
         )
@@ -76,34 +68,28 @@ class Graph2CellLifting(GraphLifting):
 
 
 class CellCyclesLifting(Graph2CellLifting):
-    r"""Lifts graphs to cell complexes by identifying the cycles as 2-cells.
+    r"""Lifts graphs to cell complexes by taking as 2-cells a cycle base for the graph.
 
-    Parameters
-    ----------
-    max_cell_length : int, optional
-        The maximum length of the cycles to be lifted. Default is None.
-    **kwargs : optional
-        Additional arguments for the class.
+    Args:
+        max_cell_length (int, optional): The maximum length of the cycles to be lifted. Default is None.
+        kwargs (optional): Additional arguments for the class.
     """
-
     def __init__(self, max_cell_length=None, **kwargs):
         super().__init__(**kwargs)
         self.complex_dim = 2
         self.max_cell_length = max_cell_length
-
+    
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}(max_cell_length={self.max_cell_length!r}, complex_dim={self.complex_dim!r})"
+    
     def lift_topology(self, data: torch_geometric.data.Data) -> dict:
-        r"""Finds the cycles of a graph and lifts them to 2-cells.
+        r"""Finds a cycle base for the graph and lifts its cycles to 2-cells.
 
-        Parameters
-        ----------
-        data : torch_geometric.data.Data
-            The input data to be lifted.
-
-        Returns
-        -------
-        dict
-            The lifted topology.
-        """
+        Args:
+            data (torch_geometric.data.Data): The input data to be lifted.
+        Returns:
+            dict: The lifted topology.
+        """        
         G = self._generate_graph_from_data(data)
         cycles = nx.cycle_basis(G)
         cell_complex = CellComplex(G)
@@ -112,7 +98,9 @@ class CellCyclesLifting(Graph2CellLifting):
         cycles = [cycle for cycle in cycles if len(cycle) != 1]
         # Eliminate cycles that are greater than the max_cell_lenght
         if self.max_cell_length is not None:
-            cycles = [cycle for cycle in cycles if len(cycle) <= self.max_cell_length]
+            cycles = [
+                cycle for cycle in cycles if len(cycle) <= self.max_cell_length
+            ]
         if len(cycles) != 0:
             cell_complex.add_cells_from(cycles, rank=self.complex_dim)
         return self._get_lifted_topology(cell_complex, G)

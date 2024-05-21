@@ -23,6 +23,9 @@
 # # python train.py dataset=IMDB-BINARY model=simplicial/sccn model.optimizer.lr=0.01,0.001 model.feature_encoder.out_channels=16,64 model.backbone.n_layers=1,2 dataset.parameters.batch_size=128 dataset.parameters.data_seed=0,3,5 trainer.check_val_every_n_epoch=5 callbacks.early_stopping.patience=10 trainer=default logger.wandb.project=topobenchmark_0503 model.backbone_wrapper.wrapper_readout=original,signal_prop_down model.readout.pooling_type=sum,mean --multirun
 # # python train.py dataset=IMDB-MULTI model=simplicial/sccn model.optimizer.lr=0.01,0.001 model.feature_encoder.out_channels=16,64 model.backbone.n_layers=1,2 dataset.parameters.batch_size=128 dataset.parameters.data_seed=0,3,5 trainer.check_val_every_n_epoch=5 callbacks.early_stopping.patience=10 trainer=default logger.wandb.project=topobenchmark_0503 model.backbone_wrapper.wrapper_readout=original,signal_prop_down model.readout.pooling_type=sum,mean --multirun
 
+# dataset.transforms.one_hot_node_degree_features.degrees_fields=x
+
+
 # # SCCNN
 # # Fixed split
 # python train.py dataset=ZINC model=simplicial/sccnn model.optimizer.lr=0.01 model.feature_encoder.out_channels=16,64 model.backbone.n_layers=2,4 dataset.parameters.batch_size=128 dataset.parameters.data_seed=0 trainer.check_val_every_n_epoch=5 callbacks.early_stopping.patience=10 trainer=default logger.wandb.project=topobenchmark_0503 dataset.transforms.graph2simplicial_lifting.complex_dim=3 model.backbone_wrapper.wrapper_readout=original,signal_prop_down model.readout.pooling_type=sum,mean callbacks.early_stopping.min_delta=0.005 dataset.transforms.graph2simplicial_lifting.signed=True,False --multirun

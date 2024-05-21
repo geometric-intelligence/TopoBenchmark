@@ -17,7 +17,7 @@ parameters:
   num_features: 6
   num_classes: 1
   task: regression
-  task_variable: 'Election' # options: ['Election', 'MedianIncome', 'MigraRate', 'BirthRate', 'DeathRate', 'BachelorRate', 'UnemploymentRate']
+  task_variable: 'MedianIncome' # options: ['Election', 'MedianIncome', 'MigraRate', 'BirthRate', 'DeathRate', 'BachelorRate', 'UnemploymentRate']
   force_reload: True
   loss_type: mse
   monitor_metric: mae

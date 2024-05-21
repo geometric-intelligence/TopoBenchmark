@@ -1,6 +1,7 @@
 import warnings
+from collections.abc import Callable
 from importlib.util import find_spec
-from typing import Any, Callable, Optional
+from typing import Any
 
 from omegaconf import DictConfig
 
@@ -10,14 +11,15 @@ log = pylogger.RankedLogger(__name__, rank_zero_only=True)
 
 
 def extras(cfg: DictConfig) -> None:
-    """Applies optional utilities before the task is started.
+    r"""Applies optional utilities before the task is started.
 
     Utilities:
         - Ignoring python warnings
         - Setting tags from command line
         - Rich config printing
 
-    :param cfg: A DictConfig object containing the config tree.
+    Args:
+        cfg (DictConfig): A DictConfig object containing the config tree.
     """
     # return if no `extras` config
     if not cfg.get("extras"):
@@ -26,7 +28,9 @@ def extras(cfg: DictConfig) -> None:
 
     # disable python warnings
     if cfg.extras.get("ignore_warnings"):
-        log.info("Disabling python warnings! <cfg.extras.ignore_warnings=True>")
+        log.info(
+            "Disabling python warnings! <cfg.extras.ignore_warnings=True>"
+        )
         warnings.filterwarnings("ignore")
 
     # prompt user to input tags from command line if none are provided in the config
@@ -36,12 +40,15 @@ def extras(cfg: DictConfig) -> None:
 
     # pretty print config tree using Rich library
     if cfg.extras.get("print_config"):
-        log.info("Printing config tree with Rich! <cfg.extras.print_config=True>")
+        log.info(
+            "Printing config tree with Rich! <cfg.extras.print_config=True>"
+        )
         rich_utils.print_config_tree(cfg, resolve=True, save_to_file=True)
 
 
 def task_wrapper(task_func: Callable) -> Callable:
-    """Optional decorator that controls the failure behavior when executing the task function.
+    r"""Optional decorator that controls the failure behavior when executing the
+    task function.
 
     This wrapper can be used to:
         - make sure loggers are closed even if the task function raises an exception (prevents multirun failure)
@@ -56,10 +63,10 @@ def task_wrapper(task_func: Callable) -> Callable:
         ...
         return metric_dict, object_dict
     ```
-
-    :param task_func: The task function to be wrapped.
-
-    :return: The wrapped task function.
+    Args:
+        task_func: The task function to be wrapped.
+    Returns:
+        The wrapped task function.
     """
 
     def wrap(cfg: DictConfig) -> tuple[dict[str, Any], dict[str, Any]]:
@@ -96,13 +103,15 @@ def task_wrapper(task_func: Callable) -> Callable:
 
 
 def get_metric_value(
-    metric_dict: dict[str, Any], metric_name: Optional[str]
-) -> Optional[float]:
-    """Safely retrieves value of the metric logged in LightningModule.
+    metric_dict: dict[str, Any], metric_name: str | None
+) -> float | None:
+    r"""Safely retrieves value of the metric logged in LightningModule.
 
-    :param metric_dict: A dict containing metric values.
-    :param metric_name: If provided, the name of the metric to retrieve.
-    :return: If a metric name was provided, the value of the metric.
+    Args:
+        metric_dict: A dict containing metric values.
+        metric_name: If provided, the name of the metric to retrieve.
+    Returns:
+        If a metric name was provided, the value of the metric.
     """
     if not metric_name:
         log.info("Metric name is None! Skipping metric value retrieval...")

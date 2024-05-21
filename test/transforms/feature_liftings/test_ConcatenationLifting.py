@@ -6,7 +6,9 @@ from topobenchmarkx.io.load.loaders import manual_simple_graph
 from topobenchmarkx.transforms.feature_liftings.feature_liftings import (
     ConcatentionLifting,
 )
-from topobenchmarkx.transforms.liftings.graph2simplicial import SimplicialCliqueLifting
+from topobenchmarkx.transforms.liftings.graph2simplicial import (
+    SimplicialCliqueLifting,
+)
 
 
 class TestConcatentionLifting:

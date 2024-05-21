@@ -8,7 +8,6 @@ from torch import einsum, nn
 
 # helpers
 
-
 def exists(val):
     return val is not None
 
@@ -65,36 +64,32 @@ def cache_fn(f):
 
 class PreNorm(nn.Module):
     r"""Class to wrap together LayerNorm and a specified function.
-    
-    Parameters
-    ----------
-    dim: int
-        Size of the dimension to normalize.
-    fn: torch.nn.Module
-        Function after LayerNorm.
-    context_dim: int
-        Size of the context to normalize.
+
+    Args:
+        dim (int): Size of the dimension to normalize.
+        fn (torch.nn.Module): Function after LayerNorm.
+        context_dim (int, optional): Size of the context to normalize. (default: None)
     """
+
     def __init__(self, dim, fn, context_dim=None):
         super().__init__()
         self.fn = fn
         self.norm = nn.LayerNorm(dim)
-        self.norm_context = nn.LayerNorm(context_dim) if exists(context_dim) else None
-
+        self.norm_context = (
+            nn.LayerNorm(context_dim) if exists(context_dim) else None
+        )
+    
+    def __repr__(self):
+        return f"{self.__class__.__name__}(dim={self.norm.normalized_shape[0]}, fn={self.fn}, context_dim={self.norm_context.normalized_shape[0] if exists(self.norm_context) else None})"
+    
     def forward(self, x, **kwargs):
-        r"""Forward pass.
-        
-        Parameters
-        ----------
-        x: torch.Tensor
-            Input tensor.
-        kwargs: dict
-            Dictionary of keyword arguments.
-        
-        Returns
-        -------
-        torch.Tensor
-            Output tensor.
+        r"""Forward pass of the PreNorm class.
+
+        Args:
+            x (torch.Tensor): Input tensor.
+            **kwargs: Additional arguments. If context_dim is not None the context tensor should be passed.
+        Returns:
+            torch.Tensor: Output tensor.
         """
         x = self.norm(x)
 
@@ -108,57 +103,54 @@ class PreNorm(nn.Module):
 
 class GEGLU(nn.Module):
     r"""GEGLU activation function."""
+
     def forward(self, x):
-        r"""Forward pass.
-        
-        Parameters
-        ----------
-        x: torch.Tensor
-            Input tensor.
+        r"""Forward pass of the GEGLU activation function.
+
+        Args:
+            x (torch.Tensor): Input tensor.
+        Returns:
+            torch.Tensor: Output tensor.
         """
         x, gates = x.chunk(2, dim=-1)
         return x * F.gelu(gates)
 
+
 class FeedForward(nn.Module):
-    r"""Feedforward network.
-    
-    Parameters
-    ----------
-    dim: int
-        Size of the input dimension.
-    mult: int
-        Multiplier for the hidden dimension.
+    r"""Feedforward network with two linear layers and GEGLU activation function in between.
+
+    Args:
+        dim (int): Size of the input dimension.
+        mult (int, optional): Multiplier for the hidden dimension. (default: 4)
     """
     def __init__(self, dim, mult=4):
         super().__init__()
         self.net = nn.Sequential(
             nn.Linear(dim, dim * mult * 2), GEGLU(), nn.Linear(dim * mult, dim)
         )
-
+    
+    def __repr__(self):
+        return f"{self.__class__.__name__}(dim={self.net[0].in_features}, mult={self.net[0].out_features // self.net[0].in_features})"
+    
     def forward(self, x):
-        r"""Forward pass.
-        
-        Parameters
-        ----------
-        x: torch.Tensor
-            Input tensor.
+        r"""Forward pass of the FeedForward class.
+
+        Args:
+            x (torch.Tensor): Input tensor.
+        Returns:
+            torch.Tensor: Output tensor.
         """
         return self.net(x)
 
 
 class Attention(nn.Module):
-    r"""Attention function.
-    
-    Parameters
-    ----------
-    query_dim: int
-        Size of the query dimension.
-    context_dim: int
-        Size of the context dimension.
-    heads: int
-        Number of heads.
-    dim_head: int
-        Size for each head.
+    r"""Attention class to calculate the attention weights.
+
+    Args:
+        query_dim (int): Size of the query dimension.
+        context_dim (int, optional): Size of the context dimension. (default: None)
+        heads (int, optional): Number of heads. (default: 8)
+        dim_head (int, optional): Size for each head. (default: 64)
     """
     def __init__(self, query_dim, context_dim=None, heads=8, dim_head=64):
         super().__init__()
@@ -171,22 +163,18 @@ class Attention(nn.Module):
         self.to_kv = nn.Linear(context_dim, inner_dim * 2, bias=False)
         self.to_out = nn.Linear(inner_dim, query_dim)
 
+    def __repr__(self):
+        return f"{self.__class__.__name__}(query_dim={self.to_q.in_features}, context_dim={self.to_kv.in_features // 2}, heads={self.heads}, dim_head={self.to_q.out_features // self.heads})"
+    
     def forward(self, x, context=None, mask=None):
-        r"""Forward pass.
-        
-        Parameters
-        ----------
-        x: torch.Tensor
-            Input tensor.
-        context: torch.Tensor
-            Context tensor.
-        mask: torch.Tensor
-            Mask for attention calculation purposes.
-        
-        Returns
-        -------
-        torch.Tensor
-            Output tensor.
+        r"""Forward pass of the Attention class.
+
+        Args:
+            x (torch.Tensor): Input tensor.
+            context (torch.Tensor, optional): Context tensor. (default: None)
+            mask (torch.Tensor, optional): Mask for attention calculation purposes. (default: None)
+        Returns:
+            torch.Tensor: Output tensor.
         """
         h = self.heads
 
@@ -194,7 +182,9 @@ class Attention(nn.Module):
         context = default(context, x)
         k, v = self.to_kv(context).chunk(2, dim=-1)
 
-        q, k, v = map(lambda t: rearrange(t, "b n (h d) -> (b h) n d", h=h), (q, k, v))
+        q, k, v = map(
+            lambda t: rearrange(t, "b n (h d) -> (b h) n d", h=h), (q, k, v)
+        )
 
         sim = einsum("b i d, b j d -> b i j", q, k) * self.scale
 
@@ -216,29 +206,20 @@ class Attention(nn.Module):
 
 
 class Perceiver(nn.Module):
-    r"""Perceiver model.
-    
-    Parameters
-    ----------
-    depth: int
-        Number of layers to add to the model.
-    dim: int
-        Size of the input dimension.
-    num_latents: int
-        Number of latent vectors.
-    cross_heads: int
-        Number of heads for cross attention.
-    latent_heads: int
-        Number of heads for latent attention.
-    cross_dim_head: int
-        Size of the cross attention head.
-    latent_dim_head: int
-        Size of the latent attention head.
-    weight_tie_layers: bool
-        Whether to tie the weights of the layers.
-    decoder_ff: bool
-        Whether to use a feedforward network in the decoder.
+    r"""Perceiver model. For more information https://arxiv.org/abs/2103.03206.
+
+    Args:
+        depth (int): Number of layers to add to the model.
+        dim (int): Size of the input dimension.
+        num_latents (int, optional): Number of latent vectors. (default: 1)
+        cross_heads (int, optional): Number of heads for cross attention. (default: 1)
+        latent_heads (int, optional): Number of heads for latent attention. (default: 8)
+        cross_dim_head (int, optional): Size of the cross attention head. (default: 64)
+        latent_dim_head (int, optional): Size of the latent attention head. (default: 64)
+        weight_tie_layers (bool, optional): Whether to tie the weights of the layers. (default: False)
+        decoder_ff (bool, optional): Whether to use a feedforward network in the decoder. (default: False)
     """
+
     def __init__(
         self,
         *,
@@ -267,7 +248,10 @@ class Perceiver(nn.Module):
                 PreNorm(
                     latent_dim,
                     Attention(
-                        latent_dim, dim, heads=cross_heads, dim_head=cross_dim_head
+                        latent_dim,
+                        dim,
+                        heads=cross_heads,
+                        dim_head=cross_dim_head,
                     ),
                     context_dim=dim,
                 ),
@@ -275,16 +259,20 @@ class Perceiver(nn.Module):
             ]
         )
 
-        def get_latent_attn(): 
+        def get_latent_attn():
             return PreNorm(
                 latent_dim,
-                Attention(latent_dim, heads=latent_heads, dim_head=latent_dim_head),
+                Attention(
+                    latent_dim, heads=latent_heads, dim_head=latent_dim_head
+                ),
             )
 
-        def get_latent_ff(): 
+        def get_latent_ff():
             return PreNorm(latent_dim, FeedForward(latent_dim))
-        
-        get_latent_attn, get_latent_ff = map(cache_fn, (get_latent_attn, get_latent_ff))
+
+        get_latent_attn, get_latent_ff = map(
+            cache_fn, (get_latent_attn, get_latent_ff)
+        )
 
         self.layers = nn.ModuleList([])
         cache_args = {"_cache": weight_tie_layers}
@@ -292,36 +280,54 @@ class Perceiver(nn.Module):
         for _ in range(depth):
             self.layers.append(
                 nn.ModuleList(
-                    [get_latent_attn(**cache_args), get_latent_ff(**cache_args)]
+                    [
+                        get_latent_attn(**cache_args),
+                        get_latent_ff(**cache_args),
+                    ]
                 )
             )
 
         self.decoder_cross_attn = PreNorm(
             queries_dim,
             Attention(
-                queries_dim, latent_dim, heads=cross_heads, dim_head=cross_dim_head
+                queries_dim,
+                latent_dim,
+                heads=cross_heads,
+                dim_head=cross_dim_head,
             ),
             context_dim=latent_dim,
         )
         self.decoder_ff = (
-            PreNorm(queries_dim, FeedForward(queries_dim)) if decoder_ff else None
+            PreNorm(queries_dim, FeedForward(queries_dim))
+            if decoder_ff
+            else None
         )
 
+        self.dim = dim
+        self.num_latents = num_latents
+        self.cross_heads = cross_heads
+        self.latent_heads = latent_heads
+        self.cross_dim_head = cross_dim_head
+        self.latent_dim_head = latent_dim_head
+        self.weight_tie_layers = weight_tie_layers
+        self.decoder_ff = decoder_ff
+        
         # self.to_logits = (
         #     nn.Linear(queries_dim, logits_dim) if exists(logits_dim) else nn.Identity()
         # )
+    
+    def __repr__(self):
+        return f"{self.__class__.__name__}(depth={len(self.layers)}, dim={self.dim}, num_latents={self.num_latents}, cross_heads={self.cross_heads}, latent_heads={self.latent_heads}, cross_dim_head={self.cross_dim_head}, latent_dim_head={self.latent_dim_head}, weight_tie_layers={self.weight_tie_layers}, decoder_ff={self.decoder_ff}"
 
     def forward(self, data, mask=None, queries=None):
-        r"""Forward pass.
-        
-        Parameters
-        ----------
-        data: torch.Tensor
-            Input tensor.
-        mask: torch.Tensor
-            Mask for attention calculation purposes.
-        queries: torch.Tensor
-            Queries tensor.
+        r"""Forward pass of the Perceiver model.
+
+        Args:
+            data (torch.Tensor): Input tensor.
+            mask (torch.Tensor, optional): Mask for attention calculation purposes. (default: None)
+            queries (torch.Tensor, optional): Queries tensor. (default: None)
+        Returns:
+            torch.Tensor: Output tensor.
         """
         b, *_ = *data.shape
 
@@ -365,4 +371,86 @@ class Perceiver(nn.Module):
         # final linear out
 
         # return x #self.to_logits(latents)
-        return
+        return None
+
+
+
+# from topobenchmarkx.models.encoders.perceiver import Perceiver
+# class SetFeatureEncoder(AbstractInitFeaturesEncoder):
+#     r"""Encoder class to apply BaseEncoder to the node features and Perceiver to the features of higher order structures.
+
+#     Parameters
+#     ----------
+#     in_channels: list(int)
+#         Input dimensions for the features.
+#     out_channels: list(int)
+#         Output dimensions for the features.
+#     proj_dropout: float
+#         Dropout for the BaseEncoders.
+#     selected_dimensions: list(int)
+#         List of indexes to apply the BaseEncoders to.
+#     """
+#     def __init__(
+#         self, in_channels, out_channels, proj_dropout=0, selected_dimensions=None
+#     ):
+#         super(AbstractInitFeaturesEncoder, self).__init__()
+#         self.in_channels = in_channels
+#         self.out_channels = out_channels
+#         self.dimensions = (
+#             selected_dimensions
+#             if selected_dimensions is not None
+#             else range(len(self.in_channels))
+#         )
+#         for idx, i in enumerate(self.dimensions):
+#             if idx == 0:
+#                 setattr(
+#                     self,
+#                     f"encoder_{i}",
+#                     BaseEncoder(
+#                         self.in_channels[i], self.out_channels, dropout=proj_dropout
+#                     ),
+#                 )
+#             else:
+#                 setattr(
+#                     self,
+#                     f"encoder_{i}",
+#                     Perceiver(
+#                         dim=self.out_channels,
+#                         depth=1,
+#                         cross_heads=4,
+#                         cross_dim_head=self.out_channels,
+#                         latent_dim_head=self.out_channels,
+#                     ),
+#                 )
+
+#     def forward(self, data: torch_geometric.data.Data) -> torch_geometric.data.Data:
+#         r"""
+#         Forward pass
+
+#         Parameters
+#         ----------
+#         data: torch_geometric.data.Data
+#             Input data object which should contain x_{i} features for each i in the selected_dimensions.
+
+#         Returns
+#         -------
+#         torch_geometric.data.Data
+#             Output data object.
+#         """
+#         if not hasattr(data, "x_0"):
+#             data.x_0 = data.x
+
+#         for idx, i in enumerate(self.dimensions):
+#             if idx == 0:
+#                 if hasattr(data, f"x_{i}") and hasattr(self, f"encoder_{i}"):
+#                     batch = data.batch if i == 0 else getattr(data, f"batch_{i}")
+#                     data[f"x_{i}"] = getattr(self, f"encoder_{i}")(
+#                         data[f"x_{i}"], batch
+#                     )
+#             else:
+#                 if hasattr(data, f"x_{i}") and hasattr(self, f"encoder_{i}"):
+#                     cell_features = data["x_0"][data[f"x_{i}"].long()]
+#                     data[f"x_{i}"] = getattr(self, f"encoder_{i}")(cell_features)
+#                 else:
+#                     data[f"x_{i}"] = torch.tensor([], device=data.x_0.device)
+#         return data

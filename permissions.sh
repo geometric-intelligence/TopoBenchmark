@@ -1,1 +1,0 @@
-chmod -R a+rwx .

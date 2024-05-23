@@ -15,6 +15,7 @@ CUDA="cu121"    # if available, select the CUDA version suitable for your system
 pip install torch==${TORCH} --extra-index-url https://download.pytorch.org/whl/${CUDA}
 pip install lightning pyg-nightly
 pip install pyg-lib torch-scatter torch-sparse torch-cluster -f https://data.pyg.org/whl/torch-${TORCH}+${CUDA}.html
+
 pytest
 
 pre-commit install

@@ -1,5 +1,6 @@
 import torch_geometric
 
+
 class NodeFeaturesToFloat(torch_geometric.transforms.BaseTransform):
     r"""A transform that converts the node features of the input graph to float.
 

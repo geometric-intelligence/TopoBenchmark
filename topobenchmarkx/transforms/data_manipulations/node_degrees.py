@@ -1,5 +1,5 @@
-import torch
 import torch_geometric
+
 
 class NodeDegrees(torch_geometric.transforms.BaseTransform):
     r"""A transform that calculates the node degrees of the input graph.
@@ -26,7 +26,7 @@ class NodeDegrees(torch_geometric.transforms.BaseTransform):
         """
         field_to_process = [
             key
-            for key in data.keys()
+            for key in data
             for field_substring in self.parameters["selected_fields"]
             if field_substring in key and key != "incidence_0"
         ]
@@ -57,7 +57,7 @@ class NodeDegrees(torch_geometric.transforms.BaseTransform):
             if data.get("num_nodes", None):
                 max_num_nodes = data["num_nodes"]
             else:
-                max_num_nodes = data["x"].shape[0] 
+                max_num_nodes = data["x"].shape[0]
             degrees = (
                 torch_geometric.utils.to_dense_adj(
                     data[field],

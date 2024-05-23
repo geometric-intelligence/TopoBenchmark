@@ -1,6 +1,7 @@
 import torch_geometric
 from torch_geometric.transforms import LargestConnectedComponents
 
+
 class KeepOnlyConnectedComponent(torch_geometric.transforms.BaseTransform):
     """A transform that keeps only the largest connected components of the
     input graph.

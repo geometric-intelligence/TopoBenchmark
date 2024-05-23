@@ -1,5 +1,6 @@
 import torch_geometric
 
+
 class IdentityTransform(torch_geometric.transforms.BaseTransform):
     r"""An identity transform that does nothing to the input data.
 

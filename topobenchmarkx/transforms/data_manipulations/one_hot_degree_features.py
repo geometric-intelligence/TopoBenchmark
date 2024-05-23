@@ -1,6 +1,6 @@
+import torch
 import torch_geometric
-from topobenchmarkx.transforms.data_manipulations.one_hot_degree import OneHotDegree
-
+from torch_geometric.utils import one_hot
 
 
 class OneHotDegreeFeatures(torch_geometric.transforms.BaseTransform):
@@ -8,17 +8,28 @@ class OneHotDegreeFeatures(torch_geometric.transforms.BaseTransform):
     features.
 
     Args:
-        kwargs (optional): Parameters for the base transform.
+        max_degree (int): The maximum degree of the graph.
+        cat (bool, optional): If set to `True`, the one hot encodings are
+                              concatenated to the node features. (default: False)
+        degrees_field (str): The field containing the node degrees.
+        features_field (str): The field containing the node features.
     """
-    def __init__(self, **kwargs):
+    def __init__(
+        self,
+        max_degree: int,
+        degrees_fields: str,
+        features_fields: str,
+        cat: bool = False,
+    ) -> None:
         super().__init__()
         self.type = "one_hot_degree_features"
-        self.deg_field = kwargs["degrees_fields"]
-        self.features_fields = kwargs["features_fields"]
-        self.transform = OneHotDegree(**kwargs)
+        self.max_degree = max_degree
+        self.degrees_field = degrees_fields
+        self.features_field = features_fields
+        self.cat = cat
 
     def __repr__(self) -> str:
-        return f"{self.__class__.__name__}(type={self.type!r}, degrees_field={self.deg_field!r}, features_field={self.features_fields!r})"
+        return f"{self.__class__.__name__}(type={self.type!r}, max_degree={self.max_degree}, degrees_field={self.deg_field!r}, features_field={self.features_fields!r})"
     
     def forward(self, data: torch_geometric.data.Data):
         r"""Apply the transform to the input data.
@@ -28,10 +39,20 @@ class OneHotDegreeFeatures(torch_geometric.transforms.BaseTransform):
         Returns:
             torch_geometric.data.Data: The transformed data.
         """
-        data = self.transform.forward(
-            data,
-            degrees_field=self.deg_field,
-            features_field=self.features_fields,
-        )
+        assert data.edge_index is not None
+
+        deg = data[self.degrees_field].to(torch.long)
+
+        if len(deg.shape) == 2:
+            deg = deg.squeeze(1)
+
+        deg = one_hot(deg, num_classes=self.max_degree + 1)
+
+        if self.cat:
+            x = data[self.features_field]
+            x = x.view(-1, 1) if x.dim() == 1 else x
+            data[self.features_field] = torch.cat([x, deg.to(x.dtype)], dim=-1)
+        else:
+            data[self.features_field] = deg
 
         return data

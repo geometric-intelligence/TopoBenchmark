@@ -1,6 +1,7 @@
 import torch_geometric
 from torch_geometric.nn import knn_graph
 
+
 class InfereKNNConnectivity(torch_geometric.transforms.BaseTransform):
     r"""A transform that generates the k-nearest neighbor connectivity of the
     input point cloud.

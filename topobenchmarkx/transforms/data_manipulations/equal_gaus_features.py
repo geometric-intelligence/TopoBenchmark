@@ -1,6 +1,7 @@
 import torch
 import torch_geometric
 
+
 class EqualGausFeatures(torch_geometric.transforms.BaseTransform):
     r"""A transform that generates equal Gaussian features for all nodes in the
     input graph.

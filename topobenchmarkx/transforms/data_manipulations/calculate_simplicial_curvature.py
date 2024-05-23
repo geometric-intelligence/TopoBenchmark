@@ -1,6 +1,7 @@
 import torch
 import torch_geometric
 
+
 class CalculateSimplicialCurvature(torch_geometric.transforms.BaseTransform):
     r"""A transform that calculates the simplicial curvature of the input graph.
 

@@ -1,6 +1,7 @@
 import torch_geometric
 from torch_geometric.nn import radius_graph
 
+
 class InfereRadiusConnectivity(torch_geometric.transforms.BaseTransform):
     r"""A transform that generates the radius connectivity of the input point
     cloud.

@@ -1,3 +1,6 @@
+from topobenchmarkx.transforms.liftings.graph2cell import GRAPH2CELL_LIFTINGS  # noqa: I001
+from topobenchmarkx.transforms.liftings.graph2hypergraph import GRAPH2HYPERGRAPH_LIFTINGS
+from topobenchmarkx.transforms.liftings.graph2simplicial import GRAPH2SIMPLICIAL_LIFTINGS
 from topobenchmarkx.transforms.liftings.lifting import (
     AbstractLifting,
     CellComplexLifting,
@@ -8,6 +11,12 @@ from topobenchmarkx.transforms.liftings.lifting import (
     SimplicialLifting,
 )
 
+LIFTING_TRANSFORMS = {
+    **GRAPH2CELL_LIFTINGS,
+    **GRAPH2HYPERGRAPH_LIFTINGS,
+    **GRAPH2SIMPLICIAL_LIFTINGS,
+}
+
 __all__ = [
     "AbstractLifting",
     "GraphLifting",
@@ -16,5 +25,5 @@ __all__ = [
     "CellComplexLifting",
     "HypergraphLifting",
     "CombinatorialLifting",
-    "FEATURE_LIFTINGS",
+    "LIFTING_TRANSFORMS",
 ]

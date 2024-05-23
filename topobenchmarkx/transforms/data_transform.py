@@ -1,5 +1,7 @@
 import torch_geometric
+
 from topobenchmarkx.transforms import TRANSFORMS
+
 
 class DataTransform(torch_geometric.transforms.BaseTransform):
     r"""Abstract class that provides an interface to define a custom data
@@ -34,7 +36,3 @@ class DataTransform(torch_geometric.transforms.BaseTransform):
         """
         transformed_data = self.transform(data)
         return transformed_data
-
-
-if __name__ == "__main__":
-    _ = DataTransform()

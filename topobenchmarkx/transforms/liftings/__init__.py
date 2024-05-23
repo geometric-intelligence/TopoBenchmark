@@ -1,18 +1,20 @@
-from topobenchmarkx.transforms.liftings.graph2cell import CellCyclesLifting
-
-from topobenchmarkx.transforms.liftings.graph2hypergraph import (
-    HypergraphKHopLifting,
-    HypergraphKNearestNeighborsLifting,
-)
-from topobenchmarkx.transforms.liftings.graph2simplicial import (
-    SimplicialCliqueLifting,
-    SimplicialNeighborhoodLifting,
+from topobenchmarkx.transforms.liftings.lifting import (
+    AbstractLifting,
+    CellComplexLifting,
+    CombinatorialLifting,
+    GraphLifting,
+    HypergraphLifting,
+    PointCloudLifting,
+    SimplicialLifting,
 )
 
 __all__ = [
-    "CellCyclesLifting",
-    "HypergraphKHopLifting",
-    "HypergraphKNearestNeighborsLifting",
-    "SimplicialCliqueLifting",
-    "SimplicialNeighborhoodLifting",
+    "AbstractLifting",
+    "GraphLifting",
+    "PointCloudLifting",
+    "SimplicialLifting",
+    "CellComplexLifting",
+    "HypergraphLifting",
+    "CombinatorialLifting",
+    "FEATURE_LIFTINGS",
 ]

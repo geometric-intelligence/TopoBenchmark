@@ -20,24 +20,28 @@ from topobenchmarkx.transforms.feature_liftings import (
 )
 
 # Topology Liftings
-from topobenchmarkx.transforms.liftings import (
-    CellCyclesLifting,
+from topobenchmarkx.transforms.liftings.graph2cell import (
+    CellCycleLifting,
+)
+from topobenchmarkx.transforms.liftings.graph2hypergraph import (
     HypergraphKHopLifting,
-    HypergraphKNearestNeighborsLifting,
+    HypergraphKNNLifting,
+)
+from topobenchmarkx.transforms.liftings.graph2simplicial import (
     SimplicialCliqueLifting,
-    SimplicialNeighborhoodLifting,
+    SimplicialKHopLifting,
 )
 
-# Dictionalry of all available transforms
+# Dictionary of all available transforms
 TRANSFORMS = {
     # Graph -> Hypergraph
     "HypergraphKHopLifting": HypergraphKHopLifting,
-    "HypergraphKNearestNeighborsLifting": HypergraphKNearestNeighborsLifting,
+    "HypergraphKNNLifting": HypergraphKNNLifting,
     # Graph -> Simplicial Complex
-    "SimplicialNeighborhoodLifting": SimplicialNeighborhoodLifting,
+    "SimplicialKHopLifting": SimplicialKHopLifting,
     "SimplicialCliqueLifting": SimplicialCliqueLifting,
     # Graph -> Cell Complex
-    "CellCyclesLifting": CellCyclesLifting,
+    "CellCycleLifting": CellCycleLifting,
     # Feature Liftings
     "ProjectionSum": ProjectionSum,
     "ConcatentionLifting": ConcatentionLifting,
@@ -56,7 +60,15 @@ TRANSFORMS = {
 }
 
 
+FEATURE_LIFTINGS = {
+    "ProjectionSum": ProjectionSum,
+    "ConcatentionLifting": ConcatentionLifting,
+    "SetLifting": SetLifting,
+    None: IdentityTransform,
+}
+
 
 __all__ = [
     "TRANSFORMS",
+    "FEATURE_LIFTINGS"
 ]

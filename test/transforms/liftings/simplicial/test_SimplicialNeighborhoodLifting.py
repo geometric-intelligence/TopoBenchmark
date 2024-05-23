@@ -4,22 +4,22 @@ import torch
 
 from topobenchmarkx.io.load.loaders import manual_simple_graph
 from topobenchmarkx.transforms.liftings.graph2simplicial import (
-    SimplicialNeighborhoodLifting,
+    SimplicialKHopLifting,
 )
 
 
-class TestSimplicialNeighborhoodLifting:
-    """Test the SimplicialNeighborhoodLifting class."""
+class TestSimplicialKHopLifting:
+    """Test the SimplicialKHopLifting class."""
 
     def setup_method(self):
         # Load the graph
         self.data = manual_simple_graph()
 
-        # Initialise the SimplicialNeighborhoodLifting class
-        self.lifting_signed = SimplicialNeighborhoodLifting(
+        # Initialise the SimplicialKHopLifting class
+        self.lifting_signed = SimplicialKHopLifting(
             complex_dim=3, signed=True
         )
-        self.lifting_unsigned = SimplicialNeighborhoodLifting(
+        self.lifting_unsigned = SimplicialKHopLifting(
             complex_dim=3, signed=False
         )
 

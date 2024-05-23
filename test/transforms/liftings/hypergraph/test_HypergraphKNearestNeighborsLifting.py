@@ -4,22 +4,22 @@ import torch
 
 from topobenchmarkx.io.load.loaders import manual_graph
 from topobenchmarkx.transforms.liftings.graph2hypergraph import (
-    HypergraphKNearestNeighborsLifting,
+    HypergraphKNNLifting,
 )
 
 
-class TestHypergraphKNearestNeighborsLifting:
-    """Test the HypergraphKNearestNeighborsLifting class."""
+class TestHypergraphKNNLifting:
+    """Test the HypergraphKNNLifting class."""
 
     def setup_method(self):
         # Load the graph
         self.data = manual_graph()
 
-        # Initialise the HypergraphKNearestNeighborsLifting class
-        self.lifting_k2 = HypergraphKNearestNeighborsLifting(
+        # Initialise the HypergraphKNNLifting class
+        self.lifting_k2 = HypergraphKNNLifting(
             k_value=2, loop=True
         )
-        self.lifting_k3 = HypergraphKNearestNeighborsLifting(
+        self.lifting_k3 = HypergraphKNNLifting(
             k_value=3, loop=True
         )
 

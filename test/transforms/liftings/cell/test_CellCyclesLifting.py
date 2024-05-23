@@ -3,18 +3,18 @@
 import torch
 
 from topobenchmarkx.io.load.loaders import manual_simple_graph
-from topobenchmarkx.transforms.liftings.graph2cell import CellCyclesLifting
+from topobenchmarkx.transforms.liftings.graph2cell import CellCycleLifting
 
 
-class TestCellCyclesLifting:
-    """Test the CellCyclesLifting class."""
+class TestCellCycleLifting:
+    """Test the CellCycleLifting class."""
 
     def setup_method(self):
         # Load the graph
         self.data = manual_simple_graph()
 
-        # Initialise the CellCyclesLifting class
-        self.lifting = CellCyclesLifting()
+        # Initialise the CellCycleLifting class
+        self.lifting = CellCycleLifting()
 
     def test_lift_topology(self):
         # Test the lift_topology method

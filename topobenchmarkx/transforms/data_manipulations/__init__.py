@@ -9,7 +9,7 @@ from topobenchmarkx.transforms.data_manipulations.node_degrees import NodeDegree
 from topobenchmarkx.transforms.data_manipulations.node_features_to_float import NodeFeaturesToFloat
 from topobenchmarkx.transforms.data_manipulations.one_hot_degree_features import OneHotDegreeFeatures
 
-DATA_MANIPULATIONS_TRANSFORMS = {
+DATA_MANIPULATIONS = {
     "Identity": IdentityTransform,
     "InfereKNNConnectivity": InfereKNNConnectivity,
     "InfereRadiusConnectivity": InfereRadiusConnectivity,
@@ -33,5 +33,5 @@ __all__ = [
     "CalculateSimplicialCurvature",
     "OneHotDegreeFeatures",
     "KeepSelectedDataFields",
-    "DATA_MANIPULATIONS_TRANSFORMS",
+    "DATA_MANIPULATIONS",
 ]

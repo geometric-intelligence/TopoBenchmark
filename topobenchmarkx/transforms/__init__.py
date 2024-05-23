@@ -1,74 +1,26 @@
-# Data manipulation transforms
-from topobenchmarkx.transforms.data_manipulations import (
-    CalculateSimplicialCurvature,
-    EqualGausFeatures,
-    IdentityTransform,
-    InfereKNNConnectivity,
-    InfereRadiusConnectivity,
-    KeepOnlyConnectedComponent,
-    KeepSelectedDataFields,
-    NodeDegrees,
-    NodeFeaturesToFloat,
-    OneHotDegreeFeatures,
-)
+from typing import Any  # noqa: I001
 
-# Feature liftings
-from topobenchmarkx.transforms.feature_liftings import (
-    ConcatentionLifting,
-    ProjectionSum,
-    SetLifting,
-)
+from topobenchmarkx.transforms.data_manipulations import DATA_MANIPULATIONS
+from topobenchmarkx.transforms.feature_liftings import FEATURE_LIFTINGS
+from topobenchmarkx.transforms.liftings.graph2cell import GRAPH2CELL_LIFTINGS
+from topobenchmarkx.transforms.liftings.graph2hypergraph import GRAPH2HYPERGRAPH_LIFTINGS
+from topobenchmarkx.transforms.liftings.graph2simplicial import GRAPH2SIMPLICIAL_LIFTINGS
 
-# Topology Liftings
-from topobenchmarkx.transforms.liftings.graph2cell import (
-    CellCycleLifting,
-)
-from topobenchmarkx.transforms.liftings.graph2hypergraph import (
-    HypergraphKHopLifting,
-    HypergraphKNNLifting,
-)
-from topobenchmarkx.transforms.liftings.graph2simplicial import (
-    SimplicialCliqueLifting,
-    SimplicialKHopLifting,
-)
-
-# Dictionary of all available transforms
-TRANSFORMS = {
-    # Graph -> Hypergraph
-    "HypergraphKHopLifting": HypergraphKHopLifting,
-    "HypergraphKNNLifting": HypergraphKNNLifting,
-    # Graph -> Simplicial Complex
-    "SimplicialKHopLifting": SimplicialKHopLifting,
-    "SimplicialCliqueLifting": SimplicialCliqueLifting,
-    # Graph -> Cell Complex
-    "CellCycleLifting": CellCycleLifting,
-    # Feature Liftings
-    "ProjectionSum": ProjectionSum,
-    "ConcatentionLifting": ConcatentionLifting,
-    "SetLifting": SetLifting,
-    # Data Manipulations
-    "Identity": IdentityTransform,
-    "InfereKNNConnectivity": InfereKNNConnectivity,
-    "InfereRadiusConnectivity": InfereRadiusConnectivity,
-    "NodeDegrees": NodeDegrees,
-    "OneHotDegreeFeatures": OneHotDegreeFeatures,
-    "EqualGausFeatures": EqualGausFeatures,
-    "NodeFeaturesToFloat": NodeFeaturesToFloat,
-    "CalculateSimplicialCurvature": CalculateSimplicialCurvature,
-    "KeepOnlyConnectedComponent": KeepOnlyConnectedComponent,
-    "KeepSelectedDataFields": KeepSelectedDataFields,
+LIFTINGS = {
+    **GRAPH2CELL_LIFTINGS,
+    **GRAPH2HYPERGRAPH_LIFTINGS,
+    **GRAPH2SIMPLICIAL_LIFTINGS,
 }
 
-
-FEATURE_LIFTINGS = {
-    "ProjectionSum": ProjectionSum,
-    "ConcatentionLifting": ConcatentionLifting,
-    "SetLifting": SetLifting,
-    None: IdentityTransform,
+TRANSFORMS: dict[Any, Any] = {
+    **LIFTINGS,
+    **FEATURE_LIFTINGS,
+    **DATA_MANIPULATIONS,
 }
-
 
 __all__ = [
+    "DATA_MANIPULATIONS",
+    "FEATURE_LIFTINGS",
+    "LIFTINGS",
     "TRANSFORMS",
-    "FEATURE_LIFTINGS"
 ]

@@ -4,24 +4,25 @@ import networkx as nx
 import torch_geometric
 from torch_geometric.utils.undirected import is_undirected, to_undirected
 
-# Data manipulation transforms
-from topobenchmarkx.transforms.data_manipulations import (
-    IdentityTransform,
-)
+# # Data manipulation transforms
+# from topobenchmarkx.transforms.data_manipulations import (
+#     IdentityTransform,
+# )
 
-# Feature liftings
-from topobenchmarkx.transforms.feature_liftings import (
-    ConcatentionLifting,
-    ProjectionSum,
-    SetLifting,
-)
+# # Feature liftings
+# from topobenchmarkx.transforms.feature_liftings import (
+#     ConcatentionLifting,
+#     ProjectionSum,
+#     SetLifting,
+# )
 
-FEATURE_LIFTINGS = {
-    "projection": ProjectionSum,
-    "concatenation": ConcatentionLifting,
-    "set": SetLifting,
-    None: IdentityTransform,
-}
+# FEATURE_LIFTINGS = {
+#     "projection": ProjectionSum,
+#     "concatenation": ConcatentionLifting,
+#     "set": SetLifting,
+#     None: IdentityTransform,
+# }
+from topobenchmarkx.transforms.feature_liftings import FEATURE_LIFTINGS
 
 
 class AbstractLifting(torch_geometric.transforms.BaseTransform):
@@ -30,7 +31,7 @@ class AbstractLifting(torch_geometric.transforms.BaseTransform):
     Parameters
     ----------
     feature_lifting : str, optional
-        The feature lifting method to be used. Default is 'projection'.
+        The feature lifting method to be used. Default is 'ProjectionSum'.
     **kwargs : optional
         Additional arguments for the class.
     """
@@ -80,7 +81,7 @@ class GraphLifting(AbstractLifting):
     Parameters
     ----------
     feature_lifting : str, optional
-        The feature lifting method to be used. Default is 'projection'.
+        The feature lifting method to be used. Default is 'ProjectionSum'.
     preserve_edge_attr : bool, optional
         Whether to preserve edge attributes. Default is False.
     **kwargs : optional
@@ -203,7 +204,7 @@ class HypergraphLifting(AbstractLifting):
     Parameters
     ----------
     feature_lifting : str, optional
-        The feature lifting method to be used. Default is 'projection'.
+        The feature lifting method to be used. Default is 'ProjectionSum'.
     **kwargs : optional
         Additional arguments for the class.
     """

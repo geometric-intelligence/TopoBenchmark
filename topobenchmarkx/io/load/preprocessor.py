@@ -3,12 +3,9 @@ import os
 
 import hydra
 import torch_geometric
-
-from topobenchmarkx.io.load.utils import ensure_serializable, make_hash
-
-
 from torch_geometric.data.dataset import *
 
+from topobenchmarkx.io.load.utils import ensure_serializable, make_hash
 
 
 class Preprocessor(torch_geometric.data.InMemoryDataset):

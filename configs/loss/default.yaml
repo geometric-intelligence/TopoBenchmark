@@ -1,0 +1,3 @@
+_target_: topobenchmarkx.models.losses.DefaultLoss
+task: ${dataset.parameters.task}
+loss_type: ${dataset.parameters.loss_type}

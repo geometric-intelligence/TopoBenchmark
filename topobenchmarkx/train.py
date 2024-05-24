@@ -106,10 +106,13 @@ def train(cfg: DictConfig) -> tuple[dict[str, Any], dict[str, Any]]:
 
     # Model for us is Network + logic: inputs backbone, readout, losses
     log.info(f"Instantiating model <{cfg.model._target_}>")
-    model: LightningModule = hydra.utils.instantiate(cfg.model)
-
-    # Assign evaluator to model
-    model.evaluator = hydra.utils.instantiate(cfg.evaluator)
+    model: LightningModule = hydra.utils.instantiate(
+        cfg.model,
+        evaluator=cfg.evaluator,
+        optimizer=cfg.optimizer,
+        scheduler=cfg.get('scheduler', None),
+        loss=cfg.loss,
+        )
 
     log.info("Instantiating callbacks...")
     callbacks: list[Callback] = instantiate_callbacks(cfg.get("callbacks"))

@@ -42,22 +42,5 @@ head_model:
   task_level: ${dataset.parameters.task_level}
   pooling_type: sum
 
-loss:
-  _target_: topobenchmarkx.models.losses.DefaultLoss
-  task: ${dataset.parameters.task}
-  loss_type: ${dataset.parameters.loss_type}
-
-optimizer:
-  _target_: torch.optim.Adam
-  _partial_: true
-  lr: 0.001 #0.01
-  weight_decay: 0.0
-
-scheduler:
-  _target_: torch.optim.lr_scheduler.StepLR
-  _partial_: true
-  step_size: 50
-  gamma: 0.5
-
 # compile model for faster training with pytorch 2.0
 compile: false

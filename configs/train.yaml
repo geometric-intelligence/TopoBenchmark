@@ -6,6 +6,9 @@ defaults:
   - _self_
   - dataset: cocitation_citeseer # us_country_demos
   - model: cell/can #hypergraph/unignn2 #allsettransformer
+  - optimizer: adam
+  - scheduler: step_lr
+  - loss: default
   - evaluator: default
   - callbacks: default
   - logger: wandb # set logger here or use command line (e.g. `python train.py logger=tensorboard`)

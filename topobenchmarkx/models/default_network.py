@@ -24,6 +24,9 @@ class TopologicalNetworkModule(LightningModule):
         head_model: torch.nn.Module,
         loss: torch.nn.Module,
         feature_encoder: torch.nn.Module | None = None,
+        evaluator: Any = None,
+        optimizer: Any = None,
+        scheduler: Any = None,
         **kwargs,
     ) -> None:
         super().__init__()
@@ -37,13 +40,17 @@ class TopologicalNetworkModule(LightningModule):
         self.readout = readout
         self.head_model = head_model
 
-        # Evaluator
-        self.evaluator = None
+        # Evaluator 
+        self.evaluator = evaluator
         self.train_metrics_logged = False
 
+        # Optimizer and Scheduler
+        self.optimizer = optimizer
+        self.scheduler = scheduler
+
         # Loss function
+        self.loss = loss        
         self.task_level = self.hparams["head_model"].task_level
-        self.loss = loss
 
         # Tracking best so far validation accuracy
         self.val_acc_best = MeanMetric()
@@ -283,12 +290,12 @@ class TopologicalNetworkModule(LightningModule):
         Returns:
             dict: A dict containing the configured optimizers and learning-rate schedulers to be used for training.
         """
-        optimizer = self.hparams.optimizer(
+        optimizer = self.optimizer(
             params=list(self.trainer.model.parameters())
             + list(self.readout.parameters())
         )
-        if self.hparams.scheduler is not None:
-            scheduler = self.hparams.scheduler(optimizer=optimizer)
+        if self.scheduler is not None:
+            scheduler = self.scheduler(optimizer=optimizer)
             return {
                 "optimizer": optimizer,
                 "lr_scheduler": {

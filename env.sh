@@ -1,11 +1,11 @@
 #!/bin/bash -l
 
-pip install --upgrade pip
-pip install -e '.[all]'
+# pip install --upgrade pip
+# pip install -e '.[all]'
 
-pip install --no-dependencies git+https://github.com/pyt-team/TopoNetX.git
-pip install --no-dependencies git+https://github.com/pyt-team/TopoModelX.git
-pip install --no-dependencies git+https://github.com/pyt-team/TopoEmbedX.git
+# pip install --no-dependencies git+https://github.com/pyt-team/TopoNetX.git
+# pip install --no-dependencies git+https://github.com/pyt-team/TopoModelX.git
+# pip install --no-dependencies git+https://github.com/pyt-team/TopoEmbedX.git
 
 # Note that not all combinations of torch and CUDA are available
 # See https://github.com/pyg-team/pyg-lib to check the configuration that works for you

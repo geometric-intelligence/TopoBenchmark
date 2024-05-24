@@ -1,10 +1,10 @@
-_target_: topobenchmarkx.models.TopologicalNetworkModule
+_target_: topobenchmarkx.nn.TopologicalNetworkModule
 
 model_name: sccnn 
 model_domain: simplicial
 
 feature_encoder:
-  _target_: topobenchmarkx.models.encoders.${model.feature_encoder.encoder_name}
+  _target_: topobenchmarkx.nn.encoders.${model.feature_encoder.encoder_name}
   encoder_name: AllCellFeatureEncoder
   in_channels: ${infer_in_channels:${dataset}}
   out_channels: 32
@@ -31,20 +31,20 @@ backbone:
   n_layers: 1
 
 backbone_wrapper:
-  _target_: topobenchmarkx.models.wrappers.SCCNNWrapper
+  _target_: topobenchmarkx.nn.wrappers.SCCNNWrapper
   _partial_: true
   wrapper_name: SCCNNWrapper
   out_channels: ${model.feature_encoder.out_channels}
   num_cell_dimensions: ${infere_list_length:${model.feature_encoder.selected_dimensions}}
 
 readout:
-  _target_: topobenchmarkx.models.readouts.${model.readout.readout_name}
+  _target_: topobenchmarkx.nn.readouts.${model.readout.readout_name}
   readout_name: PropagateSignalDown #  Use <NoReadOut> in case readout is not needed Options: PropagateSignalDown
   hidden_dim: ${model.feature_encoder.out_channels}
   num_cell_dimensions: ${infere_list_length:${model.feature_encoder.selected_dimensions}}
 
 head_model:
-  _target_: topobenchmarkx.models.head_models.${model.head_model.head_model_name}
+  _target_: topobenchmarkx.nn.head_models.${model.head_model.head_model_name}
   head_model_name: ZeroCellModel
   in_channels: ${model.feature_encoder.out_channels}
   out_channels: ${dataset.parameters.num_classes}

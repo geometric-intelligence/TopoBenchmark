@@ -3,7 +3,7 @@
 from . import data
 from . import evaluators
 from . import io
-from . import models
+from . import nn
 from . import transforms
 from . import utils
 

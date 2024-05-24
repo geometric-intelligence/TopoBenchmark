@@ -1,7 +1,10 @@
-# Train rest of the TU graph datasets (TOTAL processes: 30)
-datasets=( 'REDDIT-BINARY' 'IMDB-BINARY' 'IMDB-MULTI' )
+
+# ----Heterophilic datasets----
+# datasets=( roman_empire minesweeper )
+
 seeds=(0 3 5 7 9)
-lrs=(0.01 0.001)
+datasets=( minesweeper )
+lrs=(0.01)
 
 for seed in ${seeds[*]}
 do 
@@ -17,14 +20,15 @@ do
             model.backbone.n_layers=1,2,3,4 \
             model.feature_encoder.proj_dropout=0.25,0.5 \
             dataset.parameters.data_seed=$seed \
-            dataset.parameters.batch_size=128,256 \
             model.readout.readout_name="NoReadOut,PropagateSignalDown" \
             dataset.transforms.graph2simplicial_lifting.signed=True \
+            dataset.parameters.batch_size=1 \
             logger.wandb.project=TopoBenchmarkX_Simplicial \
-            trainer.max_epochs=500 \
+            trainer.max_epochs=1000 \
             trainer.min_epochs=50 \
-            trainer.check_val_every_n_epoch=5 \
-            callbacks.early_stopping.patience=10 \
+            trainer.check_val_every_n_epoch=1 \
+            trainer.devices=\[2\] \
+            callbacks.early_stopping.patience=50 \
             tags="[MainExperiment]" \
             --multirun &
         done
@@ -33,4 +37,4 @@ done
 
 
 
-# Final totoal processes: 35
+# Final totoal processes: 60

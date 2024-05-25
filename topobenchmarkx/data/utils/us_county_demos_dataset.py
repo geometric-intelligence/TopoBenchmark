@@ -1,16 +1,17 @@
 import os
 import os.path as osp
-from collections.abc import Callable
-from typing import ClassVar
 import shutil
+from typing import ClassVar
+
+import numpy as np
+import pandas as pd
 import torch
+import torch_geometric
 from omegaconf import DictConfig
 from torch_geometric.data import Data, InMemoryDataset, extract_zip
-# from torch_geometric.io import fs
 
-from topobenchmarkx.io.load.download_utils import download_file_from_drive
-from topobenchmarkx.io.load.split_utils import random_splitting
-from topobenchmarkx.io.load.us_county_demos import load_us_county_demos
+from topobenchmarkx.data.utils.download_utils import download_file_from_drive
+from topobenchmarkx.data.utils.split_utils import random_splitting
 
 
 class USCountyDemosDataset(InMemoryDataset):
@@ -60,22 +61,14 @@ class USCountyDemosDataset(InMemoryDataset):
         root: str,
         name: str,
         parameters: DictConfig,
-        transform: Callable | None = None,
-        pre_transform: Callable | None = None,
-        pre_filter: Callable | None = None,
-        #force_reload: bool = True,
-        use_node_attr: bool = False,
-        use_edge_attr: bool = False,
     ) -> None:
-        self.name = name.replace("_", "-")
-        self.parameters = parameters
+        force_reload = parameters.get("force_reload", True)
         super().__init__(
             root,
-            transform,
-            pre_transform,
-            pre_filter,
-            #force_reload=force_reload,
+            force_reload=force_reload,
         )
+        self.name = name.replace("_", "-")
+        self.parameters = parameters
 
         # Load the processed data
         data, _ = torch.load(self.processed_paths[0])
@@ -101,14 +94,14 @@ class USCountyDemosDataset(InMemoryDataset):
         # Assign data object to self.data, to make it be prodessed by Dataset class
         self.data, self.slices = self.collate([data])
         
-        # Make sure the dataset will be reloaded during next run 
+        # Make sure the dataset will be reloaded during next run
         shutil.rmtree(self.raw_dir)
         # Get parent dir of self.processed_paths[0]
         processed_dir = os.path.abspath(os.path.join(self.processed_paths[0], os.pardir))
         shutil.rmtree(processed_dir)
         
     def __repr__(self) -> str:
-        return f"{self.name}(self.root={self.root}, self.name={self.name}, self.parameters={self.parameters}, self.transform={self.transform}, self.pre_transform={self.pre_transform}, self.pre_filter={self.pre_filter}, self.force_reload={self.force_reload})" 
+        return f"{self.name}(self.root={self.root}, self.name={self.name}, self.parameters={self.parameters}, self.force_reload={self.force_reload})"
 
     @property
     def raw_dir(self) -> str:
@@ -121,7 +114,7 @@ class USCountyDemosDataset(InMemoryDataset):
     @property
     def raw_file_names(self) -> list[str]:
         #names = ["county", f"{self.parameters.year}"]
-        return [f"county_graph.csv", f"county_stats_{self.parameters.year}.csv"]
+        return ["county_graph.csv", f"county_stats_{self.parameters.year}.csv"]
 
     @property
     def processed_file_names(self) -> str:
@@ -167,11 +160,123 @@ class USCountyDemosDataset(InMemoryDataset):
         This method loads the US county demographics data, applies any pre-processing transformations if specified,
         and saves the processed data to the appropriate location.
         """
-        data = load_us_county_demos(
-            self.raw_dir,
-            year=self.parameters.year,
-            y_col=self.parameters.task_variable,
-        )
+        data = self.load()
 
         data = data if self.pre_transform is None else self.pre_transform(data)
         self.save([data], self.processed_paths[0])
+        
+    def load(self):
+        r"""Load US County Demos dataset considering the year and task_variable defined.
+        
+        Returns:
+            torch_geometric.data.Data: Data object of the graph for the US County Demos dataset.
+        """
+        path = self.raw_dir
+        year = self.parameters.year
+        y_col = self.parameters.task_variable
+        
+        edges_df = pd.read_csv(f"{path}/county_graph.csv")
+        stat = pd.read_csv(
+            f"{path}/county_stats_{year}.csv", encoding="ISO-8859-1"
+        )
+
+        keep_cols = [
+            "FIPS",
+            "DEM",
+            "GOP",
+            "MedianIncome",
+            "MigraRate",
+            "BirthRate",
+            "DeathRate",
+            "BachelorRate",
+            "UnemploymentRate",
+        ]
+
+        # Select columns, replace ',' with '.' and convert to numeric
+        stat = stat.loc[:, keep_cols]
+        stat["MedianIncome"] = stat["MedianIncome"].replace(",", ".", regex=True)
+        stat = stat.apply(pd.to_numeric, errors="coerce")
+
+        # Step 2: Substitute NaN values with column mean
+        for column in stat.columns:
+            if column != "FIPS":
+                mean_value = stat[column].mean()
+                stat[column].fillna(mean_value, inplace=True)
+        stat = stat[keep_cols].dropna()
+
+        # Delete edges that are not present in stat df
+        unique_fips = stat["FIPS"].unique()
+
+        src_ = edges_df["SRC"].apply(lambda x: x in unique_fips)
+        dst_ = edges_df["DST"].apply(lambda x: x in unique_fips)
+
+        edges_df = edges_df[src_ & dst_]
+
+        # Remove rows from stat df where edges_df['SRC'] or edges_df['DST'] are not present
+        stat = stat[
+            stat["FIPS"].isin(edges_df["SRC"]) & stat["FIPS"].isin(edges_df["DST"])
+        ]
+        stat = stat.reset_index(drop=True)
+
+        # Remove rows where SRC == DST
+        edges_df = edges_df[edges_df["SRC"] != edges_df["DST"]]
+
+        # Get torch_geometric edge_index format
+        edge_index = torch.tensor(
+            np.stack([edges_df["SRC"].to_numpy(), edges_df["DST"].to_numpy()])
+        )
+
+        # Make edge_index undirected
+        edge_index = torch_geometric.utils.to_undirected(edge_index)
+
+        # Convert edge_index back to pandas DataFrame
+        edges_df = pd.DataFrame(edge_index.numpy().T, columns=["SRC", "DST"])
+
+        del edge_index
+
+        # Map stat['FIPS'].unique() to [0, ..., num_nodes]
+        fips_map = {fips: i for i, fips in enumerate(stat["FIPS"].unique())}
+        stat["FIPS"] = stat["FIPS"].map(fips_map)
+
+        # Map edges_df['SRC'] and edges_df['DST'] to [0, ..., num_nodes]
+        edges_df["SRC"] = edges_df["SRC"].map(fips_map)
+        edges_df["DST"] = edges_df["DST"].map(fips_map)
+
+        # Get torch_geometric edge_index format
+        edge_index = torch.tensor(
+            np.stack([edges_df["SRC"].to_numpy(), edges_df["DST"].to_numpy()])
+        )
+
+        # Remove isolated nodes (Note: this function maps the nodes to [0, ..., num_nodes] automatically)
+        edge_index, _, mask = torch_geometric.utils.remove_isolated_nodes(
+            edge_index
+        )
+
+        # Conver mask to index
+        index = np.arange(mask.size(0))[mask]
+        stat = stat.iloc[index]
+        stat = stat.reset_index(drop=True)
+
+        # Get new values for FIPS from current index
+        # To understand why please print stat.iloc[[516, 517, 518, 519, 520]] for 2012 year
+        # Basically the FIPS values has been shifted
+        stat["FIPS"] = stat.reset_index()["index"]
+
+        # Create Election variable
+        stat["Election"] = (stat["DEM"] - stat["GOP"]) / (
+            stat["DEM"] + stat["GOP"]
+        )
+
+        # Drop DEM and GOP columns and FIPS
+        stat = stat.drop(columns=["DEM", "GOP", "FIPS"])
+
+        # Prediction col
+        x_col = list(stat.columns)
+        x_col.remove(y_col)
+
+        x = torch.tensor(stat[x_col].to_numpy(), dtype=torch.float32)
+        y = torch.tensor(stat[y_col].to_numpy(), dtype=torch.float32)
+
+        data = torch_geometric.data.Data(x=x, y=y, edge_index=edge_index)
+
+        return data

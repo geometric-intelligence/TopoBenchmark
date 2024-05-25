@@ -10,7 +10,7 @@ import torch_geometric
 from omegaconf import DictConfig
 from torch_geometric.data import Data, InMemoryDataset
 
-from topobenchmarkx.io.load.split_utils import random_splitting
+from topobenchmarkx.data.utils.split_utils import random_splitting
 
 
 class HeteroDataset(InMemoryDataset):

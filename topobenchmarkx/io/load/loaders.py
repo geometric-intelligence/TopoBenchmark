@@ -9,10 +9,10 @@ from omegaconf import DictConfig
 
 from topobenchmarkx.data.datasets import CustomDataset
 from topobenchmarkx.data.heteriphilic_dataset import HeteroDataset
-from topobenchmarkx.data.us_county_demos_dataset import USCountyDemosDataset
+from topobenchmarkx.data.utils.us_county_demos_dataset import USCountyDemosDataset
 from topobenchmarkx.io.load.loader import AbstractLoader
 from topobenchmarkx.io.load.preprocessor import Preprocessor
-from topobenchmarkx.io.load.split_utils import (
+from topobenchmarkx.data.utils.split_utils import (
     assing_train_val_test_mask_to_graphs,
     load_graph_cocitation_split,
     load_graph_tudataset_split,

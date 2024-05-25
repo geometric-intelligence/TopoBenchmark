@@ -33,10 +33,8 @@ class PreProcessor(torch_geometric.data.InMemoryDataset):
     def processed_dir(self) -> str:
         r"""Return the path to the processed directory.
 
-        Returns
-        -------
-        str
-            Path to the processed directory.
+        Returns:
+            str: Path to the processed directory.
         """
         return self.root
 
@@ -45,9 +43,7 @@ class PreProcessor(torch_geometric.data.InMemoryDataset):
         r"""Return the name of the processed file.
 
         Returns
-        -------
-        str
-            Name of the processed file.
+            str: Name of the processed file.
         """
         return "data.pt"
 
@@ -56,17 +52,11 @@ class PreProcessor(torch_geometric.data.InMemoryDataset):
     ) -> torch_geometric.transforms.Compose:
         r"""Instantiate the pre-transforms.
 
-        Parameters
-        ----------
-        data_dir : str
-            Path to the directory containing the data.
-        transforms_config : DictConfig
-            Configuration parameters for the transforms.
-
-        Returns
-        -------
-        torch_geometric.transforms.Compose
-            Pre-transform object.
+        Parameters:
+            data_dir (str): Path to the directory containing the data.
+            transforms_config (DictConfig): Configuration parameters for the transforms.
+        Returns:
+            torch_geometric.transforms.Compose: Pre-transform object.
         """
         pre_transforms_dict = {
             key: DataTransform(**value) for key, value in transforms_config.items()
@@ -82,14 +72,10 @@ class PreProcessor(torch_geometric.data.InMemoryDataset):
     ) -> None:
         r"""Set the processed data directory.
 
-        Parameters
-        ----------
-        pre_transforms_dict : dict
-            Dictionary containing the pre-transforms.
-        data_dir : str
-            Path to the directory containing the data.
-        transforms_config : DictConfig
-            Configuration parameters for the transforms.
+        Args:
+            pre_transforms_dict (dict): Dictionary containing the pre-transforms.
+            data_dir (str): Path to the directory containing the data.
+            transforms_config (DictConfig): Configuration parameters for the transforms.
         """
         # Use self.transform_parameters to define unique save/load path for each transform parameters
         repo_name = "_".join(list(transforms_config.keys()))

@@ -1,4 +1,4 @@
-_target_: topobenchmarkx.io.load.loaders.GraphLoader
+_target_: topobenchmarkx.data.load.loaders.GraphLoader
 
 defaults:
   - transforms/data_manipulations: equal_gaus_features

@@ -38,7 +38,7 @@ class TestCollateFunction:
             "parameter_multiplication", lambda x, y: int(int(x) * int(y))
         )
 
-        initialize(version_base="1.3", config_path="../../configs", job_name="job")
+        initialize(version_base="1.3", config_path="../../configs") #, job_name="job")
         cfg = compose(config_name="train.yaml")
         
         graph_loader = hydra.utils.instantiate(cfg.dataset, _recursive_=False)

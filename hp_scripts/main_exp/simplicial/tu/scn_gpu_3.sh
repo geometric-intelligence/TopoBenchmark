@@ -22,7 +22,7 @@ do
         trainer.max_epochs=500 \
         trainer.min_epochs=50 \
         trainer.check_val_every_n_epoch=5 \
-        trainer.devices=\[2\] \
+        trainer.devices=\[3\] \
         callbacks.early_stopping.patience=10 \
         tags="[MainExperiment]" \
         --multirun &
@@ -45,7 +45,7 @@ python ../../../topobenchmarkx/train.py \
         trainer.max_epochs=500 \
         trainer.min_epochs=50 \
         trainer.check_val_every_n_epoch=5 \
-        trainer.devices=\[2\] \
+        trainer.devices=\[3\] \
         callbacks.early_stopping.patience=10 \
         tags="[MainExperiment]" \
         --multirun

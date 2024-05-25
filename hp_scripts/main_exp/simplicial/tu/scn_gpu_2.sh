@@ -21,7 +21,7 @@ do
         trainer.max_epochs=500 \
         trainer.min_epochs=50 \
         trainer.check_val_every_n_epoch=5 \
-        trainer.devices=\[1\] \
+        trainer.devices=\[2\] \
         callbacks.early_stopping.patience=10 \
         tags="[MainExperiment]" \
         --multirun &

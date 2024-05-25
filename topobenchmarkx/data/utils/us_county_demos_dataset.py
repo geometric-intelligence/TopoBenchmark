@@ -9,6 +9,7 @@ import torch
 import torch_geometric
 from omegaconf import DictConfig
 from torch_geometric.data import Data, InMemoryDataset, extract_zip
+from torch_geometric.io import fs
 
 from topobenchmarkx.data.utils.download_utils import download_file_from_drive
 from topobenchmarkx.data.utils.split_utils import random_splitting
@@ -45,12 +46,10 @@ class USCountyDemosDataset(InMemoryDataset):
     """
 
     URLS: ClassVar = {
-        # 'contact-high-school': 'https://drive.google.com/open?id=1VA2P62awVYgluOIh1W4NZQQgkQCBk-Eu',
         "US-county-demos": "https://drive.google.com/file/d/1FNF_LbByhYNICPNdT6tMaJI9FxuSvvLK/view?usp=sharing",
     }
 
     FILE_FORMAT: ClassVar = {
-        # 'contact-high-school': 'tar.gz',
         "US-county-demos": "zip",
     }
 
@@ -62,17 +61,32 @@ class USCountyDemosDataset(InMemoryDataset):
         name: str,
         parameters: DictConfig,
     ) -> None:
-        force_reload = parameters.get("force_reload", True)
-        super().__init__(
-            root,
-            force_reload=force_reload,
-        )
         self.name = name.replace("_", "-")
         self.parameters = parameters
+        self.year = parameters.year
+        self.task_variable = parameters.task_variable
+        #force_reload = parameters.get("force_reload", True)
+        super().__init__(
+            root,
+            #force_reload=force_reload,
+        )
+        
+        out = fs.torch_load(self.processed_paths[0])
+        assert len(out) == 3 or len(out) == 4
 
-        # Load the processed data
-        data, _ = torch.load(self.processed_paths[0])
-    
+        if len(out) == 3:  # Backward compatibility.
+            data, self.slices, self.sizes = out
+            data_cls = Data
+        else:
+            data, self.slices, self.sizes, data_cls = out
+
+        if not isinstance(data, dict):  # Backward compatibility.
+            self.data = data
+        else:
+            self.data = data_cls.from_dict(data)
+
+        assert isinstance(self._data, Data)
+
         # Map the loaded data into
         data = Data.from_dict(data) if isinstance(data, dict) else data
 
@@ -93,12 +107,11 @@ class USCountyDemosDataset(InMemoryDataset):
 
         # Assign data object to self.data, to make it be prodessed by Dataset class
         self.data, self.slices = self.collate([data])
-        
         # Make sure the dataset will be reloaded during next run
-        shutil.rmtree(self.raw_dir)
+        #shutil.rmtree(self.raw_dir)
         # Get parent dir of self.processed_paths[0]
-        processed_dir = os.path.abspath(os.path.join(self.processed_paths[0], os.pardir))
-        shutil.rmtree(processed_dir)
+        #processed_dir = os.path.abspath(os.path.join(self.processed_paths[0], os.pardir))
+        #shutil.rmtree(processed_dir)
         
     def __repr__(self) -> str:
         return f"{self.name}(self.root={self.root}, self.name={self.name}, self.parameters={self.parameters}, self.force_reload={self.force_reload})"
@@ -109,17 +122,16 @@ class USCountyDemosDataset(InMemoryDataset):
 
     @property
     def processed_dir(self) -> str:
-        return osp.join(self.root, self.name, "processed")
+        return osp.join(self.root, self.name, "processed", str(self.year), self.task_variable)
 
     @property
     def raw_file_names(self) -> list[str]:
-        #names = ["county", f"{self.parameters.year}"]
-        return ["county_graph.csv", f"county_stats_{self.parameters.year}.csv"]
+        return ["county_graph.csv", f"county_stats_{self.year}.csv"]
 
     @property
     def processed_file_names(self) -> str:
         return "data.pt"
-
+    
     def download(self) -> None:
         r"""Downloads the dataset from the specified URL and saves it to the raw
         directory.
@@ -152,7 +164,6 @@ class USCountyDemosDataset(InMemoryDataset):
         
         # Delete osp.join(folder, self.name) dir
         shutil.rmtree(osp.join(folder, self.name))
-        
 
     def process(self) -> None:
         r"""Process the data for the dataset.
@@ -160,24 +171,24 @@ class USCountyDemosDataset(InMemoryDataset):
         This method loads the US county demographics data, applies any pre-processing transformations if specified,
         and saves the processed data to the appropriate location.
         """
-        data = self.load()
-
-        data = data if self.pre_transform is None else self.pre_transform(data)
-        self.save([data], self.processed_paths[0])
+        data = self.read_us_county_demos()
+        data_list = [data]
+        self.data, self.slices = self.collate(data_list)
+        self._data_list = None  # Reset cache.
+        fs.torch_save(
+            (self._data.to_dict(), self.slices, {}, self._data.__class__),
+            self.processed_paths[0],
+        )
         
-    def load(self):
+    def read_us_county_demos(self):
         r"""Load US County Demos dataset considering the year and task_variable defined.
         
         Returns:
             torch_geometric.data.Data: Data object of the graph for the US County Demos dataset.
         """
-        path = self.raw_dir
-        year = self.parameters.year
-        y_col = self.parameters.task_variable
-        
-        edges_df = pd.read_csv(f"{path}/county_graph.csv")
+        edges_df = pd.read_csv(f"{self.raw_dir}/county_graph.csv")
         stat = pd.read_csv(
-            f"{path}/county_stats_{year}.csv", encoding="ISO-8859-1"
+            f"{self.raw_dir}/county_stats_{self.year}.csv", encoding="ISO-8859-1"
         )
 
         keep_cols = [
@@ -201,7 +212,7 @@ class USCountyDemosDataset(InMemoryDataset):
         for column in stat.columns:
             if column != "FIPS":
                 mean_value = stat[column].mean()
-                stat[column].fillna(mean_value, inplace=True)
+                stat[column] = stat[column].fillna(mean_value)
         stat = stat[keep_cols].dropna()
 
         # Delete edges that are not present in stat df
@@ -272,10 +283,10 @@ class USCountyDemosDataset(InMemoryDataset):
 
         # Prediction col
         x_col = list(stat.columns)
-        x_col.remove(y_col)
+        x_col.remove(self.task_variable)
 
         x = torch.tensor(stat[x_col].to_numpy(), dtype=torch.float32)
-        y = torch.tensor(stat[y_col].to_numpy(), dtype=torch.float32)
+        y = torch.tensor(stat[self.task_variable].to_numpy(), dtype=torch.float32)
 
         data = torch_geometric.data.Data(x=x, y=y, edge_index=edge_index)
 

@@ -1,4 +1,4 @@
-# Train rest of the TU graph datasets (TOTAL processes: 30)
+### SCN### SCN### SCN### SCN### SCN### SCN### SCN### SCN
 datasets=( 'NCI109' )
 seeds=(0 3 5 7)
 
@@ -9,8 +9,8 @@ do
     do
     python ../../../topobenchmarkx/train.py \
         dataset=$dataset \
-        model=simplicial/sccn \
-        model.optimizer.lr=0.001 \
+        model=simplicial/scn \
+        model.optimizer.lr=0.01,0.001 \
         model.feature_encoder.out_channels=32,64 \
         model.backbone.n_layers=1,2,3,4 \
         model.feature_encoder.proj_dropout=0.25,0.5 \
@@ -22,7 +22,7 @@ do
         trainer.max_epochs=500 \
         trainer.min_epochs=50 \
         trainer.check_val_every_n_epoch=5 \
-        trainer.devices=\[1\] \
+        trainer.devices=\[2\] \
         callbacks.early_stopping.patience=10 \
         tags="[MainExperiment]" \
         --multirun &
@@ -32,7 +32,7 @@ done
 
 python ../../../topobenchmarkx/train.py \
         dataset=NCI109 \
-        model=simplicial/sccn \
+        model=simplicial/scn \
         model.optimizer.lr=0.01,0.001 \
         model.feature_encoder.out_channels=32,64 \
         model.backbone.n_layers=1,2,3,4 \
@@ -45,9 +45,7 @@ python ../../../topobenchmarkx/train.py \
         trainer.max_epochs=500 \
         trainer.min_epochs=50 \
         trainer.check_val_every_n_epoch=5 \
-        trainer.devices=\[1\] \
+        trainer.devices=\[2\] \
         callbacks.early_stopping.patience=10 \
         tags="[MainExperiment]" \
         --multirun
-
-# Final totoal processes: 35

@@ -14,7 +14,7 @@ do
         do
         python ../../../topobenchmarkx/train.py \
             dataset=$dataset \
-            model=simplicial/sccn \
+            model=simplicial/scn \
             model.optimizer.lr=$lr \
             model.feature_encoder.out_channels=32,64,128 \
             model.backbone.n_layers=1,2,3,4 \

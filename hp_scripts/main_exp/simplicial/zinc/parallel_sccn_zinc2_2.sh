@@ -15,7 +15,7 @@ do
             python ../../../topobenchmarkx/train.py \
             dataset=ZINC \
             seed=$seed \
-            model=simplicial/sccn \
+            model=simplicial/scn \
             model.optimizer.lr=$lr \
             model.optimizer.weight_decay=0 \
             model.feature_encoder.out_channels=32,64,128 \

@@ -47,7 +47,7 @@ class GraphLoader(AbstractLoader):
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}(parameters={self.parameters})"
     
-    def load(self) -> CustomDataset:
+    def load(self) -> tuple[torch_geometric.data.Dataset, str]:
         r"""Load graph dataset.
 
         Returns:
@@ -55,7 +55,7 @@ class GraphLoader(AbstractLoader):
         """
         # Define the path to the data directory
         root_data_dir = self.parameters["data_dir"]
-        self.data_dir = os.path.join(root_data_dir, self.parameters["data_name"])
+        data_dir = os.path.join(root_data_dir, self.parameters["data_name"])
         if (
             self.parameters.data_name.lower() in ["cora", "citeseer", "pubmed"]
             and self.parameters.data_type == "cocitation"
@@ -133,17 +133,19 @@ class GraphLoader(AbstractLoader):
                 name=self.parameters["data_name"],
                 parameters=self.parameters,
             )
+            # Need to redefine data_dir for the (year, task_variable) pair chosen
+            data_dir = dataset.processed_root
 
         elif self.parameters.data_name in ["manual"]:
             data = load_manual_graph()
-            dataset = CustomDataset([data], self.data_dir)
+            dataset = CustomDataset([data], data_dir)
 
         else:
             raise NotImplementedError(
                 f"Dataset {self.parameters.data_name} not implemented"
             )
 
-        return dataset
+        return dataset, data_dir
 
 
 class CellComplexLoader(AbstractLoader):

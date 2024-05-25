@@ -85,6 +85,7 @@ def generate_zero_sparse_connectivity(m, n):
 
 def load_cell_complex_dataset(cfg):
     r"""Loads cell complex datasets."""
+    raise NotImplementedError
 
 
 def load_simplicial_dataset(cfg):
@@ -280,7 +281,7 @@ def load_hypergraph_pickle_dataset(cfg):
     print("Final num_nodes", data.num_nodes)
     print("Final num_class", data.num_class)
 
-    return data
+    return data, data_dir
 
 
 def load_manual_graph():

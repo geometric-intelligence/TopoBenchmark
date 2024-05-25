@@ -1,19 +1,51 @@
-def get_default_transform(data_domain, model):
+def get_default_transform(dataset, model):
     r"""Get default transform for a given data domain and model.
 
     Args:
-        data_domain (str): Data domain.
+        dataset (str): Dataset name. Should be in the format "data_domain/name".
         model (str): Model name. Should be in the format "model_domain/name".
     Returns:
         str: Default transform.
     Raises:
         ValueError: If the combination of data_domain and model is invalid.
     """
+    data_domain, dataset = dataset.split("/")
     model_domain = model.split("/")[0]
     if data_domain == model_domain:
         return "identity"
     elif data_domain == "graph" and model_domain != "combinatorial":
-        return f"graph2{model_domain}_default"
+        if dataset in [
+            "IMDB-BINARY",
+            "IMDB-MULTI",
+            "REDDIT-BINARY",
+            "PROTEINS_TU",
+            "ZINC",
+        ]:
+            return f"dataset_defaults/{dataset}"
+        else:
+            return f"liftings/graph2{model_domain}_default"
+    else:
+        raise ValueError(
+            f"Invalid combination of data_domain={data_domain} and model_domain={model_domain}"
+        )
+        
+def get_required_transform(data_domain, model):
+    r"""Get required transform for a given data domain and model.
+
+    Args:
+        data_domain (str): Dataset domain.
+        model (str): Model name. Should be in the format "model_domain/name".
+    Returns:
+        str: Default transform.
+    Raises:
+        ValueError: If the combination of data_domain and model is invalid.
+    """
+    data_domain = data_domain
+    model_domain = model.split("/")[0]
+    if data_domain == model_domain:
+        return "identity"
+    elif data_domain == "graph" and model_domain != "combinatorial":
+        return f"liftings/graph2{model_domain}_default"
     else:
         raise ValueError(
             f"Invalid combination of data_domain={data_domain} and model_domain={model_domain}"

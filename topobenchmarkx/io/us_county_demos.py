@@ -4,7 +4,7 @@ import torch
 import torch_geometric
 
 
-def load_us_county_demos(path, year=2012, y_col="Election"):
+def read_us_county_demos(path, year=2012, y_col="Election"):
     r"""Load US County Demos dataset.
 
     Args:

@@ -1,2 +1,0 @@
-defaults:
-  - graph2simplicial_lifting: simplicial_clique #simplicial_neighborhood #simplicial_clique

@@ -1,0 +1,36 @@
+_target_: topobenchmarkx.data.load.loaders.GraphLoader
+
+defaults:
+  - transforms/data_manipulations: node_degrees
+  - transforms/data_manipulations@transforms.one_hot_node_degree_features: one_hot_node_degree_features
+  - transforms: ${get_default_transform:graph,${model}}
+
+# Data definition
+parameters:
+  data_domain: graph
+  data_type: TUDataset
+  data_name: IMDB-MULTI
+  data_dir: ${paths.data_dir}${dataset.parameters.data_domain}/${dataset.parameters.data_type}
+  data_split_dir: ${paths.data_dir}data_splits/${dataset.parameters.data_name}
+
+  # Dataset parameters
+  num_features: 89 # In IMDB-MULTI dataset, num_features is equal to maximum node degree among all graphs +1
+  max_node_degree: 88
+  max_x_1_degree: 88
+  num_classes: 3
+  task: classification
+  loss_type: cross_entropy
+  monitor_metric: accuracy
+  task_level: graph
+  data_seed: 0
+  split_type: random #'k-fold' # either "k-fold" or "random" strategies
+  k: 10 # for "k-fold" Cross-Validation
+  train_prop: 0.5 # for "random" strategy splitting
+
+  # Dataloader parameters
+  batch_size: 64 # We have an issue with allowing multiple graphs in a batch due to sparse incidences
+  num_workers: 0
+  pin_memory: False
+
+
+

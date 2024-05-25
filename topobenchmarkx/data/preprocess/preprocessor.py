@@ -12,22 +12,23 @@ class PreProcessor(torch_geometric.data.InMemoryDataset):
 
     Args:
         data_list (list): List of data objects.
-        transforms_config (DictConfig): Configuration parameters for the transforms.
         data_dir (str): Path to the directory containing the data.
+        transforms_config (DictConfig): Configuration parameters for the transforms. (default: None)
         force_reload (bool): Whether to force reload the data. (default: False)
         **kwargs: Optional additional arguments.
     """
 
-    def __init__(self, data_list, transforms_config, data_dir, **kwargs):
+    def __init__(self, data_list, data_dir, transforms_config=None, **kwargs):
         if isinstance(data_list, torch_geometric.data.Dataset):
             data_list = [data_list.get(idx) for idx in range(len(data_list))]
         elif isinstance(data_list, torch_geometric.data.Data):
             data_list = [data_list]
         self.data_list = data_list
-        pre_transform = self.instantiate_pre_transform(data_dir, transforms_config)
-        super().__init__(self.processed_data_dir, None, pre_transform, **kwargs)
-        self.save_transform_parameters()
-        self.load(self.processed_paths[0])
+        if transforms_config is not None:
+            pre_transform = self.instantiate_pre_transform(data_dir, transforms_config)
+            super().__init__(self.processed_data_dir, None, pre_transform, **kwargs)
+            self.save_transform_parameters()
+            self.load(self.processed_paths[0])
 
     @property
     def processed_dir(self) -> str:

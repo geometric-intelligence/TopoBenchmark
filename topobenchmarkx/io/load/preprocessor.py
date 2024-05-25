@@ -42,7 +42,7 @@ class Preprocessor(torch_geometric.data.InMemoryDataset):
             self.processed_data_dir,
             None,
             pre_transform,
-            #force_reload=force_reload,
+            force_reload=force_reload,
             **kwargs,
         )
         self.save_transform_parameters()

@@ -13,6 +13,7 @@ from lightning.pytorch.loggers import Logger
 from omegaconf import DictConfig, OmegaConf
 
 from topobenchmarkx.data.dataloaders import DefaultDataModule
+from topobenchmarkx.data.preprocess import PreProcessor
 from topobenchmarkx.utils import (
     RankedLogger,
     extras,
@@ -27,6 +28,7 @@ from topobenchmarkx.utils.config_resolvers import (
     get_default_transform,
     get_monitor_metric,
     get_monitor_mode,
+    get_required_transform,
     infer_in_channels,
     infere_list_length,
 )
@@ -50,6 +52,7 @@ from topobenchmarkx.utils.config_resolvers import (
 
 
 OmegaConf.register_new_resolver("get_default_transform", get_default_transform)
+OmegaConf.register_new_resolver("get_required_transform", get_required_transform)
 OmegaConf.register_new_resolver("get_monitor_metric", get_monitor_metric)
 OmegaConf.register_new_resolver("get_monitor_mode", get_monitor_mode)
 OmegaConf.register_new_resolver("infer_in_channels", infer_in_channels)
@@ -86,8 +89,10 @@ def train(cfg: DictConfig) -> tuple[dict[str, Any], dict[str, Any]]:
     random.seed(cfg.seed)
 
     # Instantiate and load dataset
-    dataset = hydra.utils.instantiate(cfg.dataset, _recursive_=False)
-    dataset = dataset.load()
+    dataset_loader = hydra.utils.instantiate(cfg.dataset.loader)
+    dataset, dataset_dir = dataset_loader.load()
+    transform_config = cfg.dataset.get("transforms", None)
+    preprocessed_dataset = PreProcessor(dataset, dataset_dir, transform_config)
     log.info(f"Instantiating datamodule <{cfg.dataset._target_}>")
 
     if cfg.dataset.parameters.task_level == "node":

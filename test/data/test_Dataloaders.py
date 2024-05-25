@@ -38,10 +38,11 @@ class TestCollateFunction:
             "parameter_multiplication", lambda x, y: int(int(x) * int(y))
         )
 
-        initialize(version_base="1.3", config_path="../../configs") #, job_name="job")
-        cfg = compose(config_name="train.yaml")
+        initialize(version_base="1.3", config_path="../../configs", job_name="job")
+        cfg = compose(config_name="train.yaml") #, overrides=["dataset=PROTEINS_TU"])
         
         graph_loader = hydra.utils.instantiate(cfg.dataset, _recursive_=False)
+
         datasets = graph_loader.load()
         self.batch_size = 2
         datamodule = DefaultDataModule(
@@ -64,7 +65,7 @@ class TestCollateFunction:
         """
         def check_shape(batch, elems, key):
             """Check that the batched data has the expected shape."""
-            if 'x_' in key or 'x'==key:
+            if 'x_' in key or 'x' == key or 'edge_attr' in key:
                 rows = 0
                 for i in range(len(elems)):
                     rows += elems[i][key].shape[0]
@@ -83,6 +84,7 @@ class TestCollateFunction:
                     rows += elems[i][f'x_{n}'].shape[0]
                 assert batch[key].shape[0] == rows
             elif key in elems[0].keys():
+                #assert 0
                 for i in range(len(batch[key].shape)):
                     i_elems = 0
                     for j in range(len(elems)):

@@ -1,8 +1,10 @@
-# 'REDDIT-BINARY' 'IMDB-BINARY' 'IMDB-MULTI'
+#!/bin/bash
 
-# questions tolokers amazon rating 
+bash ./hetero/run_hetero.sh
+wait
 
-# Sequentially run parallel experiments for each set of datasets
-bash /home/lev/projects/TopoBenchmarkX/hp_scripts/main_exp/simplicial/hetero/run_hetero.sh
-bash /home/lev/projects/TopoBenchmarkX/hp_scripts/main_exp/simplicial/tu/run_tu.sh
-bash /home/lev/projects/TopoBenchmarkX/hp_scripts/main_exp/simplicial/zinc/run_zinc.sh
+bash ./tu/run_tu.sh
+wait
+
+bash ./zinc/run_zinc.sh
+wait

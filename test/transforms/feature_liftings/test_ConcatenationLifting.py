@@ -1,5 +1,4 @@
 """Test the message passing module."""
-
 import torch
 
 from topobenchmarkx.io.load.loaders import manual_simple_graph
@@ -19,17 +18,11 @@ class TestConcatentionLifting:
         self.data = manual_simple_graph()
 
         # Initialize a lifting class
-        self.lifting = SimplicialCliqueLifting(complex_dim=3)
-        # Initialize the ConcatentionLifting class
-        self.feature_lifting = ConcatentionLifting()
+        self.lifting = SimplicialCliqueLifting(feature_lifting="concatenation", complex_dim=3)
 
     def test_lift_features(self):
         # Test the lift_features method
         lifted_data = self.lifting.forward(self.data.clone())
-        del lifted_data.x_1
-        del lifted_data.x_2
-        del lifted_data.x_3
-        lifted_data = self.feature_lifting.forward(lifted_data)
 
         expected_x1 = torch.tensor(
             [
@@ -100,3 +93,4 @@ class TestConcatentionLifting:
         assert (
             expected_x3 == lifted_data.x_3
         ).all(), "Something is wrong with the lifted features x_3."
+

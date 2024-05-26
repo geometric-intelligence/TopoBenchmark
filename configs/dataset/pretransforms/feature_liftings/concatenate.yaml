@@ -1,3 +1,0 @@
-_target_: topobenchmarkx.transforms.data_transform.DataTransform
-transform_name: "ConcatentionLifting"
-transform_type: null

@@ -123,7 +123,7 @@ def load_simplicial_dataset(cfg):
                     )
                 )
             )
-        except ValueError:  # noqa: PERF203
+        except ValueError:
             features[f"x_{rank_idx}"] = torch.tensor(
                 np.zeros((data.shape[rank_idx], 0))
             )
@@ -333,44 +333,6 @@ def load_manual_graph():
         num_nodes=len(vertices),
         y=torch.tensor(y),
     )
-
-
-def get_Planetoid_pyg(cfg):
-    r"""Loads Planetoid graph datasets from torch_geometric.
-
-    Parameters
-    ----------
-    cfg : DictConfig
-        Configuration parameters.
-
-    Returns
-    -------
-    torch_geometric.data.Data
-        Graph dataset.
-    """
-    data_dir, data_name = cfg["data_dir"], cfg["data_name"]
-    dataset = torch_geometric.datasets.Planetoid(data_dir, data_name)
-    data = dataset.data
-    data.num_nodes = data.x.shape[0]
-    return data
-
-
-def get_TUDataset_pyg(cfg):
-    r"""Loads TU graph datasets from torch_geometric.
-
-    Parameters
-    ----------
-    cfg : DictConfig
-        Configuration parameters.
-
-    Returns
-    -------
-    list
-        List containing the graph dataset.
-    """
-    data_dir, data_name = cfg["data_dir"], cfg["data_name"]
-    dataset = torch_geometric.datasets.TUDataset(root=data_dir, name=data_name)
-    return [data for data in dataset]
 
 
 def ensure_serializable(obj):

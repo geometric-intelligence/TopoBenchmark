@@ -1,4 +1,0 @@
-_target_: topobenchmarkx.transforms.data_transform.DataTransform
-transform_name: "NodeFeaturesToFloat"
-transform_type: "data manipulation"
-

@@ -84,7 +84,6 @@ class TestCollateFunction:
                     rows += elems[i][f'x_{n}'].shape[0]
                 assert batch[key].shape[0] == rows
             elif key in elems[0].keys():
-                #assert 0
                 for i in range(len(batch[key].shape)):
                     i_elems = 0
                     for j in range(len(elems)):

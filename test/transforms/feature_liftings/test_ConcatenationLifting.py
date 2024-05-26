@@ -98,8 +98,3 @@ class TestConcatentionLifting:
             expected_x3 == lifted_data.x_3
         ).all(), "Something is wrong with the lifted features x_3."
 
-
-if __name__ == "__main__":
-    t = TestConcatentionLifting()
-    t.setup_method()
-    t.test_lift_features()

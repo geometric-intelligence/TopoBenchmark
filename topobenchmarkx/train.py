@@ -5,8 +5,6 @@ import hydra
 import lightning as L
 import numpy as np
 import rootutils
-
-rootutils.setup_root(__file__, indicator=".project-root", pythonpath=True)
 import torch
 from lightning import Callback, LightningModule, Trainer
 from lightning.pytorch.loggers import Logger
@@ -23,7 +21,6 @@ from topobenchmarkx.utils import (
     log_hyperparameters,
     task_wrapper,
 )
-
 from topobenchmarkx.utils.config_resolvers import (
     get_default_transform,
     get_monitor_metric,
@@ -33,6 +30,7 @@ from topobenchmarkx.utils.config_resolvers import (
     infere_list_length,
 )
 
+rootutils.setup_root(__file__, indicator=".project-root", pythonpath=True)
 # ------------------------------------------------------------------------------------ #
 # the setup_root above is equivalent to:
 # - adding project root dir to PYTHONPATH

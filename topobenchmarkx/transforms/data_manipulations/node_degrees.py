@@ -26,7 +26,7 @@ class NodeDegrees(torch_geometric.transforms.BaseTransform):
         """
         field_to_process = [
             key
-            for key in data
+            for key in data.keys()
             for field_substring in self.parameters["selected_fields"]
             if field_substring in key and key != "incidence_0"
         ]

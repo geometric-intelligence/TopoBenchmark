@@ -5,7 +5,7 @@
 defaults:
   - _self_
   - dataset: graph/US-county-demos # US-county-demos
-  - model: cell/can #hypergraph/unignn2 #allsettransformer
+  - model: cell/cwn #hypergraph/unignn2 #allsettransformer
   - transforms: ${get_default_transform:${dataset},${model}}
   - optimizer: adam
   - scheduler: step_lr

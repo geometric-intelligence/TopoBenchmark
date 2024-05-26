@@ -12,7 +12,7 @@ from torch_geometric.data import Data
 from torch_sparse import coalesce
 
 # from sklearn.model_selection import StratifiedKFold
-# from topobenchmarkx.data.datasets import CustomDataset
+# from topobenchmarkx.dataset.datasets import CustomDataset
 
 
 def get_complex_connectivity(complex, max_rank, signed=False):

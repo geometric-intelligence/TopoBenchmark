@@ -28,7 +28,7 @@ class AllCellFeatureEncoder(AbstractFeatureEncoder):
         self.out_channels = out_channels
         self.dimensions = (
             selected_dimensions
-            if selected_dimensions is not None
+            if (selected_dimensions is not None) #and len(selected_dimensions) <= len(self.in_channels))
             else range(len(self.in_channels))
         )
         for i in self.dimensions:

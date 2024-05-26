@@ -237,6 +237,15 @@ def load_single_graph_splits(dataset, parameters):
     data.train_mask = torch.from_numpy(splits["train"])
     data.val_mask = torch.from_numpy(splits["valid"])
     data.test_mask = torch.from_numpy(splits["test"])
+    
+    if parameters.get("standardize", False):
+        # Standardize the node features respecting train mask
+        data.x = (data.x - data.x[data.train_mask].mean(0)) / data.x[
+            data.train_mask
+        ].std(0)
+        data.y = (data.y - data.y[data.train_mask].mean(0)) / data.y[
+            data.train_mask
+        ].std(0)
 
     return CustomDataset([data]), None, None
 

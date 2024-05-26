@@ -1,4 +1,4 @@
-_target_: topobenchmarkx.dataset.load.loaders.GraphLoader
+_target_: topobenchmarkx.dataset.load.GraphLoader
 
 
 defaults:

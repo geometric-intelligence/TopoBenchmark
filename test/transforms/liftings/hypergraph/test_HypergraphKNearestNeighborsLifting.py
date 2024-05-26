@@ -2,7 +2,7 @@
 
 import torch
 
-from topobenchmarkx.io.load.loaders import manual_graph
+from topobenchmarkx.dataset.load.loaders import manual_graph
 from topobenchmarkx.transforms.liftings.graph2hypergraph import (
     HypergraphKNNLifting,
 )

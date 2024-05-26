@@ -1,7 +1,7 @@
 """Test the message passing module."""
 import torch
 
-from topobenchmarkx.io.load.loaders import manual_simple_graph
+from topobenchmarkx.dataset.load.loaders import manual_simple_graph
 from topobenchmarkx.transforms.feature_liftings.feature_liftings import (
     ConcatentionLifting,
 )

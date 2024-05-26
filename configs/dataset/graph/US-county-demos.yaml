@@ -1,6 +1,6 @@
 # Dataset loader config
 loader:
-  _target_: topobenchmarkx.dataset.load.loaders.GraphLoader
+  _target_: topobenchmarkx.dataset.load.GraphLoader
   parameters: 
     data_domain: graph
     data_type: cornel

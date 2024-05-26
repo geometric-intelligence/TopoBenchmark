@@ -1,4 +1,4 @@
-_target_: topobenchmarkx.dataset.load.loaders.GraphLoader
+_target_: topobenchmarkx.dataset.load.GraphLoader
 
 # USE python train.py dataset.transforms.one_hot_node_degree_features.degrees_fields=x to run this config
 

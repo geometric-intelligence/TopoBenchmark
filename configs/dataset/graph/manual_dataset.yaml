@@ -1,4 +1,4 @@
-_target_: topobenchmarkx.io.load.loaders.ManualGraphLoader
+_target_: topobenchmarkx.dataset.load.loaders.ManualGraphLoader
 
 defaults:
   - transforms: ${get_default_transform:graph,${model}}

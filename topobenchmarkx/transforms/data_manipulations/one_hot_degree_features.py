@@ -13,6 +13,7 @@ class OneHotDegreeFeatures(torch_geometric.transforms.BaseTransform):
                               concatenated to the node features. (default: False)
         degrees_field (str): The field containing the node degrees.
         features_field (str): The field containing the node features.
+        kwargs (optional): Additional arguments for the class.
     """
     def __init__(
         self,
@@ -20,6 +21,7 @@ class OneHotDegreeFeatures(torch_geometric.transforms.BaseTransform):
         degrees_fields: str,
         features_fields: str,
         cat: bool = False,
+        **kwargs,
     ) -> None:
         super().__init__()
         self.type = "one_hot_degree_features"

@@ -6,10 +6,10 @@ defaults:
   - _self_
   - dataset: graph/US-county-demos # US-county-demos
   - model: cell/can #hypergraph/unignn2 #allsettransformer
+  - transforms: ${get_default_transform:${dataset},${model}}
   - optimizer: adam
   - scheduler: step_lr
   - loss: default
-  - transforms: ${get_default_transform:${dataset},${model}}
   - evaluator: default
   - callbacks: default
   - logger: wandb # set logger here or use command line (e.g. `python train.py logger=tensorboard`)

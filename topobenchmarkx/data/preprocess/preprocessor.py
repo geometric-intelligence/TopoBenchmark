@@ -1,6 +1,7 @@
 import json
 import os
 
+import hydra
 import torch_geometric
 
 from topobenchmarkx.data.utils.utils import ensure_serializable, make_hash
@@ -59,8 +60,9 @@ class PreProcessor(torch_geometric.data.InMemoryDataset):
         Returns:
             torch_geometric.transforms.Compose: Pre-transform object.
         """
+        pre_transforms_dict = hydra.utils.instantiate(transforms_config)
         pre_transforms_dict = {
-            key: DataTransform(**value) for key, value in transforms_config.items()
+            key: DataTransform(**value) for key,value in transforms_config.items()
         }
         pre_transforms = torch_geometric.transforms.Compose(
             list(pre_transforms_dict.values())

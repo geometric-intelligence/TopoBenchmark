@@ -89,23 +89,21 @@ def train(cfg: DictConfig) -> tuple[dict[str, Any], dict[str, Any]]:
     random.seed(cfg.seed)
 
     # Instantiate and load dataset
+    log.info(f"Instantiating loader <{cfg.dataset.loader._target_}>")
     dataset_loader = hydra.utils.instantiate(cfg.dataset.loader)
     dataset, dataset_dir = dataset_loader.load()
-    transform_config = cfg.dataset.get("transforms", None)
+    transform_config = cfg.get("transforms", None)
     preprocessed_dataset = PreProcessor(dataset, dataset_dir, transform_config)
-    log.info(f"Instantiating datamodule <{cfg.dataset._target_}>")
-
-    if cfg.dataset.parameters.task_level == "node":
-        datamodule = DefaultDataModule(dataset_train=dataset)
-
-    elif cfg.dataset.parameters.task_level == "graph":
+    # Load splits
+    dataset_train, dataset_val, dataset_test = hydra.utils.instantiate(cfg.dataset.split_loader, dataset=preprocessed_dataset)
+    log.info(f"Instantiating datamodule")
+    if cfg.dataset.parameters.task_level in ["node", "graph"]:
         datamodule = DefaultDataModule(
-            dataset_train=dataset[0],
-            dataset_val=dataset[1],
-            dataset_test=dataset[2],
-            batch_size=cfg.dataset.parameters.batch_size,
+            dataset_train=dataset_train,
+            dataset_val=dataset_val,
+            dataset_test=dataset_test,
+            **cfg.dataset.get("dataloader_params", {}),
         )
-
     else:
         raise ValueError("Invalid task_level")
 
@@ -115,7 +113,7 @@ def train(cfg: DictConfig) -> tuple[dict[str, Any], dict[str, Any]]:
         cfg.model,
         evaluator=cfg.evaluator,
         optimizer=cfg.optimizer,
-        scheduler=cfg.get('scheduler', None),
+        scheduler=cfg.get("scheduler", None),
         loss=cfg.loss,
         )
 

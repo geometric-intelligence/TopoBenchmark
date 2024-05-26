@@ -16,7 +16,7 @@ from topobenchmarkx.data.utils.split_utils import (
     assing_train_val_test_mask_to_graphs,
     load_graph_cocitation_split,
     load_graph_tudataset_split,
-    load_split,
+    load_hypergraph_coauthorship_split,
 )
 from topobenchmarkx.io.load.utils import (
     load_cell_complex_dataset,
@@ -104,7 +104,7 @@ class HypergraphLoader(AbstractLoader):
             CustomDataset: CustomDataset object containing the loaded data.
         """
         data = load_hypergraph_pickle_dataset(self.parameters)
-        data = load_split(data, self.parameters)
+        data = load_hypergraph_coauthorship_split(data, self.parameters)
         dataset = CustomDataset([data])
         return dataset
 

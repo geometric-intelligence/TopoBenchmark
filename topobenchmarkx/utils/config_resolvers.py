@@ -1,3 +1,6 @@
+import os
+
+        
 def get_default_transform(dataset, model):
     r"""Get default transform for a given data domain and model.
 
@@ -14,13 +17,10 @@ def get_default_transform(dataset, model):
     if data_domain == model_domain:
         return "identity"
     elif data_domain == "graph" and model_domain != "combinatorial":
-        if dataset in [
-            "IMDB-BINARY",
-            "IMDB-MULTI",
-            "REDDIT-BINARY",
-            "PROTEINS_TU",
-            "ZINC",
-        ]:
+        # Check if there is a default transform for the dataset at ./configs/transforms/dataset_defaults/
+        # If not, use the default lifting transform for the dataset to be compatible with the model
+        datasets_with_defaults = [f.split(".")[0] for f in os.listdir("./configs/transforms/dataset_defaults/")]
+        if dataset in datasets_with_defaults:
             return f"dataset_defaults/{dataset}"
         else:
             return f"liftings/graph2{model_domain}_default"

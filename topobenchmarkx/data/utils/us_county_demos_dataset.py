@@ -62,7 +62,7 @@ class USCountyDemosDataset(InMemoryDataset):
         name: str,
         parameters: DictConfig,
     ) -> None:
-        self.name = name.replace("_", "-")
+        self.name = name
         self.parameters = parameters
         self.year = parameters.year
         self.task_variable = parameters.task_variable

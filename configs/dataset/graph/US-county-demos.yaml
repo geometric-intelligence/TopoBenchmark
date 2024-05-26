@@ -1,13 +1,13 @@
 # Dataset loader config
 loader:
   _target_: topobenchmarkx.data.load.loaders.GraphLoader
-  params: 
+  parameters: 
     data_domain: graph
     data_type: cornel
     data_name: US-county-demos
     year: 2012
     task_variable: 'MedianIncome' # options: ['Election', 'MedianIncome', 'MigraRate', 'BirthRate', 'DeathRate', 'BachelorRate', 'UnemploymentRate']
-    data_dir: ${paths.data_dir}/${dataset.loader.params.data_domain}/${dataset.loader.params.data_type}
+    data_dir: ${paths.data_dir}/${dataset.loader.parameters.data_domain}/${dataset.loader.parameters.data_type}
 
 # Dataset parameters
 parameters:
@@ -21,7 +21,7 @@ parameters:
 
 #splits
 split_params:
-  data_split_dir: ${paths.data_dir}/data_splits/${dataset.loader.params.data_name}
+  data_split_dir: ${paths.data_dir}/data_splits/${dataset.loader.parameters.data_name}
   data_seed: 0
   split_type: random #'k-fold' # either "k-fold" or "random" strategies
   k: 10 # for "k-fold" Cross-Validation

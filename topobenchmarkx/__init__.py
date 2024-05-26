@@ -1,6 +1,6 @@
 
 # Import submodules
-from . import data
+from . import dataset
 from . import evaluators
 from . import io
 from . import nn
@@ -8,7 +8,7 @@ from . import transforms
 from . import utils
 
 __all__ = [
-    "data",
+    "dataset",
     "evaluators",
     "hp_scripts",
     "io",

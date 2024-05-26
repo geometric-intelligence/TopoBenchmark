@@ -87,24 +87,25 @@ def get_monitor_mode(task):
         raise ValueError(f"Invalid task {task}")
 
 
-def infer_in_channels(dataset):
+def infer_in_channels(dataset, transforms):
     r"""Infer the number of input channels for a given dataset.
 
     Args:
-        dataset (torch_geometric.data.Dataset): Input dataset.
+        dataset (DictConfig): Configuration parameters for the dataset.
+        transforms (DictConfig): Configuration parameters for the transforms.
     Returns:
         list: List with dimensions of the input channels.
     """
-    def find_complex_lifting(dataset):
+    def find_complex_lifting(transforms):
         r"""Find if there is a complex lifting in the dataset.
 
         Args:
-            dataset (torch_geometric.data.Dataset): Input dataset.
+        dataset (DictConfig): Configuration parameters for the dataset.
         Returns:
             bool: True if there is a complex lifting, False otherwise.
             str: Name of the complex lifting, if it exists.
         """
-        if "transforms" not in dataset:
+        if transforms is None:
             return False, None
         complex_transforms = [
             "graph2cell_lifting",
@@ -112,62 +113,62 @@ def infer_in_channels(dataset):
             "graph2combinatorial_lifting",
         ]
         for t in complex_transforms:
-            if t in dataset.transforms:
+            if t in transforms:
                 return True, t
         return False, None
 
-    def check_for_type_feature_lifting(dataset, lifting):
+    def check_for_type_feature_lifting(transforms, lifting):
         r"""Check the type of feature lifting in the dataset.
 
         Args:
-            dataset (torch_geometric.data.Dataset): Input dataset.
+            dataset (DictConfig): Configuration parameters for the dataset.
             lifting (str): Name of the complex lifting.
         Returns:
             str: Type of feature lifting.
         """
-        lifting_params_keys = dataset.transforms[lifting].keys()
+        lifting_params_keys = transforms[lifting].keys()
         if "feature_lifting" in lifting_params_keys:
-            feature_lifting = dataset.transforms[lifting]["feature_lifting"]
+            feature_lifting = transforms[lifting]["feature_lifting"]
         else:
             feature_lifting = "projection"
 
         return feature_lifting
 
-    there_is_complex_lifting, lifting = find_complex_lifting(dataset)
+    there_is_complex_lifting, lifting = find_complex_lifting(transforms)
     if there_is_complex_lifting:
         # Get type of feature lifting
-        feature_lifting = check_for_type_feature_lifting(dataset, lifting)
+        feature_lifting = check_for_type_feature_lifting(transforms, lifting)
 
         if isinstance(dataset.parameters.num_features, int):
             if feature_lifting == "projection":
-                return [dataset.parameters.num_features] * dataset.transforms[
+                return [dataset.parameters.num_features] * transforms[
                     lifting
                 ].complex_dim
 
             elif feature_lifting == "concatenation":
                 return_value = [dataset.parameters.num_features]
-                for i in range(2, dataset.transforms[lifting].complex_dim + 1):
+                for i in range(2, transforms[lifting].complex_dim + 1):
                     return_value += [int(dataset.parameters.num_features * i)]
 
                 return return_value
 
             else:
-                return [dataset.parameters.num_features] * dataset.transforms[
+                return [dataset.parameters.num_features] * transforms[
                     lifting
                 ].complex_dim
         else:
             # Case when the dataset has not edge attributes
-            if dataset.transforms[lifting].preserve_edge_attr == False:
+            if not transforms[lifting].preserve_edge_attr:
                 
                 if feature_lifting == "projection":
                     return [
                         dataset.parameters.num_features[0]
-                    ] * dataset.transforms[lifting].complex_dim
+                    ] * transforms[lifting].complex_dim
                 
                 elif feature_lifting == "concatenation":
                     return_value = [dataset.parameters.num_features]
                     for i in range(
-                        2, dataset.transforms[lifting].complex_dim + 1
+                        2, transforms[lifting].complex_dim + 1
                     ):
                         return_value += [
                             int(dataset.parameters.num_features * i)
@@ -178,13 +179,13 @@ def infer_in_channels(dataset):
                 else:
                     return [
                         dataset.parameters.num_features
-                    ] * dataset.transforms[lifting].complex_dim
+                    ] * transforms[lifting].complex_dim
 
             else:
                 return list(dataset.parameters.num_features) + [
                     dataset.parameters.num_features[1]
                 ] * (
-                    dataset.transforms[lifting].complex_dim
+                    transforms[lifting].complex_dim
                     + 1
                     - len(dataset.parameters.num_features)
                 )

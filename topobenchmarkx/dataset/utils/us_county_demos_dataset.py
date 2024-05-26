@@ -11,8 +11,8 @@ from omegaconf import DictConfig
 from torch_geometric.data import Data, InMemoryDataset, extract_zip
 from torch_geometric.io import fs
 
-from topobenchmarkx.data.utils.download_utils import download_file_from_drive
-from topobenchmarkx.data.utils.split_utils import random_splitting
+from topobenchmarkx.dataset.utils.download_utils import download_file_from_drive
+from topobenchmarkx.dataset.utils.split_utils import random_splitting
 from topobenchmarkx.io import read_us_county_demos
 
 

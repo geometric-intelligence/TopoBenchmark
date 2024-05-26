@@ -4,7 +4,7 @@ import os
 import hydra
 import torch_geometric
 
-from topobenchmarkx.data.utils.utils import ensure_serializable, make_hash
+from topobenchmarkx.dataset.utils.utils import ensure_serializable, make_hash
 from topobenchmarkx.transforms.data_transform import DataTransform
 
 
@@ -30,6 +30,7 @@ class PreProcessor(torch_geometric.data.InMemoryDataset):
             super().__init__(self.processed_data_dir, None, pre_transform, **kwargs)
             self.save_transform_parameters()
             self.load(self.processed_paths[0])
+            self.data_list = [self.get(idx) for idx in range(len(self))]
 
     @property
     def processed_dir(self) -> str:

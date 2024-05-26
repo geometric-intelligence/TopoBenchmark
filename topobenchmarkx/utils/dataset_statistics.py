@@ -12,7 +12,7 @@ from lightning import Callback, LightningModule, Trainer
 from lightning.pytorch.loggers import Logger
 from omegaconf import DictConfig, OmegaConf
 
-from topobenchmarkx.data.dataloaders import DefaultDataModule
+from topobenchmarkx.dataset.dataload.dataloader import DefaultDataModule
 from topobenchmarkx.utils import (
     RankedLogger,
     extras,

@@ -1,2 +1,2 @@
 defaults:
-  - liftings/graph2cell@graph2cell_lifting: cycle
+  - graph2cell@graph2cell_lifting: cycle

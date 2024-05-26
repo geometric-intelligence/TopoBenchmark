@@ -4,8 +4,8 @@
 # order of defaults determines the order in which configs override each other
 defaults:
   - _self_
-  - dataset: graph/US-county-demos #US-county-demos
-  - model: simplicial/sccn #hypergraph/unignn2 #cell/cwn #hypergraph/unignn2 #allsettransformer
+  - dataset: graph/ZINC #US-county-demos
+  - model: cell/cwn #simplicial/sccn #hypergraph/unignn2 #cell/cwn #hypergraph/unignn2 #allsettransformer
   - transforms: ${get_default_transform:${dataset},${model}}
   - optimizer: adam
   - scheduler: step_lr

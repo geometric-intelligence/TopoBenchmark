@@ -1,2 +1,2 @@
 defaults:
-  - liftings/graph2hypergraph@graph2hypergraph_lifting: khop #knn
+  - graph2hypergraph@graph2hypergraph_lifting: khop #knn

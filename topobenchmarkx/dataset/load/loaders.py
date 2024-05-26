@@ -112,7 +112,7 @@ class GraphLoader(AbstractLoader):
             )
             # Join dataset to process it
             dataset = datasets[0] + datasets[1] + datasets[2]
-            dataset = ConcatToGeometricDataset(dataset)
+            dataset = ConcatToGeometricDataset(dataset, split_idx)
             
         elif self.parameters.data_name in [
             "amazon_ratings",

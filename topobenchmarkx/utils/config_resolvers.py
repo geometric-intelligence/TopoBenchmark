@@ -45,7 +45,7 @@ def get_required_transform(data_domain, model):
     if data_domain == model_domain:
         return "identity"
     elif data_domain == "graph" and model_domain != "combinatorial":
-        return f"liftings/graph2{model_domain}_default"
+        return f"graph2{model_domain}_default"
     else:
         raise ValueError(
             f"Invalid combination of data_domain={data_domain} and model_domain={model_domain}"

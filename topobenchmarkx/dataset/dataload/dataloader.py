@@ -16,7 +16,7 @@ class DefaultDataModule(LightningDataModule):
         batch_size (int, optional): The batch size for the dataloader. (default: 1)
         num_workers (int, optional): The number of worker processes to use for data loading. (default: 0)
         pin_memory (bool, optional): If True, the data loader will copy tensors into pinned memory before returning them. (default: False)
-
+        kwargs: Additional arguments.
     Returns:
         None
 
@@ -32,6 +32,7 @@ class DefaultDataModule(LightningDataModule):
         batch_size=1,
         num_workers: int = 0,
         pin_memory: bool = False,
+        **kwargs: Any,
     ) -> None:
         super().__init__()
 

@@ -19,11 +19,13 @@ class PreProcessor(torch_geometric.data.InMemoryDataset):
         **kwargs: Optional additional arguments.
     """
 
-    def __init__(self, data_list, data_dir, transforms_config=None, **kwargs):
-        if isinstance(data_list, torch_geometric.data.Dataset):
-            data_list = [data_list.get(idx) for idx in range(len(data_list))]
-        elif isinstance(data_list, torch_geometric.data.Data):
-            data_list = [data_list]
+    def __init__(self, dataset, data_dir, transforms_config=None, **kwargs):
+        if isinstance(dataset, torch_geometric.data.Dataset):
+            data_list = [dataset.get(idx) for idx in range(len(dataset))]
+            if hasattr(dataset, "split_idxs"):
+                self.split_idxs = dataset.split_idxs
+        elif isinstance(dataset, torch_geometric.data.Data):
+            data_list = [dataset]
         self.data_list = data_list
         if transforms_config is not None:
             pre_transform = self.instantiate_pre_transform(data_dir, transforms_config)

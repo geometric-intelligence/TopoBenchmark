@@ -270,10 +270,14 @@ def load_multiple_graphs_splits(dataset, parameters):
 
     elif parameters.split_type == "k-fold":
         split_idx = k_fold_split(labels, parameters)
+        
+    elif parameters.split_type == "fixed" and hasattr(dataset, "split_idxs"):
+        split_idx = dataset.split_idxs
 
     else:
         raise NotImplementedError(
-            f"split_type {parameters.split_type} not valid. Choose either 'random' or 'k-fold'"
+            f"split_type {parameters.split_type} not valid. Choose either 'random', 'k-fold' or 'fixed'.\
+            If 'fixed' is chosen, the dataset should have the attribute split_idxs"
         )
 
     train_dataset, val_dataset, test_dataset = (

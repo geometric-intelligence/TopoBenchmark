@@ -12,7 +12,6 @@ loader:
 # Dataset parameters
 parameters:
   num_features: 6
-  max_node_degree: 20
   num_classes: 1
   task: regression
   loss_type: mse

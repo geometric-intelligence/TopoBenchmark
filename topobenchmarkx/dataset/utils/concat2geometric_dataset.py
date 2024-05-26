@@ -2,9 +2,10 @@ from torch_geometric.data import Data, Dataset
 
 
 class ConcatToGeometricDataset(Dataset):
-    def __init__(self, concat_dataset):
+    def __init__(self, concat_dataset, split_idxs):
         super().__init__()
         self.concat_dataset = concat_dataset
+        self.split_idxs = split_idxs
 
     def len(self):
         return len(self.concat_dataset)

@@ -32,7 +32,10 @@ class PreProcessor(torch_geometric.data.InMemoryDataset):
             super().__init__(self.processed_data_dir, None, pre_transform, **kwargs)
             self.save_transform_parameters()
             self.load(self.processed_paths[0])
-            self.data_list = [self.get(idx) for idx in range(len(self))]
+        else:
+            super().__init__(data_dir, None, None, **kwargs)
+            self.load(data_dir+"/processed/data.pt")
+        self.data_list = [self.get(idx) for idx in range(len(self))]
 
     @property
     def processed_dir(self) -> str:
@@ -41,7 +44,7 @@ class PreProcessor(torch_geometric.data.InMemoryDataset):
         Returns:
             str: Path to the processed directory.
         """
-        return self.root
+        return self.root + "/processed"
 
     @property
     def processed_file_names(self) -> str:
@@ -116,7 +119,7 @@ class PreProcessor(torch_geometric.data.InMemoryDataset):
 
     def process(self) -> None:
         r"""Process the data."""
-        self.data_list = [self.pre_transform(d) for d in self.data_list]
+        self.data_list = [self.pre_transform(d) for d in self.data_list] if self.pre_transform is not None else self.data_list
 
         self._data, self.slices = self.collate(self.data_list)
         self._data_list = None  # Reset cache.

@@ -5,7 +5,7 @@
 defaults:
   - _self_
   - dataset: graph/ZINC #US-county-demos
-  - model: cell/cwn #simplicial/sccn #hypergraph/unignn2 #cell/cwn #hypergraph/unignn2 #allsettransformer
+  - model: cell/cwn #graph/gcn #cell/cwn #simplicial/sccn #hypergraph/unignn2 #cell/cwn #hypergraph/unignn2 #allsettransformer
   - transforms: ${get_default_transform:${dataset},${model}}
   - optimizer: adam
   - scheduler: step_lr

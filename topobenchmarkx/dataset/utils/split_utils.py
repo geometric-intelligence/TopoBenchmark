@@ -194,13 +194,8 @@ def assing_train_val_test_mask_to_graphs(dataset, split_idx):
         if not assigned:
             raise ValueError("Graph not in any split")
 
-    datasets = [
-        CustomDataset(data_train_lst),
-        CustomDataset(data_val_lst),
-        CustomDataset(data_test_lst),
-    ]
+    return CustomDataset(data_train_lst), CustomDataset(data_val_lst), CustomDataset(data_test_lst)
 
-    return datasets
 
 def load_single_graph_splits(dataset, parameters):
     r"""Loads the graph dataset with the specified split.

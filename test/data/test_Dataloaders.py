@@ -39,9 +39,10 @@ class TestCollateFunction:
         )
 
         initialize(version_base="1.3", config_path="../../configs", job_name="job")
-        cfg = compose(config_name="train.yaml")
+        cfg = compose(config_name="train.yaml") #, overrides=["dataset=PROTEINS_TU"])
         
         graph_loader = hydra.utils.instantiate(cfg.dataset, _recursive_=False)
+
         datasets = graph_loader.load()
         self.batch_size = 2
         datamodule = DefaultDataModule(
@@ -64,7 +65,7 @@ class TestCollateFunction:
         """
         def check_shape(batch, elems, key):
             """Check that the batched data has the expected shape."""
-            if 'x_' in key or 'x'==key:
+            if 'x_' in key or 'x' == key or 'edge_attr' in key:
                 rows = 0
                 for i in range(len(elems)):
                     rows += elems[i][key].shape[0]

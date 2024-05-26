@@ -30,7 +30,7 @@ class KeepSelectedDataFields(torch_geometric.transforms.BaseTransform):
             + self.parameters["preserved_fields"]
         )
         
-        for key in data:
+        for key in data.keys():
             if key not in fields_to_keep:
                 del data[key]
         return data

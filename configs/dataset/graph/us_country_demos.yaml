@@ -1,21 +1,16 @@
-transforms:
-  - user/as
-
-# Data definition
+# Dataset loader config
 loader:
   _target_: topobenchmarkx.data.load.loaders.GraphLoader
-  parameters: ${dataset.parameters}
+  params: 
+    data_domain: graph
+    data_type: cornel
+    data_name: US-county-demos
+    year: 2012
+    task_variable: 'MedianIncome' # options: ['Election', 'MedianIncome', 'MigraRate', 'BirthRate', 'DeathRate', 'BachelorRate', 'UnemploymentRate']
+    data_dir: ${paths.data_dir}/${dataset.loader.params.data_domain}/${dataset.loader.params.data_type}
 
 # Dataset parameters
 parameters:
-  data_domain: graph
-  data_type: cornel
-  year: 2012
-  task_variable: 'MedianIncome' # options: ['Election', 'MedianIncome', 'MigraRate', 'BirthRate', 'DeathRate', 'BachelorRate', 'UnemploymentRate']
-  data_name: US-county-demos
-  data_dir: ${paths.data_dir}${dataset.parameters.data_domain}/${dataset.parameters.data_type}
-  data_split_dir: ${paths.data_dir}data_splits/${dataset.parameters.data_name}
-
   num_features: 6
   max_node_degree: 20
   num_classes: 1
@@ -26,6 +21,7 @@ parameters:
 
 #splits
 split_params:
+  data_split_dir: ${paths.data_dir}/data_splits/${dataset.loader.params.data_name}
   data_seed: 0
   split_type: random #'k-fold' # either "k-fold" or "random" strategies
   k: 10 # for "k-fold" Cross-Validation

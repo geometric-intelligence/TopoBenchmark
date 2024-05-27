@@ -26,6 +26,7 @@ do
     tags="[MainExperiment]" \
     --multirun &
 done
+done
 
 
 python train.py \

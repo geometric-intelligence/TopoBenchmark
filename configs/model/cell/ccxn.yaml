@@ -7,15 +7,15 @@ feature_encoder:
   _target_: topobenchmarkx.models.encoders.${model.feature_encoder.encoder_name}
   encoder_name: AllCellFeatureEncoder
   in_channels: ${infer_in_channels:${dataset}} #${dataset.parameters.num_features}
-  out_channels: 32
-  proj_dropout: 0.0
+  out_channels: 128
+  proj_dropout: 0.5
 
 backbone:
   _target_: topomodelx.nn.cell.ccxn.CCXN
   in_channels_0: ${model.feature_encoder.out_channels}
   in_channels_1: ${model.feature_encoder.out_channels}
   in_channels_2: ${model.feature_encoder.out_channels}
-  n_layers: 1
+  n_layers: 4
   att: True
 
 backbone_additional_params:

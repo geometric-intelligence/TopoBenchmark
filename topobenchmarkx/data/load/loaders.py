@@ -12,7 +12,11 @@ from topobenchmarkx.data.utils import (
     load_manual_graph,
     load_simplicial_dataset,
 )
-from topobenchmarkx.data.utils.us_county_demos_dataset import (
+from topobenchmarkx.datasets import (
+    FIXED_SPLITS_DATASETS,
+    HETEROPHILIC_DATASETS,
+    PLANETOID_DATASETS,
+    TU_DATASETS,
     USCountyDemosDataset,
 )
 
@@ -54,7 +58,7 @@ class GraphLoader(AbstractLoader):
         root_data_dir = self.parameters["data_dir"]
         data_dir = os.path.join(root_data_dir, self.parameters["data_name"])
         if (
-            self.parameters.data_name.lower() in ["cora", "citeseer", "pubmed"]
+            self.parameters.data_name in PLANETOID_DATASETS
             and self.parameters.data_type == "cocitation"
         ):
             dataset = torch_geometric.datasets.Planetoid(
@@ -62,24 +66,14 @@ class GraphLoader(AbstractLoader):
                 name=self.parameters["data_name"],
             )
 
-        elif self.parameters.data_name in [
-            "MUTAG",
-            "ENZYMES",
-            "PROTEINS",
-            "COLLAB",
-            "IMDB-BINARY",
-            "IMDB-MULTI",
-            "REDDIT-BINARY",
-            "NCI1",
-            "NCI109",
-        ]:
+        elif self.parameters.data_name in TU_DATASETS:
             dataset = torch_geometric.datasets.TUDataset(
                 root=root_data_dir,
                 name=self.parameters["data_name"],
                 use_node_attr=False,
             )
 
-        elif self.parameters.data_name in ["ZINC", "AQSOL"]:
+        elif self.parameters.data_name in FIXED_SPLITS_DATASETS:
             datasets = []
             for split in ["train", "val", "test"]:
                 if self.parameters.data_name == "ZINC":
@@ -112,13 +106,7 @@ class GraphLoader(AbstractLoader):
             setattr(dataset, "split_idx", split_idx)
             data_dir = root_data_dir
             
-        elif self.parameters.data_name in [
-            "amazon_ratings",
-            "questions",
-            "minesweeper",
-            "roman_empire",
-            "tolokers",
-        ]:
+        elif self.parameters.data_name in HETEROPHILIC_DATASETS:
             dataset = torch_geometric.datasets.HeterophilousGraphDataset(
                 root=root_data_dir,
                 name=self.parameters["data_name"],

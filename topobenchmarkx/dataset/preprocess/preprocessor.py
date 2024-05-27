@@ -22,17 +22,21 @@ class PreProcessor(torch_geometric.data.InMemoryDataset):
     def __init__(self, dataset, data_dir, transforms_config=None, **kwargs):
         if isinstance(dataset, torch_geometric.data.Dataset):
             data_list = [dataset.get(idx) for idx in range(len(dataset))]
+            # Some datasets have fixed splits, and those are stored as split_idxs when loaded
+            # We need to keep storing this information to be able to reproduce the splits
             if hasattr(dataset, "split_idxs"):
                 self.split_idxs = dataset.split_idxs
         elif isinstance(dataset, torch_geometric.data.Data):
             data_list = [dataset]
         self.data_list = data_list
         if transforms_config is not None:
+            self.transforms_applied = True
             pre_transform = self.instantiate_pre_transform(data_dir, transforms_config)
             super().__init__(self.processed_data_dir, None, pre_transform, **kwargs)
             self.save_transform_parameters()
             self.load(self.processed_paths[0])
         else:
+            self.transforms_applied = False
             super().__init__(data_dir, None, None, **kwargs)
             self.load(data_dir+"/processed/data.pt")
         self.data_list = [self.get(idx) for idx in range(len(self))]
@@ -44,7 +48,10 @@ class PreProcessor(torch_geometric.data.InMemoryDataset):
         Returns:
             str: Path to the processed directory.
         """
-        return self.root + "/processed"
+        if self.transforms_applied:
+            return self.root
+        else:
+            return self.root + "/processed"
 
     @property
     def processed_file_names(self) -> str:

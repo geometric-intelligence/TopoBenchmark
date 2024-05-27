@@ -1,37 +1,38 @@
-_target_: topobenchmarkx.dataset.load.GraphLoader
+# Dataset loader config
+loader:
+  _target_: topobenchmarkx.dataset.load.GraphLoader
+  parameters: 
+    data_domain: graph
+    data_type: TUDataset
+    data_name: MUTAG
+    data_dir: ${paths.data_dir}/${dataset.loader.parameters.data_domain}/${dataset.loader.parameters.data_type}
 
-defaults:
-  - transforms: ${get_default_transform:graph,${model}}
-  
-# Data definition
+# Dataset parameters
 parameters:
-  data_domain: graph
-  data_type: TUDataset
-  data_name: MUTAG
-  data_dir: ${paths.data_dir}/${dataset.parameters.data_domain}/${dataset.parameters.data_type}
-  data_split_dir: ${paths.data_dir}/data_splits/${dataset.parameters.data_name}
-
-  # Dataset parameters
   num_features:
     - 7 # initial node features
     - 4 # initial edge features
-
   num_classes: 2
   task: classification
   loss_type: cross_entropy
   monitor_metric: accuracy
   task_level: graph
-  data_seed: 0
-  split_type: random #'k-fold' # either "k-fold" or "random" strategies
-  k: 10 # for "k-fold" Cross-Validation
-  train_prop: 0.5 # for "random" strategy splitting
-
   # Lifting parameters
   max_dim_if_lifted: 3 # This is the maximum dimension of the simplicial complex in the dataset
   preserve_edge_attr_if_lifted: False
 
-  # Dataloader parameters
+#splits
+split_loader:
+  _target_: topobenchmarkx.dataset.utils.load_multiple_graphs_splits
+  parameters:
+    data_split_dir: ${paths.data_dir}/data_splits/${dataset.loader.parameters.data_name}
+    data_seed: 0
+    split_type: random #'k-fold' # either "k-fold" or "random" strategies
+    k: 10 # for "k-fold" Cross-Validation
+    train_prop: 0.5 # for "random" strategy splitting
+
+# Dataloader parameters
+dataloader_params:
   batch_size: 10 # We have an issue with allowing multiple graphs in a batch due to sparse incidences
   num_workers: 0
   pin_memory: False
-

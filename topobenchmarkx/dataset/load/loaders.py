@@ -125,7 +125,6 @@ class GraphLoader(AbstractLoader):
             dataset = torch_geometric.datasets.HeterophilousGraphDataset(
                 root=root_data_dir,
                 name=self.parameters["data_name"],
-                **self.parameters,
             )
         
         elif self.parameters.data_name in ["US-county-demos"]:
@@ -145,7 +144,7 @@ class GraphLoader(AbstractLoader):
             raise NotImplementedError(
                 f"Dataset {self.parameters.data_name} not implemented"
             )
-
+            
         return dataset, data_dir
 
 

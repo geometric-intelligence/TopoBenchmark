@@ -3,10 +3,6 @@ import os.path as osp
 import shutil
 from typing import ClassVar
 
-import numpy as np
-import pandas as pd
-import torch
-import torch_geometric
 from omegaconf import DictConfig
 from torch_geometric.data import Data, InMemoryDataset, extract_zip
 from torch_geometric.io import fs
@@ -130,7 +126,7 @@ class USCountyDemosDataset(InMemoryDataset):
         extract_zip(path, folder)
         # Delete zip file
         os.unlink(path)
-        # Move files from osp.join(folder, self.name) to folder
+        # Move files from osp.join(folder, name_download) to folder
         for file in os.listdir(osp.join(folder, self.name)):
             shutil.move(osp.join(folder, self.name, file), folder)
         # Delete osp.join(folder, self.name) dir

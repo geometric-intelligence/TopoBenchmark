@@ -5,18 +5,15 @@ import torch_geometric
 from omegaconf import DictConfig
 
 from topobenchmarkx.dataset.load.base import AbstractLoader
-from topobenchmarkx.dataset.utils.concat2geometric_dataset import (
-    ConcatToGeometricDataset,
-)
-from topobenchmarkx.dataset.utils.custom_dataset import CustomDataset
-from topobenchmarkx.dataset.utils.us_county_demos_dataset import (
-    USCountyDemosDataset,
-)
-from topobenchmarkx.dataset.utils.utils import (
+from topobenchmarkx.dataset.utils import (
+    DataloadDataset,
     load_cell_complex_dataset,
     load_hypergraph_pickle_dataset,
     load_manual_graph,
     load_simplicial_dataset,
+)
+from topobenchmarkx.dataset.utils.us_county_demos_dataset import (
+    USCountyDemosDataset,
 )
 
 
@@ -51,7 +48,7 @@ class GraphLoader(AbstractLoader):
         r"""Load graph dataset.
 
         Returns:
-            CustomDataset: CustomDataset object containing the loaded data.
+            DataloadDataset: DataloadDataset object containing the loaded data.
         """
         # Define the path to the data directory
         root_data_dir = self.parameters["data_dir"]
@@ -112,7 +109,7 @@ class GraphLoader(AbstractLoader):
             )
             # Join dataset to process it
             dataset = datasets[0] + datasets[1] + datasets[2]
-            dataset = ConcatToGeometricDataset(dataset, split_idx)
+            setattr(dataset, "split_idx", split_idx)
             data_dir = root_data_dir
             
         elif self.parameters.data_name in [
@@ -138,7 +135,7 @@ class GraphLoader(AbstractLoader):
 
         elif self.parameters.data_name in ["manual"]:
             data = load_manual_graph()
-            dataset = CustomDataset([data], data_dir)
+            dataset = DataloadDataset([data], data_dir)
 
         else:
             raise NotImplementedError(

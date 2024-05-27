@@ -2,6 +2,7 @@ import json
 import os
 
 import hydra
+import torch
 import torch_geometric
 
 from topobenchmarkx.dataset.utils.utils import ensure_serializable, make_hash
@@ -22,10 +23,8 @@ class PreProcessor(torch_geometric.data.InMemoryDataset):
     def __init__(self, dataset, data_dir, transforms_config=None, **kwargs):
         if isinstance(dataset, torch_geometric.data.Dataset):
             data_list = [dataset.get(idx) for idx in range(len(dataset))]
-            # Some datasets have fixed splits, and those are stored as split_idxs when loaded
-            # We need to keep storing this information to be able to reproduce the splits
-            if hasattr(dataset, "split_idxs"):
-                self.split_idxs = dataset.split_idxs
+        elif isinstance(dataset, torch.utils.data.Dataset):
+            data_list = [dataset[idx] for idx in range(len(dataset))]
         elif isinstance(dataset, torch_geometric.data.Data):
             data_list = [dataset]
         self.data_list = data_list
@@ -40,6 +39,10 @@ class PreProcessor(torch_geometric.data.InMemoryDataset):
             super().__init__(data_dir, None, None, **kwargs)
             self.load(data_dir+"/processed/data.pt")
         self.data_list = [self.get(idx) for idx in range(len(self))]
+        # Some datasets have fixed splits, and those are stored as split_idx during loading
+        # We need to store this information to be able to reproduce the splits afterwards
+        if hasattr(dataset, "split_idx"):
+            self.split_idx = dataset.split_idx
 
     @property
     def processed_dir(self) -> str:

@@ -10,9 +10,9 @@ class DefaultDataModule(LightningDataModule):
     r"""This class takes care of returning the dataloaders for the training, validation, and test datasets. It also handles the collate function. The class is designed to work with the `torch` dataloaders.
 
     Args:
-        dataset_train (CustomDataset): The training dataset.
-        dataset_val (CustomDataset, optional): The validation dataset. (default: None)
-        dataset_test (CustomDataset, optional): The test dataset. (default: None)
+        dataset_train (DataloadDataset): The training dataset.
+        dataset_val (DataloadDataset, optional): The validation dataset. (default: None)
+        dataset_test (DataloadDataset, optional): The test dataset. (default: None)
         batch_size (int, optional): The batch size for the dataloader. (default: 1)
         num_workers (int, optional): The number of worker processes to use for data loading. (default: 0)
         pin_memory (bool, optional): If True, the data loader will copy tensors into pinned memory before returning them. (default: False)

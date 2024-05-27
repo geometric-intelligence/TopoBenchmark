@@ -4,7 +4,7 @@ import numpy as np
 import torch
 from sklearn.model_selection import StratifiedKFold
 
-from topobenchmarkx.dataset.datasets import CustomDataset
+from topobenchmarkx.dataset.utils.helper_classes import DataloadDataset
 
 
 # Generate splits in different fasions
@@ -194,7 +194,7 @@ def assing_train_val_test_mask_to_graphs(dataset, split_idx):
         if not assigned:
             raise ValueError("Graph not in any split")
 
-    return CustomDataset(data_train_lst), CustomDataset(data_val_lst), CustomDataset(data_test_lst)
+    return DataloadDataset(data_train_lst), DataloadDataset(data_val_lst), DataloadDataset(data_test_lst)
 
 
 def load_single_graph_splits(dataset, parameters):
@@ -242,7 +242,7 @@ def load_single_graph_splits(dataset, parameters):
             data.train_mask
         ].std(0)
 
-    return CustomDataset([data]), None, None
+    return DataloadDataset([data]), None, None
 
 
 def load_multiple_graphs_splits(dataset, parameters):
@@ -266,13 +266,13 @@ def load_multiple_graphs_splits(dataset, parameters):
     elif parameters.split_type == "k-fold":
         split_idx = k_fold_split(labels, parameters)
         
-    elif parameters.split_type == "fixed" and hasattr(dataset, "split_idxs"):
-        split_idx = dataset.split_idxs
+    elif parameters.split_type == "fixed" and hasattr(dataset, "split_idx"):
+        split_idx = dataset.split_idx
 
     else:
         raise NotImplementedError(
             f"split_type {parameters.split_type} not valid. Choose either 'random', 'k-fold' or 'fixed'.\
-            If 'fixed' is chosen, the dataset should have the attribute split_idxs"
+            If 'fixed' is chosen, the dataset should have the attribute split_idx"
         )
 
     train_dataset, val_dataset, test_dataset = (
@@ -309,117 +309,4 @@ def load_coauthorship_hypergraph_splits(data, parameters, train_prop=0.5):
         ).shape[0]
         == data.num_nodes
     ), "Not all nodes within splits"
-    return CustomDataset([data]), None, None
-
-
-# Load splits for different dataset
-# def load_graph_uscountydemosdataset_split(dataset, cfg):
-#     r"""Loads the graph dataset with the specified split.
-
-#     Args:
-#         dataset (torch_geometric.data.Dataset): Graph dataset.
-#         cfg (DictConfig): Configuration parameters.
-#     Returns:
-#         list: List containing the train, validation, and test splits.
-#     """
-    # Extract labels from dataset object
-    # assert (
-    #     len(dataset) == 1
-    # ), "Torch Geometric Cocitation dataset should have only one graph"
-
-    # data = dataset.data
-    # labels = data.y.numpy()
-
-    # # Ensure labels are one dimensional array
-    # assert len(labels.shape) == 1, "Labels should be one dimensional array"
-
-    # if cfg.split_type == "random":
-    #     splits = random_splitting(labels, cfg)
-
-    # elif cfg.split_type == "k-fold":
-    #     splits = k_fold_split(labels, cfg)
-
-    # else:
-    #     raise NotImplementedError(
-    #         f"split_type {cfg.split_type} not valid. Choose either 'random' or 'k-fold'"
-    #     )
-
-    # # Assign train val test masks to the graph
-    # data.train_mask = torch.from_numpy(splits["train"])
-    # data.val_mask = torch.from_numpy(splits["valid"])
-    # data.test_mask = torch.from_numpy(splits["test"])
-
-    # return CustomDataset([data])
-
-
-# def load_graph_tudataset_split(dataset, cfg):
-#     r"""Loads the graph dataset with the specified split.
-
-#     Args:
-#         dataset (torch_geometric.data.Dataset): Graph dataset.
-#         cfg (DictConfig): Configuration parameters.
-#     Returns:
-#         list: List containing the train, validation, and test splits.
-#     """
-#     # Extract labels from dataset object
-#     assert (
-#         len(dataset) > 1
-#     ), "Torch Geometric TU datasets should have more than one graph in the dataset"
-#     labels = np.array([data.y.squeeze(0).numpy() for data in dataset])
-
-#     if cfg.split_type == "random":
-#         split_idx = random_splitting(labels, cfg)
-
-#     elif cfg.split_type == "k-fold":
-#         split_idx = k_fold_split(labels, cfg)
-
-#     else:
-#         raise NotImplementedError(
-#             f"split_type {cfg.split_type} not valid. Choose either 'random' or 'k-fold'"
-#         )
-
-#     train_dataset, val_dataset, test_dataset = (
-#         assing_train_val_test_mask_to_graphs(dataset, split_idx)
-#     )
-
-#     return [train_dataset, val_dataset, test_dataset]
-
-
-# def load_graph_cocitation_split(dataset, cfg):
-#     r"""Loads cocitation graph datasets with the specified split.
-
-#     Args:
-#         dataset (torch_geometric.data.Dataset): Graph dataset.
-#         cfg (DictConfig): Configuration parameters.
-#     Returns:
-#         list: List containing the train, validation, and test splits.
-#     """
-
-#     # Extract labels from dataset object
-#     assert (
-#         len(dataset) == 1
-#     ), "Torch Geometric Cocitation dataset should have only one graph"
-
-#     data = dataset.data
-#     labels = data.y.numpy()
-
-#     # Ensure labels are one dimensional array
-#     assert len(labels.shape) == 1, "Labels should be one dimensional array"
-
-#     if cfg.split_type == "random":
-#         splits = random_splitting(labels, cfg)
-
-#     elif cfg.split_type == "k-fold":
-#         splits = k_fold_split(labels, cfg)
-
-#     else:
-#         raise NotImplementedError(
-#             f"split_type {cfg.split_type} not valid. Choose either 'random' or 'k-fold'"
-#         )
-
-#     # Assign train val test masks to the graph
-#     data.train_mask = torch.from_numpy(splits["train"])
-#     data.val_mask = torch.from_numpy(splits["valid"])
-#     data.test_mask = torch.from_numpy(splits["test"])
-
-#     return CustomDataset([data])
+    return DataloadDataset([data]), None, None

@@ -1,6 +1,4 @@
 import hashlib
-import os.path as osp
-import pickle
 
 import networkx as nx
 import numpy as np
@@ -9,8 +7,6 @@ import toponetx.datasets.graph as graph
 import torch
 import torch_geometric
 from topomodelx.utils.sparse import from_sparse
-from torch_geometric.data import Data
-from torch_sparse import coalesce
 
 
 def get_complex_connectivity(complex, max_rank, signed=False):
@@ -48,7 +44,7 @@ def get_complex_connectivity(complex, max_rank, signed=False):
                         rank=rank_idx, signed=signed
                     )
                 )
-            except ValueError:  # noqa: PERF203
+            except ValueError:
                 if connectivity_info == "incidence":
                     connectivity[f"{connectivity_info}_{rank_idx}"] = (
                         generate_zero_sparse_connectivity(
@@ -178,112 +174,6 @@ def load_simplicial_dataset(cfg):
     )(data)
 
 
-def load_hypergraph_pickle_dataset(cfg):
-    r"""Loads hypergraph datasets from pickle files.
-
-    Parameters
-    ----------
-    cfg : DictConfig
-        Configuration parameters.
-
-    Returns
-    -------
-    torch_geometric.data.Data
-        Hypergraph dataset.
-    """
-    data_dir = cfg["data_dir"]
-    print(f"Loading {cfg['data_domain']} dataset name: {cfg['data_name']}")
-
-    # Load node features:
-
-    with open(osp.join(data_dir, "features.pickle"), "rb") as f:
-        features = pickle.load(f)
-        features = features.todense()
-
-    # Load node labels:
-    with open(osp.join(data_dir, "labels.pickle"), "rb") as f:
-        labels = pickle.load(f)
-
-    num_nodes, feature_dim = features.shape
-    assert num_nodes == len(labels)
-    print(f"number of nodes:{num_nodes}, feature dimension: {feature_dim}")
-
-    features = torch.FloatTensor(features)
-    labels = torch.LongTensor(labels)
-
-    # Load hypergraph.
-    with open(osp.join(data_dir, "hypergraph.pickle"), "rb") as f:
-        # Hypergraph in hyperGCN is in the form of a dictionary.
-        # { hyperedge: [list of nodes in the he], ...}
-        hypergraph = pickle.load(f)
-
-    print(f"number of hyperedges: {len(hypergraph)}")
-
-    edge_idx = 0  # num_nodes
-    node_list = []
-    edge_list = []
-    for he in hypergraph:
-        cur_he = hypergraph[he]
-        cur_size = len(cur_he)
-
-        node_list += list(cur_he)
-        edge_list += [edge_idx] * cur_size
-
-        edge_idx += 1
-
-    # check that every node is in some hyperedge
-    if len(np.unique(node_list)) != num_nodes:
-        # add self hyperedges to isolated nodes
-        isolated_nodes = np.setdiff1d(np.arange(num_nodes), np.unique(node_list))
-
-        for node in isolated_nodes:
-            node_list += [node]
-            edge_list += [edge_idx]
-            edge_idx += 1
-            hypergraph[f"Unique_additonal_he_{edge_idx}"] = [node]
-
-    edge_index = np.array([node_list, edge_list], dtype=int)
-    edge_index = torch.LongTensor(edge_index)
-
-    data = Data(
-        x=features,
-        x_0=features,
-        edge_index=edge_index,
-        incidence_hyperedges=edge_index,
-        y=labels,
-    )
-
-    # data.coalesce()
-    # There might be errors if edge_index.max() != num_nodes.
-    # used user function to override the default function.
-    # the following will also sort the edge_index and remove duplicates.
-    total_num_node_id_he_id = edge_index.max() + 1
-    data.edge_index, data.edge_attr = coalesce(
-        data.edge_index, None, total_num_node_id_he_id, total_num_node_id_he_id
-    )
-
-    n_x = num_nodes
-    num_class = len(np.unique(labels.numpy()))
-
-    # Add parameters to attribute
-    data.n_x = n_x
-    data.num_hyperedges = len(hypergraph)
-    data.num_class = num_class
-
-    data.incidence_hyperedges = torch.sparse_coo_tensor(
-        data.edge_index,
-        values=torch.ones(data.edge_index.shape[1]),
-        size=(data.num_nodes, data.num_hyperedges),
-    )
-
-    # Print some info
-    print("Final num_hyperedges", data.num_hyperedges)
-    print("Final num_nodes", data.num_nodes)
-    print("Final num_class", data.num_class)
-
-    return data, data_dir
-
-
 def load_manual_graph():
     """Create a manual graph for testing purposes."""
     # Define the vertices (just 8 vertices)
@@ -352,7 +242,7 @@ def ensure_serializable(obj):
         for key, value in obj.items():
             obj[key] = ensure_serializable(value)
         return obj
-    elif isinstance(obj, list | tuple):  # noqa: RET505
+    elif isinstance(obj, list | tuple):
         return [ensure_serializable(item) for item in obj]
     elif isinstance(obj, set):
         return {ensure_serializable(item) for item in obj}

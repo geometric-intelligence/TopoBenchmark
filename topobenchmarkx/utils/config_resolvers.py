@@ -14,22 +14,23 @@ def get_default_transform(dataset, model):
     """
     data_domain, dataset = dataset.split("/")
     model_domain = model.split("/")[0]
-    if data_domain == model_domain:
-        return "identity"
-    elif data_domain == "graph" and model_domain != "combinatorial":
+    if data_domain == "graph" and model_domain != "combinatorial":
         # Check if there is a default transform for the dataset at ./configs/transforms/dataset_defaults/
         # If not, use the default lifting transform for the dataset to be compatible with the model
         datasets_with_defaults = [f.split(".")[0] for f in os.listdir("./configs/transforms/dataset_defaults/")]
         if dataset in datasets_with_defaults:
             return f"dataset_defaults/{dataset}"
         else:
-            return f"liftings/graph2{model_domain}_default"
+            if data_domain == model_domain:
+                return "no_transform"
+            else:
+                return f"liftings/graph2{model_domain}_default"
     else:
         raise ValueError(
             f"Invalid combination of data_domain={data_domain} and model_domain={model_domain}"
         )
         
-def get_required_transform(data_domain, model):
+def get_required_lifting(data_domain, model):
     r"""Get required transform for a given data domain and model.
 
     Args:
@@ -43,7 +44,7 @@ def get_required_transform(data_domain, model):
     data_domain = data_domain
     model_domain = model.split("/")[0]
     if data_domain == model_domain:
-        return "identity"
+        return "no_lifting"
     elif data_domain == "graph" and model_domain != "combinatorial":
         return f"graph2{model_domain}_default"
     else:

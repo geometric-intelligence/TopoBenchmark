@@ -1,0 +1,2 @@
+defaults:
+  - /transforms/data_manipulations@identity: identity

@@ -1,2 +1,2 @@
 defaults:
-  - graph2simplicial@graph2simplicial_lifting: clique #khop
+  - /transforms/liftings/graph2simplicial@graph2simplicial_lifting: clique #khop

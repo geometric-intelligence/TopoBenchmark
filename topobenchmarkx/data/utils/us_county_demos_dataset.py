@@ -7,7 +7,7 @@ from omegaconf import DictConfig
 from torch_geometric.data import Data, InMemoryDataset, extract_zip
 from torch_geometric.io import fs
 
-from topobenchmarkx.dataset.utils import (
+from topobenchmarkx.data.utils import (
     download_file_from_drive,
     read_us_county_demos,
 )

@@ -5,7 +5,7 @@ import hydra
 import torch
 import torch_geometric
 
-from topobenchmarkx.dataset.utils.utils import ensure_serializable, make_hash
+from topobenchmarkx.data.utils.utils import ensure_serializable, make_hash
 from topobenchmarkx.transforms.data_transform import DataTransform
 
 

@@ -28,16 +28,6 @@ split_helper_functions = [
     "load_single_graph_splits",
 ]
 
-from .helper_classes import (
-    DataloadDataset,
-    DomainData,
-)
-
-dataset_classes = [
-    "DataloadDataset",
-    "DomainData",
-]
-
 from .io_utils import (
     download_file_from_drive,
     load_hypergraph_pickle_dataset,
@@ -50,4 +40,4 @@ io_helper_functions = [
     "download_file_from_drive",
 ]
 
-__all__ = utils_functions + split_helper_functions + dataset_classes + io_helper_functions
+__all__ = utils_functions + split_helper_functions + io_helper_functions

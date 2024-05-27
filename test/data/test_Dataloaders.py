@@ -5,7 +5,7 @@ from omegaconf import OmegaConf
 
 import torch
 
-from topobenchmarkx.dataset.dataload.dataloader import to_data_list, DefaultDataModule
+from topobenchmarkx.data.dataload.dataloader import to_data_list, DefaultDataModule
 
 from topobenchmarkx.utils.config_resolvers import (
     get_default_transform,

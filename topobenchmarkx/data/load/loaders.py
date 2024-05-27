@@ -4,15 +4,15 @@ import numpy as np
 import torch_geometric
 from omegaconf import DictConfig
 
-from topobenchmarkx.dataset.load.base import AbstractLoader
-from topobenchmarkx.dataset.utils import (
-    DataloadDataset,
+from topobenchmarkx.data.dataload import DataloadDataset
+from topobenchmarkx.data.load.base import AbstractLoader
+from topobenchmarkx.data.utils import (
     load_cell_complex_dataset,
     load_hypergraph_pickle_dataset,
     load_manual_graph,
     load_simplicial_dataset,
 )
-from topobenchmarkx.dataset.utils.us_county_demos_dataset import (
+from topobenchmarkx.data.utils.us_county_demos_dataset import (
     USCountyDemosDataset,
 )
 

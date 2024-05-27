@@ -1,8 +1,8 @@
 # Import submodules
-from . import dataset, evaluators, nn, transforms, utils
+from . import data, evaluators, nn, transforms, utils
 
 __all__ = [
-    "dataset",
+    "data",
     "evaluators",
     "nn",
     "transforms",

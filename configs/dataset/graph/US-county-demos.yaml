@@ -1,6 +1,6 @@
 # Dataset loader config
 loader:
-  _target_: topobenchmarkx.dataset.load.GraphLoader
+  _target_: topobenchmarkx.data.load.GraphLoader
   parameters: 
     data_domain: graph
     data_type: cornel
@@ -20,7 +20,7 @@ parameters:
 
 #splits
 split_loader:
-  _target_: topobenchmarkx.dataset.utils.load_single_graph_splits
+  _target_: topobenchmarkx.data.utils.load_single_graph_splits
   parameters:
     data_split_dir: ${paths.data_dir}/data_splits/${dataset.loader.parameters.data_name}
     data_seed: 0

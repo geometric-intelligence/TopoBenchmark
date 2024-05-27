@@ -2,7 +2,7 @@ import networkx as nx
 import torch
 from toponetx.classes import SimplicialComplex
 
-from topobenchmarkx.dataset.utils.utils import get_complex_connectivity
+from topobenchmarkx.data.utils.utils import get_complex_connectivity
 from topobenchmarkx.transforms.liftings import GraphLifting
 
 

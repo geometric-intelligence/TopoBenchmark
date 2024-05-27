@@ -1,11 +1,28 @@
 from collections import defaultdict
+from typing import Any
 
 import torch
-from torch_geometric.data import Batch
-from torch_geometric.utils import is_sparse
+import torch_geometric
 from torch_sparse import SparseTensor
 
-from topobenchmarkx.dataset.utils.helper_classes import DomainData
+
+class DomainData(torch_geometric.data.Data):
+    r"""Data object class that overwrites some methods from
+    `torch_geometric.data.Data` so that not only sparse matrices with adj in the
+    name can work with the `torch_geometric` dataloaders."""
+    def is_valid(self, string):
+        r"""Check if the string contains any of the valid names."""
+        valid_names = ["adj", "incidence", "laplacian"]
+        return any(name in string for name in valid_names)
+
+    def __cat_dim__(self, key: str, value: Any, *args, **kwargs) -> Any:
+        r"""Overwrite the `__cat_dim__` method to handle sparse matrices to handle the names specified in `is_valid`."""
+        if torch_geometric.utils.is_sparse(value) and self.is_valid(key):
+            return (0, 1)
+        elif "index" in key or key == "face":
+            return -1
+        else:
+            return 0
 
 
 def to_data_list(batch):
@@ -43,7 +60,7 @@ def collate_fn(batch):
         values, keys = b[0], b[1]
         data = DomainData()
         for key, value in zip(keys, values, strict=False):
-            if is_sparse(value):
+            if torch_geometric.utils.is_sparse(value):
                 value = value.coalesce()
             data[key] = value
 
@@ -77,7 +94,7 @@ def collate_fn(batch):
 
         data_list.append(data)
 
-    batch = Batch.from_data_list(data_list)
+    batch = torch_geometric.data.Batch.from_data_list(data_list)
 
     # Rename batch.batch to batch.batch_0 for consistency
     batch["batch_0"] = batch.pop("batch")

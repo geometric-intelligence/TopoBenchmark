@@ -6,7 +6,7 @@ from omegaconf import OmegaConf
 import torch
 import torch_geometric
 
-#from topobenchmarkx.dataset.load.loaders import manual_simple_graph
+#from topobenchmarkx.data.load.loaders import manual_simple_graph
 
 from topobenchmarkx.transforms.data_manipulations import (
     InfereKNNConnectivity, 

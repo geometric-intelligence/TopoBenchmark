@@ -9,7 +9,7 @@ do
   python train.py \
     dataset=$dataset \
     model=cell/cwn \
-    model.optimizer.lr=0.001 \
+    model.optimizer.lr=0.01,0.001 \
     model.feature_encoder.out_channels=32,64,128 \
     model.backbone.n_layers=1,2,3,4 \
     model.feature_encoder.proj_dropout=0.25,0.5 \

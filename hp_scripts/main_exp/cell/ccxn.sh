@@ -23,7 +23,7 @@ do
       trainer.devices=\[0\] \
       trainer.check_val_every_n_epoch=5 \
       callbacks.early_stopping.patience=10 \
-      --multirun 
+      --multirun &
   done
 done
 

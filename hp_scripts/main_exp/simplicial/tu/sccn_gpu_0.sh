@@ -26,9 +26,4 @@ do
         tags="[MainExperiment]" \
         --multirun &
     done
-   
 done
-
-
-
-# Final totoal processes: 35

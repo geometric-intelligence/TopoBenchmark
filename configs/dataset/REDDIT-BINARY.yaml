@@ -15,7 +15,6 @@ parameters:
   # Dataset parameters
   num_features: 10
   max_node_degree: 3062
-  # max_x_1_degree: 3062
   num_classes: 2
   task: classification
   loss_type: cross_entropy
@@ -27,7 +26,7 @@ parameters:
   train_prop: 0.5 # for "random" strategy splitting
 
   # Dataloader parameters
-  batch_size: 128 # We have an issue with allowing multiple graphs in a batch due to sparse incidences
+  batch_size: 16 # We have an issue with allowing multiple graphs in a batch due to sparse incidences
   num_workers: 0
   pin_memory: True
 

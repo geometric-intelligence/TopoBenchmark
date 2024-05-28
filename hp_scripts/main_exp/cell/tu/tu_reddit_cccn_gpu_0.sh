@@ -11,7 +11,7 @@ for dataset in ${datasets[*]}
       model.backbone.n_layers=1,2,3 \
       model.feature_encoder.proj_dropout=0.5 \
       dataset.parameters.data_seed=0,3,5,7,9 \
-      dataset.parameters.batch_size=16,32 \
+      dataset.parameters.batch_size=16 \
       dataset.transforms.graph2cell_lifting.max_cell_length=10 \
       model.readout.readout_name="NoReadOut,PropagateSignalDown" \
       logger.wandb.project=TopoBenchmarkX_Cellular \

@@ -57,6 +57,7 @@ class DefaultDataModule(LightningDataModule):
             self.dataset_test = dataset_test
         self.num_workers = num_workers
         self.pin_memory = pin_memory
+        self.persistent_workers = kwargs.get("persistent_workers", False)
             
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}(dataset_train={self.dataset_train}, dataset_val={self.dataset_val}, dataset_test={self.dataset_test}, batch_size={self.batch_size})"
@@ -74,6 +75,7 @@ class DefaultDataModule(LightningDataModule):
             pin_memory=self.pin_memory,
             shuffle=True,
             collate_fn=collate_fn,
+            persistent_workers=self.persistent_workers,
         )
 
     def val_dataloader(self) -> DataLoader:
@@ -89,6 +91,7 @@ class DefaultDataModule(LightningDataModule):
             pin_memory=self.pin_memory,
             shuffle=False,
             collate_fn=collate_fn,
+            persistent_workers=self.persistent_workers,
         )
 
     def test_dataloader(self) -> DataLoader:
@@ -106,6 +109,7 @@ class DefaultDataModule(LightningDataModule):
             pin_memory=self.pin_memory,
             shuffle=False,
             collate_fn=collate_fn,
+            persistent_workers=self.persistent_workers,
         )
 
     def teardown(self, stage: str | None = None) -> None:

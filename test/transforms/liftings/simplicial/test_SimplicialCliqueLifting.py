@@ -27,6 +27,7 @@ class TestSimplicialCliqueLifting:
         """Test the lift_topology method."""
 
         # Test the lift_topology method
+        print(self.data)
         lifted_data_signed = self.lifting_signed.forward(self.data.clone())
         lifted_data_unsigned = self.lifting_unsigned.forward(self.data.clone())
 

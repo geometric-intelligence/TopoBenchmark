@@ -29,7 +29,7 @@ split_loader:
 
 # Dataloader parameters
 dataloader_params:
-  batch_size: 128 # We have an issue with allowing multiple graphs in a batch due to sparse incidences
-  num_workers: 10
+  batch_size: 128 #128 
+  num_workers: 0
   pin_memory: False
-  persistent_workers: True
+  persistent_workers: False

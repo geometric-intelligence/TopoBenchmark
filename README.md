@@ -17,57 +17,57 @@ It offers ready-to-use training pipelines to train and test a model and immediat
 
 ## :gear: Models
 
-Many of the models implemented are taken from [`TopoModelX`](https://github.com/pyt-team/TopoModelX).
+Many of the models implemented are taken from [`TopoModelX`](https://github.com/pyt-team/TopoModelX). Here is the list of all the models implemented.
 
 ### Graphs
-| Model | Description | Reference |
-| --- | --- | --- |
-| GAT | - | - |
-| GIN | - | - |
-| GCN | - | - |
+| Model | Reference |
+| --- | --- |
+| GAT | [Graph Attention Networks](https://openreview.net/pdf?id=rJXMpikCZ) |
+| GIN | [How Powerful are Graph Neural Networks?](https://openreview.net/pdf?id=ryGs6iA5Km) |
+| GCN | [Semi-Supervised Classification with Graph Convolutional Networks](https://arxiv.org/pdf/1609.02907v4) |
 
 ### Simplicial complexes
-| Model | Description | Reference |
-| --- | --- | --- |
-| SAN | - | - |
-| SCCN | - | - |
-| SCCNN | - | - |
-| SCN | - | - |
+| Model | Reference |
+| --- | --- |
+| SAN | [Simplicial Attention Neural Networks](https://arxiv.org/pdf/2203.07485) |
+| SCCN | [Efficient Representation Learning for Higher-Order Data with Simplicial Complexes](https://openreview.net/pdf?id=nGqJY4DODN) |
+| SCCNN | [Convolutional Learning on Simplicial Complexes](https://arxiv.org/pdf/2301.11163) |
+| SCN | [Simplicial Complex Neural Networks](https://ieeexplore.ieee.org/document/10285604) |
 
 ### Cellular complexes
-| Model | Description | Reference |
-| --- | --- | --- |
-| CAN | - | - |
-| CCCN | - | - |
-| CCXN | - | - |
-| CWN | - | - |
+| Model | Reference |
+| --- | --- |
+| CAN | [Cell Attention Network](https://arxiv.org/pdf/2209.08179) |
+| CCCN | [A learning algorithm for computational connected cellular network](https://ieeexplore.ieee.org/document/1202221) |
+| CCXN | [Cell Complex Neural Networks](https://openreview.net/pdf?id=6Tq18ySFpGU) |
+| CWN | [Weisfeiler and Lehman Go Cellular: CW Networks](https://arxiv.org/pdf/2106.12575) |
 
 ### Hypergraphs
-| Model | Description | Reference |
-| --- | --- | --- |
-| AllDeepSet | - | - |
-| AllSetTransformer | - | - |
-| EDGNN | - | - |
-| UniGNN | - | - |
-| UniGNN2 | - | - |
+| Model | Reference |
+| --- | --- |
+| AllDeepSet | [You are AllSet: A Multiset Function Framework for Hypergraph Neural Networks](https://openreview.net/pdf?id=hpBTIv2uy_E) |
+| AllSetTransformer | [You are AllSet: A Multiset Function Framework for Hypergraph Neural Networks](https://openreview.net/pdf?id=hpBTIv2uy_E) |
+| EDGNN | [Equivariant Hypergraph Diffusion Neural Operators](https://arxiv.org/pdf/2207.06680) |
+| UniGNN | [UniGNN: a Unified Framework for Graph and Hypergraph Neural Networks](https://arxiv.org/pdf/2105.00956) |
+| UniGNN2 | [UniGNN: a Unified Framework for Graph and Hypergraph Neural Networks](https://arxiv.org/pdf/2105.00956) |
 
 ## :top: Liftings
 ### Graph2Simplicial
 | Name | Description | Reference |
 | --- | --- | --- |
-| CliqueLifting | - | - |
-| KHopLifting | - | - |
+| CliqueLifting | The algorithm finds the cliques in the graph and creates simplices. Given a clique the first simplex added is the one containing all the nodes of the clique, then the simplices composed of all the possible combinations with one node missing, then two nodes missing, and so on, until all the possible pairs are added. Then the method moves to the next clique. | [Simplicial Complexes](https://en.wikipedia.org/wiki/Clique_complex) |
+| KHopLifting | For each node in the graph, the algorithm finds the set of nodes that are at most k connections away from the initial node. This set is then treated as if it was a clique from the CliqueLifting method. The process is repeated for all nodes in the graph. | [Neighborhood Complexes](https://arxiv.org/pdf/math/0512077) |
 
 ### Graph2Cell
 | Name | Description | Reference |
 | --- | --- | --- |
-| CycleLifting | - | - |
+| CycleLifting | The algorithm finds a cycle base for the graph. Given this set of cycles the method creates a cell for each one. | [CW Complexes](https://en.wikipedia.org/wiki/CW_complex) |
 
 ### Graph2Hypergraph
 | Name | Description | Reference |
 | --- | --- | --- |
-| KHopLifting | - | - |
-| KNearestNeighborsLifting | - | - |
+| KHopLifting | For each node in the graph, the algorithm finds the set of nodes that are at most k connections away from the initial node. This set is then used to create an hyperedge. The process is repeated for all nodes in the graph. | [Section 3.4](https://ieeexplore.ieee.org/abstract/document/9264674) |
+| KNearestNeighborsLifting | For each node in the graph, the method finds the k nearest nodes by using the Euclidean distance between the vectors of features. The set of k nodes found is considered as an hyperedge. The proces is repeated for all nodes in the graph. | [Section 3.1](https://ieeexplore.ieee.org/abstract/document/9264674) |
 
 ## :keyboard: Development
 

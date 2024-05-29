@@ -1,5 +1,5 @@
-from topobenchmarkx.transforms.liftings.lifting import (
-    AbstractLifting,
+from .base import AbstractLifting
+from .liftings import (
     CellComplexLifting,
     CombinatorialLifting,
     GraphLifting,

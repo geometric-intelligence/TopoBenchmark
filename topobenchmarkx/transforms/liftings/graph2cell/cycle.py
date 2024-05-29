@@ -2,7 +2,7 @@ import networkx as nx
 import torch_geometric
 from toponetx.classes import CellComplex
 
-from topobenchmarkx.transforms.liftings.graph2cell import Graph2CellLifting
+from topobenchmarkx.transforms.liftings.graph2cell.base import Graph2CellLifting
 
 
 class CellCycleLifting(Graph2CellLifting):

@@ -1,7 +1,6 @@
-from topobenchmarkx.transforms.liftings.graph2hypergraph.base import Graph2HypergraphLifting  # noqa: I001
-from topobenchmarkx.transforms.liftings.graph2hypergraph.khop import HypergraphKHopLifting
-from topobenchmarkx.transforms.liftings.graph2hypergraph.knn import HypergraphKNNLifting
-
+from .base import Graph2HypergraphLifting
+from .khop import HypergraphKHopLifting
+from .knn import HypergraphKNNLifting
 
 GRAPH2HYPERGRAPH_LIFTINGS = {
     "HypergraphKHopLifting": HypergraphKHopLifting,

@@ -1,78 +1,8 @@
-from abc import abstractmethod
-
 import networkx as nx
 import torch_geometric
 from torch_geometric.utils.undirected import is_undirected, to_undirected
 
-# # Data manipulation transforms
-# from topobenchmarkx.transforms.data_manipulations import (
-#     IdentityTransform,
-# )
-
-# # Feature liftings
-# from topobenchmarkx.transforms.feature_liftings import (
-#     ConcatentionLifting,
-#     ProjectionSum,
-#     SetLifting,
-# )
-
-# FEATURE_LIFTINGS = {
-#     "projection": ProjectionSum,
-#     "concatenation": ConcatentionLifting,
-#     "set": SetLifting,
-#     None: IdentityTransform,
-# }
-from topobenchmarkx.transforms.feature_liftings import FEATURE_LIFTINGS
-
-
-class AbstractLifting(torch_geometric.transforms.BaseTransform):
-    r"""Abstract class for topological liftings.
-
-    Parameters
-    ----------
-    feature_lifting : str, optional
-        The feature lifting method to be used. Default is 'ProjectionSum'.
-    **kwargs : optional
-        Additional arguments for the class.
-    """
-
-    def __init__(self, feature_lifting=None, **kwargs):
-        super().__init__()
-        self.feature_lifting = FEATURE_LIFTINGS[feature_lifting]()
-
-    @abstractmethod
-    def lift_topology(self, data: torch_geometric.data.Data) -> dict:
-        r"""Lifts the topology of a graph to higher-order topological domains.
-
-        Parameters
-        ----------
-        data : torch_geometric.data.Data
-            The input data to be lifted.
-
-        Returns
-        -------
-        dict
-            The lifted topology.
-        """
-        raise NotImplementedError
-
-    def forward(self, data: torch_geometric.data.Data) -> torch_geometric.data.Data:
-        r"""Applies the full lifting (topology + features) to the input data.
-
-        Parameters
-        ----------
-        data : torch_geometric.data.Data
-            The input data to be lifted.
-
-        Returns
-        -------
-        torch_geometric.data.Data
-            The lifted data.
-        """
-        initial_data = data.to_dict()
-        lifted_topology = self.lift_topology(data)
-        lifted_topology = self.feature_lifting(lifted_topology)
-        return torch_geometric.data.Data(**initial_data, **lifted_topology)
+from topobenchmarkx.transforms.liftings import AbstractLifting
 
 
 class GraphLifting(AbstractLifting):

@@ -1,13 +1,12 @@
-from topobenchmarkx.transforms.liftings.graph2cell.base import Graph2CellLifting  # noqa: I001
-from topobenchmarkx.transforms.liftings.graph2cell.cycle import CellCycleLifting
-
+from .base import Graph2CellLifting
+from .cycle import CellCycleLifting
 
 GRAPH2CELL_LIFTINGS = {
     "CellCycleLifting": CellCycleLifting,
 }
 
 __all__ = [
-    "Graph2CellLifting",
     "CellCycleLifting",
+    "Graph2CellLifting",
     "GRAPH2CELL_LIFTINGS"
 ]

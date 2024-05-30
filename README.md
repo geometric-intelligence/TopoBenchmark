@@ -63,11 +63,11 @@ python topobenchmarkx/train.py
 
 ### Explore the Tutorials
 
-To add a new dataset and benchmark task, you can follow our tutorials.
+To add a new dataset and benchmark task, you can explore our [tutorials](https://github.com/pyt-team/TopoBenchmarkX/tree/main/tutorials).
 
 ## :gear: Neural Networks
 
-Many of the neural networks implemented are taken from [`TopoModelX`](https://github.com/pyt-team/TopoModelX). Here is the list of all the models implemented, organized by the topological domain over which they operate: graph, simplicial complex, cellular complex or hypergraph.
+We list the neural networks trained and evaluated by `TopoBenchmarkX`, organized by the topological domain over which they operate: graph, simplicial complex, cellular complex or hypergraph. Many of these neural networks were originally implemented in [`TopoModelX`](https://github.com/pyt-team/TopoModelX).
 
 ### Graphs
 | Model | Reference |
@@ -103,7 +103,7 @@ Many of the neural networks implemented are taken from [`TopoModelX`](https://gi
 
 ## :top: Liftings
 
-We list the liftings implemented, i.e., the functions that can convert a dataset defined on a topological domain into the same dataset but supported on a different topological domain.
+We list the liftings used in `TopoBenchmarkX` to transform datasets. Here, a _lifting_ refers to a function that transforms a dataset defined on a topological domain (_e.g._, on a graph) into the same dataset but supported on a different topological domain (_e.g._, on a simplicial complex).
 
 ### Graph2Simplicial
 | Name | Description | Reference |
@@ -202,7 +202,7 @@ Happy development!
 
 ## :spiral_notepad: References
 
-To learn more about the benchmark approach, we refer to the paper:
+To learn more about `TopoBenchmarkX`, we invite you to read the paper:
 
 ```
 @misc{topobenchmarkx2024,
@@ -214,3 +214,4 @@ To learn more about the benchmark approach, we refer to the paper:
       primaryClass={cs.LG}
 }
 ```
+If you find `TopoBenchmarkX` useful, we appreciate if you cite it!

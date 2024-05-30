@@ -36,7 +36,7 @@ Assess how your model compares against state-of-the-art topological neural netwo
 
 ## Overview
 
-`TopoBenchmarkX` is a Python library developed to train and compare the performances of topological neural networks using different topological domains. Here, a _topological domain_ means a graph, a simplicial complex, a cellular complex, or a hypergraph.
+`TopoBenchmarkX` (TBX) is a Python library developed to train and compare the performances of topological neural networks using different topological domains. Here, a _topological domain_ means a graph, a simplicial complex, a cellular complex, or a hypergraph.
 
 The main pipeline trains and evaluates a wide range of state-of-the-art neural networks (see [:gear: Neural Networks](https://github.com/pyt-team/TopoBenchmarkX/blob/ninamiolane-readme/README.md#gear-neural-networks)) on numerous and varied datasets and benchmark tasks. 
 
@@ -46,7 +46,14 @@ Additionally, the library offers the ability to transform, i.e., _lift_, each da
 
 ### Create Environment
 
-First, check the CUDA version of your machine:
+First, clone the `TopoBenchmarkX` repository and set up a conda environment `tbx` with python 3.11.3.
+```
+git clone git@github.com:pyt-team/topobenchmarkx.git
+cd topobenchmarkx
+conda create -n tbx python=3.11.3
+```
+
+Next, check the CUDA version of your machine:
 ```
 /usr/local/cuda/bin/nvcc --version
 ```
@@ -57,7 +64,7 @@ Next, create the environment with the following command.
 ```
 source env_setup.sh
 ```
-This command creates the conda environment named topobenchmarkx and installs the `TopoBenchmarkX` library and its dependencies. 
+This command installs the `TopoBenchmarkX` library and its dependencies. 
 
 ### Run Training Pipeline
 
@@ -138,13 +145,13 @@ If you don't have conda on your machine, please follow [their guide](https://doc
 
 We recommend using Python 3.11.3, which is the python version used to run the unit-tests. You can create create and activate a conda environment as follows:
    ```bash
-   conda create -n topox python=3.11.3
-   conda activate topox
+   conda create -n tbx python=3.11.3
+   conda activate tbx
    ```
 
 Then:
 
-1. Clone a copy of tmx from source:
+1. Clone a copy of tbx from source:
 
    ```bash
    git clone git@github.com:pyt-team/topobenchmarkx.git
@@ -160,7 +167,7 @@ Then:
    - Modify `install_requirements.sh` to select the proper `CUDA` and `torch` versions among the available options (`CUDA=cu121` and `torch=2.3.0` by default).
    - Please check [this website](https://github.com/pyg-team/pyg-lib) to check the combination that works best for you.
 
-5. Ensure that you have a working tmx installation by running the entire test suite with
+5. Ensure that you have a working tbx installation by running the entire test suite with
 
    ```bash
    pytest

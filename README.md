@@ -13,6 +13,7 @@
 [![Test](https://github.com/pyt-team/TopoBenchmarkX/actions/workflows/python-app.yml/badge.svg)](https://github.com/pyt-team/TopoBenchmarkX/actions/workflows/python-app.yml)
 [![Python](https://img.shields.io/badge/python-3.10+-blue?logo=python)](https://www.python.org/)
 [![license](https://badgen.net/github/license/TopoBenchmarkX/TopoBenchmarkX?color=green)](https://github.com/TopoBenchmarkX/TopoBenchmarkX/blob/main/LICENSE)
+[![slack](https://img.shields.io/badge/chat-on%20slack-purple?logo=slack)](https://join.slack.com/t/pyt-teamworkspace/shared_invite/zt-2k63sv99s-jbFMLtwzUCc8nt3sIRWjEw)
 
 
 </div>

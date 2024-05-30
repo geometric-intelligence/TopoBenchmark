@@ -201,3 +201,16 @@ docker run -it -d --volume $(pwd):/TopoBenchmarkX topobenchmark:new
 Happy development!
 
 ## :spiral_notepad: References
+
+To learn more about the benchmark approach, we refer to the paper:
+
+```
+@misc{topobenchmarkx2024,
+      title={TopoBenchmarkX},
+      author={PyT-Team},
+      year={2024},
+      eprint={TBD},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG}
+}
+```

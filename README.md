@@ -1,20 +1,26 @@
-# Logos
-
 <h2 align="center">
-  <img src="resources/logo_small.svg" height="250px">
-
+  <img src="resources/logo.svg" width="1000">
 </h2>
 
-<p align="center">
-  <img src="resources/logo.svg" width="1000">
-</p>
+<h4 align="center">
+    A Comprehensive Benchmark for Topological Deep Learning
+</h4>
 
 
-# :dart: TopoBenchmarkX
+<div align="center">
 
 [![Lint](https://github.com/pyt-team/TopoBenchmarkX/actions/workflows/lint.yml/badge.svg)](https://github.com/pyt-team/TopoBenchmarkX/actions/workflows/lint.yml)
 [![Test](https://github.com/pyt-team/TopoBenchmarkX/actions/workflows/python-app.yml/badge.svg)](https://github.com/pyt-team/TopoBenchmarkX/actions/workflows/python-app.yml)
 [![Python](https://img.shields.io/badge/python-3.10+-blue?logo=python)](https://www.python.org/)
+
+</div>
+
+<p align="center">
+  <a href="#topologicaldeeplearning">Overview</a> •
+  <a href="#installation">Installation</a> •
+  <a href="https://github.com/pyt-team/TopoBenchmarkX/tree/dev/tutorials">Tutorials</a> •
+  <a href="#references">References</a> 
+</p>
 
 Immediately assess how your model stacks against the state-of-the-art of topological models.
 

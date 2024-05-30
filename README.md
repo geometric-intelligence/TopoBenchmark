@@ -42,7 +42,7 @@ The main pipeline trains and evaluates a wide range of state-of-the-art neural n
 
 Additionally, the library offers the ability to transform, i.e., _lift_, each dataset from one topological domain to another (see [:top: Liftings](https://github.com/pyt-team/TopoBenchmarkX/blob/ninamiolane-readme/README.md#top-liftings)).
 
-## Get Started
+## :toolbox: Get Started
 
 ### Create Environment
 
@@ -61,7 +61,7 @@ This command creates the conda environment named topobenchmarkx and installs the
 python topobenchmarkx/train.py 
 ```
 
-### :toolbox: Tutorials
+### Explore the Tutorials
 
 To add a new dataset and benchmark task, you can follow our tutorials.
 

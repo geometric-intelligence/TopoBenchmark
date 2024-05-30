@@ -19,10 +19,10 @@
 </div>
 
 <p align="center">
-  <a href="#topological">Overview</a> •
-  <a href="#installation">Installation</a> •
+  <a href="#topological-deep-learning">Overview</a> •
+  <a href="##sample-usage">Sample Usage</a> •
   <a href="https://github.com/pyt-team/TopoBenchmarkX/tree/dev/tutorials">Tutorials</a> •
-  <a href="#references">References</a> 
+  <a href="#spiral_notepad-references">References</a> 
 </p>
 
 Immediately assess how your model stacks against the state-of-the-art of topological models.
@@ -32,9 +32,9 @@ Immediately assess how your model stacks against the state-of-the-art of topolog
 </p>
 
 
-## Topological Deep Learning
+## Overview
 
-`TopoBenchmarkX` is a Python library developed to train and compare models using different topological structures.
+`TopoBenchmarkX` is a Python library developed to train and compare neural networks models using different topological structures.
 
 It offers ready-to-use training pipelines to train and test a model and immediately compare its results with a wide range of models. It also supports numerous and varied datasets, and the ability to transform each dataset from one domain to another.
 

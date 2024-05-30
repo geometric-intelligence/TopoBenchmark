@@ -19,7 +19,7 @@
 </div>
 
 <p align="center">
-  <a href="#topologicaldeeplearning">Overview</a> •
+  <a href="#topological">Overview</a> •
   <a href="#installation">Installation</a> •
   <a href="https://github.com/pyt-team/TopoBenchmarkX/tree/dev/tutorials">Tutorials</a> •
   <a href="#references">References</a> 

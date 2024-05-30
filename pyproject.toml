@@ -33,7 +33,6 @@ dependencies=[
     "matplotlib",
     "networkx",
     "pandas",
-    "gudhi",
     "decorator",
     "hypernetx < 2.0.0",
     "trimesh",
@@ -49,7 +48,11 @@ dependencies=[
     "jupyterlab",
     "rich",
     "rootutils",
-    "pytest",
+    "toponetx @ git+https://github.com/pyt-team/TopoNetX.git",
+    "topomodelx @ git+https://github.com/pyt-team/TopoModelX.git",
+    "topoembedx @ git+https://github.com/pyt-team/TopoEmbedX.git",
+    "pyg-lib",
+    "lightning",
 ]
 
 [project.optional-dependencies]

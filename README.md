@@ -23,7 +23,7 @@ Assess how your model compares against state-of-the-art topological neural netwo
 
 <p align="center">
   <a href="#overview">Overview</a> •
-  <a href="#sample-usage">Sample Usage</a> •
+  <a href="#get-started">Get Started</a> •
   <a href="https://github.com/pyt-team/TopoBenchmarkX/tree/dev/tutorials">Tutorials</a> •
   <a href="#spiral_notepad-references">References</a> 
 </p>

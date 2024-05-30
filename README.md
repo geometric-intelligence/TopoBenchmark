@@ -38,30 +38,36 @@ Assess how your model compares against state-of-the-art topological neural netwo
 
 `TopoBenchmarkX` is a Python library developed to train and compare the performances of topological neural networks using different topological domains. Here, a _topological domain_ means a graph, a simplicial complex, a cellular complex, or a hypergraph.
 
-The main pipeline trains and evaluates a wide range of state-of-the-art neural networks (see [:gear: Neural Networks](https://github.com/pyt-team/TopoBenchmarkX/blob/ninamiolane-readme/README.md#gear-neural-networks)) on numerous and varied datasets and benchmark tasks. Additionally, the library offers the ability to transform, i.e., _lift_, each dataset from one topological domain to another (see [:top: Liftings](https://github.com/pyt-team/TopoBenchmarkX/blob/ninamiolane-readme/README.md#top-liftings)).
+The main pipeline trains and evaluates a wide range of state-of-the-art neural networks (see [:gear: Neural Networks](https://github.com/pyt-team/TopoBenchmarkX/blob/ninamiolane-readme/README.md#gear-neural-networks)) on numerous and varied datasets and benchmark tasks. 
 
-## :toolbox: Tutorials
+Additionally, the library offers the ability to transform, i.e., _lift_, each dataset from one topological domain to another (see [:top: Liftings](https://github.com/pyt-team/TopoBenchmarkX/blob/ninamiolane-readme/README.md#top-liftings)).
 
-## Sample Usage
+## Get Started
+
 ### Create Environment
 
-To create the environment, ensure the specified CUDA version in the env.sh file is compatible with your devices and run the following command.
+To create the environment, first ensure the specified CUDA version in the env_setup.sh file (`CUDA=cu121` by default) is compatible with your devices. 
 
+Next, run the following command.
 
 ```
-source env.sh
+source env_setup.sh
 ```
-The command above will create the conda environment named topobenchmarkx and install the `TopoBenchmarkX` library and its dependencies. 
+This command creates the conda environment named topobenchmarkx and installs the `TopoBenchmarkX` library and its dependencies. 
 
-### Train
+### Run Training Pipeline
 
 ```
 python topobenchmarkx/train.py 
 ```
 
+### :toolbox: Tutorials
+
+To add a new dataset and benchmark task, you can follow our tutorials.
+
 ## :gear: Neural Networks
 
-Many of the neural networks implemented are taken from [`TopoModelX`](https://github.com/pyt-team/TopoModelX). Here is the list of all the models implemented.
+Many of the neural networks implemented are taken from [`TopoModelX`](https://github.com/pyt-team/TopoModelX). Here is the list of all the models implemented, organized by the topological domain over which they operate: graph, simplicial complex, cellular complex or hypergraph.
 
 ### Graphs
 | Model | Reference |
@@ -96,6 +102,9 @@ Many of the neural networks implemented are taken from [`TopoModelX`](https://gi
 | UniGNN2 | [UniGNN: a Unified Framework for Graph and Hypergraph Neural Networks](https://arxiv.org/pdf/2105.00956) |
 
 ## :top: Liftings
+
+We list the liftings implemented, i.e., the functions that can convert a dataset defined on a topological domain into the same dataset but supported on a different topological domain.
+
 ### Graph2Simplicial
 | Name | Description | Reference |
 | --- | --- | --- |
@@ -115,7 +124,9 @@ Many of the neural networks implemented are taken from [`TopoModelX`](https://gi
 
 ## :keyboard: Development
 
-(Introductory paragraph stating that we have 2 options, conda or docker)
+To join the development of `TopoBenchmarkX`, you should install the library in dev mode. 
+
+For this, you can create an environment using either conda or docker. Both options are detailed below.
 
 ### Using conda env
 
@@ -186,5 +197,7 @@ With CPU
 ```
 docker run -it -d --volume $(pwd):/TopoBenchmarkX topobenchmark:new
 ```
+
+Happy development!
 
 ## :spiral_notepad: References

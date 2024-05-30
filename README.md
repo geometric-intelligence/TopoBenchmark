@@ -12,6 +12,8 @@
 [![Lint](https://github.com/pyt-team/TopoBenchmarkX/actions/workflows/lint.yml/badge.svg)](https://github.com/pyt-team/TopoBenchmarkX/actions/workflows/lint.yml)
 [![Test](https://github.com/pyt-team/TopoBenchmarkX/actions/workflows/python-app.yml/badge.svg)](https://github.com/pyt-team/TopoBenchmarkX/actions/workflows/python-app.yml)
 [![Python](https://img.shields.io/badge/python-3.10+-blue?logo=python)](https://www.python.org/)
+[![license](https://badgen.net/github/license/TopoBenchmarkX/TopoBenchmarkX?color=green)](https://github.com/TopoBenchmarkX/TopoBenchmarkX/blob/main/LICENSE)
+
 
 </div>
 

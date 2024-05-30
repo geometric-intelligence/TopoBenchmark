@@ -1,4 +1,6 @@
 #!/bin/bash -l
+yes | conda create -n topobenchmarkx python=3.11.3
+conda activate topobenchmarkx
 
 pip install --upgrade pip
 pip install -e '.[all]'

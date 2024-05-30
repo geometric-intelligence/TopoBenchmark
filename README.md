@@ -1,3 +1,15 @@
+# Logos
+
+<h2 align="center">
+  <img src="resources/logo_small.svg" height="250px">
+
+</h2>
+
+<p align="center">
+  <img src="resources/logo.svg" width="1000">
+</p>
+
+
 # :dart: TopoBenchmarkX
 
 Immediately assess how your model stacks against the state-of-the-art of topological models.
@@ -6,6 +18,8 @@ Immediately assess how your model stacks against the state-of-the-art of topolog
   <img src="resources/photo1716928649.jpeg" width="700">
 </p>
 
+
+</p>
 ## Topological Deep Learning
 
 `TopoBenchmarkX` is a Python library developed to train and compare models using different topological structures.
@@ -14,6 +28,12 @@ It offers ready-to-use training pipelines to train and test a model and immediat
 
 ## :toolbox: Tutorials
 
+## Sample Usage
+### Run the model 
+
+```
+python topobenchmarkx/train.py 
+```
 
 ## :gear: Models
 

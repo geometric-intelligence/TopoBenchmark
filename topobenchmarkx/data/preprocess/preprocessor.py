@@ -37,7 +37,7 @@ class PreProcessor(torch_geometric.data.InMemoryDataset):
         else:
             self.transforms_applied = False
             super().__init__(data_dir, None, None, **kwargs)
-            self.load(data_dir+"/processed/data.pt")
+            self.load(data_dir + "/processed/data.pt")
         self.data_list = [self.get(idx) for idx in range(len(self))]
         # Some datasets have fixed splits, and those are stored as split_idx during loading
         # We need to store this information to be able to reproduce the splits afterwards

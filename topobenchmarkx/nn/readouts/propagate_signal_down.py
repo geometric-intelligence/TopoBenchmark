@@ -1,9 +1,9 @@
 import torch
 import torch_geometric
 import topomodelx
-from topobenchmarkx.nn.readouts.readout import AbstractReadOut
+from topobenchmarkx.nn.readouts.readout import AbstractZeroCellReadOut
 
-class PropagateSignalDown(AbstractReadOut):
+class PropagateSignalDown(AbstractZeroCellReadOut):
     r"""Propagate signal down readout layer. This readout layer propagates the signal from cells of a certain order to the cells of the lower order.
     
     Args:
@@ -12,7 +12,7 @@ class PropagateSignalDown(AbstractReadOut):
         readout_name (str): Readout name.
     """
     def __init__(self, **kwargs):
-        super().__init__()
+        super().__init__(**kwargs)
 
         self.name = kwargs["readout_name"]
         self.dimensions = range(kwargs["num_cell_dimensions"] - 1, 0, -1)

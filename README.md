@@ -172,9 +172,9 @@ Then:
 
 
 
-### <img src="https://github.com/wesbos/Font-Awesome-Docker-Icon/blob/master/docker-white.svg" width="30" height="30"> Using Docker
+### Using Docker
 
-For ease of use, TopoBenchmarkX employs [Docker](https://www.docker.com/). To set it up on your system you can follow [their guide](https://docs.docker.com/get-docker/). once installed, please follow the next steps:
+For ease of use, TopoBenchmarkX employs <img src="https://github.com/wesbos/Font-Awesome-Docker-Icon/blob/master/docker-white.svg" width="20" height="20"> [Docker](https://www.docker.com/). To set it up on your system you can follow [their guide](https://docs.docker.com/get-docker/). once installed, please follow the next steps:
 
 First, navigate to the correct folder.
 ```

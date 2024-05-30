@@ -155,7 +155,7 @@ Then:
 
    ```bash
    git clone git@github.com:pyt-team/topobenchmarkx.git
-   cd topobenchmarkx
+   cd TopoBenchmarkX
    ```
 
 2. Install the required dependencies:

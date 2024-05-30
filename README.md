@@ -12,6 +12,8 @@
 
 # :dart: TopoBenchmarkX
 
+[![Test Codebase](https://github.com/pyt-team/TopoBenchmarkX//actions/workflows/test.yml/badge.svg)](https://github.com/pyt-team/torch_topo/actions/workflows/test.yml)
+
 Immediately assess how your model stacks against the state-of-the-art of topological models.
 
 <p align="center">

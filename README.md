@@ -1,10 +1,10 @@
 <h2 align="center">
-  <img src="resources/logo.svg" width="1000">
+  <img src="resources/logo_black_purple.jpg" width="800">
 </h2>
 
-<h4 align="center">
-    A Comprehensive Benchmark for Topological Deep Learning
-</h4>
+<h3 align="center">
+    A Comprehensive Benchmark Suite for Topological Deep Learning
+</h3>
 
 <p align="center">
 Assess how your model compares against state-of-the-art topological neural networks.

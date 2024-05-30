@@ -36,9 +36,9 @@ Assess how your model compares against state-of-the-art topological neural netwo
 
 ## Overview
 
-`TopoBenchmarkX` is a Python library developed to train and compare the performances of topological neural networks using different topological domains. Here, a topological domain means a graph, a simplicial complex, a cellular complex, or a hypergraph.
+`TopoBenchmarkX` is a Python library developed to train and compare the performances of topological neural networks using different topological domains. Here, a _topological domain_ means a graph, a simplicial complex, a cellular complex, or a hypergraph.
 
-`TopoBenchmarkX` supports numerous and varied datasets, and the ability to transform each dataset from one domain to another.
+The main pipeline trains and evaluates a wide range of state-of-the-art neural networks (see [Neural Networks](#Neural-Networks)) on numerous and varied datasets and benchmark tasks. Additionally, the library offers the ability to transform, i.e., _lift_, each dataset from one topological domain to another (see [Liftings]).
 
 ## :toolbox: Tutorials
 

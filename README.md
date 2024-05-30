@@ -29,6 +29,15 @@ It offers ready-to-use training pipelines to train and test a model and immediat
 ## :toolbox: Tutorials
 
 ## Sample Usage
+### Environment
+To create the environment, ensure the specified CUDA version in the env.sh file is compatible with your devices and run the following command.
+
+
+```
+source env.sh
+```
+The command above will create the conda environment named topobenchmarkx and install the TopoBenchmarkX library and its dependencies. 
+
 ### Run the model 
 
 ```

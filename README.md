@@ -46,9 +46,13 @@ Additionally, the library offers the ability to transform, i.e., _lift_, each da
 
 ### Create Environment
 
-To create the environment, first ensure the specified CUDA version in the env_setup.sh file (`CUDA=cu121` by default) is compatible with your devices. 
+First, check the CUDA version of your machine:
+```
+/usr/local/cuda/bin/nvcc --version
+```
+and ensure that it matches the CUDA version specified in the `env_setup.sh` file (`CUDA=cu121` by default). If it does not match, update `env_setup.sh` accordingly.
 
-Next, run the following command.
+Next, create the environment with the following command.
 
 ```
 source env_setup.sh

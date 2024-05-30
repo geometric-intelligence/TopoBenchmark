@@ -57,7 +57,7 @@ Next, check the CUDA version of your machine:
 ```
 /usr/local/cuda/bin/nvcc --version
 ```
-and ensure that it matches the CUDA version specified in the `env_setup.sh` file (`CUDA=cu121` by default). If it does not match, update `env_setup.sh` accordingly.
+and ensure that it matches the CUDA version specified in the `env_setup.sh` file (`CUDA=cu121` by default). If it does not match, update `env_setup.sh` accordingly by changing both the `CUDA` and `TORCH` environment variables to compatible values as specified on [this website](https://github.com/pyg-team/pyg-lib).
 
 Next, create the environment with the following command.
 

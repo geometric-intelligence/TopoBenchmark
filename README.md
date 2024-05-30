@@ -38,29 +38,30 @@ Assess how your model compares against state-of-the-art topological neural netwo
 
 `TopoBenchmarkX` is a Python library developed to train and compare the performances of topological neural networks using different topological domains. Here, a _topological domain_ means a graph, a simplicial complex, a cellular complex, or a hypergraph.
 
-The main pipeline trains and evaluates a wide range of state-of-the-art neural networks (see [Neural Networks](#Neural-Networks)) on numerous and varied datasets and benchmark tasks. Additionally, the library offers the ability to transform, i.e., _lift_, each dataset from one topological domain to another (see [Liftings]).
+The main pipeline trains and evaluates a wide range of state-of-the-art neural networks (see [Neural Networks](https://github.com/pyt-team/TopoBenchmarkX/blob/ninamiolane-readme/README.md#gear-neural-networks)) on numerous and varied datasets and benchmark tasks. Additionally, the library offers the ability to transform, i.e., _lift_, each dataset from one topological domain to another (see [Liftings]).
 
 ## :toolbox: Tutorials
 
 ## Sample Usage
-### Environment
+### Create Environment
+
 To create the environment, ensure the specified CUDA version in the env.sh file is compatible with your devices and run the following command.
 
 
 ```
 source env.sh
 ```
-The command above will create the conda environment named topobenchmarkx and install the TopoBenchmarkX library and its dependencies. 
+The command above will create the conda environment named topobenchmarkx and install the `TopoBenchmarkX` library and its dependencies. 
 
-### Run the model 
+### Train
 
 ```
 python topobenchmarkx/train.py 
 ```
 
-## :gear: Models
+## :gear: Neural Networks
 
-Many of the models implemented are taken from [`TopoModelX`](https://github.com/pyt-team/TopoModelX). Here is the list of all the models implemented.
+Many of the neural networks implemented are taken from [`TopoModelX`](https://github.com/pyt-team/TopoModelX). Here is the list of all the models implemented.
 
 ### Graphs
 | Model | Reference |

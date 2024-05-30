@@ -6,6 +6,9 @@
     A Comprehensive Benchmark for Topological Deep Learning
 </h4>
 
+<p align="center">
+Assess how your model compares against state-of-the-art topological neural networks.
+</p>
 
 <div align="center">
 
@@ -25,7 +28,6 @@
   <a href="#spiral_notepad-references">References</a> 
 </p>
 
-Immediately assess how your model stacks against the state-of-the-art of topological models.
 
 <p align="center">
   <img src="resources/photo1716928649.jpeg" width="700">

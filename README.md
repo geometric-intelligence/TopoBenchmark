@@ -19,7 +19,6 @@ Immediately assess how your model stacks against the state-of-the-art of topolog
 </p>
 
 
-</p>
 ## Topological Deep Learning
 
 `TopoBenchmarkX` is a Python library developed to train and compare models using different topological structures.
@@ -100,9 +99,55 @@ Many of the models implemented are taken from [`TopoModelX`](https://github.com/
 
 ## :keyboard: Development
 
-For ease of use, TopoBenchmarkX employs [Docker](https://www.docker.com/). To set it up on your system you can follow [their guide](https://docs.docker.com/get-docker/).
+(Introductory paragraph stating that we have 2 options, conda or docker)
+
+### Using conda env
+
+If you don't have conda on your machine, please follow [their guide](https://docs.anaconda.com/free/miniconda/miniconda-install/) to install it. 
+
+We recommend using Python 3.11.3, which is the python version used to run the unit-tests. You can create create and activate a conda environment as follows:
+   ```bash
+   conda create -n topox python=3.11.3
+   conda activate topox
+   ```
+
+Then:
+
+1. Clone a copy of tmx from source:
+
+   ```bash
+   git clone git@github.com:pyt-team/topobenchmarkx.git
+   cd topobenchmarkx
+   ```
+
+2. Install the required dependencies:
+
+   ```bash
+   bash env_setup.sh
+   ```
+   **Notes:**
+   - Modify `install_requirements.sh` to select the proper `CUDA` and `torch` versions among the available options (`CUDA=cu121` and `torch=2.3.0` by default).
+   - Please check [this website](https://github.com/pyg-team/pyg-lib) to check the combination that works best for you.
+
+5. Ensure that you have a working tmx installation by running the entire test suite with
+
+   ```bash
+   pytest
+   ```
+
+    In case an error occurs, please first check if all sub-packages ([`torch-scatter`](https://github.com/rusty1s/pytorch_scatter), [`torch-sparse`](https://github.com/rusty1s/pytorch_sparse), [`torch-cluster`](https://github.com/rusty1s/pytorch_cluster) and [`torch-spline-conv`](https://github.com/rusty1s/pytorch_spline_conv)) are on its latest reported version.
+
+6. Install pre-commit hooks:
+
+   ```bash
+   pre-commit install
+   ```
+
+
 
 ### <img src="https://github.com/wesbos/Font-Awesome-Docker-Icon/blob/master/docker-white.svg" width="30" height="30"> Using Docker
+
+For ease of use, TopoBenchmarkX employs [Docker](https://www.docker.com/). To set it up on your system you can follow [their guide](https://docs.docker.com/get-docker/). once installed, please follow the next steps:
 
 First, navigate to the correct folder.
 ```

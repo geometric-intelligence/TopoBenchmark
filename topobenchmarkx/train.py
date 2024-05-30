@@ -90,12 +90,12 @@ def train(cfg: DictConfig) -> tuple[dict[str, Any], dict[str, Any]]:
     log.info(f"Instantiating loader <{cfg.dataset.loader._target_}>")
     dataset_loader = hydra.utils.instantiate(cfg.dataset.loader)
     dataset, dataset_dir = dataset_loader.load()
-    # Preprocess dataset
+    # Preprocess dataset and load the splits
     log.info("Instantiating preprocessor...")
     transform_config = cfg.get("transforms", None)
-    preprocessed_dataset = PreProcessor(dataset, dataset_dir, transform_config)
-    # Load splits
-    dataset_train, dataset_val, dataset_test = hydra.utils.instantiate(cfg.dataset.split_loader, dataset=preprocessed_dataset)
+    preprocessor = PreProcessor(dataset, dataset_dir, transform_config)
+    dataset_train, dataset_val, dataset_test = preprocessor.load_dataset_splits(cfg.dataset.split_params)
+    # Prepare datamodule
     log.info("Instantiating datamodule...")
     if cfg.dataset.parameters.task_level in ["node", "graph"]:
         datamodule = DefaultDataModule(

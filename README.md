@@ -1,5 +1,5 @@
 <h2 align="center">
-  <img src="resources/logo_black_purple.jpg" width="800">
+  <img src="resources/logo_black_purple.jpg" width="600">
 </h2>
 
 <h3 align="center">
@@ -49,7 +49,7 @@ Additionally, the library offers the ability to transform, i.e., _lift_, each da
 First, clone the `TopoBenchmarkX` repository and set up a conda environment `tbx` with python 3.11.3.
 ```
 git clone git@github.com:pyt-team/topobenchmarkx.git
-cd topobenchmarkx
+cd TopoBenchmarkX
 conda create -n tbx python=3.11.3
 ```
 

@@ -68,6 +68,8 @@ This command installs the `TopoBenchmarkX` library and its dependencies.
 
 ### Run Training Pipeline
 
+Next, train the neural networks by running the following command:
+
 ```
 python topobenchmarkx/train.py 
 ```

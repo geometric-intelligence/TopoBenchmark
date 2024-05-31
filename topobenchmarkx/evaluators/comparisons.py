@@ -151,7 +151,7 @@ def compare_models(results, p_limit=0.05, verbose=False):
     groups = []
     for i in range(M):
         idx = 1
-        rankings = np.argsort(average_ranks)
+        rankings = rankdata(average_ranks)-1
         model_idx = np.where(rankings == i)[0][0]
         group = [model_idx]
         while i + idx < M:

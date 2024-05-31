@@ -79,6 +79,59 @@ To add a new dataset and benchmark task, you can explore our [tutorials](https:/
 ## :gear: Neural Networks
 
 We list the neural networks trained and evaluated by `TopoBenchmarkX`, organized by the topological domain over which they operate: graph, simplicial complex, cellular complex or hypergraph. Many of these neural networks were originally implemented in [`TopoModelX`](https://github.com/pyt-team/TopoModelX).
+## Additional details on project
+<details>
+<summary><b>Hierarchy of configuration files</b></summary>
+
+```
+├── configs                   <- Hydra configs
+│   ├── callbacks                <- Callbacks configs
+│   ├── dataset                  <- Dataset configs
+│   │   ├── graph                    <- Graph dataset configs
+│   │   ├── hypergraph               <- Hypergraph dataset configs
+│   │   └── simplicial               <- Simplicial dataset configs
+│   ├── debug                    <- Debugging configs
+│   ├── evaluator                <- Evaluator configs
+│   ├── experiment               <- Experiment configs
+│   ├── extras                   <- Extra utilities configs
+│   ├── hparams_search           <- Hyperparameter search configs
+│   ├── hydra                    <- Hydra configs
+│   ├── local                    <- Local configs
+│   ├── logger                   <- Logger configs
+│   ├── loss                     <- Loss function configs
+│   ├── model                    <- Model configs
+│   │   ├── cell                     <- Cell model configs
+│   │   ├── graph                    <- Graph model configs
+│   │   ├── hypergraph               <- Hypergraph model configs
+│   │   └── simplicial               <- Simplicial model configs
+│   ├── optimizer                <- Optimizer configs
+│   ├── paths                    <- Project paths configs
+│   ├── scheduler                <- Scheduler configs
+│   ├── trainer                  <- Trainer configs
+│   ├── transforms               <- Data transformation configs
+│   │   ├── data_manipulations       <- Data manipulation transforms
+│   │   ├── dataset_defaults         <- Default dataset transforms
+│   │   ├── feature_liftings         <- Feature lifting transforms
+│   │   └── liftings                 <- Lifting transforms
+│   │       ├── graph2cell               <- Graph to cell lifting transforms
+│   │       ├── graph2hypergraph         <- Graph to hypergraph lifting transforms
+│   │       ├── graph2simplicial         <- Graph to simplicial lifting transforms
+│   │       ├── graph2cell_default.yaml  <- Default graph to cell lifting config
+│   │       ├── graph2hypergraph_default.yaml <- Default graph to hypergraph lifting config
+│   │       ├── graph2simplicial_default.yaml <- Default graph to simplicial lifting config
+│   │       ├── no_lifting.yaml           <- No lifting config
+│   │       ├── custom_example.yaml       <- Custom example transform config
+│   │       └── no_transform.yaml         <- No transform config
+│   ├── wandb_sweep              <- Weights & Biases sweep configs
+│   │
+│   ├── __init__.py              <- Init file for configs module
+│   └── train.yaml               <- Main config for training
+```
+
+
+</details>
+
+
 
 ### Graphs
 | Model | Reference |

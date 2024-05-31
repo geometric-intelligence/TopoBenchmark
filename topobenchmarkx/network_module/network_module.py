@@ -2,10 +2,11 @@ from typing import Any
 
 import torch
 from lightning import LightningModule
-from torchmetrics import MeanMetric
 from torch_geometric.data import Data
+from torchmetrics import MeanMetric
 
-class TopologicalNetworkModule(LightningModule):
+
+class NetworkModule(LightningModule):
     r"""A `LightningModule` to define a network.
     
     Args:
@@ -304,4 +305,4 @@ class TopologicalNetworkModule(LightningModule):
 
 
 if __name__ == "__main__":
-    _ = TopologicalNetworkModule(None, None, None, None)
+    _ = NetworkModule(None, None, None, None)

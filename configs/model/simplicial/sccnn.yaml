@@ -1,4 +1,4 @@
-_target_: topobenchmarkx.networks.TopologicalNetworkModule
+_target_: topobenchmarkx.network_module.NetworkModule
 
 model_name: sccnn 
 model_domain: simplicial

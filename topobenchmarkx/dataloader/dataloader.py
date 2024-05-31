@@ -3,7 +3,7 @@ from typing import Any
 from lightning import LightningDataModule
 from torch.utils.data import DataLoader
 
-from topobenchmarkx.data.utils.dataloader_utils import collate_fn
+from topobenchmarkx.dataloader.utils import collate_fn
 
 
 class DefaultDataModule(LightningDataModule):

@@ -1,12 +1,24 @@
 # Import submodules
-from . import data, evaluators, nn, transforms, utils
+from . import (
+    data,
+    dataloader,
+    datasets,
+    evaluator,
+    network_module,
+    nn,
+    transforms,
+    utils,
+)
 
 __all__ = [
     "data",
-    "evaluators",
+    "evaluator",
     "nn",
     "transforms",
     "utils",
+    "dataloader",
+    "datasets",
+    "network_module",
 ]
 
 

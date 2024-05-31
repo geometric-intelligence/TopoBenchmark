@@ -6,5 +6,5 @@
 bash ./tu/run_tu.sh
 wait
 
-bash ./zinc/run_zinc.sh
-wait
+# bash ./zinc/run_zinc.sh
+# wait

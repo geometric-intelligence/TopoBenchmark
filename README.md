@@ -46,7 +46,10 @@ Additionally, the library offers the ability to transform, i.e., _lift_, each da
 
 ### Create Environment
 
-First, clone the `TopoBenchmarkX` repository and set up a conda environment `tbx` with python 3.11.3.
+If you do not have conda on your machine, please follow [their guide](https://docs.anaconda.com/free/miniconda/miniconda-install/) to install it. 
+
+First, clone the `TopoBenchmarkX` repository and set up a conda environment `tbx` with python 3.11.3. 
+
 ```
 git clone git@github.com:pyt-team/topobenchmarkx.git
 cd TopoBenchmarkX
@@ -141,60 +144,22 @@ To join the development of `TopoBenchmarkX`, you should install the library in d
 
 For this, you can create an environment using either conda or docker. Both options are detailed below.
 
-### Using conda env
+### Using Conda Environment
 
-If you don't have conda on your machine, please follow [their guide](https://docs.anaconda.com/free/miniconda/miniconda-install/) to install it. 
-
-We recommend using Python 3.11.3, which is the python version used to run the unit-tests. You can create create and activate a conda environment as follows:
-   ```bash
-   conda create -n tbx python=3.11.3
-   conda activate tbx
-   ```
-
-Then:
-
-1. Clone a copy of tbx from source:
-
-   ```bash
-   git clone git@github.com:pyt-team/topobenchmarkx.git
-   cd TopoBenchmarkX
-   ```
-
-2. Install the required dependencies:
-
-   ```bash
-   bash env_setup.sh
-   ```
-   **Notes:**
-   - Modify `install_requirements.sh` to select the proper `CUDA` and `torch` versions among the available options (`CUDA=cu121` and `torch=2.3.0` by default).
-   - Please check [this website](https://github.com/pyg-team/pyg-lib) to check the combination that works best for you.
-
-5. Ensure that you have a working tbx installation by running the entire test suite with
-
-   ```bash
-   pytest
-   ```
-
-    In case an error occurs, please first check if all sub-packages ([`torch-scatter`](https://github.com/rusty1s/pytorch_scatter), [`torch-sparse`](https://github.com/rusty1s/pytorch_sparse), [`torch-cluster`](https://github.com/rusty1s/pytorch_cluster) and [`torch-spline-conv`](https://github.com/rusty1s/pytorch_spline_conv)) are on its latest reported version.
-
-6. Install pre-commit hooks:
-
-   ```bash
-   pre-commit install
-   ```
-
+Follow the steps in [:toolbox: Get Started](https://github.com/pyt-team/TopoBenchmarkX/blob/ninamiolane-readme/README.md##toolbox-get-started).
 
 
 ### Using Docker
 
 For ease of use, TopoBenchmarkX employs <img src="https://github.com/wesbos/Font-Awesome-Docker-Icon/blob/master/docker-white.svg" width="20" height="20"> [Docker](https://www.docker.com/). To set it up on your system you can follow [their guide](https://docs.docker.com/get-docker/). once installed, please follow the next steps:
 
-First, navigate to the correct folder.
+First, clone the repository and navigate to the correct folder.
 ```
-cd /path/to/TopoBenchmarkX
+git clone git@github.com:pyt-team/topobenchmarkx.git
+cd TopoBenchmarkX
 ```
 
-Then we need to build the Docker image.
+Then, build the Docker image.
 ```
 docker build -t topobenchmark:new .
 ```

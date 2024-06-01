@@ -4,7 +4,8 @@ from . import (
     dataloader,
     datasets,
     evaluator,
-    network_module,
+    loss,
+    model,
     nn,
     transforms,
     utils,
@@ -13,12 +14,13 @@ from . import (
 __all__ = [
     "data",
     "evaluator",
+    "loss",
     "nn",
     "transforms",
     "utils",
     "dataloader",
     "datasets",
-    "network_module",
+    "model",
 ]
 
 

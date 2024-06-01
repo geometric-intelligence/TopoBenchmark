@@ -15,7 +15,7 @@ feature_encoder:
     - 2
 
 backbone:
-  _target_: custom_models.simplicial.sccnn.SCCNNCusctom
+  _target_: topobenchmarkx.nn.backbones.simplicial.sccnn.SCCNNCustom
   in_channels_all:
     - ${model.feature_encoder.out_channels}
     - ${model.feature_encoder.out_channels}

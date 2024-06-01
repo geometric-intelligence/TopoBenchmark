@@ -1,4 +1,4 @@
-_target_: topobenchmarkx.network_module.NetworkModule
+_target_: topobenchmarkx.model.TBXModel
 
 model_name: unignn2
 model_domain: hypergraph

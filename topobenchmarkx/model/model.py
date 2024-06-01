@@ -6,7 +6,7 @@ from torch_geometric.data import Data
 from torchmetrics import MeanMetric
 
 
-class NetworkModule(LightningModule):
+class TBXModel(LightningModule):
     r"""A `LightningModule` to define a network.
     
     Args:
@@ -305,4 +305,4 @@ class NetworkModule(LightningModule):
 
 
 if __name__ == "__main__":
-    _ = NetworkModule(None, None, None, None)
+    _ = TBXModel(None, None, None, None)

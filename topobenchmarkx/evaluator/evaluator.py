@@ -2,10 +2,10 @@
 
 from torchmetrics import MetricCollection
 
-from topobenchmarkx.evaluator.metrics import METRICS
+from topobenchmarkx.evaluator import METRICS
 
 
-class TorchEvaluator:
+class TBXEvaluator:
     r"""Evaluator class that is responsible for computing the metrics for a
     given task.
 
@@ -99,12 +99,3 @@ class TorchEvaluator:
         This method should be called after each epoch
         """
         self.metrics.reset()
-
-
-if __name__ == "__main__":
-    evaluator = TorchEvaluator(
-        task="classification",
-        num_classes=3,
-        classification_metrics=["accuracy"],
-    )
-    print(evaluator.task)

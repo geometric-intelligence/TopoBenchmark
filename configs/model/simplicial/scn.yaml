@@ -1,4 +1,4 @@
-_target_: topobenchmarkx.network_module.NetworkModule
+_target_: topobenchmarkx.model.TBXModel
 
 mdoel_name: scn 
 model_domain: simplicial

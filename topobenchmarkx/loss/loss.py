@@ -1,10 +1,10 @@
 import torch
 import torch_geometric
 
-from topobenchmarkx.nn.losses.base import AbstractLoss
+from topobenchmarkx.loss.base import AbstractLoss
 
 
-class DefaultLoss(AbstractLoss):
+class TBXLoss(AbstractLoss):
     r"""Defines the default model loss for the given task.
     
     Args:

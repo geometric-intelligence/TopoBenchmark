@@ -1,5 +1,5 @@
 import numpy as np
-from scipy.stats import friedmanchisquare, wilcoxon, rankdata, chi2
+from scipy.stats import chi2, friedmanchisquare, rankdata, wilcoxon
 
 
 def signed_ranks_test(results_1, results_2):

@@ -1,5 +1,5 @@
 import numpy as np
-from scipy.stats import chi2, friedmanchisquare, rankdata, wilcoxon
+from scipy.stats import friedmanchisquare, wilcoxon, rankdata, chi2
 
 
 def signed_ranks_test(results_1, results_2):
@@ -16,6 +16,7 @@ def signed_ranks_test(results_1, results_2):
         float: The p-value of the test.
     """
     xs = results_1 - results_2
+    xs = xs[~np.isnan(xs)]
     return wilcoxon(xs[xs != 0])[1]
 
 
@@ -86,7 +87,7 @@ def skillings_mack_test(results, n_simulations=10000):
         SM = np.dot(A.T, np.dot(inv_covariance_matrix, A))
         return SM
     
-    def get_simulated_SM_values(res, n_nans, n_simulations):
+    def get_simulated_SM_values(res, mask_nans, n_simulations):
         r"""Calculates the Skillings-Mack statistic for the null hypothesis. The null hypothesis
         is that the models are equivalent and the differences between them are due to random noise.
         For this reason we use the normal distribution to obtain the simulated results.
@@ -100,15 +101,13 @@ def skillings_mack_test(results, n_simulations=10000):
         SMs = np.zeros(n_simulations)
         for i in range(n_simulations):
             res = np.random.normal(loc=0, scale=1, size=res_shape)
-            for j in range(res_shape[0]):
-                res[j, np.random.choice(res_shape[0], n_nans[j])] = np.nan
+            res[mask_nans] = np.nan
             SMs[i] = get_SM_value(res)
         return SMs
     
     SM = get_SM_value(results)
-    p1 = chi2.sf(SM, results.shape[0]-1)
-    n_nans = np.sum(np.isnan(results), axis=1)
-    null_SM = get_simulated_SM_values(results, n_nans, n_simulations)
+    mask_nans = np.isnan(results)
+    null_SM = get_simulated_SM_values(results, mask_nans, n_simulations)
     p = np.sum(null_SM > SM) / n_simulations
 
     return p
@@ -137,7 +136,7 @@ def compare_models(results, p_limit=0.05, verbose=False):
     average_ranks = np.mean(ranks, axis=1)
     
     if np.any(np.isnan(results)):
-        p_value = skillings_mack_test(results)
+        p_value = skillings_mack_test(results, n_simulations=10000)
         test_name = "Skillings-Mack"
     else:
         p_value = friedman_test(results)
@@ -152,14 +151,13 @@ def compare_models(results, p_limit=0.05, verbose=False):
     groups = []
     for i in range(M):
         idx = 1
-        model_idx = np.where(np.argsort(average_ranks) == i)[0][0]
+        rankings = rankdata(average_ranks)-1
+        model_idx = np.where(rankings == i)[0][0]
         group = [model_idx]
         while i + idx < M:
-            next_model_idx = np.where(np.argsort(average_ranks) == i + idx)[0][
-                0
-            ]
+            next_model_idx = np.where(rankings == i + idx)[0][0]
             p = signed_ranks_test(
-                results[model_idx, :], results[model_idx + idx, :]
+                results[model_idx, :], results[next_model_idx, :]
             )
             if verbose:
                 print(

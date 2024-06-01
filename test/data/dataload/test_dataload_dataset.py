@@ -1,6 +1,8 @@
 import torch
-from torch_geometric.data import Data 
+from torch_geometric.data import Data
+
 from topobenchmarkx.dataloader import DataloadDataset
+
 
 class TestDataloadDataset:
 
@@ -23,5 +25,5 @@ class TestDataloadDataset:
 
             assert keys == expected_keys
         
-        for d, expected in zip(data, expected_data):
+        for d, expected in zip(data, expected_data, strict=False):
             assert torch.equal(d, expected)

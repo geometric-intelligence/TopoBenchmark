@@ -1,5 +1,5 @@
-from topobenchmarkx.nn.encoders.encoder import AbstractFeatureEncoder
-from topobenchmarkx.nn.encoders.all_cell_encoder import AllCellFeatureEncoder
+from .all_cell_encoder import AllCellFeatureEncoder
+from .base import AbstractFeatureEncoder
 
 # ... import other encoders classes here
 # For example:

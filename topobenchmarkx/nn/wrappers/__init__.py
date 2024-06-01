@@ -1,3 +1,4 @@
+from topobenchmarkx.nn.wrappers.base import AbstractWrapper
 from topobenchmarkx.nn.wrappers.cell import (
     CANWrapper,
     CCCNWrapper,
@@ -12,7 +13,6 @@ from topobenchmarkx.nn.wrappers.simplicial import (
     SCCNWrapper,
     SCNWrapper,
 )
-from topobenchmarkx.nn.wrappers.wrapper import DefaultWrapper
 
 # ... import other readout classes here
 # For example:
@@ -22,7 +22,7 @@ from topobenchmarkx.nn.wrappers.wrapper import DefaultWrapper
 
 # Export all wrappers
 __all__ = [
-    "DefaultWrapper",
+    "AbstractWrapper",
     "GNNWrapper",
     "HypergraphWrapper",
     "SANWrapper",

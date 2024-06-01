@@ -1,6 +1,6 @@
-from topobenchmarkx.nn.readouts.readout import AbstractZeroCellReadOut
-from topobenchmarkx.nn.readouts.propagate_signal_down import PropagateSignalDown
-from topobenchmarkx.nn.readouts.identical import NoReadOut
+from .base import AbstractZeroCellReadOut
+from .identical import NoReadOut
+from .propagate_signal_down import PropagateSignalDown
 
 # ... import other readout classes here
 # For example:

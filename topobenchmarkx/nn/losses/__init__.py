@@ -1,5 +1,5 @@
-from topobenchmarkx.nn.losses.base import AbstractLoss
-from topobenchmarkx.nn.losses.default_loss import DefaultLoss
+from .base import AbstractLoss
+from .default_loss import DefaultLoss
 
 # ... import other readout classes here
 # For example:

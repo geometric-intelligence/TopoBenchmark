@@ -13,8 +13,8 @@ class AbstractLoss(ABC):
         return self.forward(model_out, batch)
     
     @abstractmethod
-    def forward(self, model_out: dict, batch: torch_geometric.data.Data): 
-        pass
+    def forward(self, model_out: dict, batch: torch_geometric.data.Data):
+        r"""Forward pass."""
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}()"

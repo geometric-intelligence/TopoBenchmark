@@ -1,7 +1,8 @@
 import torch
 import torch_geometric
 from torch_geometric.nn.norm import GraphNorm
-from topobenchmarkx.nn.encoders.encoder import AbstractFeatureEncoder
+
+from topobenchmarkx.nn.encoders.base import AbstractFeatureEncoder
 
 
 class AllCellFeatureEncoder(AbstractFeatureEncoder):

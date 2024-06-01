@@ -37,7 +37,8 @@ class TestCollateFunction:
             [2, 2], [2.2, 2], [2.1, 1.5],
             [-3, 2], [-2.7, 2], [-2.5, 1.5],
             [-3, -2], [-2.7, -2], [-2.5, -1.5],
-             ])
+        ])
+        
         self.data = torch_geometric.data.Data(
             x=x,
             num_nodes=len(x),

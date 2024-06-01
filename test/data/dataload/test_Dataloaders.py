@@ -5,7 +5,8 @@ from omegaconf import OmegaConf
 
 import torch
 
-from topobenchmarkx.data.dataload.dataloader import to_data_list, DefaultDataModule
+from topobenchmarkx.data.dataload import DefaultDataModule
+from topobenchmarkx.data.utils.dataloader_utils import to_data_list
 
 from topobenchmarkx.utils.config_resolvers import (
     get_default_transform,
@@ -38,8 +39,8 @@ class TestCollateFunction:
             "parameter_multiplication", lambda x, y: int(int(x) * int(y))
         )
 
-        initialize(version_base="1.3", config_path="../../configs", job_name="job")
-        cfg = compose(config_name="train.yaml") #, overrides=["dataset=PROTEINS_TU"])
+        initialize(version_base="1.3", config_path="../../../configs", job_name="job")
+        cfg = compose(config_name="train.yaml") #, overrides=["dataset=graph/MUTAG"])
         
         graph_loader = hydra.utils.instantiate(cfg.dataset, _recursive_=False)
 

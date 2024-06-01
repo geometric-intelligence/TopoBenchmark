@@ -11,6 +11,10 @@ class TestDataloadDataset:
         ]
         self.dataset = DataloadDataset(self.data_list)
 
+    def teardown(self):
+        del self.data_list
+        del self.dataset
+
     def test_len(self):
         assert len(self.dataset) == 2
 
@@ -25,3 +29,4 @@ class TestDataloadDataset:
         
         for d, expected in zip(data, expected_data):
             assert torch.equal(d, expected)
+

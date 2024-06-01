@@ -6,7 +6,7 @@ from torch.utils.data import DataLoader
 from topobenchmarkx.dataloader.utils import collate_fn
 
 
-class DefaultDataModule(LightningDataModule):
+class TBXDataloader(LightningDataModule):
     r"""This class takes care of returning the dataloaders for the training, validation, and test datasets. It also handles the collate function. The class is designed to work with the `torch` dataloaders.
 
     Args:

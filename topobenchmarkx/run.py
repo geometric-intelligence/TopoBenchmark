@@ -11,7 +11,7 @@ from lightning.pytorch.loggers import Logger
 from omegaconf import DictConfig, OmegaConf
 
 from topobenchmarkx.data.preprocess import PreProcessor
-from topobenchmarkx.dataloader.dataloader import DefaultDataModule
+from topobenchmarkx.dataloader.dataloader import TBXDataloader
 from topobenchmarkx.utils import (
     RankedLogger,
     extras,
@@ -98,7 +98,7 @@ def run(cfg: DictConfig) -> tuple[dict[str, Any], dict[str, Any]]:
     # Prepare datamodule
     log.info("Instantiating datamodule...")
     if cfg.dataset.parameters.task_level in ["node", "graph"]:
-        datamodule = DefaultDataModule(
+        datamodule = TBXDataloader(
             dataset_train=dataset_train,
             dataset_val=dataset_val,
             dataset_test=dataset_test,

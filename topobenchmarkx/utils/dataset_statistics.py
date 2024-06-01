@@ -1,28 +1,20 @@
+import os
 import random
 from typing import Any
 
 import hydra
 import lightning as L
 import numpy as np
+import pandas as pd
 import rootutils
-
-rootutils.setup_root(__file__, indicator=".project-root", pythonpath=True)
 import torch
-from lightning import Callback, LightningModule, Trainer
-from lightning.pytorch.loggers import Logger
 from omegaconf import DictConfig, OmegaConf
 
-from topobenchmarkx.dataloader.dataloader import DefaultDataModule
+from topobenchmarkx.dataloader import TBXDataloader
 from topobenchmarkx.utils import (
     RankedLogger,
     extras,
-    get_metric_value,
-    instantiate_callbacks,
-    instantiate_loggers,
-    log_hyperparameters,
-    task_wrapper,
 )
-
 from topobenchmarkx.utils.config_resolvers import (
     get_default_transform,
     get_monitor_metric,
@@ -30,8 +22,9 @@ from topobenchmarkx.utils.config_resolvers import (
     infer_in_channels,
     infere_num_cell_dimensions,
 )
-import pandas as pd
-import os
+
+rootutils.setup_root(__file__, indicator=".project-root", pythonpath=True)
+
 # ------------------------------------------------------------------------------------ #
 # the setup_root above is equivalent to:
 # - adding project root dir to PYTHONPATH
@@ -95,17 +88,16 @@ def train(cfg: DictConfig) -> tuple[dict[str, Any], dict[str, Any]]:
     
     one_graph_flag = True
     if cfg.dataset.parameters.batch_size != 1:
-        cfg.dataset.parameters.batch_size != 1
         one_graph_flag = False
 
 
     log.info(f"Instantiating datamodule <{cfg.dataset._target_}>")
 
     if cfg.dataset.parameters.task_level == "node":
-        datamodule = DefaultDataModule(dataset_train=dataset)
+        datamodule = TBXDataloader(dataset_train=dataset)
 
     elif cfg.dataset.parameters.task_level == "graph":
-        datamodule = DefaultDataModule(
+        datamodule = TBXDataloader(
             dataset_train=dataset[0],
             dataset_val=dataset[1],
             dataset_test=dataset[2],
@@ -115,7 +107,7 @@ def train(cfg: DictConfig) -> tuple[dict[str, Any], dict[str, Any]]:
     else:
         raise ValueError("Invalid task_level")
 
-    if one_graph_flag == True:
+    if one_graph_flag:
         dataloaders = [datamodule.train_dataloader()]
     else:
         dataloaders = [datamodule.train_dataloader(), datamodule.val_dataloader(), datamodule.test_dataloader()]
@@ -162,17 +154,17 @@ def train(cfg: DictConfig) -> tuple[dict[str, Any], dict[str, Any]]:
                 for i in range(len(cell_sizes)):
                     if cell_sizes[i].item() > 10:
                         cell_dict["greater_than_10"] += cell_counts[i].item()
-                    else: 
+                    else:
                         cell_dict[str(cell_sizes[i].item())] += cell_counts[i].item()
     
     # Get current working dir
     filename = f"{cfg.paths['root_dir']}/tables/dataset_statistics.csv"
     
-    dict_collector['dataset'] = cfg.dataset.parameters.data_name
-    dict_collector['domain'] = cfg.model.model_domain
+    dict_collector["dataset"] = cfg.dataset.parameters.data_name
+    dict_collector["domain"] = cfg.model.model_domain
 
-    df = pd.DataFrame.from_dict(dict_collector, orient='index')
-    if not os.path.exists(filename) == True:
+    df = pd.DataFrame.from_dict(dict_collector, orient="index")
+    if not os.path.exists(filename):
         # Save to csv file such as methods .... is a header
         df.T.to_csv(filename, header=True)
     else:
@@ -183,28 +175,14 @@ def train(cfg: DictConfig) -> tuple[dict[str, Any], dict[str, Any]]:
         # write to csv file
         df_saved.to_csv(filename)
     
-    if cfg.model.model_domain == "cell":   
+    if cfg.model.model_domain == "cell":
         filename = f"{cfg.paths['root_dir']}/tables/cell_statistics.csv"
-        # Create a dict from two arrays
-        # cell_dict = dict(zip(cell_sizes.long().tolist(), cell_counts.long().tolist()))
-        # keys = list(cell_dict.keys())
-        # for key in keys:
-        #     cell_dict[str(key)] = cell_dict.pop(key)
 
-        # # Check if there are cells size of which greater than 10
-        # n_large_cells = 0
-        # subset_keys = [key for key in sorted(cell_dict.keys()) if int(key) > 10]
-        
-        # for key in subset_keys:
-        #     n_large_cells += cell_dict.pop(key)
-        
-        # cell_dict["greater_than_10"] = n_large_cells
+        cell_dict["dataset"] = cfg.dataset.parameters.data_name
+        cell_dict["domain"] = cfg.model.model_domain
 
-        cell_dict['dataset'] = cfg.dataset.parameters.data_name
-        cell_dict['domain'] = cfg.model.model_domain
-
-        df = pd.DataFrame.from_dict(cell_dict, orient='index')
-        if not os.path.exists(filename) == True:
+        df = pd.DataFrame.from_dict(cell_dict, orient="index")
+        if not os.path.exists(filename):
             # Save to csv file such as methods .... is a header
             df.T.to_csv(filename, header=True)
         else:
@@ -214,9 +192,6 @@ def train(cfg: DictConfig) -> tuple[dict[str, Any], dict[str, Any]]:
             df_saved = df_saved._append(df.T, ignore_index=True)
             # write to csv file
             df_saved.to_csv(filename)
- 
-        
-    return 
 
 
 
@@ -232,13 +207,8 @@ def main(cfg: DictConfig) -> float | None:
     # apply extra utilities
     # (e.g. ask for tags if none are provided in cfg, print cfg tree, etc.)
     extras(cfg)
-
     
     train(cfg)
-
-    
-    # return optimized metric
-    return 
 
 
 if __name__ == "__main__":

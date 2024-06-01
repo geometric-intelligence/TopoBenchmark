@@ -1,5 +1,5 @@
-from topobenchmarkx.nn.losses.loss import AbstractltLoss
-from topobenchmarkx.nn.losses.default_loss import DefaultLoss
+from .base import AbstractLoss
+from .default_loss import DefaultLoss
 
 # ... import other readout classes here
 # For example:
@@ -7,7 +7,7 @@ from topobenchmarkx.nn.losses.default_loss import DefaultLoss
 # from topobenchmarkx.nn.losses.other_loss_2 import OtherLoss2
 
 __all__ = [
-    "AbstractltLoss",
+    "AbstractLoss",
     "DefaultLoss"
     # "OtherLoss1",
     # "OtherLoss2",

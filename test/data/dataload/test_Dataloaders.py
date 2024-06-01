@@ -24,9 +24,9 @@ class TestCollateFunction:
 
     def setup_method(self):
         """Setup the test.
-        
+
         For this test we load the MUTAG dataset.
-        
+
         Parameters
         ----------
         None
@@ -41,7 +41,7 @@ class TestCollateFunction:
 
         initialize(version_base="1.3", config_path="../../../configs", job_name="job")
         cfg = compose(config_name="train.yaml") #, overrides=["dataset=graph/MUTAG"])
-        
+
         graph_loader = hydra.utils.instantiate(cfg.dataset, _recursive_=False)
 
         datasets = graph_loader.load()
@@ -54,12 +54,12 @@ class TestCollateFunction:
         )
         self.val_dataloader = datamodule.val_dataloader()
         self.val_dataset = datasets[1]
-        
+
     def test_lift_features(self):
         """Test the collate funciton.
-        
+
         To test the collate function we use the DefaultDataModule class to create a dataloader that uses the collate function. We then first check that the batched data has the expected shape. We then convert the batched data back to a list and check that the data in the list is the same as the original data.
-        
+
         Parameters
         ----------
         None
@@ -90,18 +90,18 @@ class TestCollateFunction:
                     for j in range(len(elems)):
                         i_elems += elems[j][key].shape[i]
                     assert batch[key].shape[i] == i_elems
-                    
+
         def check_separation(matrix, n_elems_0_row, n_elems_0_col):
             """Check that the matrix is separated into two parts diagonally concatenated."""
             assert torch.all(matrix[:n_elems_0_row, n_elems_0_col:] == 0)
             assert torch.all(matrix[n_elems_0_row:, :n_elems_0_col] == 0)
-            
+
         def check_values(matrix, m1, m2):
             """Check that the values in the matrix are the same as the values in the original data."""
             assert torch.allclose(matrix[:m1.shape[0], :m1.shape[1]], m1)
             assert torch.allclose(matrix[m1.shape[0]:, m1.shape[1]:], m2)
-            
-        
+
+
         batch = next(iter(self.val_dataloader))
         elems = []
         for i in range(self.batch_size):
@@ -122,8 +122,8 @@ class TestCollateFunction:
                         n0_row = torch.sum(batch[f'batch_{i-1}']==0)
                     n0_col = torch.sum(batch[f'batch_{i}']==0)
                     check_separation(batch[key].to_dense(), n0_row, n0_col)
-                    check_values(batch[key].to_dense(), 
-                                 elems[0][key].to_dense(), 
+                    check_values(batch[key].to_dense(),
+                                 elems[0][key].to_dense(),
                                  elems[1][key].to_dense())
 
         # Check that going back to a list of data gives the same data

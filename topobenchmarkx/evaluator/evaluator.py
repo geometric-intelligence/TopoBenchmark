@@ -2,7 +2,7 @@
 
 from torchmetrics import MetricCollection
 
-from topobenchmarkx.evaluators.metrics import METRICS
+from topobenchmarkx.evaluator.metrics import METRICS
 
 
 class TorchEvaluator:

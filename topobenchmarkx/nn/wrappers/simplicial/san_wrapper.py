@@ -1,7 +1,7 @@
 import torch
-from topobenchmarkx.nn.wrappers.wrapper import DefaultWrapper
+from topobenchmarkx.nn.wrappers.base import AbstractWrapper
 
-class SANWrapper(DefaultWrapper):
+class SANWrapper(AbstractWrapper):
     r"""Wrapper for the SAN model. This wrapper defines the forward pass of the model. The SAN model returns the embeddings of the cells of rank 1. The embeddings of the cells of rank 0 are computed as the sum of the embeddings of the cells of rank 1 connected to them."""
 
     def forward(self, batch):

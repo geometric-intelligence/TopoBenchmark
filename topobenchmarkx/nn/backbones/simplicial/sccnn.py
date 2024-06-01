@@ -4,7 +4,7 @@ import torch
 from torch.nn.parameter import Parameter
 
 
-class SCCNNCusctom(torch.nn.Module):
+class SCCNNCustom(torch.nn.Module):
     """SCCNN implementation for complex classification.
 
     Note: In this task, we can consider the output on any order of simplices for the

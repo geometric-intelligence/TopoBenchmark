@@ -10,8 +10,8 @@ from lightning import Callback, LightningModule, Trainer
 from lightning.pytorch.loggers import Logger
 from omegaconf import DictConfig, OmegaConf
 
-from topobenchmarkx.data.dataload.dataloader import DefaultDataModule
 from topobenchmarkx.data.preprocess import PreProcessor
+from topobenchmarkx.dataloader.dataloader import DefaultDataModule
 from topobenchmarkx.utils import (
     RankedLogger,
     extras,
@@ -27,7 +27,7 @@ from topobenchmarkx.utils.config_resolvers import (
     get_monitor_mode,
     get_required_lifting,
     infer_in_channels,
-    infere_list_length,
+    infere_num_cell_dimensions,
 )
 
 rootutils.setup_root(__file__, indicator=".project-root", pythonpath=True)
@@ -54,7 +54,7 @@ OmegaConf.register_new_resolver("get_required_lifting", get_required_lifting)
 OmegaConf.register_new_resolver("get_monitor_metric", get_monitor_metric)
 OmegaConf.register_new_resolver("get_monitor_mode", get_monitor_mode)
 OmegaConf.register_new_resolver("infer_in_channels", infer_in_channels)
-OmegaConf.register_new_resolver("infere_list_length", infere_list_length)
+OmegaConf.register_new_resolver("infere_num_cell_dimensions", infere_num_cell_dimensions)
 OmegaConf.register_new_resolver(
     "parameter_multiplication", lambda x, y: int(int(x) * int(y))
 )
@@ -64,7 +64,7 @@ log = RankedLogger(__name__, rank_zero_only=True)
 
 
 @task_wrapper
-def train(cfg: DictConfig) -> tuple[dict[str, Any], dict[str, Any]]:
+def run(cfg: DictConfig) -> tuple[dict[str, Any], dict[str, Any]]:
     """Trains the model. Can additionally evaluate on a testset, using best
     weights obtained during training.
 
@@ -90,12 +90,12 @@ def train(cfg: DictConfig) -> tuple[dict[str, Any], dict[str, Any]]:
     log.info(f"Instantiating loader <{cfg.dataset.loader._target_}>")
     dataset_loader = hydra.utils.instantiate(cfg.dataset.loader)
     dataset, dataset_dir = dataset_loader.load()
-    # Preprocess dataset
+    # Preprocess dataset and load the splits
     log.info("Instantiating preprocessor...")
     transform_config = cfg.get("transforms", None)
-    preprocessed_dataset = PreProcessor(dataset, dataset_dir, transform_config)
-    # Load splits
-    dataset_train, dataset_val, dataset_test = hydra.utils.instantiate(cfg.dataset.split_loader, dataset=preprocessed_dataset)
+    preprocessor = PreProcessor(dataset, dataset_dir, transform_config)
+    dataset_train, dataset_val, dataset_test = preprocessor.load_dataset_splits(cfg.dataset.split_params)
+    # Prepare datamodule
     log.info("Instantiating datamodule...")
     if cfg.dataset.parameters.task_level in ["node", "graph"]:
         datamodule = DefaultDataModule(
@@ -154,14 +154,24 @@ def train(cfg: DictConfig) -> tuple[dict[str, Any], dict[str, Any]]:
 
     if cfg.get("test"):
         log.info("Starting testing!")
-        ckpt_path = trainer.checkpoint_callback.best_model_path
-        if ckpt_path == "":
-            log.warning(
-                "Best ckpt not found! Using current weights for testing..."
-            )
-            ckpt_path = None
-        trainer.test(model=model, datamodule=datamodule, ckpt_path=ckpt_path)
-        log.info(f"Best ckpt path: {ckpt_path}")
+        test_best_model_path = True
+        if cfg.get("ckpt_path"):
+            ckpt_path = cfg.ckpt_path
+            log.info(f"Attempting to load weights from the provided ckpt_path: {ckpt_path}")
+            try:
+                trainer.test(model=model, datamodule=datamodule, ckpt_path=ckpt_path)
+                test_best_model_path = False # do not test "best model" if a valid ckpt_path is provided
+            except FileNotFoundError:
+                log.warning(f"No checkpoint file found at the provided ckpt_path: {ckpt_path}.")
+                log.info("Trying with best model instead...")
+        if test_best_model_path:
+            ckpt_path = trainer.checkpoint_callback.best_model_path
+            if ckpt_path == "":
+                log.warning(
+                    "Best ckpt not found! Using current weights for testing..."
+                )
+                ckpt_path = None
+            trainer.test(model=model, datamodule=datamodule, ckpt_path=ckpt_path)
 
     test_metrics = trainer.callback_metrics
 
@@ -206,7 +216,7 @@ def main(cfg: DictConfig) -> float | None:
     extras(cfg)
 
     # train the model
-    metric_dict, _ = train(cfg)
+    metric_dict, _ = run(cfg)
 
     # safely retrieve metric value for hydra-based hyperparameter optimization
     metric_value = get_metric_value(

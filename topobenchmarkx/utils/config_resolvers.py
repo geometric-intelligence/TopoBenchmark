@@ -197,7 +197,7 @@ def infer_in_channels(dataset, transforms):
             return [dataset.parameters.num_features[0]]
 
 
-def infere_list_length(list):
+def infere_num_cell_dimensions(selected_dimensions, in_channels):
     r"""Infer the length of a list.
     
     Args:
@@ -205,4 +205,7 @@ def infere_list_length(list):
     Returns:
         int: Length of the input list.
     """
-    return len(list)
+    if selected_dimensions is not None:
+        return len(selected_dimensions)
+    else:
+        return len(in_channels)

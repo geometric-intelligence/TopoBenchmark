@@ -1,11 +1,18 @@
 import json
 import os
+from typing import Any
 
 import hydra
 import torch
 import torch_geometric
 
-from topobenchmarkx.data.utils.utils import ensure_serializable, make_hash
+from topobenchmarkx.dataloader import DataloadDataset
+from topobenchmarkx.data.utils import (
+    ensure_serializable,
+    load_inductive_splits,
+    load_transductive_splits,
+    make_hash,
+)
 from topobenchmarkx.transforms.data_transform import DataTransform
 
 
@@ -37,7 +44,7 @@ class PreProcessor(torch_geometric.data.InMemoryDataset):
         else:
             self.transforms_applied = False
             super().__init__(data_dir, None, None, **kwargs)
-            self.load(data_dir+"/processed/data.pt")
+            self.load(data_dir + "/processed/data.pt")
         self.data_list = [self.get(idx) for idx in range(len(self))]
         # Some datasets have fixed splits, and those are stored as split_idx during loading
         # We need to store this information to be able to reproduce the splits afterwards
@@ -136,3 +143,15 @@ class PreProcessor(torch_geometric.data.InMemoryDataset):
 
         assert isinstance(self._data, torch_geometric.data.Data)
         self.save(self.data_list, self.processed_paths[0])
+        
+    def load_dataset_splits(self, split_params) -> tuple[DataloadDataset, DataloadDataset | None, DataloadDataset | None]:
+        if not split_params.get("learning_setting", False):
+            raise ValueError("No learning setting specified in split_params")
+        
+        if split_params.learning_setting == "inductive":
+            return load_inductive_splits(self, split_params)
+        elif split_params.learning_setting == "transductive":
+            return load_transductive_splits(self, split_params)
+        else:
+            raise ValueError(f"Invalid '{split_params.learning_setting}' learning setting.\
+                Please define either 'inductive' or 'transductive'.")

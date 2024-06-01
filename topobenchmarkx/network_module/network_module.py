@@ -2,10 +2,11 @@ from typing import Any
 
 import torch
 from lightning import LightningModule
-from torchmetrics import MeanMetric
 from torch_geometric.data import Data
+from torchmetrics import MeanMetric
 
-class TopologicalNetworkModule(LightningModule):
+
+class NetworkModule(LightningModule):
     r"""A `LightningModule` to define a network.
     
     Args:
@@ -21,7 +22,6 @@ class TopologicalNetworkModule(LightningModule):
         backbone: torch.nn.Module,
         backbone_wrapper: torch.nn.Module,
         readout: torch.nn.Module,
-        head_model: torch.nn.Module,
         loss: torch.nn.Module,
         feature_encoder: torch.nn.Module | None = None,
         evaluator: Any = None,
@@ -38,7 +38,6 @@ class TopologicalNetworkModule(LightningModule):
         self.feature_encoder = feature_encoder
         self.backbone = backbone_wrapper(backbone)
         self.readout = readout
-        self.head_model = head_model
 
         # Evaluator 
         self.evaluator = evaluator
@@ -50,7 +49,7 @@ class TopologicalNetworkModule(LightningModule):
 
         # Loss function
         self.loss = loss        
-        self.task_level = self.hparams["head_model"].task_level
+        self.task_level = self.hparams["readout"].task_level
 
         # Tracking best so far validation accuracy
         self.val_acc_best = MeanMetric()
@@ -59,7 +58,7 @@ class TopologicalNetworkModule(LightningModule):
         self.metric_collector_test = []
 
     def __repr__(self) -> str:
-        return f"{self.__class__.__name__}(backbone={self.backbone}, readout={self.readout}, head_model={self.head_model}, loss={self.loss}, feature_encoder={self.feature_encoder})"
+        return f"{self.__class__.__name__}(backbone={self.backbone}, readout={self.readout}, loss={self.loss}, feature_encoder={self.feature_encoder})"
         
     def forward(self, batch: Data) -> dict:
         r"""Perform a forward pass through the model `self.backbone`.
@@ -90,9 +89,6 @@ class TopologicalNetworkModule(LightningModule):
         
         # Readout
         model_out = self.readout(model_out=model_out, batch=batch)
-        
-        # Head model
-        model_out = self.head_model(model_out=model_out, batch=batch)
 
         # Loss
         model_out = self.process_outputs(model_out=model_out, batch=batch)
@@ -309,4 +305,4 @@ class TopologicalNetworkModule(LightningModule):
 
 
 if __name__ == "__main__":
-    _ = TopologicalNetworkModule(None, None, None, None)
+    _ = NetworkModule(None, None, None, None)

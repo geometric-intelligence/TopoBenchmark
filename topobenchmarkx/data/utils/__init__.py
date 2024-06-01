@@ -3,6 +3,8 @@
 from .utils import (
     generate_zero_sparse_connectivity,
     get_complex_connectivity,
+    make_hash,
+    ensure_serializable,
     load_cell_complex_dataset,
     load_manual_graph,
     load_simplicial_dataset,
@@ -18,14 +20,14 @@ utils_functions = [
 
 from .split_utils import (
     load_coauthorship_hypergraph_splits,
-    load_multiple_graphs_splits,
-    load_single_graph_splits,
+    load_inductive_splits,
+    load_transductive_splits,
 )
 
 split_helper_functions = [
     "load_coauthorship_hypergraph_splits",
-    "load_multiple_graphs_splits",
-    "load_single_graph_splits",
+    "load_inductive_splits",
+    "load_transductive_splits",
 ]
 
 from .io_utils import (

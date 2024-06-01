@@ -1,6 +1,6 @@
-from topobenchmarkx.nn.wrappers.wrapper import DefaultWrapper
+from topobenchmarkx.nn.wrappers.base import AbstractWrapper
 
-class CWNWrapper(DefaultWrapper):
+class CWNWrapper(AbstractWrapper):
     r"""Wrapper for the CWN model. This wrapper defines the forward pass of the model. The CWN model returns the embeddings of the cells of rank 0, 1, and 2."""
 
     def forward(self, batch):

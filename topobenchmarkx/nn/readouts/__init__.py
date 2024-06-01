@@ -1,6 +1,6 @@
-from topobenchmarkx.nn.readouts.readout import AbstractReadOut
-from topobenchmarkx.nn.readouts.propagate_signal_down import PropagateSignalDown
-from topobenchmarkx.nn.readouts.identical import NoReadOut
+from .base import AbstractZeroCellReadOut
+from .identical import NoReadOut
+from .propagate_signal_down import PropagateSignalDown
 
 # ... import other readout classes here
 # For example:
@@ -9,7 +9,7 @@ from topobenchmarkx.nn.readouts.identical import NoReadOut
 
 # Export all readouts and the dictionary
 __all__ = [
-    "AbstractReadOut"
+    "AbstractZeroCellReadOut",
     "PropagateSignalDown",
     "NoReadOut"
     # "OtherReadout1",

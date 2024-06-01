@@ -4,7 +4,7 @@ import numpy as np
 import torch
 from sklearn.model_selection import StratifiedKFold
 
-from topobenchmarkx.data.dataload import DataloadDataset
+from topobenchmarkx.dataloader import DataloadDataset
 
 
 # Generate splits in different fasions
@@ -197,11 +197,11 @@ def assing_train_val_test_mask_to_graphs(dataset, split_idx):
     return DataloadDataset(data_train_lst), DataloadDataset(data_val_lst), DataloadDataset(data_test_lst)
 
 
-def load_single_graph_splits(dataset, parameters):
+def load_transductive_splits(dataset, parameters):
     r"""Loads the graph dataset with the specified split.
 
     Args:
-        dataset (torch_geometric.data.Dataset): Graph dataset.
+        dataset (torch_geometric.data.Dataset): Considered taset.
         parameters (DictConfig): Configuration parameters.
     Returns:
         list: List containing the train, validation, and test splits.
@@ -209,7 +209,7 @@ def load_single_graph_splits(dataset, parameters):
     # Extract labels from dataset object
     assert (
         len(dataset) == 1
-    ), "Dataset should have only one graph"
+    ), "Dataset should have only one graph in a transductive setting."
 
     data = dataset.data_list[0]
     labels = data.y.numpy()
@@ -245,7 +245,7 @@ def load_single_graph_splits(dataset, parameters):
     return DataloadDataset([data]), None, None
 
 
-def load_multiple_graphs_splits(dataset, parameters):
+def load_inductive_splits(dataset, parameters):
     r"""Loads multiple-graph datasets with the specified split.
 
     Args:
@@ -257,7 +257,7 @@ def load_multiple_graphs_splits(dataset, parameters):
     # Extract labels from dataset object
     assert (
         len(dataset) > 1
-    ), "Datasets should have more than one graph"
+    ), "Datasets should have more than one graph in an inductive setting."
     labels = np.array([data.y.squeeze(0).numpy() for data in dataset.data_list])
 
     if parameters.split_type == "random":

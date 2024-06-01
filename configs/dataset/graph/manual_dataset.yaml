@@ -17,15 +17,14 @@ parameters:
   task_level: node
 
 #splits
-split_loader:
-  _target_: topobenchmarkx.data.utils.load_single_graph_splits
-  parameters:
-    data_split_dir: ${paths.data_dir}/data_splits/${dataset.loader.parameters.data_name}
-    data_seed: 0
-    split_type: random #'k-fold' # either "k-fold" or "random" strategies
-    k: 2 # for "k-fold" Cross-Validation
-    train_prop: 0.5 # for "random" strategy splitting
-    standardize: True
+split_params:
+  learning_setting: transductive
+  data_split_dir: ${paths.data_dir}/data_splits/${dataset.loader.parameters.data_name}
+  data_seed: 0
+  split_type: random #'k-fold' # either "k-fold" or "random" strategies
+  k: 2 # for "k-fold" Cross-Validation
+  train_prop: 0.5 # for "random" strategy splitting
+  standardize: True
 
 # Dataloader parameters
 dataloader_params:

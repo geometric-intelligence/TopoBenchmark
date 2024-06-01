@@ -1,6 +1,6 @@
-from topobenchmarkx.nn.wrappers.wrapper import DefaultWrapper
+from topobenchmarkx.nn.wrappers.base import AbstractWrapper
 
-class HypergraphWrapper(DefaultWrapper):
+class HypergraphWrapper(AbstractWrapper):
     r"""Wrapper for the hypergraph models. This wrapper defines the forward pass of the model. The hypergraph model return the embeddings of the cells of rank 0, and 1 (the hyperedges)."""
 
     def forward(self, batch):

@@ -1,8 +1,10 @@
 from abc import ABC, abstractmethod
+
 import torch
 import torch.nn as nn
 
-class DefaultWrapper(ABC, torch.nn.Module):
+
+class AbstractWrapper(ABC, torch.nn.Module):
     r"""Abstract class that provides an interface to handle the network
     output.
     
@@ -54,4 +56,3 @@ class DefaultWrapper(ABC, torch.nn.Module):
         Returns:
             dict: Dictionary containing the updated model output.
         """
-        pass

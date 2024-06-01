@@ -1,21 +1,18 @@
 """Test the collate function."""
 import hydra
+import rootutils
+import torch
 from hydra import compose, initialize
 from omegaconf import OmegaConf
 
-import torch
-
-from topobenchmarkx.data.dataload import DefaultDataModule
-from topobenchmarkx.data.utils.dataloader_utils import to_data_list
-
+from topobenchmarkx.dataloader import TBXDataloader
+from topobenchmarkx.dataloader.utils import to_data_list
 from topobenchmarkx.utils.config_resolvers import (
     get_default_transform,
     get_monitor_metric,
     get_monitor_mode,
     infer_in_channels,
 )
-
-import rootutils
 
 rootutils.setup_root("./", indicator=".project-root", pythonpath=True)
 
@@ -46,7 +43,7 @@ class TestCollateFunction:
 
         datasets = graph_loader.load()
         self.batch_size = 2
-        datamodule = DefaultDataModule(
+        datamodule = TBXDataloader(
             dataset_train=datasets[0],
             dataset_val=datasets[1],
             dataset_test=datasets[2],
@@ -58,7 +55,7 @@ class TestCollateFunction:
     def test_lift_features(self):
         """Test the collate funciton.
 
-        To test the collate function we use the DefaultDataModule class to create a dataloader that uses the collate function. We then first check that the batched data has the expected shape. We then convert the batched data back to a list and check that the data in the list is the same as the original data.
+        To test the collate function we use the TBXDataloader class to create a dataloader that uses the collate function. We then first check that the batched data has the expected shape. We then convert the batched data back to a list and check that the data in the list is the same as the original data.
 
         Parameters
         ----------
@@ -66,25 +63,25 @@ class TestCollateFunction:
         """
         def check_shape(batch, elems, key):
             """Check that the batched data has the expected shape."""
-            if 'x_' in key or 'x' == key or 'edge_attr' in key:
+            if "x_" in key or key == "x" or "edge_attr" in key:
                 rows = 0
                 for i in range(len(elems)):
                     rows += elems[i][key].shape[0]
                 assert batch[key].shape[0] == rows
                 assert batch[key].shape[1] == elems[0][key].shape[1]
-            elif 'edge_index' in key:
+            elif "edge_index" in key:
                 cols = 0
                 for i in range(len(elems)):
                     cols += elems[i][key].shape[1]
                 assert batch[key].shape[0] == 2
                 assert batch[key].shape[1] == cols
-            elif 'batch_' in key:
+            elif "batch_" in key:
                 rows = 0
-                n = int(key.split('_')[1])
+                n = int(key.split("_")[1])
                 for i in range(len(elems)):
-                    rows += elems[i][f'x_{n}'].shape[0]
+                    rows += elems[i][f"x_{n}"].shape[0]
                 assert batch[key].shape[0] == rows
-            elif key in elems[0].keys():
+            elif key in elems[0]:
                 for i in range(len(batch[key].shape)):
                     i_elems = 0
                     for j in range(len(elems)):
@@ -103,24 +100,22 @@ class TestCollateFunction:
 
 
         batch = next(iter(self.val_dataloader))
-        elems = []
-        for i in range(self.batch_size):
-            elems.append(self.val_dataset.data_lst[i])
+        elems = [self.val_dataset.data_lst[i] for i in range(self.batch_size)]
 
         # Check shape
-        for key in batch.keys():
+        for key in batch:
             check_shape(batch, elems, key)
 
         # Check that the batched data is separated correctly and the values are correct
         if self.batch_size == 2:
-            for key in batch.keys():
-                if 'incidence_' in key:
-                    i = int(key.split('_')[1])
+            for key in batch:
+                if "incidence_" in key:
+                    i = int(key.split("_")[1])
                     if i==0:
                         n0_row = 1
                     else:
-                        n0_row = torch.sum(batch[f'batch_{i-1}']==0)
-                    n0_col = torch.sum(batch[f'batch_{i}']==0)
+                        n0_row = torch.sum(batch[f"batch_{i-1}"]==0)
+                    n0_col = torch.sum(batch[f"batch_{i}"]==0)
                     check_separation(batch[key].to_dense(), n0_row, n0_col)
                     check_values(batch[key].to_dense(),
                                  elems[0][key].to_dense(),
@@ -130,8 +125,8 @@ class TestCollateFunction:
         batch_list = to_data_list(batch)
         assert len(batch_list) == len(elems)
         for i in range(len(batch_list)):
-            for key in elems[i].keys():
-                if key in batch_list[i].keys():
+            for key in elems[i]:
+                if key in batch_list[i]:
                     if batch_list[i][key].is_sparse:
                         assert torch.all(batch_list[i][key].coalesce().indices() == elems[i][key].coalesce().indices())
                         assert torch.allclose(batch_list[i][key].coalesce().values(), elems[i][key].coalesce().values())

@@ -1,7 +1,7 @@
 from .dataload_dataset import DataloadDataset
-from .dataloader import DefaultDataModule
+from .dataloader import TBXDataloader
 
 __all__ = [
-    "DefaultDataModule",
+    "TBXDataloader",
     "DataloadDataset"
 ]

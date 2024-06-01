@@ -37,7 +37,7 @@ class TestCollateFunction:
         )
 
         initialize(version_base="1.3", config_path="../../../configs", job_name="job")
-        cfg = compose(config_name="train.yaml") #, overrides=["dataset=graph/MUTAG"])
+        cfg = compose(config_name="run.yaml") #, overrides=["dataset=graph/MUTAG"])
 
         graph_loader = hydra.utils.instantiate(cfg.dataset, _recursive_=False)
 

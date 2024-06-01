@@ -125,7 +125,7 @@ We list the neural networks trained and evaluated by `TopoBenchmarkX`, organized
 │   ├── wandb_sweep              <- Weights & Biases sweep configs
 │   │
 │   ├── __init__.py              <- Init file for configs module
-│   └── train.yaml               <- Main config for training
+│   └── run.yaml               <- Main config for training
 ```
 
 

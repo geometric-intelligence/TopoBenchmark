@@ -4,7 +4,7 @@ import numpy as np
 import torch
 from sklearn.model_selection import StratifiedKFold
 
-from topobenchmarkx.data.dataload import DataloadDataset
+from topobenchmarkx.dataloader import DataloadDataset
 
 
 # Generate splits in different fasions

@@ -12,7 +12,7 @@ from lightning import Callback, LightningModule, Trainer
 from lightning.pytorch.loggers import Logger
 from omegaconf import DictConfig, OmegaConf
 
-from topobenchmarkx.data.dataload.dataloader import DefaultDataModule
+from topobenchmarkx.dataloader.dataloader import DefaultDataModule
 from topobenchmarkx.utils import (
     RankedLogger,
     extras,
@@ -28,7 +28,7 @@ from topobenchmarkx.utils.config_resolvers import (
     get_monitor_metric,
     get_monitor_mode,
     infer_in_channels,
-    infere_list_length,
+    infere_num_cell_dimensions,
 )
 import pandas as pd
 import os
@@ -54,7 +54,7 @@ OmegaConf.register_new_resolver("get_default_transform", get_default_transform)
 OmegaConf.register_new_resolver("get_monitor_metric", get_monitor_metric)
 OmegaConf.register_new_resolver("get_monitor_mode", get_monitor_mode)
 OmegaConf.register_new_resolver("infer_in_channels", infer_in_channels)
-OmegaConf.register_new_resolver("infere_list_length", infere_list_length)
+OmegaConf.register_new_resolver("infere_num_cell_dimensions", infere_num_cell_dimensions)
 OmegaConf.register_new_resolver(
     "parameter_multiplication", lambda x, y: int(int(x) * int(y))
 )

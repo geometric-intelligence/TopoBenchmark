@@ -6,7 +6,7 @@ import hydra
 import torch
 import torch_geometric
 
-from topobenchmarkx.data.dataload import DataloadDataset
+from topobenchmarkx.dataloader import DataloadDataset
 from topobenchmarkx.data.utils import (
     ensure_serializable,
     load_inductive_splits,

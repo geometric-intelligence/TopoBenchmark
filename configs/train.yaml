@@ -5,7 +5,7 @@
 defaults:
   - _self_
   - dataset: graph/ZINC
-  - model: simplicial/scn
+  - model: simplicial/sccn
   - transforms: ${get_default_transform:${dataset},${model}} #no_transform
   - optimizer: adam
   - scheduler: step_lr

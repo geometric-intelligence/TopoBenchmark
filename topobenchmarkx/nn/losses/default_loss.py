@@ -1,10 +1,11 @@
 import torch
 import torch_geometric
-from topobenchmarkx.nn.losses.loss import AbstractltLoss
 
-class DefaultLoss(AbstractltLoss):
-    r"""Abstract class that provides an interface to loss logic within
-    netowrk.
+from topobenchmarkx.nn.losses.base import AbstractLoss
+
+
+class DefaultLoss(AbstractLoss):
+    r"""Defines the default model loss for the given task.
     
     Args:
         task (str): Task type, either "classification" or "regression".
@@ -28,7 +29,7 @@ class DefaultLoss(AbstractltLoss):
         self.loss_type = loss_type
 
     def __repr__(self) -> str:
-        return f'{self.__class__.__name__}(task={self.task}, loss_type={self.loss_type})'
+        return f"{self.__class__.__name__}(task={self.task}, loss_type={self.loss_type})"
     
     def forward(self,  model_out: dict, batch: torch_geometric.data.Data):
         r"""Forward pass of the loss function.
@@ -48,4 +49,3 @@ class DefaultLoss(AbstractltLoss):
         model_out["loss"] = self.criterion(logits, target)
 
         return model_out
-    

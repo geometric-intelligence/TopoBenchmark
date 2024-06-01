@@ -1,7 +1,9 @@
-import torch_geometric
 from abc import ABC, abstractmethod
 
-class AbstractltLoss(ABC):
+import torch_geometric
+
+
+class AbstractLoss(ABC):
     r"""Abstract class for the loss class."""
     def __init__(self,):
         super().__init__()
@@ -15,4 +17,4 @@ class AbstractltLoss(ABC):
         pass
 
     def __repr__(self) -> str:
-        return f'{self.__class__.__name__}()'
+        return f"{self.__class__.__name__}()"

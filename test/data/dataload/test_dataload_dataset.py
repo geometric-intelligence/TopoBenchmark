@@ -1,6 +1,6 @@
 import torch
 from torch_geometric.data import Data 
-from topobenchmarkx.data.dataload import DataloadDataset
+from topobenchmarkx.dataloader import DataloadDataset
 
 class TestDataloadDataset:
 

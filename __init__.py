@@ -1,4 +1,4 @@
-from . import configs, topobenchmarkx.nn.backbones, test, topobenchmarkx
+import configs, topobenchmarkx.nn.backbones, test, topobenchmarkx
 from .topobenchmarkx import run
 
 __all__ = ["topobenchmarkx", "topobenchmarkx.nn.backbones", "configs", "test", "run"]

@@ -1,6 +1,7 @@
 
 import torch_geometric
-from topobenchmarkx.nn.readouts.readout import AbstractZeroCellReadOut
+
+from topobenchmarkx.nn.readouts.base import AbstractZeroCellReadOut
 
 
 class NoReadOut(AbstractZeroCellReadOut):

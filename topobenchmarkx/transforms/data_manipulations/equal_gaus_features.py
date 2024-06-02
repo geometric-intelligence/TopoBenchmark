@@ -23,7 +23,7 @@ class EqualGausFeatures(torch_geometric.transforms.BaseTransform):
         self.feature_vector = torch.normal(
             mean=self.mean, std=self.std, size=(1, self.feature_vector)
         )
-        
+
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}(type={self.type!r}, mean={self.mean!r}, std={self.std!r}, feature_vector={self.feature_vector!r})"
 

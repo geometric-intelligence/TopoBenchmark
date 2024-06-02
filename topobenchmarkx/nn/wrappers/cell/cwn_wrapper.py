@@ -1,11 +1,16 @@
 from topobenchmarkx.nn.wrappers.base import AbstractWrapper
 
+
 class CWNWrapper(AbstractWrapper):
-    r"""Wrapper for the CWN model. This wrapper defines the forward pass of the model. The CWN model returns the embeddings of the cells of rank 0, 1, and 2."""
+    r"""Wrapper for the CWN model.
+
+    This wrapper defines the forward pass of the model. The CWN model returns
+    the embeddings of the cells of rank 0, 1, and 2.
+    """
 
     def forward(self, batch):
         r"""Forward pass for the CWN wrapper.
-        
+
         Args:
             batch (torch_geometric.data.Data): Batch object containing the batched domain data.
         Returns:

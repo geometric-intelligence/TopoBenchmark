@@ -8,26 +8,31 @@ from topobenchmarkx.transforms.liftings import GraphLifting
 
 class Graph2CellLifting(GraphLifting):
     r"""Abstract class for lifting graphs to cell complexes.
-    
+
     Args:
         complex_dim (int, optional): The dimension of the cell complex to be generated. (default: 2)
         kwargs (optional): Additional arguments for the class.
     """
+
     def __init__(self, complex_dim=2, **kwargs):
         super().__init__(**kwargs)
         self.complex_dim = complex_dim
         self.type = "graph2cell"
 
-    def _get_lifted_topology(self, cell_complex: CellComplex, graph: nx.Graph) -> dict:
+    def _get_lifted_topology(
+        self, cell_complex: CellComplex, graph: nx.Graph
+    ) -> dict:
         r"""Returns the lifted topology.
-        
+
         Args:
             cell_complex (CellComplex): The cell complex.
             graph (nx.Graph): The input graph.
         Returns:
             dict: The lifted topology.
         """
-        lifted_topology = get_complex_connectivity(cell_complex, self.complex_dim)
+        lifted_topology = get_complex_connectivity(
+            cell_complex, self.complex_dim
+        )
         lifted_topology["x_0"] = torch.stack(
             list(cell_complex.get_cell_attributes("features", 0).values())
         )

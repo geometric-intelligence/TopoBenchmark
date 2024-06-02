@@ -5,14 +5,14 @@ import torch.nn as nn
 
 
 class AbstractWrapper(ABC, torch.nn.Module):
-    r"""Abstract class that provides an interface to handle the network
-    output.
-    
+    r"""Abstract class that provides an interface to handle the network output.
+
     Args:
         backbone (torch.nn.Module): Backbone model.
         out_channels (int): Number of output channels.
         num_cell_dimensions (int): Number of cell dimensions.
     """
+
     def __init__(self, backbone, **kwargs):
         super().__init__()
         self.backbone = backbone
@@ -28,15 +28,23 @@ class AbstractWrapper(ABC, torch.nn.Module):
 
     def __repr__(self):
         return f"{self.__class__.__name__}(backbone={self.backbone}, out_channels={self.backbone.out_channels}, dimensions={self.dimensions})"
-     
+
     def __call__(self, batch):
-        r"""Forward pass for the model. This method calls the forward method and adds the residual connection."""
+        r"""Forward pass for the model.
+
+        This method calls the forward method and adds the residual connection.
+        """
         model_out = self.forward(batch)
         model_out = self.residual_connection(model_out=model_out, batch=batch)
         return model_out
 
     def residual_connection(self, model_out, batch):
-        r"""Residual connection for the model. This method sums, for the embeddings of the cells of any rank, the output of the model with the input embeddings and applies layer normalization."""
+        r"""Residual connection for the model.
+
+        This method sums, for the embeddings of the cells of any rank, the
+        output of the model with the input embeddings and applies layer
+        normalization.
+        """
         for i in self.dimensions:
             if (
                 (f"x_{i}" in batch)
@@ -49,8 +57,9 @@ class AbstractWrapper(ABC, torch.nn.Module):
 
     @abstractmethod
     def forward(self, batch):
-        r"""Forward pass for the model. This method should be implemented by the child class.
-        
+        r"""Forward pass for the model. This method should be implemented by the
+        child class.
+
         Args:
             batch (torch_geometric.data.Data): Batch object containing the batched data.
         Returns:

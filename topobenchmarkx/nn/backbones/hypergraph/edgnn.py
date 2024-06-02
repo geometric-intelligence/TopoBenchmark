@@ -6,8 +6,131 @@ import torch_geometric
 import torch_scatter
 
 
+class EDGNN(nn.Module):
+    """EDGNN.
+
+    Args:
+        num_features (int): number of input features
+        input_dropout (float, optional): dropout rate for input features. Defaults to 0.2.
+        dropout (float, optional): dropout rate for hidden layers. Defaults to 0.2.
+        activation (str, optional): activation function. Defaults to 'relu'.
+        MLP_num_layers (int, optional): number of layers in MLP. Defaults to 2.
+        MLP2_num_layers (int, optional): number of layers in the second MLP. Defaults to -1.
+        MLP3_num_layers (int, optional): number of layers in the third MLP. Defaults to -1.
+        All_num_layers (int, optional): number of layers in the EDConv. Defaults to 2.
+        edconv_type (str, optional): type of EDConv. Defaults to 'EquivSet'.
+        restart_alpha (float, optional): restart alpha. Defaults to 0.5.
+        aggregate (str, optional): aggregation method. Defaults to 'add'.
+        normalization (str, optional): normalization method. Defaults to 'None'.
+        AllSet_input_norm (bool, optional): whether to normalize input features. Defaults to False.
+    """
+
+    def __init__(
+        self,
+        num_features,
+        input_dropout=0.2,
+        dropout=0.2,
+        activation="relu",
+        MLP_num_layers=2,
+        MLP2_num_layers=-1,
+        MLP3_num_layers=-1,
+        All_num_layers=2,
+        edconv_type="EquivSet",
+        restart_alpha=0.5,
+        aggregate="add",
+        normalization="None",
+        AllSet_input_norm=False,
+    ):
+        super().__init__()
+        act = {"Id": nn.Identity(), "relu": nn.ReLU(), "prelu": nn.PReLU()}
+        self.act = act[activation]
+        self.input_drop = nn.Dropout(input_dropout)  # 0.6 is chosen as default
+        self.dropout = nn.Dropout(dropout)  # 0.2 is chosen for GCNII
+
+        self.in_channels = num_features
+        self.hidden_channels = self.in_channels
+
+        self.mlp1_layers = MLP_num_layers
+        self.mlp2_layers = (
+            MLP_num_layers if MLP2_num_layers < 0 else MLP2_num_layers
+        )
+        self.mlp3_layers = (
+            MLP_num_layers if MLP3_num_layers < 0 else MLP3_num_layers
+        )
+        self.nlayer = All_num_layers
+        self.edconv_type = edconv_type
+
+        if edconv_type == "EquivSet":
+            self.conv = EquivSetConv(
+                self.in_channels,
+                self.in_channels,
+                mlp1_layers=self.mlp1_layers,
+                mlp2_layers=self.mlp2_layers,
+                mlp3_layers=self.mlp3_layers,
+                alpha=restart_alpha,
+                aggr=aggregate,
+                dropout=dropout,
+                normalization=normalization,
+                input_norm=AllSet_input_norm,
+            )
+        elif edconv_type == "JumpLink":
+            self.conv = JumpLinkConv(
+                self.in_channels,
+                self.in_channels,
+                mlp_layers=self.mlp1_layers,
+                alpha=restart_alpha,
+                aggr=aggregate,
+            )
+        elif edconv_type == "MeanDeg":
+            self.conv = MeanDegConv(
+                self.in_channels,
+                self.in_channels,
+                init_features=self.in_channels,
+                mlp1_layers=self.mlp1_layers,
+                mlp2_layers=self.mlp2_layers,
+                mlp3_layers=self.mlp3_layers,
+            )
+        else:
+            raise ValueError(f"Unsupported EDConv type: {edconv_type}")
+
+    def reset_parameters(self):
+        r"""Reset parameters."""
+        self.conv.reset_parameters()
+
+    def forward(self, x, edge_index):
+        r"""Forward pass.
+
+        Args:
+            x (Tensor): input features
+            edge_index (LongTensor): edge index
+        Returns:
+            Tensor: output features
+            None
+        """
+        if edge_index.layout == torch.sparse_coo:
+            edge_index, _ = torch_geometric.utils.to_edge_index(edge_index)
+        V, E = edge_index[0], edge_index[1]
+        x0 = x
+        for _ in range(self.nlayer):
+            x = self.dropout(x)
+            x = self.conv(x, V, E, x0)
+            x = self.act(x)
+        x = self.dropout(x)
+        return x, None
+
+
 class MLP(nn.Module):
-    """adapted from https://github.com/CUAI/CorrectAndSmooth/blob/master/gen_models.py"""
+    """Adapted from https://github.com/CUAI/CorrectAndSmooth/blob/master/gen_models.py
+
+    Args:
+        in_channels (int): number of input features
+        hidden_channels (int): number of hidden features
+        out_channels (int): number of output features
+        num_layers (int): number of layers
+        dropout (float, optional): dropout rate. Defaults to 0.5.
+        Normalization (str, optional): normalization method. Defaults to 'bn'.
+        InputNorm (bool, optional): whether to normalize input features. Defaults to False.
+    """
 
     def __init__(
         self,
@@ -91,6 +214,7 @@ class MLP(nn.Module):
         self.dropout = dropout
 
     def reset_parameters(self):
+        r"""Reset parameters."""
         for lin in self.lins:
             lin.reset_parameters()
         for normalization in self.normalizations:
@@ -98,6 +222,13 @@ class MLP(nn.Module):
                 normalization.reset_parameters()
 
     def forward(self, x):
+        r"""Forward pass.
+
+        Args:
+            x (Tensor): input features
+        Returns:
+            Tensor: output features
+        """
         x = self.normalizations[0](x)
         for i, lin in enumerate(self.lins[:-1]):
             x = lin(x)
@@ -108,6 +239,13 @@ class MLP(nn.Module):
         return x
 
     def flops(self, x):
+        r"""Calculate FLOPs.
+
+        Args:
+            x (Tensor): input features
+        Returns:
+            int: FLOPs
+        """
         num_samples = np.prod(x.shape[:-1])
         flops = num_samples * self.in_channels  # first normalization
         flops += (
@@ -128,7 +266,15 @@ class MLP(nn.Module):
 
 
 class PlainMLP(nn.Module):
-    """adapted from https://github.com/CUAI/CorrectAndSmooth/blob/master/gen_models.py"""
+    """adapted from https://github.com/CUAI/CorrectAndSmooth/blob/master/gen_models.py
+
+    Args:
+        in_channels (int): number of input features
+        hidden_channels (int): number of hidden features
+        out_channels (int): number of output features
+        num_layers (int): number of layers
+        dropout (float, optional): dropout rate. Defaults to 0.5.
+    """
 
     def __init__(
         self,
@@ -137,8 +283,6 @@ class PlainMLP(nn.Module):
         out_channels,
         num_layers,
         dropout=0.5,
-        Normalization="bn",
-        InputNorm=False,
     ):
         super().__init__()
         self.lins = nn.ModuleList()
@@ -150,10 +294,18 @@ class PlainMLP(nn.Module):
         self.dropout = dropout
 
     def reset_parameters(self):
+        r"""Reset parameters."""
         for lin in self.lins:
             lin.reset_parameters()
 
     def forward(self, x):
+        r"""Forward pass.
+
+        Args:
+            x (Tensor): input features
+        Returns:
+            Tensor: output features
+        """
         for lin in self.lins[:-1]:
             x = lin(x)
             x = F.relu(x, inplace=True)
@@ -369,105 +521,3 @@ class MeanDegConv(nn.Module):
         X = self.W3(torch.cat([Xv, X, X0, torch.log(deg_v)[..., None]], -1))
 
         return X
-
-
-class EDGNN(nn.Module):
-    def __init__(
-        self,
-        num_features,
-        input_dropout=0.2,
-        dropout=0.2,
-        activation="relu",
-        MLP_num_layers=2,
-        MLP2_num_layers=-1,
-        MLP3_num_layers=-1,
-        All_num_layers=2,
-        edconv_type="EquivSet",
-        restart_alpha=0.5,
-        aggregate="add",
-        normalization="None",
-        AllSet_input_norm=False,
-    ):
-        """EDGNN.
-
-        Args:
-            num_features (int): number of input features
-            input_dropout (float, optional): dropout rate for input features. Defaults to 0.2.
-            dropout (float, optional): dropout rate for hidden layers. Defaults to 0.2.
-            activation (str, optional): activation function. Defaults to 'relu'.
-            MLP_num_layers (int, optional): number of layers in MLP. Defaults to 2.
-            MLP2_num_layers (int, optional): number of layers in the second MLP. Defaults to -1.
-            MLP3_num_layers (int, optional): number of layers in the third MLP. Defaults to -1.
-            All_num_layers (int, optional): number of layers in the EDConv. Defaults to 2.
-            edconv_type (str, optional): type of EDConv. Defaults to 'EquivSet'.
-            restart_alpha (float, optional): restart alpha. Defaults to 0.5.
-            aggregate (str, optional): aggregation method. Defaults to 'add'.
-            normalization (str, optional): normalization method. Defaults to 'None'.
-            AllSet_input_norm (bool, optional): whether to normalize input features. Defaults to False.
-        """
-        super().__init__()
-        act = {"Id": nn.Identity(), "relu": nn.ReLU(), "prelu": nn.PReLU()}
-        self.act = act[activation]
-        self.input_drop = nn.Dropout(input_dropout)  # 0.6 is chosen as default
-        self.dropout = nn.Dropout(dropout)  # 0.2 is chosen for GCNII
-
-        self.in_channels = num_features
-        self.hidden_channels = self.in_channels
-
-        self.mlp1_layers = MLP_num_layers
-        self.mlp2_layers = (
-            MLP_num_layers if MLP2_num_layers < 0 else MLP2_num_layers
-        )
-        self.mlp3_layers = (
-            MLP_num_layers if MLP3_num_layers < 0 else MLP3_num_layers
-        )
-        self.nlayer = All_num_layers
-        self.edconv_type = edconv_type
-
-        if edconv_type == "EquivSet":
-            self.conv = EquivSetConv(
-                self.in_channels,
-                self.in_channels,
-                mlp1_layers=self.mlp1_layers,
-                mlp2_layers=self.mlp2_layers,
-                mlp3_layers=self.mlp3_layers,
-                alpha=restart_alpha,
-                aggr=aggregate,
-                dropout=dropout,
-                normalization=normalization,
-                input_norm=AllSet_input_norm,
-            )
-        elif edconv_type == "JumpLink":
-            self.conv = JumpLinkConv(
-                self.in_channels,
-                self.in_channels,
-                mlp_layers=self.mlp1_layers,
-                alpha=restart_alpha,
-                aggr=aggregate,
-            )
-        elif edconv_type == "MeanDeg":
-            self.conv = MeanDegConv(
-                self.in_channels,
-                self.in_channels,
-                init_features=self.in_channels,
-                mlp1_layers=self.mlp1_layers,
-                mlp2_layers=self.mlp2_layers,
-                mlp3_layers=self.mlp3_layers,
-            )
-        else:
-            raise ValueError(f"Unsupported EDConv type: {edconv_type}")
-
-    def reset_parameters(self):
-        self.conv.reset_parameters()
-
-    def forward(self, x, edge_index):
-        if edge_index.layout == torch.sparse_coo:
-            edge_index, _ = torch_geometric.utils.to_edge_index(edge_index)
-        V, E = edge_index[0], edge_index[1]
-        x0 = x
-        for _ in range(self.nlayer):
-            x = self.dropout(x)
-            x = self.conv(x, V, E, x0)
-            x = self.act(x)
-        x = self.dropout(x)
-        return x, None

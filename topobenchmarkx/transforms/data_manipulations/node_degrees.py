@@ -52,7 +52,7 @@ class NodeDegrees(torch_geometric.transforms.BaseTransform):
             assert (
                 field == "edge_index"
             ), "Following logic of finding degrees is only implemented for edge_index"
-            
+
             # Get number of nodes
             if data.get("num_nodes", None):
                 max_num_nodes = data["num_nodes"]

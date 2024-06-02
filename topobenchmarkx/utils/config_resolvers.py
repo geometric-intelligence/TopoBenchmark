@@ -1,6 +1,6 @@
 import os
 
-        
+
 def get_default_transform(dataset, model):
     r"""Get default transform for a given data domain and model.
 
@@ -17,7 +17,10 @@ def get_default_transform(dataset, model):
     if data_domain == "graph" and model_domain != "combinatorial":
         # Check if there is a default transform for the dataset at ./configs/transforms/dataset_defaults/
         # If not, use the default lifting transform for the dataset to be compatible with the model
-        datasets_with_defaults = [f.split(".")[0] for f in os.listdir("./configs/transforms/dataset_defaults/")]
+        datasets_with_defaults = [
+            f.split(".")[0]
+            for f in os.listdir("./configs/transforms/dataset_defaults/")
+        ]
         if dataset in datasets_with_defaults:
             return f"dataset_defaults/{dataset}"
         else:
@@ -29,7 +32,8 @@ def get_default_transform(dataset, model):
         raise ValueError(
             f"Invalid combination of data_domain={data_domain} and model_domain={model_domain}"
         )
-        
+
+
 def get_required_lifting(data_domain, model):
     r"""Get required transform for a given data domain and model.
 
@@ -97,6 +101,7 @@ def infer_in_channels(dataset, transforms):
     Returns:
         list: List with dimensions of the input channels.
     """
+
     def find_complex_lifting(transforms):
         r"""Find if there is a complex lifting in the dataset.
 
@@ -160,27 +165,25 @@ def infer_in_channels(dataset, transforms):
         else:
             # Case when the dataset has edge attributes
             if not transforms[lifting].preserve_edge_attr:
-                
+
                 if feature_lifting == "ProjectionSum":
-                    return [
-                        dataset.parameters.num_features[0]
-                    ] * transforms[lifting].complex_dim
-                
+                    return [dataset.parameters.num_features[0]] * transforms[
+                        lifting
+                    ].complex_dim
+
                 elif feature_lifting == "Concatenation":
                     return_value = [dataset.parameters.num_features]
-                    for i in range(
-                        2, transforms[lifting].complex_dim + 1
-                    ):
+                    for i in range(2, transforms[lifting].complex_dim + 1):
                         return_value += [
                             int(dataset.parameters.num_features * i)
                         ]
 
                     return return_value
-                
+
                 else:
-                    return [
-                        dataset.parameters.num_features[0]
-                    ] * transforms[lifting].complex_dim
+                    return [dataset.parameters.num_features[0]] * transforms[
+                        lifting
+                    ].complex_dim
 
             else:
                 return list(dataset.parameters.num_features) + [
@@ -198,7 +201,7 @@ def infer_in_channels(dataset, transforms):
 
 def infere_num_cell_dimensions(selected_dimensions, in_channels):
     r"""Infer the length of a list.
-    
+
     Args:
         list (list): Input list.
     Returns:

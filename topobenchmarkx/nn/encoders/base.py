@@ -5,15 +5,17 @@ import torch_geometric
 
 
 class AbstractFeatureEncoder(torch.nn.Module):
-    r"""Abstract class that provides an interface to define a custom feature encoder.
-    
+    r"""Abstract class that provides an interface to define a custom feature
+    encoder.
+
     Args:
         kwargs: Additional arguments.
     """
+
     def __init__(self, **kwargs):
         super().__init__()
         return
-    
+
     def __repr__(self):
         return f"{self.__class__.__name__}()"
 

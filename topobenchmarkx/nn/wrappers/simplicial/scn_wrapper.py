@@ -1,12 +1,18 @@
 import torch
+
 from topobenchmarkx.nn.wrappers.base import AbstractWrapper
 
+
 class SCNWrapper(AbstractWrapper):
-    r"""Wrapper for the SCNW model. This wrapper defines the forward pass of the model. The SCNW model returns the embeddings of the cells of rank 0, 1, and 2."""
+    r"""Wrapper for the SCNW model.
+
+    This wrapper defines the forward pass of the model. The SCNW model returns
+    the embeddings of the cells of rank 0, 1, and 2.
+    """
 
     def forward(self, batch):
         r"""Forward pass for the SCNW wrapper.
-        
+
         Args:
             batch (torch_geometric.data.Data): Batch object containing the batched data.
         Returns:
@@ -33,8 +39,10 @@ class SCNWrapper(AbstractWrapper):
         return model_out
 
     def normalize_matrix(self, matrix):
-        r"""Normalize the input matrix. The normalization is performed using the diagonal matrix of the inverse square root of the sum of the absolute values of the rows.
-        
+        r"""Normalize the input matrix. The normalization is performed using the
+        diagonal matrix of the inverse square root of the sum of the absolute
+        values of the rows.
+
         Args:
             matrix (torch.sparse.FloatTensor): Input matrix to be normalized.
         Returns:

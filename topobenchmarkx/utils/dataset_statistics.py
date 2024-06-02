@@ -47,14 +47,15 @@ OmegaConf.register_new_resolver("get_default_transform", get_default_transform)
 OmegaConf.register_new_resolver("get_monitor_metric", get_monitor_metric)
 OmegaConf.register_new_resolver("get_monitor_mode", get_monitor_mode)
 OmegaConf.register_new_resolver("infer_in_channels", infer_in_channels)
-OmegaConf.register_new_resolver("infere_num_cell_dimensions", infere_num_cell_dimensions)
+OmegaConf.register_new_resolver(
+    "infere_num_cell_dimensions", infere_num_cell_dimensions
+)
 OmegaConf.register_new_resolver(
     "parameter_multiplication", lambda x, y: int(int(x) * int(y))
 )
 
 torch.set_num_threads(1)
 log = RankedLogger(__name__, rank_zero_only=True)
-
 
 
 def train(cfg: DictConfig) -> tuple[dict[str, Any], dict[str, Any]]:
@@ -78,18 +79,17 @@ def train(cfg: DictConfig) -> tuple[dict[str, Any], dict[str, Any]]:
     np.random.seed(cfg.seed)
     # Seed for python random
     random.seed(cfg.seed)
-    
+
     if cfg.model.model_domain == "cell":
-        cfg.dataset.transforms.graph2cell_lifting.max_cell_length=1000
+        cfg.dataset.transforms.graph2cell_lifting.max_cell_length = 1000
 
     # Instantiate and load dataset
     dataset = hydra.utils.instantiate(cfg.dataset, _recursive_=False)
     dataset = dataset.load()
-    
+
     one_graph_flag = True
     if cfg.dataset.parameters.batch_size != 1:
         one_graph_flag = False
-
 
     log.info(f"Instantiating datamodule <{cfg.dataset._target_}>")
 
@@ -110,7 +110,11 @@ def train(cfg: DictConfig) -> tuple[dict[str, Any], dict[str, Any]]:
     if one_graph_flag:
         dataloaders = [datamodule.train_dataloader()]
     else:
-        dataloaders = [datamodule.train_dataloader(), datamodule.val_dataloader(), datamodule.test_dataloader()]
+        dataloaders = [
+            datamodule.train_dataloader(),
+            datamodule.val_dataloader(),
+            datamodule.test_dataloader(),
+        ]
 
     dict_collector = {
         "num_hyperedges": 0,
@@ -121,45 +125,48 @@ def train(cfg: DictConfig) -> tuple[dict[str, Any], dict[str, Any]]:
     }
 
     cell_dict = {
-        "3":0,
-        "4":0,
-        "5":0,
-        "6":0,
-        "7":0,
-        "8":0,
-        "9":0,
-        "10":0,
-        "greater_than_10":0
-
+        "3": 0,
+        "4": 0,
+        "5": 0,
+        "6": 0,
+        "7": 0,
+        "8": 0,
+        "9": 0,
+        "10": 0,
+        "greater_than_10": 0,
     }
-    
+
     for loader in dataloaders:
         for batch in loader:
             if cfg.model.model_domain == "hypergraph":
                 dict_collector["zero_cell"] += batch.x.shape[0]
                 dict_collector["num_hyperedges"] += batch.x_hyperedges.shape[0]
-            
+
             elif cfg.model.model_domain == "simplicial":
                 dict_collector["zero_cell"] += batch.x_0.shape[0]
-                dict_collector["one_cell"] +=batch.x_1.shape[0]
-                dict_collector["two_cell"] +=batch.x_2.shape[0]
+                dict_collector["one_cell"] += batch.x_1.shape[0]
+                dict_collector["two_cell"] += batch.x_2.shape[0]
                 dict_collector["three_cell"] += batch.x_3.shape[0]
 
             elif cfg.model.model_domain == "cell":
                 dict_collector["zero_cell"] += batch.x_0.shape[0]
                 dict_collector["one_cell"] += batch.x_1.shape[0]
                 dict_collector["two_cell"] += batch.x_2.shape[0]
-                cell_sizes, cell_counts = torch.unique(batch.incidence_2.to_dense().sum(0), return_counts=True)
+                cell_sizes, cell_counts = torch.unique(
+                    batch.incidence_2.to_dense().sum(0), return_counts=True
+                )
                 cell_sizes = cell_sizes.long()
                 for i in range(len(cell_sizes)):
                     if cell_sizes[i].item() > 10:
                         cell_dict["greater_than_10"] += cell_counts[i].item()
                     else:
-                        cell_dict[str(cell_sizes[i].item())] += cell_counts[i].item()
-    
+                        cell_dict[str(cell_sizes[i].item())] += cell_counts[
+                            i
+                        ].item()
+
     # Get current working dir
     filename = f"{cfg.paths['root_dir']}/tables/dataset_statistics.csv"
-    
+
     dict_collector["dataset"] = cfg.dataset.parameters.data_name
     dict_collector["domain"] = cfg.model.model_domain
 
@@ -174,7 +181,7 @@ def train(cfg: DictConfig) -> tuple[dict[str, Any], dict[str, Any]]:
         df_saved = df_saved._append(dict_collector, ignore_index=True)
         # write to csv file
         df_saved.to_csv(filename)
-    
+
     if cfg.model.model_domain == "cell":
         filename = f"{cfg.paths['root_dir']}/tables/cell_statistics.csv"
 
@@ -194,7 +201,6 @@ def train(cfg: DictConfig) -> tuple[dict[str, Any], dict[str, Any]]:
             df_saved.to_csv(filename)
 
 
-
 @hydra.main(
     version_base="1.3", config_path="../configs", config_name="run.yaml"
 )
@@ -207,7 +213,7 @@ def main(cfg: DictConfig) -> float | None:
     # apply extra utilities
     # (e.g. ask for tags if none are provided in cfg, print cfg tree, etc.)
     extras(cfg)
-    
+
     train(cfg)
 
 

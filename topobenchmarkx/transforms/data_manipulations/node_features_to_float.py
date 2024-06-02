@@ -14,7 +14,7 @@ class NodeFeaturesToFloat(torch_geometric.transforms.BaseTransform):
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}(type={self.type!r})"
-    
+
     def forward(self, data: torch_geometric.data.Data):
         r"""Apply the transform to the input data.
 

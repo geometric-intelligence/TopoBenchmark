@@ -14,10 +14,10 @@ class KeepOnlyConnectedComponent(torch_geometric.transforms.BaseTransform):
         super().__init__()
         self.type = "keep_connected_component"
         self.parameters = kwargs
-    
+
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}(type={self.type!r}, parameters={self.parameters!r})"
-    
+
     def forward(self, data: torch_geometric.data.Data):
         """Apply the transform to the input data.
 

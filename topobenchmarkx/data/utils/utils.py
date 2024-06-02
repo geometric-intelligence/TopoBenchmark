@@ -48,13 +48,15 @@ def get_complex_connectivity(complex, max_rank, signed=False):
                 if connectivity_info == "incidence":
                     connectivity[f"{connectivity_info}_{rank_idx}"] = (
                         generate_zero_sparse_connectivity(
-                            m=practical_shape[rank_idx - 1], n=practical_shape[rank_idx]
+                            m=practical_shape[rank_idx - 1],
+                            n=practical_shape[rank_idx],
                         )
                     )
                 else:
                     connectivity[f"{connectivity_info}_{rank_idx}"] = (
                         generate_zero_sparse_connectivity(
-                            m=practical_shape[rank_idx], n=practical_shape[rank_idx]
+                            m=practical_shape[rank_idx],
+                            n=practical_shape[rank_idx],
                         )
                     )
     connectivity["shape"] = practical_shape

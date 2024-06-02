@@ -62,7 +62,7 @@ Next, check the CUDA version of your machine:
 ```
 and ensure that it matches the CUDA version specified in the `env_setup.sh` file (`CUDA=cu121` by default). If it does not match, update `env_setup.sh` accordingly by changing both the `CUDA` and `TORCH` environment variables to compatible values as specified on [this website](https://github.com/pyg-team/pyg-lib).
 
-Next, create the environment with the following command.
+Next, set up the environment with the following command.
 
 ```
 source env_setup.sh
@@ -74,7 +74,7 @@ This command installs the `TopoBenchmarkX` library and its dependencies.
 Next, train the neural networks by running the following command:
 
 ```
-python topobenchmarkx/train.py 
+python -m topobenchmarkx 
 ```
 
 ### Explore the Tutorials

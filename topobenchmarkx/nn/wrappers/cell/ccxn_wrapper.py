@@ -1,5 +1,6 @@
 from topobenchmarkx.nn.wrappers.base import AbstractWrapper
 
+
 class CCXNWrapper(AbstractWrapper):
     r"""Wrapper for the CCXN model. This wrapper defines the forward pass of the model. The CCXN model returns the embeddings of the cells of rank 0, 1, and 2."""
 

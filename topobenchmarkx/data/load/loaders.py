@@ -103,7 +103,7 @@ class GraphLoader(AbstractLoader):
             )
             # Join dataset to process it
             dataset = datasets[0] + datasets[1] + datasets[2]
-            setattr(dataset, "split_idx", split_idx)
+            dataset.split_idx = split_idx
             data_dir = root_data_dir
             
         elif self.parameters.data_name in HETEROPHILIC_DATASETS:

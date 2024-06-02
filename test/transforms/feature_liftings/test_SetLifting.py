@@ -2,9 +2,6 @@
 
 import torch
 
-from topobenchmarkx.transforms.feature_liftings import (
-    Set,
-)
 from topobenchmarkx.transforms.liftings.graph2simplicial import (
     SimplicialCliqueLifting,
 )

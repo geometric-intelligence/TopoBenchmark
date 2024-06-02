@@ -1,13 +1,12 @@
-# noqa: F401
 
 from .utils import (
+    ensure_serializable,
     generate_zero_sparse_connectivity,
     get_complex_connectivity,
-    make_hash,
-    ensure_serializable,
     load_cell_complex_dataset,
     load_manual_graph,
     load_simplicial_dataset,
+    make_hash,
 )
 
 utils_functions = [

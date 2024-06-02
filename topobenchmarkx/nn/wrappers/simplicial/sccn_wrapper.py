@@ -1,5 +1,6 @@
 from topobenchmarkx.nn.wrappers.base import AbstractWrapper
 
+
 class SCCNWrapper(AbstractWrapper):
     r"""Wrapper for the SCCN model. This wrapper defines the forward pass of the model. The SCCN model returns the embeddings of the cells of any rank."""
 

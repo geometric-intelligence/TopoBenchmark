@@ -1,8 +1,8 @@
+from unittest.mock import MagicMock, patch
+
 import pytest
-import os
-from unittest.mock import patch, MagicMock
-import torch_geometric
 from omegaconf import DictConfig
+
 from topobenchmarkx.data.load import GraphLoader
 
 
@@ -22,7 +22,7 @@ class TestGraphLoader:
         loader = GraphLoader(self.parameters)
         assert loader.parameters == self.parameters
     
-    @patch('torch_geometric.datasets.Planetoid')
+    @patch("torch_geometric.datasets.Planetoid")
     def test_load_planetoid(self, mock_planetoid):
         parameters = DictConfig({
             "data_dir": "/path/to/data",
@@ -37,7 +37,7 @@ class TestGraphLoader:
         mock_planetoid.assert_called_once_with(root="/path/to/data", name="Cora")
         assert data_dir == "/path/to/data/Cora"
 
-    @patch('torch_geometric.datasets.TUDataset')
+    @patch("torch_geometric.datasets.TUDataset")
     def test_load_tu_dataset(self, mock_tudataset):
         parameters = DictConfig({
             "data_dir": "/path/to/data",
@@ -50,13 +50,13 @@ class TestGraphLoader:
         mock_tudataset.assert_called_once_with(root="/path/to/data", name="MUTAG", use_node_attr=False)
         assert data_dir == "/path/to/data/MUTAG"
 
-    @patch('torch_geometric.datasets.ZINC')
-    @patch('torch_geometric.datasets.AQSOL')
+    @patch("torch_geometric.datasets.ZINC")
+    @patch("torch_geometric.datasets.AQSOL")
     def test_load_fixed_splits(self, *mock_datasets):
         # The cases must be in reverse order of @patch(...)
         cases = [
             ("AQSOL", dict()),
-            ("ZINC", {"subset": True}), 
+            ("ZINC", {"subset": True}),
         ]
         for i, mock_dataset in enumerate(mock_datasets):
             data_name = cases[i][0]
@@ -74,7 +74,7 @@ class TestGraphLoader:
             
             assert data_dir == "/path/to/data"
 
-    @patch('torch_geometric.datasets.HeterophilousGraphDataset')
+    @patch("torch_geometric.datasets.HeterophilousGraphDataset")
     def test_load_heterophilous(self, mock_dataset):
         parameters = DictConfig({
             "data_dir": "/path/to/data",

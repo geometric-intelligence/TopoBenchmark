@@ -1,11 +1,11 @@
+from unittest.mock import ANY, MagicMock, patch
+
 import pytest
-from unittest.mock import patch, MagicMock, Mock, PropertyMock, ANY
-import os
-import json
 import torch_geometric
 from omegaconf import DictConfig
-from topobenchmarkx.dataloader import DataloadDataset
+
 from topobenchmarkx.data.preprocess.preprocessor import PreProcessor
+
 from ..._utils.flow_mocker import FlowMocker
 
 
@@ -50,7 +50,7 @@ class TestPreProcessor:
                 "assert_args": ("created_property", "processed_data_dir")
             },
             {
-                "mock": "torch_geometric.data.InMemoryDataset.__init__", 
+                "mock": "torch_geometric.data.InMemoryDataset.__init__",
                 "assert_args": ("called_once_with", ANY, None, ANY)
             },
             {
@@ -73,14 +73,14 @@ class TestPreProcessor:
         flow_mocker.assert_all(preprocessor_with_tranform)
 
         
-    @patch('topobenchmarkx.data.preprocess.preprocessor.load_inductive_splits')
+    @patch("topobenchmarkx.data.preprocess.preprocessor.load_inductive_splits")
     def test_load_dataset_splits_inductive(self, mock_load_inductive_splits):
         split_params = DictConfig({"learning_setting": "inductive"})
         self.preprocessor.load_dataset_splits(split_params)
         mock_load_inductive_splits.assert_called_once_with(self.preprocessor, split_params)
 
     
-    @patch('topobenchmarkx.data.preprocess.preprocessor.load_transductive_splits')
+    @patch("topobenchmarkx.data.preprocess.preprocessor.load_transductive_splits")
     def test_load_dataset_splits_transductive(self, mock_load_transductive_splits):
         split_params = DictConfig({"learning_setting": "transductive"})
         self.preprocessor.load_dataset_splits(split_params)

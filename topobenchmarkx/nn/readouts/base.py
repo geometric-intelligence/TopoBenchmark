@@ -68,7 +68,7 @@ class AbstractZeroCellReadOut(torch.nn.Module):
                 x = scatter(x, batch, dim=0, reduce="mean")
 
             elif self.pooling_type == "sum":
-                x = scatter(x, batch, dim=0, reduce="sum") 
+                x = scatter(x, batch, dim=0, reduce="sum")
         return self.linear(x)
         
     @abstractmethod

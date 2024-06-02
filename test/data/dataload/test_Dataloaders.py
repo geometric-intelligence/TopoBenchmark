@@ -3,17 +3,10 @@ import hydra
 import rootutils
 import torch
 from hydra import compose, initialize
-from omegaconf import OmegaConf
 
-from topobenchmarkx.dataloader import TBXDataloader
 from topobenchmarkx.data.preprocess.preprocessor import PreProcessor
+from topobenchmarkx.dataloader import TBXDataloader
 from topobenchmarkx.dataloader.utils import to_data_list
-from topobenchmarkx.utils.config_resolvers import (
-    get_default_transform,
-    get_monitor_metric,
-    get_monitor_mode,
-    infer_in_channels,
-)
 
 rootutils.setup_root("./", indicator=".project-root", pythonpath=True)
 

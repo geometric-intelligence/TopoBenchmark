@@ -1,4 +1,5 @@
-from unittest.mock import patch, MagicMock, Mock, PropertyMock, ANY
+from unittest.mock import PropertyMock
+
 
 class FlowMocker:
     def __init__(self, mocker, params, setup=True):
@@ -59,7 +60,7 @@ class FlowMocker:
                     assert_func(*func_params)
                 elif assert_func == "created_property":
                     if len(func_params) > 1:
-                        raise ValueError(f"Expected one value for `created_property`")
+                        raise ValueError("Expected one value for `created_property`")
                     assert hasattr(tested_obj, func_params[0])
                 
 

@@ -1,5 +1,5 @@
 import numpy as np
-from scipy.stats import friedmanchisquare, wilcoxon, rankdata, chi2
+from scipy.stats import friedmanchisquare, rankdata, wilcoxon
 
 
 def signed_ranks_test(results_1, results_2):
@@ -63,7 +63,7 @@ def skillings_mack_test(results, n_simulations=10000):
         results = np.delete(results, cols_to_remove, axis=1)
         k = np.sum(~np.isnan(results), axis=0)
 
-        ranks = rankdata(-results, axis=0, method='average', nan_policy='omit')
+        ranks = rankdata(-results, axis=0, method="average", nan_policy="omit")
         
         A = np.zeros(M)
         for j in range(M):
@@ -80,7 +80,7 @@ def skillings_mack_test(results, n_simulations=10000):
             covariance_matrix[i, i] = -np.sum(covariance_matrix[i, :])
         rank = np.linalg.matrix_rank(covariance_matrix)
         if rank == M-1:
-            covariance_matrix = np.pad(covariance_matrix[:-1,:-1], ((0, 1), (0, 1)), mode='constant')
+            covariance_matrix = np.pad(covariance_matrix[:-1,:-1], ((0, 1), (0, 1)), mode="constant")
         else:
             raise ValueError(f"Problem with the covariance matrix having rank {rank} instead of {M-1} (M-1).")
         inv_covariance_matrix = np.linalg.pinv(covariance_matrix)
@@ -128,7 +128,7 @@ def compare_models(results, p_limit=0.05, verbose=False):
     """
     M = results.shape[0]
 
-    ranks = rankdata(-results, axis=0, nan_policy='omit')
+    ranks = rankdata(-results, axis=0, nan_policy="omit")
     
     k = np.sum(~np.isnan(results), axis=0)
     for i in range(M):

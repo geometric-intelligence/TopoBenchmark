@@ -1,8 +1,6 @@
 """Test the message passing module."""
 import torch
-from topobenchmarkx.transforms.feature_liftings import (
-    Concatenation,
-)
+
 from topobenchmarkx.transforms.liftings.graph2simplicial import (
     SimplicialCliqueLifting,
 )

@@ -1,30 +1,18 @@
 """Test the collate function."""
-import hydra
-from hydra import compose, initialize
-from omegaconf import OmegaConf
 
+import rootutils
 import torch
 import torch_geometric
 
 #from topobenchmarkx.data.load.loaders import manual_simple_graph
-
 from topobenchmarkx.transforms.data_manipulations import (
-    InfereKNNConnectivity, 
+    InfereKNNConnectivity,
     InfereRadiusConnectivity,
     KeepSelectedDataFields,
     NodeDegrees,
     NodeFeaturesToFloat,
-    OneHotDegreeFeatures
+    OneHotDegreeFeatures,
 )
-
-from topobenchmarkx.utils.config_resolvers import (
-    get_default_transform,
-    get_monitor_metric,
-    get_monitor_mode,
-    infer_in_channels,
-)
-
-import rootutils
 
 rootutils.setup_root("./", indicator=".project-root", pythonpath=True)
 
@@ -76,7 +64,7 @@ class TestCollateFunction:
         
     def test_keep_selected_data_fields(self):
         data = self.keep_selected_fields(self.data.clone())
-        assert set() == set(data.keys()) - set(self.keep_selected_fields.parameters['base_fields'] + self.keep_selected_fields.parameters['preserved_fields']), \
+        assert set() == set(data.keys()) - set(self.keep_selected_fields.parameters["base_fields"] + self.keep_selected_fields.parameters["preserved_fields"]), \
             "Some fields are not deleted"
 
     def test_node_degress(self):

@@ -2,10 +2,10 @@
 
 from torchmetrics import MetricCollection
 
-from topobenchmarkx.evaluator import METRICS
+from topobenchmarkx.evaluator import METRICS, AbstractEvaluator
 
 
-class TBXEvaluator:
+class TBXEvaluator(AbstractEvaluator):
     r"""Evaluator class that is responsible for computing the metrics for a
     given task.
 
@@ -45,10 +45,6 @@ class TBXEvaluator:
         else:
             raise ValueError(f"Invalid task {kwargs['task']}")
 
-        # self.metrics = MetricCollection(
-        #     {name: METRICS[name](**parameters) for name in metric_names}
-        # )
-
         metrics = {}
         for name in metric_names:
             if name in ["recall", "precision", "auroc"]:
@@ -87,15 +83,11 @@ class TBXEvaluator:
 
     def compute(self):
         r"""Compute the metrics.
-
-        Args:
-            res_dict (dict): A dictionary containing the computed metrics.
         """
         return self.metrics.compute()
 
     def reset(self):
         """Reset the metrics.
-
-        This method should be called after each epoch
+        This method should be called after each epoch.
         """
         self.metrics.reset()

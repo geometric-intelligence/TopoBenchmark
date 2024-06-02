@@ -2,7 +2,6 @@
 
 import torch
 
-from topobenchmarkx.data.load.loaders import manual_graph
 from topobenchmarkx.transforms.liftings.graph2hypergraph import (
     HypergraphKNNLifting,
 )
@@ -12,9 +11,6 @@ class TestHypergraphKNNLifting:
     """Test the HypergraphKNNLifting class."""
 
     def setup_method(self):
-        # Load the graph
-        self.data = manual_graph()
-
         # Initialise the HypergraphKNNLifting class
         self.lifting_k2 = HypergraphKNNLifting(
             k_value=2, loop=True
@@ -23,8 +19,9 @@ class TestHypergraphKNNLifting:
             k_value=3, loop=True
         )
 
-    def test_lift_topology(self):
+    def test_lift_topology(self, simple_graph_2):
         # Test the lift_topology method
+        self.data = simple_graph_2
         lifted_data_k2 = self.lifting_k2.forward(self.data.clone())
 
         expected_n_hyperedges = 9

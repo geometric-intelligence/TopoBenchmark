@@ -28,29 +28,22 @@ class TestCollateFunction:
         ----------
         None
         """
-        OmegaConf.register_new_resolver("get_default_transform", get_default_transform)
-        OmegaConf.register_new_resolver("get_monitor_metric", get_monitor_metric)
-        OmegaConf.register_new_resolver("get_monitor_mode", get_monitor_mode)
-        OmegaConf.register_new_resolver("infer_in_channels", infer_in_channels)
-        OmegaConf.register_new_resolver(
-            "parameter_multiplication", lambda x, y: int(int(x) * int(y))
-        )
-
         initialize(version_base="1.3", config_path="../../../configs", job_name="job")
-        cfg = compose(config_name="train.yaml") #, overrides=["dataset=graph/MUTAG"])
+        cfg = compose(config_name="train.yaml", overrides=["dataset=graph/MUTAG"])
 
         graph_loader = hydra.utils.instantiate(cfg.dataset, _recursive_=False)
-
-        datasets = graph_loader.load()
+        
+        datasets, _ = graph_loader.loader.load()
+        
         self.batch_size = 2
         datamodule = TBXDataloader(
-            dataset_train=datasets[0],
-            dataset_val=datasets[1],
-            dataset_test=datasets[2],
+            dataset_train=datasets,
+            dataset_val=datasets,
+            dataset_test=datasets,
             batch_size=self.batch_size
         )
-        self.val_dataloader = datamodule.val_dataloader()
-        self.val_dataset = datasets[1]
+        self.val_dataloader = datamodule.train_dataloader()
+        self.val_dataset = datasets
 
     def test_lift_features(self):
         """Test the collate funciton.
@@ -98,7 +91,7 @@ class TestCollateFunction:
             assert torch.allclose(matrix[:m1.shape[0], :m1.shape[1]], m1)
             assert torch.allclose(matrix[m1.shape[0]:, m1.shape[1]:], m2)
 
-
+        #assert 0
         batch = next(iter(self.val_dataloader))
         elems = [self.val_dataset.data_lst[i] for i in range(self.batch_size)]
 

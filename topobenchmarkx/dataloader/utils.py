@@ -57,6 +57,7 @@ def collate_fn(batch):
     running_idx = {}
 
     for batch_idx, b in enumerate(batch):
+        assert 0
         values, keys = b[0], b[1]
         data = DomainData()
         for key, value in zip(keys, values, strict=False):

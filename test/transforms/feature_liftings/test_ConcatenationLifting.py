@@ -1,9 +1,7 @@
 """Test the message passing module."""
 import torch
-
-from topobenchmarkx.data.load.loaders import manual_simple_graph
-from topobenchmarkx.transforms.feature_liftings.feature_liftings import (
-    ConcatentionLifting,
+from topobenchmarkx.transforms.feature_liftings import (
+    Concatenation,
 )
 from topobenchmarkx.transforms.liftings.graph2simplicial import (
     SimplicialCliqueLifting,
@@ -14,15 +12,13 @@ class TestConcatentionLifting:
     """Test the ConcatentionLifting class."""
 
     def setup_method(self):
-        # Load the graph
-        self.data = manual_simple_graph()
-
         # Initialize a lifting class
-        self.lifting = SimplicialCliqueLifting(feature_lifting="concatenation", complex_dim=3)
+        self.lifting = SimplicialCliqueLifting(feature_lifting="Concatenation", complex_dim=3)
 
-    def test_lift_features(self):
+    def test_lift_features(self, simple_graph_1):
+        data = simple_graph_1
         # Test the lift_features method
-        lifted_data = self.lifting.forward(self.data.clone())
+        lifted_data = self.lifting.forward(data.clone())
 
         expected_x1 = torch.tensor(
             [

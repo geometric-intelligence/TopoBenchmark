@@ -2,7 +2,6 @@
 
 import torch
 
-from topobenchmarkx.data.load.loaders import manual_simple_graph
 from topobenchmarkx.transforms.liftings.graph2simplicial import (
     SimplicialKHopLifting,
 )
@@ -12,9 +11,6 @@ class TestSimplicialKHopLifting:
     """Test the SimplicialKHopLifting class."""
 
     def setup_method(self):
-        # Load the graph
-        self.data = manual_simple_graph()
-
         # Initialise the SimplicialKHopLifting class
         self.lifting_signed = SimplicialKHopLifting(
             complex_dim=3, signed=True
@@ -23,8 +19,9 @@ class TestSimplicialKHopLifting:
             complex_dim=3, signed=False
         )
 
-    def test_lift_topology(self):
+    def test_lift_topology(self, simple_graph_1):
         # Test the lift_topology method
+        self.data = simple_graph_1
         lifted_data_signed = self.lifting_signed.forward(self.data.clone())
         lifted_data_unsigned = self.lifting_unsigned.forward(self.data.clone())
         expected_incidence_1 = torch.tensor(
@@ -90,8 +87,9 @@ class TestSimplicialKHopLifting:
             "Something is wrong with signed incidence_2 (edges to triangles)."
         )
 
-    def test_lifted_features_signed(self):
+    def test_lifted_features_signed(self, simple_graph_1):
         # Test the lift_features method for signed case
+        self.data = simple_graph_1
         lifted_data = self.lifting_signed.forward(self.data)
 
         expected_features_1 = torch.tensor(
@@ -177,8 +175,9 @@ class TestSimplicialKHopLifting:
             expected_features_2 == lifted_data.x_2
         ).all(), "Something is wrong with x_2 features."
 
-    def test_lifted_features_unsigned(self):
+    def test_lifted_features_unsigned(self, simple_graph_1):
         # Test the lift_features method for unsigned case
+        self.data = simple_graph_1
         lifted_data = self.lifting_unsigned.forward(self.data)
 
         expected_features_1 = torch.tensor(

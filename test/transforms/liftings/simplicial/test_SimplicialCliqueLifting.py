@@ -2,7 +2,6 @@
 
 import torch
 
-from topobenchmarkx.data.load.loaders import manual_simple_graph
 from topobenchmarkx.transforms.liftings.graph2simplicial import (
     SimplicialCliqueLifting,
 )
@@ -12,9 +11,6 @@ class TestSimplicialCliqueLifting:
     """Test the SimplicialCliqueLifting class."""
 
     def setup_method(self):
-        # Load the graph
-        self.data = manual_simple_graph()
-
         # Initialise the SimplicialCliqueLifting class
         self.lifting_signed = SimplicialCliqueLifting(
             complex_dim=3, signed=True
@@ -23,11 +19,11 @@ class TestSimplicialCliqueLifting:
             complex_dim=3, signed=False
         )
 
-    def test_lift_topology(self):
+    def test_lift_topology(self, simple_graph_1):
         """Test the lift_topology method."""
 
         # Test the lift_topology method
-        print(self.data)
+        self.data = simple_graph_1
         lifted_data_signed = self.lifting_signed.forward(self.data.clone())
         lifted_data_unsigned = self.lifting_unsigned.forward(self.data.clone())
 
@@ -94,9 +90,9 @@ class TestSimplicialCliqueLifting:
             expected_incidence_3 == lifted_data_signed.incidence_3.to_dense()
         ).all(), "Something is wrong with signed incidence_3 (triangles to tetrahedrons)."
 
-    def test_lifted_features_signed(self):
+    def test_lifted_features_signed(self, simple_graph_1):
         """Test the lift_features method in signed incidence cases."""
-
+        self.data = simple_graph_1
         # Test the lift_features method for signed case
         lifted_data = self.lifting_signed.forward(self.data)
 
@@ -136,9 +132,9 @@ class TestSimplicialCliqueLifting:
             excepted_features_3 == lifted_data.x_3
         ).all(), "Something is wrong with x_3 features."
 
-    def test_lifted_features_unsigned(self):
+    def test_lifted_features_unsigned(self, simple_graph_1):
         """Test the lift_features method in unsigned incidence cases."""
-
+        self.data = simple_graph_1
         # Test the lift_features method for unsigned case
         lifted_data = self.lifting_unsigned.forward(self.data)
 

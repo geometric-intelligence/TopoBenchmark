@@ -3,7 +3,7 @@ import os
 from unittest.mock import patch, MagicMock
 import torch_geometric
 from omegaconf import DictConfig
-from topobenchmarkx.data.load import GraphLoader  # Replace 'your_module' with the actual module name
+from topobenchmarkx.data.load import GraphLoader
 
 
 class TestGraphLoader:
@@ -15,7 +15,7 @@ class TestGraphLoader:
             "split_type": "fixed"
         })
 
-    def teardown(self):
+    def teardown_method(self):
         del self.parameters
 
     def test_init(self):
@@ -33,6 +33,7 @@ class TestGraphLoader:
         mock_planetoid.return_value = MagicMock()
         loader = GraphLoader(parameters)
         dataset, data_dir = loader.load()
+        
         mock_planetoid.assert_called_once_with(root="/path/to/data", name="Cora")
         assert data_dir == "/path/to/data/Cora"
 
@@ -45,6 +46,7 @@ class TestGraphLoader:
         mock_tudataset.return_value = MagicMock()
         loader = GraphLoader(parameters)
         dataset, data_dir = loader.load()
+        
         mock_tudataset.assert_called_once_with(root="/path/to/data", name="MUTAG", use_node_attr=False)
         assert data_dir == "/path/to/data/MUTAG"
 
@@ -81,6 +83,7 @@ class TestGraphLoader:
         mock_dataset.return_value = MagicMock()
         loader = GraphLoader(parameters)
         dataset, data_dir = loader.load()
+        
         mock_dataset.assert_called_once_with(root="/path/to/data", name="amazon_ratings")
         assert data_dir == "/path/to/data/amazon_ratings"
 

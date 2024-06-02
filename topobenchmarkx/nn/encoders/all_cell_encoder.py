@@ -6,7 +6,10 @@ from topobenchmarkx.nn.encoders.base import AbstractFeatureEncoder
 
 
 class AllCellFeatureEncoder(AbstractFeatureEncoder):
-    r"""Encoder class to apply BaseEncoder to the features of higher order structures. The class creates a BaseEncoder for each dimension specified in selected_dimensions. Then during the forward pass, the BaseEncoders are applied to the features of the corresponding dimensions.
+    r"""Encoder class to apply BaseEncoder to the features of higher order
+    structures. The class creates a BaseEncoder for each dimension specified in
+    selected_dimensions. Then during the forward pass, the BaseEncoders are
+    applied to the features of the corresponding dimensions.
 
     Args:
         in_channels (list[int]): Input dimensions for the features.
@@ -15,21 +18,24 @@ class AllCellFeatureEncoder(AbstractFeatureEncoder):
         selected_dimensions (list[int], optional): List of indexes to apply the BaseEncoders to. (default: None)
         **kwargs: Additional arguments.
     """
+
     def __init__(
         self,
         in_channels,
         out_channels,
         proj_dropout=0,
         selected_dimensions=None,
-        **kwargs
+        **kwargs,
     ):
         super().__init__(**kwargs)
-        
+
         self.in_channels = in_channels
         self.out_channels = out_channels
         self.dimensions = (
             selected_dimensions
-            if (selected_dimensions is not None) #and len(selected_dimensions) <= len(self.in_channels))
+            if (
+                selected_dimensions is not None
+            )  # and len(selected_dimensions) <= len(self.in_channels))
             else range(len(self.in_channels))
         )
         for i in self.dimensions:
@@ -42,13 +48,15 @@ class AllCellFeatureEncoder(AbstractFeatureEncoder):
                     dropout=proj_dropout,
                 ),
             )
+
     def __repr__(self):
         return f"{self.__class__.__name__}(in_channels={self.in_channels}, out_channels={self.out_channels}, dimensions={self.dimensions})"
-    
+
     def forward(
         self, data: torch_geometric.data.Data
     ) -> torch_geometric.data.Data:
-        r"""Forward pass. The method applies the BaseEncoders to the features of the selected_dimensions.
+        r"""Forward pass. The method applies the BaseEncoders to the features of
+        the selected_dimensions.
 
         Args:
             data (torch_geometric.data.Data): Input data object which should contain x_{i} features for each i in the selected_dimensions.
@@ -67,6 +75,7 @@ class AllCellFeatureEncoder(AbstractFeatureEncoder):
                 )
         return data
 
+
 class BaseEncoder(torch.nn.Module):
     r"""Encoder class that uses two linear layers with GraphNorm, Relu
     activation function, and dropout between the two layers.
@@ -76,6 +85,7 @@ class BaseEncoder(torch.nn.Module):
         out_channels (int): Dimensions of output features.
         dropout (float, optional): Percentage of channels to discard between the two linear layers. (default: 0)
     """
+
     def __init__(self, in_channels, out_channels, dropout=0):
         super().__init__()
         self.linear1 = torch.nn.Linear(in_channels, out_channels)
@@ -83,12 +93,14 @@ class BaseEncoder(torch.nn.Module):
         self.relu = torch.nn.ReLU()
         self.BN = GraphNorm(out_channels)
         self.dropout = torch.nn.Dropout(dropout)
-    
+
     def __repr__(self):
         return f"{self.__class__.__name__}(in_channels={self.linear1.in_features}, out_channels={self.linear1.out_features})"
 
     def forward(self, x: torch.Tensor, batch: torch.Tensor) -> torch.Tensor:
-        r"""Forward pass of the encoder. It applies two linear layers with GraphNorm, Relu activation function, and dropout between the two layers.
+        r"""Forward pass of the encoder. It applies two linear layers with
+        GraphNorm, Relu activation function, and dropout between the two
+        layers.
 
         Args:
             x (torch.Tensor): Input tensor of dimensions [N, in_channels].
@@ -101,5 +113,3 @@ class BaseEncoder(torch.nn.Module):
         x = self.dropout(self.relu(x))
         x = self.linear2(x)
         return x
-
-

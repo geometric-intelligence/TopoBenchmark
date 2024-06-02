@@ -189,6 +189,7 @@ def read_us_county_demos(path, year=2012, y_col="Election"):
 
     return data
 
+
 def load_hypergraph_pickle_dataset(cfg):
     r"""Loads hypergraph datasets from pickle files.
 
@@ -245,7 +246,9 @@ def load_hypergraph_pickle_dataset(cfg):
     # check that every node is in some hyperedge
     if len(np.unique(node_list)) != num_nodes:
         # add self hyperedges to isolated nodes
-        isolated_nodes = np.setdiff1d(np.arange(num_nodes), np.unique(node_list))
+        isolated_nodes = np.setdiff1d(
+            np.arange(num_nodes), np.unique(node_list)
+        )
 
         for node in isolated_nodes:
             node_list += [node]

@@ -1,4 +1,5 @@
 import pytest
+
 from topobenchmarkx.data.utils.io_utils import *
 
 
@@ -16,4 +17,3 @@ def test_get_file_id_from_url():
 
     with pytest.raises(ValueError):
         get_file_id_from_url(url_wrong)
-    

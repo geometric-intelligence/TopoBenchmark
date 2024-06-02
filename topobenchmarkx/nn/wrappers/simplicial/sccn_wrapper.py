@@ -1,11 +1,16 @@
 from topobenchmarkx.nn.wrappers.base import AbstractWrapper
 
+
 class SCCNWrapper(AbstractWrapper):
-    r"""Wrapper for the SCCN model. This wrapper defines the forward pass of the model. The SCCN model returns the embeddings of the cells of any rank."""
+    r"""Wrapper for the SCCN model.
+
+    This wrapper defines the forward pass of the model. The SCCN model returns
+    the embeddings of the cells of any rank.
+    """
 
     def forward(self, batch):
         r"""Forward pass for the SCCN wrapper.
-        
+
         Args:
             batch (torch_geometric.data.Data): Batch object containing the batched data.
         Returns:

@@ -1,5 +1,5 @@
-from .all_cell_encoder import AllCellFeatureEncoder
-from .base import AbstractFeatureEncoder
+from .all_cell_encoder import AllCellFeatureEncoder  # noqa: F401
+from .base import AbstractFeatureEncoder  # noqa: F401
 
 # ... import other encoders classes here
 # For example:

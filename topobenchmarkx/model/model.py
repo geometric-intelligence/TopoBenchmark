@@ -8,7 +8,7 @@ from torchmetrics import MeanMetric
 
 class TBXModel(LightningModule):
     r"""A `LightningModule` to define a network.
-    
+
     Args:
         backbone (torch.nn.Module): The backbone model to train.
         backbone_wrapper (torch.nn.Module): The backbone wrapper class.
@@ -17,6 +17,7 @@ class TBXModel(LightningModule):
         loss (torch.nn.Module): The loss class.
         feature_encoder (torch.nn.Module, optional): The feature encoder. (default: None)
     """
+
     def __init__(
         self,
         backbone: torch.nn.Module,
@@ -42,7 +43,7 @@ class TBXModel(LightningModule):
             self.backbone = backbone_wrapper(backbone)
         self.readout = readout
 
-        # Evaluator 
+        # Evaluator
         self.evaluator = evaluator
         self.train_metrics_logged = False
 
@@ -51,7 +52,7 @@ class TBXModel(LightningModule):
         self.scheduler = scheduler
 
         # Loss function
-        self.loss = loss        
+        self.loss = loss
         self.task_level = self.hparams["readout"].task_level
 
         # Tracking best so far validation accuracy
@@ -62,7 +63,7 @@ class TBXModel(LightningModule):
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}(backbone={self.backbone}, readout={self.readout}, loss={self.loss}, feature_encoder={self.feature_encoder})"
-        
+
     def forward(self, batch: Data) -> dict:
         r"""Perform a forward pass through the model `self.backbone`.
 
@@ -73,9 +74,7 @@ class TBXModel(LightningModule):
         """
         return self.backbone(batch)
 
-    def model_step(
-        self, batch: Data
-    ) -> dict:
+    def model_step(self, batch: Data) -> dict:
         r"""Perform a single model step on a batch of data.
 
         Args:
@@ -86,17 +85,17 @@ class TBXModel(LightningModule):
 
         # Feature Encoder
         batch = self.feature_encoder(batch)
-        
+
         # Domain model
         model_out = self.forward(batch)
-        
+
         # Readout
         if self.readout is not None:
             model_out = self.readout(model_out=model_out, batch=batch)
 
         # Loss
         model_out = self.process_outputs(model_out=model_out, batch=batch)
-        
+
         # Metric
         model_out = self.loss(model_out=model_out, batch=batch)
         self.evaluator.update(model_out)
@@ -129,11 +128,9 @@ class TBXModel(LightningModule):
         # Return loss for backpropagation step
         return model_out["loss"]
 
-    def validation_step(
-        self, batch: Data, batch_idx: int
-    ) -> None:
-        r"""Perform a single validation step on a batch of data from the validation
-        set.
+    def validation_step(self, batch: Data, batch_idx: int) -> None:
+        r"""Perform a single validation step on a batch of data from the
+        validation set.
 
         Args:
             batch (torch_geometric.data.Data): Batch object containing the batched data.
@@ -152,11 +149,8 @@ class TBXModel(LightningModule):
             batch_size=1,
         )
 
-    def test_step(
-        self, batch: Data, batch_idx: int
-    ) -> None:
-        r"""Perform a single test step on a batch of data from the test
-        set.
+    def test_step(self, batch: Data, batch_idx: int) -> None:
+        r"""Perform a single test step on a batch of data from the test set.
 
         Args:
             batch (torch_geometric.data.Data): Batch object containing the batched data.
@@ -177,7 +171,7 @@ class TBXModel(LightningModule):
 
     def process_outputs(self, model_out: dict, batch: Data) -> dict:
         r"""Process model outputs.
-        
+
         Args:
             model_out (dict): Dictionary containing the model output.
             batch (torch_geometric.data.Data): Batch object containing the batched data.
@@ -205,7 +199,7 @@ class TBXModel(LightningModule):
 
     def log_metrics(self, mode=None):
         r"""Log metrics.
-        
+
         Args:
             mode (str, optional): The mode of the model, either "train", "val", or "test". (default: None)
         """
@@ -236,33 +230,51 @@ class TBXModel(LightningModule):
         self.train_metrics_logged = True
 
     def on_train_epoch_end(self) -> None:
-        r"""Lightning hook that is called when a train epoch ends. This hook is used to log the train metrics."""
+        r"""Lightning hook that is called when a train epoch ends.
+
+        This hook is used to log the train metrics.
+        """
         # Log train metrics and reset evaluator
         if not self.train_metrics_logged:
             self.log_metrics(mode="train")
             self.train_metrics_logged = True
 
     def on_validation_epoch_end(self) -> None:
-        r"""Lightning hook that is called when a validation epoch ends. This hook is used to log the validation metrics."""
+        r"""Lightning hook that is called when a validation epoch ends.
+
+        This hook is used to log the validation metrics.
+        """
         # Log validation metrics and reset evaluator
         self.log_metrics(mode="val")
 
     def on_test_epoch_end(self) -> None:
-        r"""Lightning hook that is called when a test epoch ends. This hook is used to log the test metrics."""
+        r"""Lightning hook that is called when a test epoch ends.
+
+        This hook is used to log the test metrics.
+        """
         self.log_metrics(mode="test")
         print()
 
     def on_train_epoch_start(self) -> None:
-        r"""Lightning hook that is called when a train epoch begins. This hook is used to reset the train metrics."""
+        r"""Lightning hook that is called when a train epoch begins.
+
+        This hook is used to reset the train metrics.
+        """
         self.evaluator.reset()
         self.train_metrics_logged = False
 
     def on_val_epoch_start(self) -> None:
-        r"""Lightning hook that is called when a validation epoch begins. This hook is used to reset the validation metrics."""
+        r"""Lightning hook that is called when a validation epoch begins.
+
+        This hook is used to reset the validation metrics.
+        """
         self.evaluator.reset()
 
     def on_test_epoch_start(self) -> None:
-        r"""Lightning hook that is called when a test epoch begins. This hook is used to reset the test metrics."""
+        r"""Lightning hook that is called when a test epoch begins.
+
+        This hook is used to reset the test metrics.
+        """
         self.evaluator.reset()
 
     def setup(self, stage: str) -> None:
@@ -306,7 +318,3 @@ class TBXModel(LightningModule):
                 },
             }
         return {"optimizer": optimizer}
-
-
-if __name__ == "__main__":
-    _ = TBXModel(None, None, None, None)

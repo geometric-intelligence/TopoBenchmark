@@ -7,13 +7,14 @@ class InfereRadiusConnectivity(torch_geometric.transforms.BaseTransform):
     cloud.
 
     Args:
-        kwargs (optional): Parameters for the base transform."""
+        kwargs (optional): Parameters for the base transform.
+    """
 
     def __init__(self, **kwargs):
         super().__init__()
         self.type = "infere_radius_connectivity"
         self.parameters = kwargs
-        
+
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}(type={self.type!r}, parameters={self.parameters!r})"
 

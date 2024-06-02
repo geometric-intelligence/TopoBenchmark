@@ -27,7 +27,7 @@ class RankedLogger(logging.LoggerAdapter):
         logger = logging.getLogger(name)
         super().__init__(logger=logger, extra=extra)
         self.rank_zero_only = rank_zero_only
-        
+
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}(name={self.logger.name!r}, rank_zero_only={self.rank_zero_only!r}, extra={self.extra})"
 

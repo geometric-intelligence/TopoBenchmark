@@ -6,13 +6,15 @@ from topobenchmarkx.nn.readouts.base import AbstractZeroCellReadOut
 
 
 class PropagateSignalDown(AbstractZeroCellReadOut):
-    r"""Propagate signal down readout layer. This readout layer propagates the signal from cells of a certain order to the cells of the lower order.
-    
+    r"""Propagate signal down readout layer. This readout layer propagates the
+    signal from cells of a certain order to the cells of the lower order.
+
     Args:
         num_cell_dimensions (int): Highest order of cells considered by the model.
         hidden_dim (int): Dimension of the cells representations.
         readout_name (str): Readout name.
     """
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
@@ -38,8 +40,14 @@ class PropagateSignalDown(AbstractZeroCellReadOut):
             )
 
     def forward(self, model_out: dict, batch: torch_geometric.data.Data):
-        r"""Forward pass of the propagate signal down readout layer. The layer takes the embeddings of the cells of a certain order and applies a convolutional layer to them. Layer normalization is then applied to the features. The output is concatenated with the initial embeddings of the cells and the result is projected with the use of a linear layer to the dimensions of the cells of lower rank. The process is repeated until the nodes embeddings, which are the cells of rank 0, are reached.
-        
+        r"""Forward pass of the propagate signal down readout layer. The layer
+        takes the embeddings of the cells of a certain order and applies a
+        convolutional layer to them. Layer normalization is then applied to the
+        features. The output is concatenated with the initial embeddings of the
+        cells and the result is projected with the use of a linear layer to the
+        dimensions of the cells of lower rank. The process is repeated until
+        the nodes embeddings, which are the cells of rank 0, are reached.
+
         Args:
             model_out (dict): Dictionary containing the model output.
             batch (torch_geometric.data.Data): Batch object containing the batched domain data.

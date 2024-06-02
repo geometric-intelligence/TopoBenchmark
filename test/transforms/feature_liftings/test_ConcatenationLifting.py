@@ -1,8 +1,7 @@
 """Test the message passing module."""
+
 import torch
-from topobenchmarkx.transforms.feature_liftings import (
-    Concatenation,
-)
+
 from topobenchmarkx.transforms.liftings.graph2simplicial import (
     SimplicialCliqueLifting,
 )
@@ -13,7 +12,9 @@ class TestConcatentionLifting:
 
     def setup_method(self):
         # Initialize a lifting class
-        self.lifting = SimplicialCliqueLifting(feature_lifting="Concatenation", complex_dim=3)
+        self.lifting = SimplicialCliqueLifting(
+            feature_lifting="Concatenation", complex_dim=3
+        )
 
     def test_lift_features(self, simple_graph_1):
         data = simple_graph_1
@@ -89,4 +90,3 @@ class TestConcatentionLifting:
         assert (
             expected_x3 == lifted_data.x_3
         ).all(), "Something is wrong with the lifted features x_3."
-

@@ -1,10 +1,13 @@
-import pytest
-import torch, torch_geometric
 import networkx as nx
+import pytest
+import torch
+import torch_geometric
+
 
 @pytest.fixture
 def mocker_fixture(mocker):
     return mocker
+
 
 @pytest.fixture
 def simple_graph_1():

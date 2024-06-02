@@ -194,7 +194,11 @@ def assing_train_val_test_mask_to_graphs(dataset, split_idx):
         if not assigned:
             raise ValueError("Graph not in any split")
 
-    return DataloadDataset(data_train_lst), DataloadDataset(data_val_lst), DataloadDataset(data_test_lst)
+    return (
+        DataloadDataset(data_train_lst),
+        DataloadDataset(data_val_lst),
+        DataloadDataset(data_test_lst),
+    )
 
 
 def load_transductive_splits(dataset, parameters):
@@ -232,7 +236,7 @@ def load_transductive_splits(dataset, parameters):
     data.train_mask = torch.from_numpy(splits["train"])
     data.val_mask = torch.from_numpy(splits["valid"])
     data.test_mask = torch.from_numpy(splits["test"])
-    
+
     if parameters.get("standardize", False):
         # Standardize the node features respecting train mask
         data.x = (data.x - data.x[data.train_mask].mean(0)) / data.x[
@@ -258,14 +262,16 @@ def load_inductive_splits(dataset, parameters):
     assert (
         len(dataset) > 1
     ), "Datasets should have more than one graph in an inductive setting."
-    labels = np.array([data.y.squeeze(0).numpy() for data in dataset.data_list])
+    labels = np.array(
+        [data.y.squeeze(0).numpy() for data in dataset.data_list]
+    )
 
     if parameters.split_type == "random":
         split_idx = random_splitting(labels, parameters)
 
     elif parameters.split_type == "k-fold":
         split_idx = k_fold_split(labels, parameters)
-        
+
     elif parameters.split_type == "fixed" and hasattr(dataset, "split_idx"):
         split_idx = dataset.split_idx
 
@@ -293,7 +299,9 @@ def load_coauthorship_hypergraph_splits(data, parameters, train_prop=0.5):
         torch_geometric.data.Data: Graph dataset with the specified split.
     """
 
-    data_dir = os.path.join(parameters["data_split_dir"], f"train_prop={train_prop}")
+    data_dir = os.path.join(
+        parameters["data_split_dir"], f"train_prop={train_prop}"
+    )
     load_path = f"{data_dir}/split_{parameters['data_seed']}.npz"
     splits = np.load(load_path, allow_pickle=True)
 

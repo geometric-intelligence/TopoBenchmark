@@ -1,18 +1,17 @@
 import json
 import os
-from typing import Any
 
 import hydra
 import torch
 import torch_geometric
 
-from topobenchmarkx.dataloader import DataloadDataset
 from topobenchmarkx.data.utils import (
     ensure_serializable,
     load_inductive_splits,
     load_transductive_splits,
     make_hash,
 )
+from topobenchmarkx.dataloader import DataloadDataset
 from topobenchmarkx.transforms.data_transform import DataTransform
 
 
@@ -37,8 +36,12 @@ class PreProcessor(torch_geometric.data.InMemoryDataset):
         self.data_list = data_list
         if transforms_config is not None:
             self.transforms_applied = True
-            pre_transform = self.instantiate_pre_transform(data_dir, transforms_config)
-            super().__init__(self.processed_data_dir, None, pre_transform, **kwargs)
+            pre_transform = self.instantiate_pre_transform(
+                data_dir, transforms_config
+            )
+            super().__init__(
+                self.processed_data_dir, None, pre_transform, **kwargs
+            )
             self.save_transform_parameters()
             self.load(self.processed_paths[0])
         else:
@@ -85,12 +88,15 @@ class PreProcessor(torch_geometric.data.InMemoryDataset):
         """
         pre_transforms_dict = hydra.utils.instantiate(transforms_config)
         pre_transforms_dict = {
-            key: DataTransform(**value) for key,value in transforms_config.items()
+            key: DataTransform(**value)
+            for key, value in transforms_config.items()
         }
         pre_transforms = torch_geometric.transforms.Compose(
             list(pre_transforms_dict.values())
         )
-        self.set_processed_data_dir(pre_transforms_dict, data_dir, transforms_config)
+        self.set_processed_data_dir(
+            pre_transforms_dict, data_dir, transforms_config
+        )
         return pre_transforms
 
     def set_processed_data_dir(
@@ -111,7 +117,9 @@ class PreProcessor(torch_geometric.data.InMemoryDataset):
         }
         params_hash = make_hash(transforms_parameters)
         self.transforms_parameters = ensure_serializable(transforms_parameters)
-        self.processed_data_dir = os.path.join(*[data_dir, repo_name, f"{params_hash}"])
+        self.processed_data_dir = os.path.join(
+            *[data_dir, repo_name, f"{params_hash}"]
+        )
 
     def save_transform_parameters(self) -> None:
         r"""Save the transform parameters."""
@@ -128,7 +136,9 @@ class PreProcessor(torch_geometric.data.InMemoryDataset):
                 saved_transform_parameters = json.load(f)
 
             if saved_transform_parameters != self.transforms_parameters:
-                raise ValueError("Different transform parameters for the same data_dir")
+                raise ValueError(
+                    "Different transform parameters for the same data_dir"
+                )
 
             print(
                 f"Transform parameters are the same, using existing data_dir: {self.processed_data_dir}"
@@ -136,22 +146,32 @@ class PreProcessor(torch_geometric.data.InMemoryDataset):
 
     def process(self) -> None:
         r"""Process the data."""
-        self.data_list = [self.pre_transform(d) for d in self.data_list] if self.pre_transform is not None else self.data_list
+        self.data_list = (
+            [self.pre_transform(d) for d in self.data_list]
+            if self.pre_transform is not None
+            else self.data_list
+        )
 
         self._data, self.slices = self.collate(self.data_list)
         self._data_list = None  # Reset cache.
 
         assert isinstance(self._data, torch_geometric.data.Data)
         self.save(self.data_list, self.processed_paths[0])
-        
-    def load_dataset_splits(self, split_params) -> tuple[DataloadDataset, DataloadDataset | None, DataloadDataset | None]:
+
+    def load_dataset_splits(
+        self, split_params
+    ) -> tuple[
+        DataloadDataset, DataloadDataset | None, DataloadDataset | None
+    ]:
         if not split_params.get("learning_setting", False):
             raise ValueError("No learning setting specified in split_params")
-        
+
         if split_params.learning_setting == "inductive":
             return load_inductive_splits(self, split_params)
         elif split_params.learning_setting == "transductive":
             return load_transductive_splits(self, split_params)
         else:
-            raise ValueError(f"Invalid '{split_params.learning_setting}' learning setting.\
-                Please define either 'inductive' or 'transductive'.")
+            raise ValueError(
+                f"Invalid '{split_params.learning_setting}' learning setting.\
+                Please define either 'inductive' or 'transductive'."
+            )

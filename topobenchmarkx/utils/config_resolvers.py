@@ -131,7 +131,7 @@ def infer_in_channels(dataset, transforms):
         if "feature_lifting" in lifting_params_keys:
             feature_lifting = transforms[lifting]["feature_lifting"]
         else:
-            feature_lifting = "projection"
+            feature_lifting = "ProjectionSum"
 
         return feature_lifting
 
@@ -141,7 +141,7 @@ def infer_in_channels(dataset, transforms):
         feature_lifting = check_for_type_feature_lifting(transforms, lifting)
 
         if isinstance(dataset.parameters.num_features, int):
-            if feature_lifting == "projection":
+            if feature_lifting == "ProjectionSum":
                 return [dataset.parameters.num_features] * transforms[
                     lifting
                 ].complex_dim
@@ -158,15 +158,15 @@ def infer_in_channels(dataset, transforms):
                     lifting
                 ].complex_dim
         else:
-            # Case when the dataset has not edge attributes
+            # Case when the dataset has edge attributes
             if not transforms[lifting].preserve_edge_attr:
                 
-                if feature_lifting == "projection":
+                if feature_lifting == "ProjectionSum":
                     return [
                         dataset.parameters.num_features[0]
                     ] * transforms[lifting].complex_dim
                 
-                elif feature_lifting == "concatenation":
+                elif feature_lifting == "Concatenation":
                     return_value = [dataset.parameters.num_features]
                     for i in range(
                         2, transforms[lifting].complex_dim + 1
@@ -179,7 +179,7 @@ def infer_in_channels(dataset, transforms):
                 
                 else:
                     return [
-                        dataset.parameters.num_features
+                        dataset.parameters.num_features[0]
                     ] * transforms[lifting].complex_dim
 
             else:
@@ -187,7 +187,6 @@ def infer_in_channels(dataset, transforms):
                     dataset.parameters.num_features[1]
                 ] * (
                     transforms[lifting].complex_dim
-                    + 1
                     - len(dataset.parameters.num_features)
                 )
     else:

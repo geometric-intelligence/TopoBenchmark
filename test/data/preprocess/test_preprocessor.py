@@ -23,20 +23,11 @@ class TestPreProcessor:
         )
 
         params = [
-            {
-                "mock": "torch_geometric.data.InMemoryDataset.__init__",
-                "alias": "mock_inmemory_init",
-            },
-            {"mock": (PreProcessor, "save_transform_parameters")},
-            {"mock": (PreProcessor, "load"), "alias": "mock_load"},
-            {
-                "mock": (PreProcessor, "__len__"),
-                "init_args": {"return_value": 3},
-            },
-            {
-                "mock": (PreProcessor, "get"),
-                "init_args": {"return_value": "0"},
-            },
+            {"mock_inmemory_init": "torch_geometric.data.InMemoryDataset.__init__"},
+            {"mock_save_transform": (PreProcessor, "save_transform_parameters")},
+            {"mock_load": (PreProcessor, "load")},
+            {"mock_len": (PreProcessor, "__len__"), "init_args": {"return_value":3}},
+            {"mock_getitem": (PreProcessor, "get"), "init_args": {"return_value": "0"}},
         ]
         self.flow_mocker = FlowMocker(mocker, params)
 
@@ -62,29 +53,32 @@ class TestPreProcessor:
         params = [
             {"assert_args": ("created_property", "processed_data_dir")},
             {
-                "mock": "torch_geometric.data.InMemoryDataset.__init__",
-                "assert_args": ("called_once_with", ANY, None, ANY),
+                "assert_args": ("created_property", "processed_data_dir")
             },
             {
-                "mock": (PreProcessor, "processed_paths"),
+                "mock_inmemory_init": "torch_geometric.data.InMemoryDataset.__init__",
+                "assert_args": ("called_once_with", ANY, None, ANY)
+            },
+            {
+                "mock_processed_paths": (PreProcessor, "processed_paths"),
                 "init_args": {"property_val": val_processed_paths},
             },
             {
-                "mock": (PreProcessor, "save_transform_parameters"),
-                "assert_args": ("created_property", "processed_paths"),
+                "mock_save_transform": (PreProcessor, "save_transform_parameters"),
+                "assert_args": ("created_property", "processed_paths")
             },
             {
-                "mock": (PreProcessor, "load"),
-                "assert_args": ("called_once_with", val_processed_paths[0]),
+                "mock_load": (PreProcessor, "load"),
+                "assert_args": ("called_once_with", val_processed_paths[0])
             },
-            {"mock": (PreProcessor, "__len__")},
-            {"mock": (PreProcessor, "get")},
+            {"mock_len": (PreProcessor, "__len__")},
+            {"mock_getitem": (PreProcessor, "get")},
         ]
-        flow_mocker = FlowMocker(mocker, params)
-        preprocessor_with_tranform = PreProcessor(
-            self.dataset, self.data_dir, self.transforms_config
+        self.flow_mocker = FlowMocker(mocker, params)
+        self.preprocessor_with_tranform = PreProcessor(
+            self.dataset, self.data_dir,  self.transforms_config
         )
-        flow_mocker.assert_all(preprocessor_with_tranform)
+        self.flow_mocker.assert_all(self.preprocessor_with_tranform)
 
     @patch("topobenchmarkx.data.preprocess.preprocessor.load_inductive_splits")
     def test_load_dataset_splits_inductive(self, mock_load_inductive_splits):

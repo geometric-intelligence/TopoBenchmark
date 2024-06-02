@@ -9,11 +9,18 @@ class FlowMocker:
         if setup:
             self.setup()
 
+    def parse_mock(self, params):
+        for k in list(params.keys()):
+            if "mock_" in k:
+                params["mock"] = params[k]
+                params["alias"] = k
+
     def setup(self):
         mocker = self.mocker
         self.mocks = dict()
 
         for p in self.params:
+            self.parse_mock(p)
             patch_obj = p.get("mock", None)
             mock_alias = p.get("alias", None)
             init_args = p.get("init_args", dict())

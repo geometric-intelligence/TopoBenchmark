@@ -125,7 +125,7 @@ We list the liftings used in `TopoBenchmarkX` to transform datasets. Here, a _li
 ### Graph2Cell
 | Name | Description | Reference |
 | --- | --- | --- |
-| CycleLifting | The algorithm finds a cycle base for the graph. Given this set of cycles the method creates a cell for each one. | [Cell Complex Liftings](https://arxiv.org/abs/2206.00606) |
+| CycleLifting | The algorithm finds a cycle base for the graph. Given this set of cycles the method creates a cell for each one. | [Appendix B](https://arxiv.org/abs/2206.00606) |
 
 ### Graph2Hypergraph
 | Name | Description | Reference |

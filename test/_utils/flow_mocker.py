@@ -25,9 +25,10 @@ class FlowMocker:
                         init_args["return_value"] = init_args["property_val"]
                         init_args["new_callable"]= PropertyMock
                         del init_args["property_val"]
-                    
+                    # Create mock object for instance
                     mock_obj = mocker.patch.object(*patch_obj, **init_args)
                 elif type(patch_obj) == str:
+                    # Create mock object for class method
                     mock_obj = mocker.patch(patch_obj, **init_args)
                 else:
                     raise ValueError(f"Wrong patch object: {patch_obj}")
@@ -38,14 +39,20 @@ class FlowMocker:
                         raise KeyError(f"`{mock_alias}` is already exist in mock dictionary")
                     self.mocks[mock_alias] = self.mocks[patch_obj]
 
-    def assert_all(self, tested_obj):
+    def assert_all(self, tested_obj, params=None):
+        """ 
+        Assert everything specified in assert_args either `params` or self.params. 
+        We can access mock object by its alias {"mock: "mock_alias_1", ...}
+        """
+        params = params if params is not None else self.params
+
         for i, p in enumerate(self.params):
-            patch_obj = p.get("mock", None)
+            mock_name = p.get("mock", None)
             assert_args = p.get("assert_args", None)
 
             if assert_args is not None:
                 assert_func, *func_params = assert_args
-                mock = self.mocks[patch_obj] if patch_obj is not None else None
+                mock = self.mocks[mock_name] if mock_name is not None else None
                 
                 if hasattr(mock, f"assert_{assert_func}"):
                     assert_func = getattr(mock, f"assert_{assert_func}")

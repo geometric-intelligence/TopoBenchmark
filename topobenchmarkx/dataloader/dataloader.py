@@ -3,6 +3,7 @@ from typing import Any
 from lightning import LightningDataModule
 from torch.utils.data import DataLoader
 
+from topobenchmarkx.dataloader.dataload_dataset import DataloadDataset
 from topobenchmarkx.dataloader.utils import collate_fn
 
 
@@ -26,10 +27,10 @@ class TBXDataloader(LightningDataModule):
 
     def __init__(
         self,
-        dataset_train,
-        dataset_val=None,
-        dataset_test=None,
-        batch_size=1,
+        dataset_train: DataloadDataset,
+        dataset_val: DataloadDataset = None,
+        dataset_test: DataloadDataset = None,
+        batch_size : int = 1,
         num_workers: int = 0,
         pin_memory: bool = False,
         **kwargs: Any,

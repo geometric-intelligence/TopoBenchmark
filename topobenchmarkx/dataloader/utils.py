@@ -27,7 +27,7 @@ class DomainData(torch_geometric.data.Data):
 
 def to_data_list(batch):
     """Workaround needed since `torch_geometric` doesn't work when using `torch.sparse` instead of `torch_sparse`."""
-    for key in batch:
+    for key, _ in batch:
         if batch[key].is_sparse:
             sparse_data = batch[key].coalesce()
             batch[key] = SparseTensor.from_torch_sparse_coo_tensor(sparse_data)

@@ -5,9 +5,10 @@ from topobenchmarkx.transforms.liftings.graph2hypergraph import Graph2Hypergraph
 
 
 class HypergraphKHopLifting(Graph2HypergraphLifting):
-    r"""Lifts graphs to hypergraph domain by considering k-hop neighborhoods of a node.
-    This lifting extracts a number of hyperedges equal to the number of nodes in the graph.
-    
+    r"""Lifts graphs to hypergraph domain by considering k-hop neighborhoods of
+    a node. This lifting extracts a number of hyperedges equal to the number of
+    nodes in the graph.
+
     Args:
         k_value (int, optional): The number of hops to consider. (default: 1)
         kwargs (optional): Additional arguments for the class.

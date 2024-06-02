@@ -8,7 +8,9 @@ from topobenchmarkx.dataloader.utils import collate_fn
 
 
 class TBXDataloader(LightningDataModule):
-    r"""This class takes care of returning the dataloaders for the training, validation, and test datasets. It also handles the collate function. The class is designed to work with the `torch` dataloaders.
+    r"""This class takes care of returning the dataloaders for the training,
+    validation, and test datasets. It also handles the collate function. The
+    class is designed to work with the `torch` dataloaders.
 
     Args:
         dataset_train (DataloadDataset): The training dataset.

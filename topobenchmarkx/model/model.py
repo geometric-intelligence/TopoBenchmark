@@ -8,7 +8,7 @@ from torchmetrics import MeanMetric
 
 class TBXModel(LightningModule):
     r"""A `LightningModule` to define a network.
-    
+
     Args:
         backbone (torch.nn.Module): The backbone model to train.
         backbone_wrapper (torch.nn.Module): The backbone wrapper class.
@@ -132,8 +132,8 @@ class TBXModel(LightningModule):
     def validation_step(
         self, batch: Data, batch_idx: int
     ) -> None:
-        r"""Perform a single validation step on a batch of data from the validation
-        set.
+        r"""Perform a single validation step on a batch of data from the
+        validation set.
 
         Args:
             batch (torch_geometric.data.Data): Batch object containing the batched data.
@@ -155,8 +155,7 @@ class TBXModel(LightningModule):
     def test_step(
         self, batch: Data, batch_idx: int
     ) -> None:
-        r"""Perform a single test step on a batch of data from the test
-        set.
+        r"""Perform a single test step on a batch of data from the test set.
 
         Args:
             batch (torch_geometric.data.Data): Batch object containing the batched data.
@@ -177,7 +176,7 @@ class TBXModel(LightningModule):
 
     def process_outputs(self, model_out: dict, batch: Data) -> dict:
         r"""Process model outputs.
-        
+
         Args:
             model_out (dict): Dictionary containing the model output.
             batch (torch_geometric.data.Data): Batch object containing the batched data.
@@ -205,7 +204,7 @@ class TBXModel(LightningModule):
 
     def log_metrics(self, mode=None):
         r"""Log metrics.
-        
+
         Args:
             mode (str, optional): The mode of the model, either "train", "val", or "test". (default: None)
         """
@@ -236,33 +235,51 @@ class TBXModel(LightningModule):
         self.train_metrics_logged = True
 
     def on_train_epoch_end(self) -> None:
-        r"""Lightning hook that is called when a train epoch ends. This hook is used to log the train metrics."""
+        r"""Lightning hook that is called when a train epoch ends.
+
+        This hook is used to log the train metrics.
+        """
         # Log train metrics and reset evaluator
         if not self.train_metrics_logged:
             self.log_metrics(mode="train")
             self.train_metrics_logged = True
 
     def on_validation_epoch_end(self) -> None:
-        r"""Lightning hook that is called when a validation epoch ends. This hook is used to log the validation metrics."""
+        r"""Lightning hook that is called when a validation epoch ends.
+
+        This hook is used to log the validation metrics.
+        """
         # Log validation metrics and reset evaluator
         self.log_metrics(mode="val")
 
     def on_test_epoch_end(self) -> None:
-        r"""Lightning hook that is called when a test epoch ends. This hook is used to log the test metrics."""
+        r"""Lightning hook that is called when a test epoch ends.
+
+        This hook is used to log the test metrics.
+        """
         self.log_metrics(mode="test")
         print()
 
     def on_train_epoch_start(self) -> None:
-        r"""Lightning hook that is called when a train epoch begins. This hook is used to reset the train metrics."""
+        r"""Lightning hook that is called when a train epoch begins.
+
+        This hook is used to reset the train metrics.
+        """
         self.evaluator.reset()
         self.train_metrics_logged = False
 
     def on_val_epoch_start(self) -> None:
-        r"""Lightning hook that is called when a validation epoch begins. This hook is used to reset the validation metrics."""
+        r"""Lightning hook that is called when a validation epoch begins.
+
+        This hook is used to reset the validation metrics.
+        """
         self.evaluator.reset()
 
     def on_test_epoch_start(self) -> None:
-        r"""Lightning hook that is called when a test epoch begins. This hook is used to reset the test metrics."""
+        r"""Lightning hook that is called when a test epoch begins.
+
+        This hook is used to reset the test metrics.
+        """
         self.evaluator.reset()
 
     def setup(self, stage: str) -> None:

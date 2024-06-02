@@ -6,7 +6,10 @@ from topobenchmarkx.nn.encoders.base import AbstractFeatureEncoder
 
 
 class AllCellFeatureEncoder(AbstractFeatureEncoder):
-    r"""Encoder class to apply BaseEncoder to the features of higher order structures. The class creates a BaseEncoder for each dimension specified in selected_dimensions. Then during the forward pass, the BaseEncoders are applied to the features of the corresponding dimensions.
+    r"""Encoder class to apply BaseEncoder to the features of higher order
+    structures. The class creates a BaseEncoder for each dimension specified in
+    selected_dimensions. Then during the forward pass, the BaseEncoders are
+    applied to the features of the corresponding dimensions.
 
     Args:
         in_channels (list[int]): Input dimensions for the features.
@@ -48,7 +51,8 @@ class AllCellFeatureEncoder(AbstractFeatureEncoder):
     def forward(
         self, data: torch_geometric.data.Data
     ) -> torch_geometric.data.Data:
-        r"""Forward pass. The method applies the BaseEncoders to the features of the selected_dimensions.
+        r"""Forward pass. The method applies the BaseEncoders to the features of
+        the selected_dimensions.
 
         Args:
             data (torch_geometric.data.Data): Input data object which should contain x_{i} features for each i in the selected_dimensions.
@@ -88,7 +92,9 @@ class BaseEncoder(torch.nn.Module):
         return f"{self.__class__.__name__}(in_channels={self.linear1.in_features}, out_channels={self.linear1.out_features})"
 
     def forward(self, x: torch.Tensor, batch: torch.Tensor) -> torch.Tensor:
-        r"""Forward pass of the encoder. It applies two linear layers with GraphNorm, Relu activation function, and dropout between the two layers.
+        r"""Forward pass of the encoder. It applies two linear layers with
+        GraphNorm, Relu activation function, and dropout between the two
+        layers.
 
         Args:
             x (torch.Tensor): Input tensor of dimensions [N, in_channels].

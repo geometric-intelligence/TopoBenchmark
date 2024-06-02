@@ -35,12 +35,13 @@ def friedman_test(results):
     return friedmanchisquare(*res)[1]
 
 def skillings_mack_test(results, n_simulations=10000):
-    r"""Calculates the p-value of the Skillings-Mack test between M models (treatments) on N
-    datasets (blocks). This test is a general Friedman-type statistic that can be used in
-    almost any block design with an arbitrary missing-data structure. 
-    
+    r"""Calculates the p-value of the Skillings-Mack test between M models
+    (treatments) on N datasets (blocks). This test is a general Friedman-type
+    statistic that can be used in almost any block design with an arbitrary
+    missing-data structure.
+
     https://www.stat.cmu.edu/technometrics/80-89/VOL-23-02/v2302171.pdf
-    
+
     Args:
         results (numpy.array): A MxN numpy array with the results of M models.
         n_simulations (int, optional): The number of simulations to perform to estimate the p-value. (default: 10000)
@@ -49,7 +50,7 @@ def skillings_mack_test(results, n_simulations=10000):
     """
     def get_SM_value(results):
         r"""Calculates the Skillings-Mack statistic for a given set of results.
-        
+
         Args:
             results (numpy.array): A MxN numpy array with the results of M models.
         Returns:
@@ -88,10 +89,11 @@ def skillings_mack_test(results, n_simulations=10000):
         return SM
     
     def get_simulated_SM_values(res, mask_nans, n_simulations):
-        r"""Calculates the Skillings-Mack statistic for the null hypothesis. The null hypothesis
-        is that the models are equivalent and the differences between them are due to random noise.
-        For this reason we use the normal distribution to obtain the simulated results.
-        
+        r"""Calculates the Skillings-Mack statistic for the null hypothesis. The
+        null hypothesis is that the models are equivalent and the differences
+        between them are due to random noise. For this reason we use the normal
+        distribution to obtain the simulated results.
+
         Args:
             res (numpy.array): A MxN numpy array with the results of M models.
             n_nans (numpy.array): A numpy array with the number of NaNs per row.
@@ -113,9 +115,9 @@ def skillings_mack_test(results, n_simulations=10000):
     return p
 
 def compare_models(results, p_limit=0.05, verbose=False):
-    """Compares different models. First it uses the Friedman test or the Skillings-Mack test 
-    to check that the models are significantly different, then it uses pairwise comparisons
-    to study the ranking of the models.
+    """Compares different models. First it uses the Friedman test or the
+    Skillings-Mack test to check that the models are significantly different,
+    then it uses pairwise comparisons to study the ranking of the models.
 
     Args:
         results (numpy.array): A MxN numpy array with the results of M models

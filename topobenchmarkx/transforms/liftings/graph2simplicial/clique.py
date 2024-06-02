@@ -9,8 +9,9 @@ from topobenchmarkx.transforms.liftings.graph2simplicial import Graph2Simplicial
 
 
 class SimplicialCliqueLifting(Graph2SimplicialLifting):
-    r"""Lifts graphs to simplicial complex domain by identifying the cliques as k-simplices.
-    
+    r"""Lifts graphs to simplicial complex domain by identifying the cliques as
+    k-simplices.
+
     Args:
         kwargs (optional): Additional arguments for the class.
     """
@@ -18,7 +19,8 @@ class SimplicialCliqueLifting(Graph2SimplicialLifting):
         super().__init__(**kwargs)
 
     def lift_topology(self, data: torch_geometric.data.Data) -> dict:
-        r"""Lifts the topology of a graph to a simplicial complex by identifying the cliques as k-simplices.
+        r"""Lifts the topology of a graph to a simplicial complex by identifying
+        the cliques as k-simplices.
 
         Args:
             data (torch_geometric.data.Data): The input data to be lifted.

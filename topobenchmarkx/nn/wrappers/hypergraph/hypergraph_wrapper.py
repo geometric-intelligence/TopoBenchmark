@@ -2,11 +2,15 @@ from topobenchmarkx.nn.wrappers.base import AbstractWrapper
 
 
 class HypergraphWrapper(AbstractWrapper):
-    r"""Wrapper for the hypergraph models. This wrapper defines the forward pass of the model. The hypergraph model return the embeddings of the cells of rank 0, and 1 (the hyperedges)."""
+    r"""Wrapper for the hypergraph models.
+
+    This wrapper defines the forward pass of the model. The hypergraph model
+    return the embeddings of the cells of rank 0, and 1 (the hyperedges).
+    """
 
     def forward(self, batch):
         r"""Forward pass for the hypergraph wrapper.
-        
+
         Args:
             batch (torch_geometric.data.Data): Batch object containing the batched data.
         Returns:

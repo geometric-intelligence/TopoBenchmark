@@ -30,7 +30,7 @@ class GraphLoader(AbstractLoader):
             - data_name (str): The name of the dataset.
             - data_type (str): The type of the dataset.
             - split_type (str): The type of split to be used. It can be "fixed", "random", or "k-fold".
-            
+
             If split_type is "random", the parameters must also contain the following keys:
                 - data_seed (int): The seed for the split.
                 - data_split_dir (str): The directory where the split is stored.

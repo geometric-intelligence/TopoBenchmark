@@ -98,7 +98,7 @@ class EDGNN(nn.Module):
 
     def forward(self, x, edge_index):
         r"""Forward pass.
-        
+
         Args:
             x (Tensor): input features
             edge_index (LongTensor): edge index
@@ -220,7 +220,7 @@ class MLP(nn.Module):
 
     def forward(self, x):
         r"""Forward pass.
-        
+
         Args:
             x (Tensor): input features
         Returns:
@@ -237,7 +237,7 @@ class MLP(nn.Module):
 
     def flops(self, x):
         r"""Calculate FLOPs.
-        
+
         Args:
             x (Tensor): input features
         Returns:
@@ -296,7 +296,7 @@ class PlainMLP(nn.Module):
 
     def forward(self, x):
         r"""Forward pass.
-        
+
         Args:
             x (Tensor): input features
         Returns:

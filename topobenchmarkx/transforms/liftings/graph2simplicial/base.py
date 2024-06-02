@@ -8,7 +8,7 @@ from topobenchmarkx.transforms.liftings import GraphLifting
 
 class Graph2SimplicialLifting(GraphLifting):
     r"""Abstract class for lifting graphs to simplicial complexes.
-    
+
     Args:
         complex_dim (int, optional): The maximum dimension of the simplicial complex to be generated. (default: 2)
         kwargs (optional): Additional arguments for the class.
@@ -23,7 +23,7 @@ class Graph2SimplicialLifting(GraphLifting):
         self, simplicial_complex: SimplicialComplex, graph: nx.Graph
     ) -> dict:
         r"""Returns the lifted topology.
-        
+
         Args:
             simplicial_complex (SimplicialComplex): The simplicial complex.
             graph (nx.Graph): The input graph.

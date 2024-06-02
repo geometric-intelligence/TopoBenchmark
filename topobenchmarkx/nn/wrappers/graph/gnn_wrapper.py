@@ -2,11 +2,15 @@ from topobenchmarkx.nn.wrappers.base import AbstractWrapper
 
 
 class GNNWrapper(AbstractWrapper):
-    r"""Wrapper for the GNN models. This wrapper defines the forward pass of the model. The GNN models return the embeddings of the cells of rank 0."""
+    r"""Wrapper for the GNN models.
+
+    This wrapper defines the forward pass of the model. The GNN models return
+    the embeddings of the cells of rank 0.
+    """
 
     def forward(self, batch):
         r"""Forward pass for the GNN wrapper.
-        
+
         Args:
             batch (torch_geometric.data.Data): Batch object containing the batched data.
         Returns:

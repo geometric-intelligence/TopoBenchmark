@@ -7,7 +7,7 @@ from torch_geometric.utils import scatter
 
 class AbstractZeroCellReadOut(torch.nn.Module):
     r"""Readout layer for GNNs that operates on the batch level.
-    
+
     Args:
         hidden_dim (int): Hidden dimension of the GNN model.
         out_channels (int): Number of output channels.
@@ -37,7 +37,7 @@ class AbstractZeroCellReadOut(torch.nn.Module):
 
     def __call__(self, model_out: dict, batch: torch_geometric.data.Data) -> dict:
         """Readout logic based on model_output.
-        
+
         Args:
             model_out (dict): Dictionary containing the model output.
             batch (torch_geometric.data.Data): Batch object containing the batched domain data.
@@ -53,7 +53,7 @@ class AbstractZeroCellReadOut(torch.nn.Module):
     
     def compute_logits(self, x, batch):
         r"""Compute logits based on the readout layer.
-        
+
         Args:
             x (torch.Tensor): Node embeddings.
             batch (torch.Tensor): Batch index tensor.

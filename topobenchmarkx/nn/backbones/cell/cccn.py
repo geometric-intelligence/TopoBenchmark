@@ -5,7 +5,7 @@ from torch_geometric.nn import GCNConv
 
 class CCCN(nn.Module):
     r"""CCCN model.
-    
+
     Args:
         in_channels (int): Number of input channels.
         n_layers (int, optional): Number of layers. (default: 2)
@@ -22,7 +22,7 @@ class CCCN(nn.Module):
 
     def forward(self, x, Ld, Lu):
         r"""Forward pass.
-        
+
         Args:
             x (torch.Tensor): Input tensor.
             Ld (torch.Tensor): Domain adjacency matrix.
@@ -39,7 +39,7 @@ class CCCN(nn.Module):
 
 class CW(nn.Module):
     r"""Layer of the CCCN model.
-    
+
     Args:
         F_in (int): Number of input channels.
         F_out (int): Number of output channels.
@@ -52,7 +52,7 @@ class CW(nn.Module):
 
     def forward(self, xe, Lu, Ld):
         r"""Forward pass.
-        
+
         Args:
             xe (torch.Tensor): Input tensor.
             Ld (torch.Tensor): Domain adjacency matrix.

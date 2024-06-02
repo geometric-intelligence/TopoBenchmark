@@ -41,8 +41,9 @@ class FlowMocker:
                     self.mocks[mock_alias] = self.mocks[patch_obj]
 
     def assert_all(self, tested_obj, params=None):
-        """ 
-        Assert everything specified in assert_args either `params` or self.params. 
+        """Assert everything specified in assert_args either `params` or
+        self.params.
+
         We can access mock object by its alias {"mock: "mock_alias_1", ...}
         """
         params = params if params is not None else self.params

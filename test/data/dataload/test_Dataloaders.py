@@ -72,12 +72,14 @@ class TestCollateFunction:
                     assert batch[key].shape[i] == i_elems
 
         def check_separation(matrix, n_elems_0_row, n_elems_0_col):
-            """Check that the matrix is separated into two parts diagonally concatenated."""
+            """Check that the matrix is separated into two parts diagonally
+            concatenated."""
             assert torch.all(matrix[:n_elems_0_row, n_elems_0_col:] == 0)
             assert torch.all(matrix[n_elems_0_row:, :n_elems_0_col] == 0)
 
         def check_values(matrix, m1, m2):
-            """Check that the values in the matrix are the same as the values in the original data."""
+            """Check that the values in the matrix are the same as the values
+            in the original data."""
             assert torch.allclose(matrix[:m1.shape[0], :m1.shape[1]], m1)
             assert torch.allclose(matrix[m1.shape[0]:, m1.shape[1]:], m2)
 

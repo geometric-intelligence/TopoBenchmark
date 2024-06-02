@@ -135,8 +135,9 @@ class USCountyDemosDataset(InMemoryDataset):
     def process(self) -> None:
         r"""Process the data for the dataset.
 
-        This method loads the US county demographics data, applies any pre-processing transformations if specified,
-        and saves the processed data to the appropriate location.
+        This method loads the US county demographics data, applies any pre-
+        processing transformations if specified, and saves the processed data
+        to the appropriate location.
         """
         data = read_us_county_demos(self.raw_dir, self.year, self.task_variable)
         data_list = [data]

@@ -6,7 +6,8 @@ from topobenchmarkx.transforms.liftings import AbstractLifting
 
 
 class GraphLifting(AbstractLifting):
-    r"""Abstract class for lifting graph topologies to other (topological) domains.
+    r"""Abstract class for lifting graph topologies to other (topological)
+    domains.
 
     Parameters
     ----------
@@ -84,7 +85,8 @@ class GraphLifting(AbstractLifting):
 
 
 class PointCloudLifting(AbstractLifting):
-    r"""Abstract class for lifting point cloud topologies to other (topological) domains.
+    r"""Abstract class for lifting point cloud topologies to other (topological)
+    domains.
 
     Parameters
     ----------
@@ -99,7 +101,8 @@ class PointCloudLifting(AbstractLifting):
 
 
 class CellComplexLifting(AbstractLifting):
-    r"""Abstract class for lifting cell complexes to other (topological) domains.
+    r"""Abstract class for lifting cell complexes to other (topological)
+    domains.
 
     Parameters
     ----------
@@ -114,7 +117,8 @@ class CellComplexLifting(AbstractLifting):
 
 
 class SimplicialLifting(AbstractLifting):
-    r"""Abstract class for lifting simplicial complexes to other (topological) domains.
+    r"""Abstract class for lifting simplicial complexes to other (topological)
+    domains.
 
     Parameters
     ----------
@@ -144,7 +148,8 @@ class HypergraphLifting(AbstractLifting):
 
 
 class CombinatorialLifting(AbstractLifting):
-    r"""Abstract class for lifting combinatorial structures to other (topological) domains.
+    r"""Abstract class for lifting combinatorial structures to other
+    (topological) domains.
 
     Parameters
     ----------

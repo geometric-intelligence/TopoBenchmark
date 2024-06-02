@@ -9,9 +9,11 @@ from topobenchmarkx.transforms.liftings.graph2simplicial.base import Graph2Simpl
 
 
 class SimplicialKHopLifting(Graph2SimplicialLifting):
-    r"""Lifts graphs to simplicial complex domain by considering k-hop neighborhoods. For each node its neighborhood
-    is selected and then all the possible simplices, when considering the neighborhood as a clique, are added to the
-    simplicial complex. For this reason this lifting does not conserve the initial graph topology.
+    r"""Lifts graphs to simplicial complex domain by considering k-hop
+    neighborhoods. For each node its neighborhood is selected and then all the
+    possible simplices, when considering the neighborhood as a clique, are
+    added to the simplicial complex. For this reason this lifting does not
+    conserve the initial graph topology.
 
     Args:
         max_k_simplices (int, optional): The maximum number of k-simplices to consider. (default: 5000)

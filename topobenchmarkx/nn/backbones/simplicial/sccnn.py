@@ -7,7 +7,7 @@ class SCCNNCustom(torch.nn.Module):
 
     Note: In this task, we can consider the output on any order of simplices for the
     classification task, which of course can be amended by a readout layer.
-    
+
     Args:
         in_channels_all (tuple of int): Dimension of input features on (nodes, edges, faces).
         hidden_channels_all (tuple of int): Dimension of features of hidden layers on (nodes, edges, faces).
@@ -54,7 +54,7 @@ class SCCNNCustom(torch.nn.Module):
 
     def forward(self, x_all, laplacian_all, incidence_all):
         """Forward computation.
-        
+
         Args:
             x_all (tuple of tensors): Tuple of feature tensors (node, edge, face).
             laplacian_all (tuple of tensors): Tuple of Laplacian tensors (graph laplacian L0, down edge laplacian L1_d, upper edge laplacian L1_u, face laplacian L2).
@@ -77,7 +77,7 @@ class SCCNNCustom(torch.nn.Module):
 
 class SCCNNLayer(torch.nn.Module):
     r"""Layer of a Simplicial Complex Convolutional Neural Network.
-    
+
     Args:
         in_channels (tuple of int): Dimensions of input features on nodes, edges, and triangles.
         out_channels (tuple of int): Dimensions of output features on nodes, edges, and triangles.
@@ -162,7 +162,7 @@ class SCCNNLayer(torch.nn.Module):
 
     def reset_parameters(self, gain: float = 1.414):
         r"""Reset learnable parameters.
-        
+
         Args:
             gain (float): Gain for the weight initialization.
         """
@@ -182,7 +182,7 @@ class SCCNNLayer(torch.nn.Module):
 
     def aggr_norm_func(self, conv_operator, x):
         r"""Perform aggregation normalization.
-        
+
         Args:
             conv_operator (torch.sparse): Convolution operator.
             x (torch.Tensor): Feature tensor.
@@ -199,7 +199,7 @@ class SCCNNLayer(torch.nn.Module):
 
     def update(self, x):
         """Update embeddings on each cell (step 4).
-        
+
         Args:
             x (torch.Tensor): Input tensor.
         Returns:
@@ -213,7 +213,7 @@ class SCCNNLayer(torch.nn.Module):
 
     def chebyshev_conv(self, conv_operator, conv_order, x):
         r"""Perform Chebyshev convolution.
-        
+
         Args:
             conv_operator (torch.sparse): Convolution operator.
             conv_order (int): Order of the convolution.
@@ -240,7 +240,7 @@ class SCCNNLayer(torch.nn.Module):
 
     def forward(self, x_all, laplacian_all, incidence_all):
         r"""Forward computation.
-        
+
         Args:
             x_all (tuple of tensors): Tuple of input feature tensors (node, edge, face).
             laplacian_all (tuple of tensors): Tuple of Laplacian tensors (graph laplacian L0, down edge laplacian L1_d, upper edge laplacian L1_u, face laplacian L2).

@@ -54,7 +54,7 @@ class CWN(torch.nn.Module):
     ):
         """Forward computation through projection, convolutions, linear layers
         and average pooling.
-        
+
         Args:
             x_0 (torch.Tensor): Input features on the nodes (0-cells).
             x_1 (torch.Tensor): Input features on the edges (1-cells).
@@ -94,7 +94,7 @@ class CWNLayer(nn.Module):
     2. A convolutional layer that sends messages from (r-1)-cells to r-cells.
     3. A layer that creates representations in r-cells based on the received messages.
     4. A layer that updates representations in r-cells.
-    
+
     Args:
         in_channels_0 (int): Dimension of input features on (r-1)-cells (nodes in case r = 1).
         in_channels_1 (int): Dimension of input features on r-cells (edges in case r = 1).
@@ -175,7 +175,7 @@ class CWNLayer(nn.Module):
 
         The forward pass of this layer is composed of two convolutional steps
         that are followed by an aggregation step and a final update step.
-        
+
         Args:
             x_0 (torch.Tensor): Input features on the (r-1)-cells.
             x_1 (torch.Tensor): Input features on the r-cells.
@@ -206,7 +206,7 @@ class _CWNDefaultFirstConv(nn.Module):
 
     The self.forward method of this module must be treated as a protocol for
     the first convolutional step in CWN layer.
-    
+
     Args:
         in_channels_1 (int): Dimension of input features on r-cells.
         in_channels_2 (int): Dimension of input features on (r+1)-cells.
@@ -236,7 +236,7 @@ class _CWNDefaultFirstConv(nn.Module):
 
     def forward(self, x_1, x_2, neighborhood_1_to_1, neighborhood_2_to_1):
         r"""Forward pass.
-        
+
         Args:
             x_1 (torch.Tensor): Input features on the r-cells.
             x_2 (torch.Tensor): Input features on the (r+1)-cells.
@@ -259,7 +259,7 @@ class _CWNDefaultSecondConv(nn.Module):
 
     The self.forward method of this module must be treated as a protocol for
     the second convolutional step in CWN layer.
-    
+
     Args:
         in_channels_0 (int): Dimension of input features on (r-1)-cells.
         out_channels (int): Dimension of output features on r-cells.
@@ -272,7 +272,7 @@ class _CWNDefaultSecondConv(nn.Module):
 
     def forward(self, x_0, neighborhood_0_to_1):
         r"""Forward pass.
-        
+
         Args:
             x_0 (torch.Tensor): Input features on the (r-1)-cells.
             x_1 (torch.Tensor): Input features on the r-cells.
@@ -294,7 +294,7 @@ class _CWNDefaultAggregate(nn.Module):
 
     def forward(self, x, y):
         r"""Forward pass.
-        
+
         Args:
             x (torch.Tensor): Representations on the r-cells produced by the first convolutional step.
             y (torch.Tensor): Representations on the r-cells produced by the second convolutional step.
@@ -306,7 +306,7 @@ class _CWNDefaultAggregate(nn.Module):
 
 class _CWNDefaultUpdate(nn.Module):
     r"""Default implementation of an update step in CWNLayer.
-    
+
     Args:
         in_channels (int): Dimension of input features on r-cells.
         out_channels (int): Dimension of output features on r-cells.
@@ -317,7 +317,7 @@ class _CWNDefaultUpdate(nn.Module):
 
     def forward(self, x, x_prev=None):
         r"""Forward pass.
-        
+
         Args:
             x (torch.Tensor): New representations on the r-cells obtained after the aggregation step.
             x_prev (torch.Tensor): Original representations on the r-cells passed into the CWN layer.

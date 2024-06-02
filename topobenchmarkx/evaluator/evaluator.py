@@ -82,12 +82,12 @@ class TBXEvaluator(AbstractEvaluator):
             raise ValueError(f"Invalid task {self.task}")
 
     def compute(self):
-        r"""Compute the metrics.
-        """
+        r"""Compute the metrics."""
         return self.metrics.compute()
 
     def reset(self):
         """Reset the metrics.
+
         This method should be called after each epoch.
         """
         self.metrics.reset()

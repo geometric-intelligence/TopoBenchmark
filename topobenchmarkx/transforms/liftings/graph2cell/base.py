@@ -8,7 +8,7 @@ from topobenchmarkx.transforms.liftings import GraphLifting
 
 class Graph2CellLifting(GraphLifting):
     r"""Abstract class for lifting graphs to cell complexes.
-    
+
     Args:
         complex_dim (int, optional): The dimension of the cell complex to be generated. (default: 2)
         kwargs (optional): Additional arguments for the class.
@@ -20,7 +20,7 @@ class Graph2CellLifting(GraphLifting):
 
     def _get_lifted_topology(self, cell_complex: CellComplex, graph: nx.Graph) -> dict:
         r"""Returns the lifted topology.
-        
+
         Args:
             cell_complex (CellComplex): The cell complex.
             graph (nx.Graph): The input graph.

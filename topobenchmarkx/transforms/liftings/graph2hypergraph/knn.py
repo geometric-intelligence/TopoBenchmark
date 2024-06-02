@@ -19,7 +19,8 @@ class HypergraphKNNLifting(Graph2HypergraphLifting):
         self.transform = torch_geometric.transforms.KNNGraph(self.k, self.loop)
 
     def lift_topology(self, data: torch_geometric.data.Data) -> dict:
-        r"""Lifts the topology of a graph to hypergraph domain by considering k-nearest neighbors.
+        r"""Lifts the topology of a graph to hypergraph domain by considering
+        k-nearest neighbors.
 
         Args:
             data (torch_geometric.data.Data): The input data to be lifted.

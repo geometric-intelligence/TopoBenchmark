@@ -32,7 +32,7 @@ class TBXDataloader(LightningDataModule):
         dataset_train: DataloadDataset,
         dataset_val: DataloadDataset = None,
         dataset_test: DataloadDataset = None,
-        batch_size : int = 1,
+        batch_size: int = 1,
         num_workers: int = 0,
         pin_memory: bool = False,
         **kwargs: Any,
@@ -61,7 +61,7 @@ class TBXDataloader(LightningDataModule):
         self.num_workers = num_workers
         self.pin_memory = pin_memory
         self.persistent_workers = kwargs.get("persistent_workers", False)
-            
+
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}(dataset_train={self.dataset_train}, dataset_val={self.dataset_val}, dataset_test={self.dataset_test}, batch_size={self.batch_size})"
 

@@ -5,7 +5,9 @@ from typing import Any
 import torch_geometric
 from toponetx.classes import SimplicialComplex
 
-from topobenchmarkx.transforms.liftings.graph2simplicial.base import Graph2SimplicialLifting
+from topobenchmarkx.transforms.liftings.graph2simplicial.base import (
+    Graph2SimplicialLifting,
+)
 
 
 class SimplicialKHopLifting(Graph2SimplicialLifting):
@@ -19,10 +21,11 @@ class SimplicialKHopLifting(Graph2SimplicialLifting):
         max_k_simplices (int, optional): The maximum number of k-simplices to consider. (default: 5000)
         kwargs (optional): Additional arguments for the class.
     """
+
     def __init__(self, max_k_simplices=5000, **kwargs):
         super().__init__(**kwargs)
         self.max_k_simplices = max_k_simplices
-    
+
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}(max_k_simplices={self.max_k_simplices!r})"
 
@@ -38,7 +41,9 @@ class SimplicialKHopLifting(Graph2SimplicialLifting):
         graph = self._generate_graph_from_data(data)
         simplicial_complex = SimplicialComplex(graph)
         edge_index = torch_geometric.utils.to_undirected(data.edge_index)
-        simplices: list[set[tuple[Any, ...]]] = [set() for _ in range(2, self.complex_dim + 1)]
+        simplices: list[set[tuple[Any, ...]]] = [
+            set() for _ in range(2, self.complex_dim + 1)
+        ]
         for n in range(graph.number_of_nodes()):
             # Find 1-hop node n neighbors
             neighbors, _, _, _ = torch_geometric.utils.k_hop_subgraph(

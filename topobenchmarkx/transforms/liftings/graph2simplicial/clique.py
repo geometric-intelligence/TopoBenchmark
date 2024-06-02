@@ -5,7 +5,9 @@ import networkx as nx
 import torch_geometric
 from toponetx.classes import SimplicialComplex
 
-from topobenchmarkx.transforms.liftings.graph2simplicial import Graph2SimplicialLifting
+from topobenchmarkx.transforms.liftings.graph2simplicial import (
+    Graph2SimplicialLifting,
+)
 
 
 class SimplicialCliqueLifting(Graph2SimplicialLifting):
@@ -15,6 +17,7 @@ class SimplicialCliqueLifting(Graph2SimplicialLifting):
     Args:
         kwargs (optional): Additional arguments for the class.
     """
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
@@ -30,7 +33,9 @@ class SimplicialCliqueLifting(Graph2SimplicialLifting):
         graph = self._generate_graph_from_data(data)
         simplicial_complex = SimplicialComplex(graph)
         cliques = nx.find_cliques(graph)
-        simplices: list[set[tuple[Any, ...]]] = [set() for _ in range(2, self.complex_dim + 1)]
+        simplices: list[set[tuple[Any, ...]]] = [
+            set() for _ in range(2, self.complex_dim + 1)
+        ]
         for clique in cliques:
             for i in range(2, self.complex_dim + 1):
                 for c in combinations(clique, i + 1):

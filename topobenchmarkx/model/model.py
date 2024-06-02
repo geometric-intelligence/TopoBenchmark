@@ -17,6 +17,7 @@ class TBXModel(LightningModule):
         loss (torch.nn.Module): The loss class.
         feature_encoder (torch.nn.Module, optional): The feature encoder. (default: None)
     """
+
     def __init__(
         self,
         backbone: torch.nn.Module,
@@ -62,7 +63,7 @@ class TBXModel(LightningModule):
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}(backbone={self.backbone}, readout={self.readout}, loss={self.loss}, feature_encoder={self.feature_encoder})"
-        
+
     def forward(self, batch: Data) -> dict:
         r"""Perform a forward pass through the model `self.backbone`.
 
@@ -73,9 +74,7 @@ class TBXModel(LightningModule):
         """
         return self.backbone(batch)
 
-    def model_step(
-        self, batch: Data
-    ) -> dict:
+    def model_step(self, batch: Data) -> dict:
         r"""Perform a single model step on a batch of data.
 
         Args:
@@ -86,17 +85,17 @@ class TBXModel(LightningModule):
 
         # Feature Encoder
         batch = self.feature_encoder(batch)
-        
+
         # Domain model
         model_out = self.forward(batch)
-        
+
         # Readout
         if self.readout is not None:
             model_out = self.readout(model_out=model_out, batch=batch)
 
         # Loss
         model_out = self.process_outputs(model_out=model_out, batch=batch)
-        
+
         # Metric
         model_out = self.loss(model_out=model_out, batch=batch)
         self.evaluator.update(model_out)
@@ -129,9 +128,7 @@ class TBXModel(LightningModule):
         # Return loss for backpropagation step
         return model_out["loss"]
 
-    def validation_step(
-        self, batch: Data, batch_idx: int
-    ) -> None:
+    def validation_step(self, batch: Data, batch_idx: int) -> None:
         r"""Perform a single validation step on a batch of data from the
         validation set.
 
@@ -152,9 +149,7 @@ class TBXModel(LightningModule):
             batch_size=1,
         )
 
-    def test_step(
-        self, batch: Data, batch_idx: int
-    ) -> None:
+    def test_step(self, batch: Data, batch_idx: int) -> None:
         r"""Perform a single test step on a batch of data from the test set.
 
         Args:

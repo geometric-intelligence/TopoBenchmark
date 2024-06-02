@@ -12,6 +12,7 @@ class CCCN(nn.Module):
         dropout (float, optional): Dropout rate. (default: 0)
         last_act (bool, optional): If True, the last activation function is applied. (default: False)
     """
+
     def __init__(self, in_channels, n_layers=2, dropout=0.0, last_act=False):
         super().__init__()
         self.d = dropout
@@ -37,6 +38,7 @@ class CCCN(nn.Module):
             x = x.relu()
         return x
 
+
 class CW(nn.Module):
     r"""Layer of the CCCN model.
 
@@ -44,6 +46,7 @@ class CW(nn.Module):
         F_in (int): Number of input channels.
         F_out (int): Number of output channels.
     """
+
     def __init__(self, F_in, F_out):
         super().__init__()
         self.har = nn.Linear(F_in, F_out)

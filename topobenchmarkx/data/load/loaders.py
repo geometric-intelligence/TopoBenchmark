@@ -41,13 +41,14 @@ class GraphLoader(AbstractLoader):
                 - data_seed (int): The seed for the split.
             The parameters can be defined in a yaml file and then loaded using `omegaconf.OmegaConf.load('path/to/dataset/config.yaml')`.
     """
+
     def __init__(self, parameters: DictConfig, **kwargs):
         super().__init__(parameters)
         self.parameters = parameters
-        
+
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}(parameters={self.parameters})"
-    
+
     def load(self) -> tuple[torch_geometric.data.Dataset, str]:
         r"""Load graph dataset.
 
@@ -105,13 +106,13 @@ class GraphLoader(AbstractLoader):
             dataset = datasets[0] + datasets[1] + datasets[2]
             dataset.split_idx = split_idx
             data_dir = root_data_dir
-            
+
         elif self.parameters.data_name in HETEROPHILIC_DATASETS:
             dataset = torch_geometric.datasets.HeterophilousGraphDataset(
                 root=root_data_dir,
                 name=self.parameters["data_name"],
             )
-        
+
         elif self.parameters.data_name in ["US-county-demos"]:
             dataset = USCountyDemosDataset(
                 root=root_data_dir,
@@ -129,7 +130,7 @@ class GraphLoader(AbstractLoader):
             raise NotImplementedError(
                 f"Dataset {self.parameters.data_name} not implemented"
             )
-            
+
         return dataset, data_dir
 
 

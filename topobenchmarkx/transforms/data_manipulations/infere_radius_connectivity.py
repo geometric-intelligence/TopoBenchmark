@@ -14,7 +14,7 @@ class InfereRadiusConnectivity(torch_geometric.transforms.BaseTransform):
         super().__init__()
         self.type = "infere_radius_connectivity"
         self.parameters = kwargs
-        
+
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}(type={self.type!r}, parameters={self.parameters!r})"
 

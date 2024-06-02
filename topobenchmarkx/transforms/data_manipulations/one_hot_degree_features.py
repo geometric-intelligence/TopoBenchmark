@@ -15,6 +15,7 @@ class OneHotDegreeFeatures(torch_geometric.transforms.BaseTransform):
         features_field (str): The field containing the node features.
         kwargs (optional): Additional arguments for the class.
     """
+
     def __init__(
         self,
         max_degree: int,
@@ -32,7 +33,7 @@ class OneHotDegreeFeatures(torch_geometric.transforms.BaseTransform):
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}(type={self.type!r}, max_degree={self.max_degree}, degrees_field={self.deg_field!r}, features_field={self.features_fields!r})"
-    
+
     def forward(self, data: torch_geometric.data.Data):
         r"""Apply the transform to the input data.
 

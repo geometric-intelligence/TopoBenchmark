@@ -11,5 +11,5 @@ __all__ = [
     "Graph2SimplicialLifting",
     "SimplicialCliqueLifting",
     "SimplicialKHopLifting",
-    "GRAPH2SIMPLICIAL_LIFTINGS"
+    "GRAPH2SIMPLICIAL_LIFTINGS",
 ]

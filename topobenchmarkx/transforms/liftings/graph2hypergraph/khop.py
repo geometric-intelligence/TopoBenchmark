@@ -1,7 +1,9 @@
 import torch  # noqa: I001
 import torch_geometric
 
-from topobenchmarkx.transforms.liftings.graph2hypergraph import Graph2HypergraphLifting
+from topobenchmarkx.transforms.liftings.graph2hypergraph import (
+    Graph2HypergraphLifting,
+)
 
 
 class HypergraphKHopLifting(Graph2HypergraphLifting):
@@ -13,10 +15,11 @@ class HypergraphKHopLifting(Graph2HypergraphLifting):
         k_value (int, optional): The number of hops to consider. (default: 1)
         kwargs (optional): Additional arguments for the class.
     """
+
     def __init__(self, k_value=1, **kwargs):
         super().__init__(**kwargs)
         self.k = k_value
-    
+
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}(k={self.k!r})"
 

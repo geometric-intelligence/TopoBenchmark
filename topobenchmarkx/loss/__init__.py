@@ -8,7 +8,7 @@ from .loss import TBXLoss
 
 __all__ = [
     "AbstractLoss",
-    "TBXLoss"
+    "TBXLoss",
     # "OtherLoss1",
     # "OtherLoss2",
     # ... add other loss classes here

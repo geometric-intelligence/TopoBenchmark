@@ -10,6 +10,7 @@ class DomainData(torch_geometric.data.Data):
     r"""Data object class that overwrites some methods from
     `torch_geometric.data.Data` so that not only sparse matrices with adj in
     the name can work with the `torch_geometric` dataloaders."""
+
     def is_valid(self, string):
         r"""Check if the string contains any of the valid names."""
         valid_names = ["adj", "incidence", "laplacian"]
@@ -90,11 +91,11 @@ def collate_fn(batch):
                     running_idx[f"cell_running_idx_number_{cell_dim}"] = (
                         current_number_of_cells
                     )
-                
+
                 else:
-                    running_idx[f"cell_running_idx_number_{cell_dim}"] += (
-                        current_number_of_cells
-                    )
+                    running_idx[
+                        f"cell_running_idx_number_{cell_dim}"
+                    ] += current_number_of_cells
 
         data_list.append(data)
 
@@ -106,7 +107,7 @@ def collate_fn(batch):
     # Add batch slices to batch
     for key, value in batch_idx_dict.items():
         batch[key] = torch.cat(value, dim=1).squeeze(0).long()
-    
+
     # Ensure shape is torch.Tensor
     # "shape" describes the number of n_cells in each graph
     if batch.get("shape") is not None:

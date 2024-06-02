@@ -17,6 +17,7 @@ class SCCNNCustom(torch.nn.Module):
         update_func (str, optional): Update function for the simplicial complex convolution. (default: None)
         n_layers (int, optional): Number of layers. (default: 2)
     """
+
     def __init__(
         self,
         in_channels_all,
@@ -87,6 +88,7 @@ class SCCNNLayer(torch.nn.Module):
         update_func (str, optional): Activation function used in aggregation layers. (default: None)
         initialization (str, optional): Weight initialization method. (default: "xavier_normal")
     """
+
     def __init__(
         self,
         in_channels,

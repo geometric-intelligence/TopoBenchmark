@@ -1,4 +1,3 @@
-
 from .utils import (
     ensure_serializable,
     generate_zero_sparse_connectivity,

@@ -8,7 +8,6 @@ __all__ = [
     "CCCNWrapper",
     "CWNWrapper",
     "CCXNWrapper",
-
     # "OtherWrapper1",
     # "OtherWrapper2",
     # ... add other readout classes here

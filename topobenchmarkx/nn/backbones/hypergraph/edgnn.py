@@ -24,6 +24,7 @@ class EDGNN(nn.Module):
         normalization (str, optional): normalization method. Defaults to 'None'.
         AllSet_input_norm (bool, optional): whether to normalize input features. Defaults to False.
     """
+
     def __init__(
         self,
         num_features,
@@ -117,9 +118,10 @@ class EDGNN(nn.Module):
         x = self.dropout(x)
         return x, None
 
+
 class MLP(nn.Module):
     """Adapted from https://github.com/CUAI/CorrectAndSmooth/blob/master/gen_models.py
-    
+
     Args:
         in_channels (int): number of input features
         hidden_channels (int): number of hidden features
@@ -129,6 +131,7 @@ class MLP(nn.Module):
         Normalization (str, optional): normalization method. Defaults to 'bn'.
         InputNorm (bool, optional): whether to normalize input features. Defaults to False.
     """
+
     def __init__(
         self,
         in_channels,
@@ -264,7 +267,7 @@ class MLP(nn.Module):
 
 class PlainMLP(nn.Module):
     """adapted from https://github.com/CUAI/CorrectAndSmooth/blob/master/gen_models.py
-    
+
     Args:
         in_channels (int): number of input features
         hidden_channels (int): number of hidden features
@@ -272,6 +275,7 @@ class PlainMLP(nn.Module):
         num_layers (int): number of layers
         dropout (float, optional): dropout rate. Defaults to 0.5.
     """
+
     def __init__(
         self,
         in_channels,

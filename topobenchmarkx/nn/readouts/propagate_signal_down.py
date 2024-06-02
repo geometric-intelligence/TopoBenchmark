@@ -14,6 +14,7 @@ class PropagateSignalDown(AbstractZeroCellReadOut):
         hidden_dim (int): Dimension of the cells representations.
         readout_name (str): Readout name.
     """
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 

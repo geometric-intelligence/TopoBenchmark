@@ -11,7 +11,7 @@ class CWN(torch.nn.Module):
     """Implementation of a specific version of CW network.
     From Bodnar, et al. Weisfeiler and Lehman go cellular: CW networks.
     NeurIPS 2021. https://arxiv.org/abs/2106.12575
-    
+
     Args:
         in_channels_0 (int): Dimension of input features on nodes (0-cells).
         in_channels_1 (int): Dimension of input features on edges (1-cells).
@@ -19,6 +19,7 @@ class CWN(torch.nn.Module):
         hid_channels (int): Dimension of hidden features.
         n_layers (int): Number of CWN layers.
     """
+
     def __init__(
         self,
         in_channels_0,
@@ -107,6 +108,7 @@ class CWNLayer(nn.Module):
         update_fn (torch.nn.Module, optional): A module that updates the aggregated representations of r-cells.
         eps (float, optional): A learnable parameter that scales the input features before the first convolutional layer.
     """
+
     def __init__(
         self,
         in_channels_0,
@@ -213,6 +215,7 @@ class _CWNDefaultFirstConv(nn.Module):
         out_channels (int): Dimension of output features on r-cells.
         eps (float, optional): A learnable parameter that scales the input features before the first convolutional layer.
     """
+
     def __init__(
         self, in_channels_1, in_channels_2, out_channels, eps: float = 0.0
     ) -> None:
@@ -264,6 +267,7 @@ class _CWNDefaultSecondConv(nn.Module):
         in_channels_0 (int): Dimension of input features on (r-1)-cells.
         out_channels (int): Dimension of output features on r-cells.
     """
+
     def __init__(self, in_channels_0, out_channels) -> None:
         super().__init__()
         self.conv_0_to_1 = Conv(
@@ -289,6 +293,7 @@ class _CWNDefaultAggregate(nn.Module):
     The self.forward method of this module must be treated as a protocol for
     the aggregation step in CWN layer.
     """
+
     def __init__(self) -> None:
         super().__init__()
 
@@ -311,6 +316,7 @@ class _CWNDefaultUpdate(nn.Module):
         in_channels (int): Dimension of input features on r-cells.
         out_channels (int): Dimension of output features on r-cells.
     """
+
     def __init__(self, in_channels, out_channels) -> None:
         super().__init__()
         self.transform = nn.Linear(in_channels, out_channels)

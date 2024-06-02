@@ -66,7 +66,7 @@ class USCountyDemosDataset(InMemoryDataset):
         super().__init__(
             root,
         )
-        
+
         out = fs.torch_load(self.processed_paths[0])
         assert len(out) == 3 or len(out) == 4
 
@@ -82,7 +82,7 @@ class USCountyDemosDataset(InMemoryDataset):
             self.data = data_cls.from_dict(data)
 
         assert isinstance(self._data, Data)
-        
+
     def __repr__(self) -> str:
         return f"{self.name}(self.root={self.root}, self.name={self.name}, self.parameters={self.parameters}, self.force_reload={self.force_reload})"
 
@@ -92,7 +92,11 @@ class USCountyDemosDataset(InMemoryDataset):
 
     @property
     def processed_dir(self) -> str:
-        self.processed_root = osp.join(self.root, self.name, "_".join([str(self.year),self.task_variable]))
+        self.processed_root = osp.join(
+            self.root,
+            self.name,
+            "_".join([str(self.year), self.task_variable]),
+        )
         return osp.join(self.processed_root, "processed")
 
     @property
@@ -102,7 +106,7 @@ class USCountyDemosDataset(InMemoryDataset):
     @property
     def processed_file_names(self) -> str:
         return "data.pt"
-    
+
     def download(self) -> None:
         r"""Downloads the dataset from the specified URL and saves it to the raw
         directory.
@@ -139,7 +143,9 @@ class USCountyDemosDataset(InMemoryDataset):
         processing transformations if specified, and saves the processed data
         to the appropriate location.
         """
-        data = read_us_county_demos(self.raw_dir, self.year, self.task_variable)
+        data = read_us_county_demos(
+            self.raw_dir, self.year, self.task_variable
+        )
         data_list = [data]
         self.data, self.slices = self.collate(data_list)
         self._data_list = None  # Reset cache.

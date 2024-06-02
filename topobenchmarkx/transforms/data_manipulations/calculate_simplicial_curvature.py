@@ -13,7 +13,7 @@ class CalculateSimplicialCurvature(torch_geometric.transforms.BaseTransform):
         super().__init__()
         self.type = "simplicial_curvature"
         self.parameters = kwargs
-        
+
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}(type={self.type!r}, parameters={self.parameters!r})"
 

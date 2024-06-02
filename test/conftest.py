@@ -8,6 +8,7 @@ import torch_geometric
 def mocker_fixture(mocker):
     return mocker
 
+
 @pytest.fixture
 def simple_graph_1():
     """Create a manual graph for testing purposes."""

@@ -12,6 +12,7 @@ class AbstractWrapper(ABC, torch.nn.Module):
         out_channels (int): Number of output channels.
         num_cell_dimensions (int): Number of cell dimensions.
     """
+
     def __init__(self, backbone, **kwargs):
         super().__init__()
         self.backbone = backbone
@@ -27,7 +28,7 @@ class AbstractWrapper(ABC, torch.nn.Module):
 
     def __repr__(self):
         return f"{self.__class__.__name__}(backbone={self.backbone}, out_channels={self.backbone.out_channels}, dimensions={self.dimensions})"
-     
+
     def __call__(self, batch):
         r"""Forward pass for the model.
 

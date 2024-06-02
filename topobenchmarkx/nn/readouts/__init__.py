@@ -11,7 +11,7 @@ from .propagate_signal_down import PropagateSignalDown
 __all__ = [
     "AbstractZeroCellReadOut",
     "PropagateSignalDown",
-    "NoReadOut"
+    "NoReadOut",
     # "OtherReadout1",
     # "OtherReadout2",
     # ... add other readout classes here

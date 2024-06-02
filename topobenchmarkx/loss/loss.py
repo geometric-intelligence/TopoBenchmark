@@ -30,8 +30,8 @@ class TBXLoss(AbstractLoss):
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}(task={self.task}, loss_type={self.loss_type})"
-    
-    def forward(self,  model_out: dict, batch: torch_geometric.data.Data):
+
+    def forward(self, model_out: dict, batch: torch_geometric.data.Data):
         r"""Forward pass of the loss function.
 
         Args:

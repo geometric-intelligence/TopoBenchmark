@@ -36,7 +36,9 @@ class AbstractLifting(torch_geometric.transforms.BaseTransform):
         """
         raise NotImplementedError
 
-    def forward(self, data: torch_geometric.data.Data) -> torch_geometric.data.Data:
+    def forward(
+        self, data: torch_geometric.data.Data
+    ) -> torch_geometric.data.Data:
         r"""Applies the full lifting (topology + features) to the input data.
 
         Parameters

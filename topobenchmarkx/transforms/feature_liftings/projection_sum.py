@@ -8,9 +8,10 @@ class ProjectionSum(torch_geometric.transforms.BaseTransform):
     Args:
         kwargs (optional): Additional arguments for the class.
     """
+
     def __init__(self, **kwargs):
         super().__init__()
-    
+
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}()"
 

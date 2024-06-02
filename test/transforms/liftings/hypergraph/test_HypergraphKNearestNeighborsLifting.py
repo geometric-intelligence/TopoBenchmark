@@ -12,12 +12,8 @@ class TestHypergraphKNNLifting:
 
     def setup_method(self):
         # Initialise the HypergraphKNNLifting class
-        self.lifting_k2 = HypergraphKNNLifting(
-            k_value=2, loop=True
-        )
-        self.lifting_k3 = HypergraphKNNLifting(
-            k_value=3, loop=True
-        )
+        self.lifting_k2 = HypergraphKNNLifting(k_value=2, loop=True)
+        self.lifting_k3 = HypergraphKNNLifting(k_value=3, loop=True)
 
     def test_lift_topology(self, simple_graph_2):
         # Test the lift_topology method

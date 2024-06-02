@@ -54,7 +54,9 @@ OmegaConf.register_new_resolver("get_required_lifting", get_required_lifting)
 OmegaConf.register_new_resolver("get_monitor_metric", get_monitor_metric)
 OmegaConf.register_new_resolver("get_monitor_mode", get_monitor_mode)
 OmegaConf.register_new_resolver("infer_in_channels", infer_in_channels)
-OmegaConf.register_new_resolver("infere_num_cell_dimensions", infere_num_cell_dimensions)
+OmegaConf.register_new_resolver(
+    "infere_num_cell_dimensions", infere_num_cell_dimensions
+)
 OmegaConf.register_new_resolver(
     "parameter_multiplication", lambda x, y: int(int(x) * int(y))
 )
@@ -94,7 +96,9 @@ def run(cfg: DictConfig) -> tuple[dict[str, Any], dict[str, Any]]:
     log.info("Instantiating preprocessor...")
     transform_config = cfg.get("transforms", None)
     preprocessor = PreProcessor(dataset, dataset_dir, transform_config)
-    dataset_train, dataset_val, dataset_test = preprocessor.load_dataset_splits(cfg.dataset.split_params)
+    dataset_train, dataset_val, dataset_test = (
+        preprocessor.load_dataset_splits(cfg.dataset.split_params)
+    )
     # Prepare datamodule
     log.info("Instantiating datamodule...")
     if cfg.dataset.parameters.task_level in ["node", "graph"]:
@@ -115,7 +119,7 @@ def run(cfg: DictConfig) -> tuple[dict[str, Any], dict[str, Any]]:
         optimizer=cfg.optimizer,
         scheduler=cfg.get("scheduler", None),
         loss=cfg.loss,
-        )
+    )
 
     log.info("Instantiating callbacks...")
     callbacks: list[Callback] = instantiate_callbacks(cfg.get("callbacks"))
@@ -157,12 +161,18 @@ def run(cfg: DictConfig) -> tuple[dict[str, Any], dict[str, Any]]:
         test_best_model_path = True
         if cfg.get("ckpt_path"):
             ckpt_path = cfg.ckpt_path
-            log.info(f"Attempting to load weights from the provided ckpt_path: {ckpt_path}")
+            log.info(
+                f"Attempting to load weights from the provided ckpt_path: {ckpt_path}"
+            )
             try:
-                trainer.test(model=model, datamodule=datamodule, ckpt_path=ckpt_path)
-                test_best_model_path = False # do not test "best model" if a valid ckpt_path is provided
+                trainer.test(
+                    model=model, datamodule=datamodule, ckpt_path=ckpt_path
+                )
+                test_best_model_path = False  # do not test "best model" if a valid ckpt_path is provided
             except FileNotFoundError:
-                log.warning(f"No checkpoint file found at the provided ckpt_path: {ckpt_path}.")
+                log.warning(
+                    f"No checkpoint file found at the provided ckpt_path: {ckpt_path}."
+                )
                 log.info("Trying with best model instead...")
         if test_best_model_path:
             ckpt_path = trainer.checkpoint_callback.best_model_path
@@ -171,7 +181,9 @@ def run(cfg: DictConfig) -> tuple[dict[str, Any], dict[str, Any]]:
                     "Best ckpt not found! Using current weights for testing..."
                 )
                 ckpt_path = None
-            trainer.test(model=model, datamodule=datamodule, ckpt_path=ckpt_path)
+            trainer.test(
+                model=model, datamodule=datamodule, ckpt_path=ckpt_path
+            )
 
     test_metrics = trainer.callback_metrics
 

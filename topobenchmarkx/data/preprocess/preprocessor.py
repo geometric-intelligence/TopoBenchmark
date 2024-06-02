@@ -1,18 +1,17 @@
 import json
 import os
-from typing import Any
 
 import hydra
 import torch
 import torch_geometric
 
-from topobenchmarkx.dataloader import DataloadDataset
 from topobenchmarkx.data.utils import (
     ensure_serializable,
     load_inductive_splits,
     load_transductive_splits,
     make_hash,
 )
+from topobenchmarkx.dataloader import DataloadDataset
 from topobenchmarkx.transforms.data_transform import DataTransform
 
 

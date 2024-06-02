@@ -129,11 +129,3 @@ class TBXDataloader(LightningDataModule):
             dict: A dictionary containing the datamodule state that you want to save.
         """
         return {}
-
-    def load_state_dict(self, state_dict: dict[str, Any]) -> None:
-        r"""Called when loading a checkpoint. Implement to reload datamodule
-        state given datamodule `state_dict()`.
-
-        Args:
-            state_dict (dict): The datamodule state. This is the object returned by `state_dict()`.
-        """

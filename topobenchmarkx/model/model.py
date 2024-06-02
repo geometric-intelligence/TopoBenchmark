@@ -42,7 +42,7 @@ class TBXModel(LightningModule):
             self.backbone = backbone_wrapper(backbone)
         self.readout = readout
 
-        # Evaluator 
+        # Evaluator
         self.evaluator = evaluator
         self.train_metrics_logged = False
 
@@ -51,7 +51,7 @@ class TBXModel(LightningModule):
         self.scheduler = scheduler
 
         # Loss function
-        self.loss = loss        
+        self.loss = loss
         self.task_level = self.hparams["readout"].task_level
 
         # Tracking best so far validation accuracy
@@ -306,7 +306,3 @@ class TBXModel(LightningModule):
                 },
             }
         return {"optimizer": optimizer}
-
-
-if __name__ == "__main__":
-    _ = TBXModel(None, None, None, None)

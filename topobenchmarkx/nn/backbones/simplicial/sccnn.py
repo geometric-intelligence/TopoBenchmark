@@ -1,5 +1,3 @@
-"""SCCNN implementation for complex classification."""
-
 import torch
 from torch.nn.parameter import Parameter
 
@@ -9,25 +7,16 @@ class SCCNNCustom(torch.nn.Module):
 
     Note: In this task, we can consider the output on any order of simplices for the
     classification task, which of course can be amended by a readout layer.
-
-    Parameters
-    ----------
-    in_channels_all: tuple of int
-        Dimension of input features on (nodes, edges, faces).
-    hidden_channels_all: tuple of int
-        Dimension of features of hidden layers on (nodes, edges, faces).
-    conv_order: int
-        Order of convolutions, we consider the same order for all convolutions.
-    sc_order: int
-        Order of simplicial complex.
-    aggr_norm: bool
-        Whether to normalize the aggregation.
-    update_func: str
-        Update function for the simplicial complex convolution.
-    n_layers: int
-        Number of layers.
+    
+    Args:
+        in_channels_all (tuple of int): Dimension of input features on (nodes, edges, faces).
+        hidden_channels_all (tuple of int): Dimension of features of hidden layers on (nodes, edges, faces).
+        conv_order (int): Order of convolutions, we consider the same order for all convolutions.
+        sc_order (int): Order of simplicial complex.
+        aggr_norm (bool, optional): Whether to normalize the aggregation. (default: False)
+        update_func (str, optional): Update function for the simplicial complex convolution. (default: None)
+        n_layers (int, optional): Number of layers. (default: 2)
     """
-
     def __init__(
         self,
         in_channels_all,
@@ -65,27 +54,13 @@ class SCCNNCustom(torch.nn.Module):
 
     def forward(self, x_all, laplacian_all, incidence_all):
         """Forward computation.
-
-        Parameters
-        ----------
-        x_all : tuple of tensors
-            Tuple of feature tensors (node, edge, face).
-            Each entry shape = (n_simplices, channels).
-
-        laplacian_all : tuple of tensors
-            Tuple of Laplacian tensors (graph laplacian L0, down edge laplacian L1_d, upper edge laplacian L1_u, face laplacian L2).
-            Each entry shape = (n_simplices,n_simplices).
-
-        incidence_all : tuple of tensors
-            Tuple of order 1 and 2 incidence matrices.
-            Shape of B1 = [n_nodes, n_edges].
-            Shape of B2 = [n_edges, n_faces].
-
-        Returns
-        -------
-        x_all : tuple of tensors
-            Tuple of final hidden state tensors (node, edge, face).
-            Each entry shape = (n_simplices, channels).
+        
+        Args:
+            x_all (tuple of tensors): Tuple of feature tensors (node, edge, face).
+            laplacian_all (tuple of tensors): Tuple of Laplacian tensors (graph laplacian L0, down edge laplacian L1_d, upper edge laplacian L1_u, face laplacian L2).
+            incidence_all (tuple of tensors): Tuple of order 1 and 2 incidence matrices.
+        Returns:
+            x_all (tuple of tensors): Tuple of final hidden state tensors (node, edge, face).
         """
         x_0, x_1, x_2 = x_all
         in_x_0 = self.in_linear_0(x_0)
@@ -100,91 +75,18 @@ class SCCNNCustom(torch.nn.Module):
         return x_all
 
 
-# Layer
-"""Simplicial Complex Convolutional Neural Network Layer."""
-
-
 class SCCNNLayer(torch.nn.Module):
     r"""Layer of a Simplicial Complex Convolutional Neural Network.
-
-    Parameters
-    ----------
-    in_channels : tuple of int
-        Dimensions of input features on nodes, edges, and triangles.
-    out_channels : tuple of int
-        Dimensions of output features on nodes, edges, and triangles.
-    conv_order : int
-        Convolution order of the simplicial filters.
-        To avoid too many parameters, we consider them to be the same.
-    sc_order : int
-        SC order.
-    aggr_norm : bool, default = False
-        Whether to normalize the aggregated message by the neighborhood size.
-    update_func : str, default = None
-        Activation function used in aggregation layers.
-    initialization : str, default = "xavier_normal"
-        Weight initialization method.
-
-    Examples
-    --------
-    Here we provide an example of pseudocode for SCCNN layer in an SC
-    of order two
-    input X_0: [n_nodes, in_channels]
-    input X_1: [n_edges, in_channels]
-    input X_2: [n_faces, in_channels]
-
-    graph Laplacian L_0: [n_nodes, n_nodes]
-    1-Lap_down L_1_down: [n_edges, n_edges]
-    1-Lap_up L_1_up: [n_edges, n_edges]
-    2-Lap L_2: [n_faces,n_faces]
-    1-incidence B_1: [n_nodes, n_edges]
-    2-incidence B_2: [n_edges, n_faces]
-
-    conv_order: int, e.g., 2
-
-    output Y_0: [n_nodes, out_channels]
-    output Y_1: [n_edges, out_channels]
-    output Y_2: [n_faces, out_channels]
-
-    SCCNN layer looks like:
-
-        Y_0 = torch.einsum(
-        concat(
-            X_0, L_0@X_0, L_0@L_0@X_0 ||
-            B_1@X_1, B_1@L_1_down@X_1, B_1@L_1_down@L_1_down@X_1
-        ), weight_0)
-        Y_1 = torch.einsum(
-        concat(
-            B_1.T@X_1, B_1.T@L_0@X_0, B_1.T@L_0@L_0@X_0 ||
-            X_1, L_1_down@X_1, L_1_down@L_1_down@X_1,
-                L_1_up@X_1, L_1_up@L_1_up@X_1 ||
-            B_2@X_2, B_2@L_2@X_2, B_2@L_2@L_2@X_2
-        ), weight_1)
-        Y_2 = torch.einsum(
-        concat(
-            X_2, L_2@X_2, L_2@L_2@X_2 ||
-            B_2.T@X_1, B_2.T@L_1_up@X_1, B_2.T@L_1_up@L_1_up@X_1
-        ), weight_2)
-    where
-        - weight_0, weight_2, weight_2 are the trainable parameters
-        - weight_0: [out_channels, in_channels, total_order_0]
-            - total_order_0 = 1+conv_order + 1+conv_order
-        - weight_1: [out_channels, in_channels, total_order_1]
-            - total_order_1 = 1+conv_order +
-                              1+conv_order+conv_order +
-                              1+conv_order
-        - weight_2: [out_channels, in_channels, total_order_2]
-            - total_order_2 = 1+conv_order + 1+conv_order
-        - to implement Lap_down@Lap_down@X, we consider chebyshev method
-            to avoid matrix@matrix computation
-
-    References
-    ----------
-    .. [1] Papillon, Sanborn, Hajij, Miolane.
-        Equations of topological neural networks (2023).
-        https://github.com/awesome-tnns/awesome-tnns/
+    
+    Args:
+        in_channels (tuple of int): Dimensions of input features on nodes, edges, and triangles.
+        out_channels (tuple of int): Dimensions of output features on nodes, edges, and triangles.
+        conv_order (int): Convolution order of the simplicial filters.
+        sc_order (int): SC order.
+        aggr_norm (bool, optional): Whether to normalize the aggregated message by the neighborhood size. (default: False)
+        update_func (str, optional): Activation function used in aggregation layers. (default: None)
+        initialization (str, optional): Weight initialization method. (default: "xavier_normal")
     """
-
     def __init__(
         self,
         in_channels,
@@ -260,16 +162,9 @@ class SCCNNLayer(torch.nn.Module):
 
     def reset_parameters(self, gain: float = 1.414):
         r"""Reset learnable parameters.
-
-        Parameters
-        ----------
-        gain : float
-            Gain for the weight initialization.
-
-        Notes
-        -----
-        This function will be called by subclasses of
-        MessagePassing that have trainable weights.
+        
+        Args:
+            gain (float): Gain for the weight initialization.
         """
         if self.initialization == "xavier_uniform":
             torch.nn.init.xavier_uniform_(self.weight_0, gain=gain)
@@ -286,7 +181,14 @@ class SCCNNLayer(torch.nn.Module):
             )
 
     def aggr_norm_func(self, conv_operator, x):
-        r"""Perform aggregation normalization."""
+        r"""Perform aggregation normalization.
+        
+        Args:
+            conv_operator (torch.sparse): Convolution operator.
+            x (torch.Tensor): Feature tensor.
+        Returns:
+            torch.Tensor: Normalized feature tensor.
+        """
         neighborhood_size = torch.sum(conv_operator.to_dense(), dim=1)
         neighborhood_size_inv = 1 / neighborhood_size
         neighborhood_size_inv[~(torch.isfinite(neighborhood_size_inv))] = 0
@@ -297,16 +199,11 @@ class SCCNNLayer(torch.nn.Module):
 
     def update(self, x):
         """Update embeddings on each cell (step 4).
-
-        Parameters
-        ----------
-        x : torch.Tensor, shape = (n_target_cells, out_channels)
-            Feature tensor.
-
-        Returns
-        -------
-        torch.Tensor, shape = (n_target_cells, out_channels)
-            Updated output features on target cells.
+        
+        Args:
+            x (torch.Tensor): Input tensor.
+        Returns:
+            torch.Tensor: Updated tensor.
         """
         if self.update_func == "sigmoid":
             return torch.sigmoid(x)
@@ -316,20 +213,13 @@ class SCCNNLayer(torch.nn.Module):
 
     def chebyshev_conv(self, conv_operator, conv_order, x):
         r"""Perform Chebyshev convolution.
-
-        Parameters
-        ----------
-        conv_operator : torch.sparse, shape = (n_simplices,n_simplices)
-            Convolution operator e.g., the adjacency matrix, or the Hodge Laplacians.
-        conv_order : int
-            The order of the convolution.
-        x : torch.Tensor, shape = (n_simplices,num_channels)
-            Feature tensor.
-
-        Returns
-        -------
-        torch.Tensor
-            Output tensor. x[:, :, k] = (conv_operator@....@conv_operator) @ x.
+        
+        Args:
+            conv_operator (torch.sparse): Convolution operator.
+            conv_order (int): Order of the convolution.
+            x (torch.Tensor): Feature tensor.
+        Returns:
+            torch.Tensor: Output tensor.
         """
         num_simplices, num_channels = x.shape
         X = torch.empty(size=(num_simplices, num_channels, conv_order)).to(
@@ -349,49 +239,14 @@ class SCCNNLayer(torch.nn.Module):
         return X
 
     def forward(self, x_all, laplacian_all, incidence_all):
-        r"""Forward computation (see [1]_).
-
-        .. math::
-            \begin{align*}
-            &🟥 \quad m_{y \rightarrow z}^{(0\rightarrow1)}  = B_1^T \cdot h_y^{t,(0)} \cdot \Theta^{t,(0 \rightarrow 1)}\\
-            &🟧 $\quad m_{z}^{(0\rightarrow1)}  = \frac{1}\sum_{y \in \mathcal{B}(z)} m_{y \rightarrow z}^{(0\rightarrow1)} \qquad \text{where} \sum \text{represents a mean.}\\
-            &🟥 $\quad m_{z \rightarrow x}^{(1 \rightarrow 0)} = B_1\odot att(m_{z \in \mathcal{C}(x)}^{(0\rightarrow1)}, h_x^{t,(0)}) \cdot m_z^{(0\rightarrow1)} \cdot \Theta^{t,(1 \rightarrow 0)}\\
-            &🟧 $\quad m_x^{(1\rightarrow0)}  = \sum_{z \in \mathcal{C}(x)} m_{z \rightarrow x}^{(1\rightarrow0)} \qquad \text{where} \sum \text{represents a mean.}\\
-            &🟩 \quad m_x^{(0)}  = m_x^{(1\rightarrow0)}\\
-            &🟦 \quad h_x^{t+1, (0)} = \Theta^{t, \text{update}} \cdot (h_x^{t,(0)}||m_x^{(0)})+b^{t, \text{update}}\\
-            \end{align*}
-
-        Parameters
-        ----------
-        x_all : tuple of tensors, shape = (x_0,x_1,x_2)
-            Tuple of input feature tensors:
-
-            - x_0: torch.Tensor, shape = (n_nodes,in_channels_0),
-            - x_1: torch.Tensor, shape = (n_edges,in_channels_1),
-            - x_2: torch.Tensor, shape = (n_triangles,in_channels_2).
-
-        laplacian_all: tuple of tensors, shape = (laplacian_0,laplacian_down_1,laplacian_up_1,laplacian_2)
-            Tuple of laplacian tensors:
-
-            - laplacian_0: torch.sparse, graph Laplacian,
-            - laplacian_down_1: torch.sparse, the 1-Hodge laplacian (lower part),
-            - laplacian_up_1: torch.sparse, the 1-hodge laplacian (upper part),
-            - laplacian_2: torch.sparse, the 2-hodge laplacian.
-
-        incidence_all : tuple of tensors, shape = (b1,b2)
-            Tuple of incidence tensors:
-
-            - b1: torch.sparse, shape = (n_nodes,n_edges), node-to-edge incidence matrix,
-            - b2: torch.sparse, shape = (n_edges,n_triangles), edge-to-face incidence matrix.
-
-        Returns
-        -------
-        y_0 : torch.Tensor
-            Output features on nodes.
-        y_1 : torch.Tensor
-            Output features on edges.
-        y_2 : torch.Tensor
-            Output features on triangles.
+        r"""Forward computation.
+        
+        Args:
+            x_all (tuple of tensors): Tuple of input feature tensors (node, edge, face).
+            laplacian_all (tuple of tensors): Tuple of Laplacian tensors (graph laplacian L0, down edge laplacian L1_d, upper edge laplacian L1_u, face laplacian L2).
+            incidence_all (tuple of tensors): Tuple of order 1 and 2 incidence matrices.
+        Returns:
+            y_all (tuple of tensors): Tuple of output feature tensors (node, edge, face).
         """
         x_0, x_1, x_2 = x_all
 

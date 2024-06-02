@@ -34,7 +34,7 @@ class TBXModel(LightningModule):
 
         # This line allows to access init params with 'self.hparams' attribute
         # also ensures init params will be stored in ckpt
-        self.save_hyperparameters(logger=False, ignore=[])
+        self.save_hyperparameters(logger=False, ignore=["backbone","readout","feature_encoder"])
 
         self.feature_encoder = feature_encoder
         if backbone_wrapper is None:
@@ -53,7 +53,7 @@ class TBXModel(LightningModule):
 
         # Loss function
         self.loss = loss
-        self.task_level = self.hparams["readout"].task_level
+        self.task_level = self.readout.task_level
 
         # Tracking best so far validation accuracy
         self.val_acc_best = MeanMetric()

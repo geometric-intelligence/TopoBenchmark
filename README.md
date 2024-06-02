@@ -119,13 +119,13 @@ We list the liftings used in `TopoBenchmarkX` to transform datasets. Here, a _li
 ### Graph2Simplicial
 | Name | Description | Reference |
 | --- | --- | --- |
-| CliqueLifting | The algorithm finds the cliques in the graph and creates simplices. Given a clique the first simplex added is the one containing all the nodes of the clique, then the simplices composed of all the possible combinations with one node missing, then two nodes missing, and so on, until all the possible pairs are added. Then the method moves to the next clique. | [Simplicial Complexes](https://en.wikipedia.org/wiki/Clique_complex) |
+| CliqueLifting | The algorithm finds the cliques in the graph and creates simplices. Given a clique the first simplex added is the one containing all the nodes of the clique, then the simplices composed of all the possible combinations with one node missing, then two nodes missing, and so on, until all the possible pairs are added. Then the method moves to the next clique. | [Clique Complexes](https://en.wikipedia.org/wiki/Clique_complex) |
 | KHopLifting | For each node in the graph, the algorithm finds the set of nodes that are at most k connections away from the initial node. This set is then treated as if it was a clique from the CliqueLifting method. The process is repeated for all nodes in the graph. | [Neighborhood Complexes](https://arxiv.org/pdf/math/0512077) |
 
 ### Graph2Cell
 | Name | Description | Reference |
 | --- | --- | --- |
-| CycleLifting | The algorithm finds a cycle base for the graph. Given this set of cycles the method creates a cell for each one. | [CW Complexes Liftings](https://arxiv.org/abs/2206.00606) |
+| CycleLifting | The algorithm finds a cycle base for the graph. Given this set of cycles the method creates a cell for each one. | [Cell Complex Liftings](https://arxiv.org/abs/2206.00606) |
 
 ### Graph2Hypergraph
 | Name | Description | Reference |

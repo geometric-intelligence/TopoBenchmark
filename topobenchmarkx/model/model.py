@@ -36,7 +36,10 @@ class TBXModel(LightningModule):
         self.save_hyperparameters(logger=False, ignore=[])
 
         self.feature_encoder = feature_encoder
-        self.backbone = backbone_wrapper(backbone)
+        if backbone_wrapper is None:
+            self.backbone = backbone
+        else:
+            self.backbone = backbone_wrapper(backbone)
         self.readout = readout
 
         # Evaluator 
@@ -88,7 +91,8 @@ class TBXModel(LightningModule):
         model_out = self.forward(batch)
         
         # Readout
-        model_out = self.readout(model_out=model_out, batch=batch)
+        if self.readout is not None:
+            model_out = self.readout(model_out=model_out, batch=batch)
 
         # Loss
         model_out = self.process_outputs(model_out=model_out, batch=batch)

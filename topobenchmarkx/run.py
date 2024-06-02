@@ -203,7 +203,7 @@ def count_number_of_parameters(
 
 
 @hydra.main(
-    version_base="1.3", config_path="../configs", config_name="train.yaml"
+    version_base="1.3", config_path="../configs", config_name="run.yaml"
 )
 def main(cfg: DictConfig) -> float | None:
     """Main entry point for training.

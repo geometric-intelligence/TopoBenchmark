@@ -1,4 +1,4 @@
-from typing import Any  # noqa: I001
+from typing import Any
 
 from topobenchmarkx.transforms.data_manipulations import DATA_MANIPULATIONS
 from topobenchmarkx.transforms.feature_liftings import FEATURE_LIFTINGS

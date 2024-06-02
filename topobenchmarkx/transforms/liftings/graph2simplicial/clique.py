@@ -1,4 +1,4 @@
-from itertools import combinations  # noqa: I001
+from itertools import combinations
 from typing import Any
 
 import networkx as nx

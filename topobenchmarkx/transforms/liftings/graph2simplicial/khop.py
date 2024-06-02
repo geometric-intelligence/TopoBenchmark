@@ -1,4 +1,4 @@
-import random  # noqa: I001
+import random
 from itertools import combinations
 from typing import Any
 

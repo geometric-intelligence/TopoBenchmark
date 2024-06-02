@@ -1,6 +1,6 @@
 from .calculate_simplicial_curvature import (
     CalculateSimplicialCurvature,
-)  # noqa: I001
+)
 from .equal_gaus_features import EqualGausFeatures
 from .identity_transform import IdentityTransform
 from .infere_knn_connectivity import InfereKNNConnectivity

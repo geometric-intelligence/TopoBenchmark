@@ -23,11 +23,24 @@ class TestPreProcessor:
         )
 
         params = [
-            {"mock_inmemory_init": "torch_geometric.data.InMemoryDataset.__init__"},
-            {"mock_save_transform": (PreProcessor, "save_transform_parameters")},
+            {
+                "mock_inmemory_init": "torch_geometric.data.InMemoryDataset.__init__"
+            },
+            {
+                "mock_save_transform": (
+                    PreProcessor,
+                    "save_transform_parameters",
+                )
+            },
             {"mock_load": (PreProcessor, "load")},
-            {"mock_len": (PreProcessor, "__len__"), "init_args": {"return_value":3}},
-            {"mock_getitem": (PreProcessor, "get"), "init_args": {"return_value": "0"}},
+            {
+                "mock_len": (PreProcessor, "__len__"),
+                "init_args": {"return_value": 3},
+            },
+            {
+                "mock_getitem": (PreProcessor, "get"),
+                "init_args": {"return_value": "0"},
+            },
         ]
         self.flow_mocker = FlowMocker(mocker, params)
 
@@ -52,31 +65,32 @@ class TestPreProcessor:
         val_processed_paths = ["/some/path"]
         params = [
             {"assert_args": ("created_property", "processed_data_dir")},
-            {
-                "assert_args": ("created_property", "processed_data_dir")
-            },
+            {"assert_args": ("created_property", "processed_data_dir")},
             {
                 "mock_inmemory_init": "torch_geometric.data.InMemoryDataset.__init__",
-                "assert_args": ("called_once_with", ANY, None, ANY)
+                "assert_args": ("called_once_with", ANY, None, ANY),
             },
             {
                 "mock_processed_paths": (PreProcessor, "processed_paths"),
                 "init_args": {"property_val": val_processed_paths},
             },
             {
-                "mock_save_transform": (PreProcessor, "save_transform_parameters"),
-                "assert_args": ("created_property", "processed_paths")
+                "mock_save_transform": (
+                    PreProcessor,
+                    "save_transform_parameters",
+                ),
+                "assert_args": ("created_property", "processed_paths"),
             },
             {
                 "mock_load": (PreProcessor, "load"),
-                "assert_args": ("called_once_with", val_processed_paths[0])
+                "assert_args": ("called_once_with", val_processed_paths[0]),
             },
             {"mock_len": (PreProcessor, "__len__")},
             {"mock_getitem": (PreProcessor, "get")},
         ]
         self.flow_mocker = FlowMocker(mocker, params)
         self.preprocessor_with_tranform = PreProcessor(
-            self.dataset, self.data_dir,  self.transforms_config
+            self.dataset, self.data_dir, self.transforms_config
         )
         self.flow_mocker.assert_all(self.preprocessor_with_tranform)
 

@@ -1,4 +1,4 @@
-import torch  # noqa: I001
+import torch
 import torch_geometric
 
 from topobenchmarkx.transforms.liftings.graph2hypergraph import (

@@ -1,14 +1,17 @@
+# numpydoc ignore=GL08,PR01
 import torch_geometric
 
 
-class NodeDegrees(torch_geometric.transforms.BaseTransform):
+class NodeDegrees(
+    torch_geometric.transforms.BaseTransform
+):  # numpydoc ignore=GL08,PR01
     r"""A transform that calculates the node degrees of the input graph.
 
     Args:
-        kwargs (optional): Parameters for the base transform.
+        **kwargs (optional): Parameters for the base transform.
     """
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs):  # numpydoc ignore=GL08
         super().__init__()
         self.type = "node_degrees"
         self.parameters = kwargs
@@ -16,7 +19,9 @@ class NodeDegrees(torch_geometric.transforms.BaseTransform):
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}(type={self.type!r}, parameters={self.parameters!r})"
 
-    def forward(self, data: torch_geometric.data.Data):
+    def forward(
+        self, data: torch_geometric.data.Data
+    ):  # numpydoc ignore=PR01,RT01
         r"""Apply the transform to the input data.
 
         Args:
@@ -26,7 +31,7 @@ class NodeDegrees(torch_geometric.transforms.BaseTransform):
         """
         field_to_process = [
             key
-            for key in data.keys()
+            for key in data
             for field_substring in self.parameters["selected_fields"]
             if field_substring in key and key != "incidence_0"
         ]
@@ -37,7 +42,7 @@ class NodeDegrees(torch_geometric.transforms.BaseTransform):
 
     def calculate_node_degrees(
         self, data: torch_geometric.data.Data, field: str
-    ) -> torch_geometric.data.Data:
+    ) -> torch_geometric.data.Data:  # numpydoc ignore=PR01,RT01
         r"""Calculate the node degrees of the input data.
 
         Args:

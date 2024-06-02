@@ -92,7 +92,8 @@ wrap-descriptions = 79
 
 [tool.ruff]
 target-version = "py310"
-extend-include = ["*.ipynb"]
+#extend-include = ["*.ipynb"]
+extend-exclude = ["test", "tutorials", "notebooks"]
 line-length = 79  # PEP 8 standard for maximum line length
 
 [tool.ruff.format]
@@ -128,7 +129,7 @@ ignore = [
 [tool.ruff.lint.pydocstyle]
 convention = "numpy"
 
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["F403"]
 
 [tool.setuptools.dynamic]

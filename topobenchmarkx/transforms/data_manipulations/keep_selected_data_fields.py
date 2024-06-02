@@ -1,7 +1,10 @@
+# numpydoc ignore=GL08,PR01,RT01
 import torch_geometric
 
 
-class KeepSelectedDataFields(torch_geometric.transforms.BaseTransform):
+class KeepSelectedDataFields(
+    torch_geometric.transforms.BaseTransform
+):  # numpydoc ignore=PR01
     r"""A transform that keeps only the selected fields of the input data.
 
     Args:
@@ -16,7 +19,9 @@ class KeepSelectedDataFields(torch_geometric.transforms.BaseTransform):
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}(type={self.type!r}, parameters={self.parameters!r})"
 
-    def forward(self, data: torch_geometric.data.Data):
+    def forward(
+        self, data: torch_geometric.data.Data
+    ):  # numpydoc ignore=GL08,PR01,RT01
         r"""Apply the transform to the input data.
 
         Args:
@@ -30,7 +35,7 @@ class KeepSelectedDataFields(torch_geometric.transforms.BaseTransform):
             + self.parameters["preserved_fields"]
         )
 
-        for key in data.keys():
+        for key in data:
             if key not in fields_to_keep:
                 del data[key]
         return data

@@ -183,8 +183,7 @@ We list the liftings used in `TopoBenchmarkX` to transform datasets. Here, a _li
 ### Graph2Cell
 | Name | Description | Reference |
 | --- | --- | --- |
-| To lift a graph to a cell complex (CC) we186
-proceed as follows. First, we identify a finite set of cycles (closed loops) within the graph. Second, each identified cycle in the graph is associated to a 2-cell, such that the boundary of the 2-cell is the cycle. The nodes and edges of the cell complex are inherited from the graph. | [CW Complexes](https://en.wikipedia.org/wiki/CW_complex) |
+| To lift a graph to a cell complex (CC) we proceed as follows. First, we identify a finite set of cycles (closed loops) within the graph. Second, each identified cycle in the graph is associated to a 2-cell, such that the boundary of the 2-cell is the cycle. The nodes and edges of the cell complex are inherited from the graph. | [CW Complexes](https://en.wikipedia.org/wiki/CW_complex) |
 
 ### Graph2Hypergraph
 | Name | Description | Reference |

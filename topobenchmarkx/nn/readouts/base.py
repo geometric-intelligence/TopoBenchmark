@@ -34,7 +34,7 @@ class AbstractZeroCellReadOut(torch.nn.Module):
         self.pooling_type = pooling_type
 
     def __repr__(self):
-        return f"{self.__class__.__name__}()"
+        return f"{self.__class__.__name__}(task_level={self.task_level}, pooling_type={self.pooling_type})"
 
     def __call__(
         self, model_out: dict, batch: torch_geometric.data.Data

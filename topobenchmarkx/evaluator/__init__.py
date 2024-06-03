@@ -1,3 +1,5 @@
+"""Evaluators for model evaluation."""
+
 from torchmetrics.classification import AUROC, Accuracy, Precision, Recall
 from torchmetrics.regression import MeanAbsoluteError, MeanSquaredError
 

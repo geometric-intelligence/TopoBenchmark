@@ -1,3 +1,5 @@
+"""Graph2Cell liftings."""
+
 from .base import Graph2CellLifting
 from .cycle import CellCycleLifting
 

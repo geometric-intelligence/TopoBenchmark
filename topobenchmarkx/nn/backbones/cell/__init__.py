@@ -1,3 +1,5 @@
+"""Cell backbones."""
+
 from .cccn import CCCN
 from .cin import CWN
 

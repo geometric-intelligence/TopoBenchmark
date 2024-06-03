@@ -1,3 +1,5 @@
+"""Wrappers for simplicial neural networks."""
+
 from .san_wrapper import SANWrapper
 from .sccn_wrapper import SCCNWrapper
 from .sccnn_wrapper import SCCNNWrapper

@@ -1,3 +1,5 @@
+"""Wrappers for cell-based neural networks."""
+
 from .can_wrapper import CANWrapper
 from .cccn_wrapper import CCCNWrapper
 from .ccxn_wrapper import CCXNWrapper

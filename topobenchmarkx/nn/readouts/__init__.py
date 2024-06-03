@@ -1,3 +1,5 @@
+"""This module contains the readout classes that are used by the library."""
+
 from .base import AbstractZeroCellReadOut
 from .identical import NoReadOut
 from .propagate_signal_down import PropagateSignalDown

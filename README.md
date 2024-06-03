@@ -35,15 +35,15 @@ Assess how your model compares against state-of-the-art topological neural netwo
 
 ## :pushpin: Overview
 
-`TopoBenchmarkX` (TBX) is a Python library developed to train and compare the performances of topological neural networks using different topological domains. Here, a _topological domain_ means a graph, a simplicial complex, a cellular complex, or a hypergraph.
+`TopoBenchmarkX` (TBX) is a modular Python library designed to standardize benchmarking and accelerate research in Topological Deep Learning (TDL). In particular, TBX allows to train and compare the performances of all sorts of Topological Neural Networks (TNNs) across the different topological domains, where by _topological domain_ we refer to a graph, a simplicial complex, a cellular complex, or a hypergraph.
 
 <p align="center">
   <img src="resources/workflow.jpeg" width="700">
 </p>
 
-The main pipeline trains and evaluates a wide range of state-of-the-art neural networks (see <a href="#gear-neural-networks">:gear: Neural Networks</a>) on numerous and varied datasets and benchmark tasks. 
+The main pipeline trains and evaluates a wide range of state-of-the-art TNNs and Graph Neural Networks (GNNs) (see <a href="#gear-neural-networks">:gear: Neural Networks</a>) on numerous and varied datasets and benchmark tasks (see <a href="#books-datasets">:books: Datasets</a> ). 
 
-Additionally, the library offers the ability to transform, i.e., _lift_, each dataset from one topological domain to another (see <a href="#rocket-liftings">:rocket: Liftings</a>).
+Additionally, the library offers the ability to transform, i.e. _lift_, each dataset from one topological domain to another (see <a href="#rocket-liftings">:rocket: Liftings</a>), enabling for the first time an exhaustive inter-domain comparison of TNNs.
 
 ## :jigsaw: Get Started
 

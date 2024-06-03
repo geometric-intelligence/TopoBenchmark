@@ -41,9 +41,9 @@ Assess how your model compares against state-of-the-art topological neural netwo
   <img src="resources/workflow.jpeg" width="700">
 </p>
 
-The main pipeline trains and evaluates a wide range of state-of-the-art neural networks (see [:gear: Neural Networks](https://github.com/pyt-team/TopoBenchmarkX/blob/ninamiolane-readme/README.md#gear-neural-networks)) on numerous and varied datasets and benchmark tasks. 
+The main pipeline trains and evaluates a wide range of state-of-the-art neural networks (see [:gear: Neural Networks](https://github.com/pyt-team/TopoBenchmarkX/blob/main/README.md#gear-neural-networks)) on numerous and varied datasets and benchmark tasks. 
 
-Additionally, the library offers the ability to transform, i.e., _lift_, each dataset from one topological domain to another (see [:arrows_clockwise: Liftings](https://github.com/pyt-team/TopoBenchmarkX/blob/ninamiolane-readme/README.md#top-liftings)).
+Additionally, the library offers the ability to transform, i.e., _lift_, each dataset from one topological domain to another (see [:arrows_clockwise: Liftings](https://github.com/pyt-team/TopoBenchmarkX/blob/main/README.md#top-liftings)).
 
 ## :jigsaw: Get Started
 

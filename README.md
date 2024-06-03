@@ -269,9 +269,12 @@ To learn more about `TopoBenchmarkX`, we invite you to read the paper:
 ```
 <details>
 <summary><b> More information regarding Topological Deep Learning </b></summary>
+  
   [Topological Graph Signal Compression](https://arxiv.org/pdf/2308.11068)
+  
   [Architectures of Topological Deep Learning: A Survey on Topological Neural Networks](https://par.nsf.gov/servlets/purl/10477141)
- [TopoX: a suite of Python packages for machine learning on topological domains](https://arxiv.org/pdf/2402.02441)	
+  
+  [TopoX: a suite of Python packages for machine learning on topological domains](https://arxiv.org/pdf/2402.02441)	
 </details>
 
 If you find `TopoBenchmarkX` useful, we would appreciate if you cite it!

@@ -1,3 +1,5 @@
+"""Loss module for the topobenchmarkx package."""
+
 import torch
 import torch_geometric
 
@@ -7,9 +9,12 @@ from topobenchmarkx.loss.base import AbstractLoss
 class TBXLoss(AbstractLoss):
     r"""Defines the default model loss for the given task.
 
-    Args:
-        task (str): Task type, either "classification" or "regression".
-        loss_type (str, optional): Loss type, either "cross_entropy", "mse", or "mae". (default: None)
+    Parameters
+    ----------
+    task : str
+        Task type, either "classification" or "regression".
+    loss_type : str, optional
+        Loss type, either "cross_entropy", "mse", or "mae" (default: None).
     """
 
     def __init__(self, task, loss_type=None):
@@ -34,11 +39,17 @@ class TBXLoss(AbstractLoss):
     def forward(self, model_out: dict, batch: torch_geometric.data.Data):
         r"""Forward pass of the loss function.
 
-        Args:
-            model_out (dict): Dictionary containing the model output.
-            batch (torch_geometric.data.Data): Batch object containing the batched domain data.
-        Returns:
-            model_out (dict): Dictionary containing the model output with the loss.
+        Parameters
+        ----------
+        model_out : dict
+            Dictionary containing the model output.
+        batch : torch_geometric.data.Data
+            Batch object containing the batched domain data.
+
+        Returns
+        -------
+        dict
+            Dictionary containing the model output with the loss.
         """
         logits = model_out["logits"]
         target = model_out["labels"]

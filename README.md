@@ -24,11 +24,11 @@ Assess how your model compares against state-of-the-art topological neural netwo
 <p align="center">
   <a href="#pushpin-overview">Overview</a> •
   <a href="#jigsaw-get-started">Get Started</a> •
-  <a href="https://github.com/pyt-team/TopoBenchmarkX/tree/dev/tutorials">Tutorials</a> •
+  <a href="#anchor-tutorials">Tutorials</a> •
   <a href="#gear-neural-networks">Neural Networks</a> •
-  <a href="#arrows-clockwise-liftings">Liftings</a> •
+  <a href="#rocket-liftings">Liftings</a> •
   <a href="#books-datasets">Datasets</a> •
-  <a href="#mag-right-references">References</a> 
+  <a href="#mag-references">References</a> 
 </p>
 
 
@@ -41,9 +41,9 @@ Assess how your model compares against state-of-the-art topological neural netwo
   <img src="resources/workflow.jpeg" width="700">
 </p>
 
-The main pipeline trains and evaluates a wide range of state-of-the-art neural networks (see [:gear: Neural Networks](https://github.com/pyt-team/TopoBenchmarkX/blob/main/README.md#gear-neural-networks)) on numerous and varied datasets and benchmark tasks. 
+The main pipeline trains and evaluates a wide range of state-of-the-art neural networks (see <a href="#gear-neural-networks">:gear: Neural Networks</a>) on numerous and varied datasets and benchmark tasks. 
 
-Additionally, the library offers the ability to transform, i.e., _lift_, each dataset from one topological domain to another (see [:arrows_clockwise: Liftings](https://github.com/pyt-team/TopoBenchmarkX/blob/main/README.md#top-liftings)).
+Additionally, the library offers the ability to transform, i.e., _lift_, each dataset from one topological domain to another (see <a href="#rocket-liftings">:rocket: Liftings</a>).
 
 ## :jigsaw: Get Started
 
@@ -80,7 +80,7 @@ Next, train the neural networks by running the following command:
 python -m topobenchmarkx 
 ```
 
-### Explore the Tutorials
+## :anchor: Tutorials
 
 To add a new dataset and benchmark task, you can explore our [tutorials](https://github.com/pyt-team/TopoBenchmarkX/tree/main/tutorials).
 
@@ -121,7 +121,7 @@ We list the neural networks trained and evaluated by `TopoBenchmarkX`, organized
 | UniGNN | [UniGNN: a Unified Framework for Graph and Hypergraph Neural Networks](https://arxiv.org/pdf/2105.00956) |
 | UniGNN2 | [UniGNN: a Unified Framework for Graph and Hypergraph Neural Networks](https://arxiv.org/pdf/2105.00956) |
 
-## :arrows_clockwise: Liftings
+## :rocket: Liftings
 
 We list the liftings used in `TopoBenchmarkX` to transform datasets. Here, a _lifting_ refers to a function that transforms a dataset defined on a topological domain (_e.g._, on a graph) into the same dataset but supported on a different topological domain (_e.g._, on a simplicial complex).
 
@@ -171,7 +171,7 @@ For this, you can create an environment using either conda or docker. Both optio
 
 ### :snake: Using Conda Environment
 
-Follow the steps in [:jigsaw: Get Started](https://github.com/pyt-team/TopoBenchmarkX/blob/ninamiolane-readme/README.md##toolbox-get-started).
+Follow the steps in <a href="#jigsaw-get-started">:jigsaw: Get Started</a>.
 
 
 ### :whale: Using Docker
@@ -204,7 +204,7 @@ docker run -it -d --volume $(pwd):/TopoBenchmarkX topobenchmarkx:new
 Happy development!
 
 
-## :mag_right: References ##
+## :mag: References ##
 
 To learn more about `TopoBenchmarkX`, we invite you to read the paper:
 
@@ -218,20 +218,11 @@ To learn more about `TopoBenchmarkX`, we invite you to read the paper:
       primaryClass={cs.LG}
 }
 ```
-<details>
-<summary><b> More information regarding Topological Deep Learning </b></summary>
-  
-  [Topological Graph Signal Compression](https://arxiv.org/pdf/2308.11068)
-  
-  [Architectures of Topological Deep Learning: A Survey on Topological Neural Networks](https://par.nsf.gov/servlets/purl/10477141)
-  
-  [TopoX: a suite of Python packages for machine learning on topological domains](https://arxiv.org/pdf/2402.02441)	
-</details>
-
-If you find `TopoBenchmarkX` useful, we would appreciate if you cite it!
+If you find `TopoBenchmarkX` useful, we would appreciate if you cite us!
 
 
-## :mouse: Additional details about the project
+
+## :mouse: Additional Details
 <details>
 <summary><b>Hierarchy of configuration files</b></summary>
 
@@ -281,4 +272,14 @@ If you find `TopoBenchmarkX` useful, we would appreciate if you cite it!
 ```
 
 
+</details>
+
+<details>
+<summary><b> More information regarding Topological Deep Learning </b></summary>
+  
+  [Topological Graph Signal Compression](https://arxiv.org/pdf/2308.11068)
+  
+  [Architectures of Topological Deep Learning: A Survey on Topological Neural Networks](https://par.nsf.gov/servlets/purl/10477141)
+  
+  [TopoX: a suite of Python packages for machine learning on topological domains](https://arxiv.org/pdf/2402.02441)	
 </details>

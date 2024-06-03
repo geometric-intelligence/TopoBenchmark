@@ -267,70 +267,9 @@ To learn more about `TopoBenchmarkX`, we invite you to read the paper:
       primaryClass={cs.LG}
 }
 ```
-To learn more about liftings, read appendix A : 
+<details>
+<summary><b> More information regarding Topological Deep Learning </b></summary>
+Topo{X}: a suite of {P}ython packages for machine learning on topological domains	
+</details>
 
-```
-@misc{hajij2023topological,
-      title={Topological Deep Learning: Going Beyond Graph Data},
-      author={Mustafa Hajij and Ghada Zamzmi and Theodore Papamarkou and Nina Miolane and Aldo Guzmán-Sáenz and Karthikeyan Natesan Ramamurthy and Tolga Birdal and Tamal K. Dey and Soham Mukherjee and Shreyas N. Samaga and Neal Livesay and Robin Walters and Paul Rosen and Michael T. Schaub},
-      year={2023},
-      eprint={2206.00606},
-      archivePrefix={arXiv},
-      primaryClass={cs.LG}
-}
-```
-
-For more information about TopoX :
-```
-@misc{topox,
-	title={Topo{X}: a suite of {P}ython packages for machine learning on topological domains},
-	author={Mustafa Hajij
-	and Mathilde Papillon
-	and Florian Frantzen
-	and Jens Agerberg
-	and Ibrahem AlJabea
-	and Ruben Ballester
-	and Claudio Battiloro
-	and Guillermo Bern{\'a}rdez
-	and Tolga Birdal
-	and Aiden Brent
-	and Peter Chin
-	and Sergio Escalera
-	and Simone Fiorellino
-	and Odin Hoff Gardaa
-	and Gurusankar Gopalakrishnan
-	and Devendra Govil
-	and Josef Hoppe
-	and Maneel Reddy Karri
-	and Jude Khouja
-	and Manuel Lecha
-	and Neal Livesay 
-	and Jan Mei{\ss}ner
-	and Soham Mukherjee
-	and Alexander Nikitin
-	and Theodore Papamarkou
-	and Jaro Pr{\'i}lepok
-	and Karthikeyan 
-	Natesan Ramamurthy
-	and Paul Rosen
-	and Aldo Guzm{\'a}n-S{\'a}enz
-	and Alessandro Salatiello
-	and Shreyas N. Samaga
-	and Simone Scardapane
-	and Michael T. Schaub
-	and Luca Scofano
-	and Indro Spinelli
-	and Lev Telyatnikov
-	and Quang Truong
-	and Robin Walters
-	and Maosheng Yang
-	and Olga Zaghen
-	and Ghada Zamzmi
-	and Ali Zia
-	and Nina Miolane},
-	journal={arXiv},
-	year={2024}
-}
-
-```
-If you find `TopoBenchmarkX` useful, we appreciate if you cite it!
+If you find `TopoBenchmarkX` useful, we would appreciate if you cite it!

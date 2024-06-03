@@ -1,19 +1,28 @@
+"""One hot degree features transform."""
+
 import torch
 import torch_geometric
 from torch_geometric.utils import one_hot
 
 
 class OneHotDegreeFeatures(torch_geometric.transforms.BaseTransform):
-    r"""A transform that adds the node degree as one hot encodings to the node
-    features.
+    r"""Class for one hot degree features transform.
 
-    Args:
-        max_degree (int): The maximum degree of the graph.
-        cat (bool, optional): If set to `True`, the one hot encodings are
-                              concatenated to the node features. (default: False)
-        degrees_field (str): The field containing the node degrees.
-        features_field (str): The field containing the node features.
-        kwargs (optional): Additional arguments for the class.
+    A transform that adds the node degree as one hot encodings to the node features.
+
+    Parameters
+    ----------
+    max_degree : int
+        The maximum degree of the graph.
+    degrees_fields : str
+        The field containing the node degrees.
+    features_fields : str
+        The field containing the node features.
+    cat : bool, optional
+        If set to `True`, the one hot encodings are concatenated to the node
+        features (default: False).
+    **kwargs : optional
+        Additional arguments for the class.
     """
 
     def __init__(
@@ -37,10 +46,15 @@ class OneHotDegreeFeatures(torch_geometric.transforms.BaseTransform):
     def forward(self, data: torch_geometric.data.Data):
         r"""Apply the transform to the input data.
 
-        Args:
-            data (torch_geometric.data.Data): The input data.
-        Returns:
-            torch_geometric.data.Data: The transformed data.
+        Parameters
+        ----------
+        data : torch_geometric.data.Data
+            The input data.
+
+        Returns
+        -------
+        torch_geometric.data.Data
+            The transformed data.
         """
         assert data.edge_index is not None
 

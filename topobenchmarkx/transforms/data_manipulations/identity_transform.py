@@ -1,11 +1,15 @@
+"""Identity transform that does nothing to the input data."""
+
 import torch_geometric
 
 
 class IdentityTransform(torch_geometric.transforms.BaseTransform):
     r"""An identity transform that does nothing to the input data.
 
-    Args:
-        kwargs (optional): Parameters for the base transform.
+    Parameters
+    ----------
+    **kwargs : optional
+        Parameters for the base transform.
     """
 
     def __init__(self, **kwargs):
@@ -19,9 +23,14 @@ class IdentityTransform(torch_geometric.transforms.BaseTransform):
     def forward(self, data: torch_geometric.data.Data):
         r"""Apply the transform to the input data.
 
-        Args:
-            data (torch_geometric.data.Data): The input data.
-        Returns:
-            torch_geometric.data.Data: The same data.
+        Parameters
+        ----------
+        data : torch_geometric.data.Data
+            The input data.
+
+        Returns
+        -------
+        torch_geometric.data.Data
+            The same data.
         """
         return data

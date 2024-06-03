@@ -1,3 +1,5 @@
+"""Graph2SimplicialLifting module."""
+
 from .base import Graph2SimplicialLifting
 from .clique import SimplicialCliqueLifting
 from .khop import SimplicialKHopLifting

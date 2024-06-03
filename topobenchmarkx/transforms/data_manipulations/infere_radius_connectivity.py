@@ -1,13 +1,18 @@
+"""InfereRadiusConnectivity class definition."""
+
 import torch_geometric
 from torch_geometric.nn import radius_graph
 
 
 class InfereRadiusConnectivity(torch_geometric.transforms.BaseTransform):
-    r"""A transform that generates the radius connectivity of the input point
-    cloud.
+    r"""Class to infer point cloud connectivity.
 
-    Args:
-        kwargs (optional): Parameters for the base transform.
+    The transform generates the radius connectivity of the input point cloud.
+
+    Parameters
+    ----------
+    **kwargs : optional
+        Parameters for the base transform.
     """
 
     def __init__(self, **kwargs):
@@ -21,10 +26,15 @@ class InfereRadiusConnectivity(torch_geometric.transforms.BaseTransform):
     def forward(self, data: torch_geometric.data.Data):
         r"""Apply the transform to the input data.
 
-        Args:
-            data (torch_geometric.data.Data): The input data.
-        Returns:
-            torch_geometric.data.Data: The transformed data.
+        Parameters
+        ----------
+        data : torch_geometric.data.Data
+            The input data.
+
+        Returns
+        -------
+        torch_geometric.data.Data
+            The transformed data.
         """
         data.edge_index = radius_graph(data.x, **self.parameters["args"])
         return data

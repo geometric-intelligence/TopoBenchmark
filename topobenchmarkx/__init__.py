@@ -1,4 +1,4 @@
-"""Init file for topobenchmarkx package."""
+"""TopobenchmarkX: A library for benchmarking of topological models."""
 
 # Import submodules
 from . import (

@@ -1,13 +1,18 @@
+"""InfereKNNConnectivity class definition."""
+
 import torch_geometric
 from torch_geometric.nn import knn_graph
 
 
 class InfereKNNConnectivity(torch_geometric.transforms.BaseTransform):
-    r"""A transform that generates the k-nearest neighbor connectivity of the
-    input point cloud.
+    r"""Transform to infer point cloud connectivity.
 
-    Args:
-        kwargs (optional): Parameters for the base transform.
+    The transform generates the k-nearest neighbor connectivity of the input point cloud.
+
+    Parameters
+    ----------
+    **kwargs : optional
+        Parameters for the base transform.
     """
 
     def __init__(self, **kwargs):
@@ -21,12 +26,16 @@ class InfereKNNConnectivity(torch_geometric.transforms.BaseTransform):
     def forward(self, data: torch_geometric.data.Data):
         r"""Apply the transform to the input data.
 
-        Args:
-            data (torch_geometric.data.Data): The input data.
-        Returns:
-            torch_geometric.data.Data: The transformed data.
-        """
+        Parameters
+        ----------
+        data : torch_geometric.data.Data
+            The input data.
 
+        Returns
+        -------
+        torch_geometric.data.Data
+            The transformed data.
+        """
         edge_index = knn_graph(data.x, **self.parameters["args"])
 
         # Remove duplicates

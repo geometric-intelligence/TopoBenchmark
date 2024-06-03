@@ -1,3 +1,5 @@
+"""Data manipulations module."""
+
 from .calculate_simplicial_curvature import (
     CalculateSimplicialCurvature,
 )

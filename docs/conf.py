@@ -74,7 +74,9 @@ latex_documents = [
     ),
 ]
 
-man_pages = [(master_doc, "topobenchmarkx", "TopoBenchmarkX Documentation", [author], 1)]
+man_pages = [
+    (master_doc, "topobenchmarkx", "TopoBenchmarkX Documentation", [author], 1)
+]
 
 texinfo_documents = [
     (
@@ -93,32 +95,23 @@ epub_exclude_files = ["search.html"]
 
 
 def copy_thumbnails():
-    """Copy the thumbnail files in the _build
-    directory to enable thumbnails in the gallery"""
+    """Copy the thumbnail files.
+
+    This function copies the thumbnail png files in the _build
+    directory to enable thumbnails in the gallery.
+    """
     src_directory = "./_thumbnails"
     des_directory = "./_build/_thumbnails"
 
     des_directory_walked = os.walk(src_directory)
     all_thumbnails = []
 
-    for a, b, c in des_directory_walked:
-        if len(c) == 0:
-            all_directories = b
-            continue
-        if len(b) != 0:
-            raise NotImplementedError(
-                "Not yet implemented for the case with more than one nested directory."
-            )
-
-        for file in c:
-            full_filename = a + "/" + file
-            all_thumbnails.append(full_filename)
+    for root, _, png in des_directory_walked:
+        full_filename = root + "/" + png
+        all_thumbnails.append(full_filename)
 
     os.mkdir("./_build")
     os.mkdir(des_directory)
-
-    for directory in all_directories:
-        os.mkdir(des_directory + "/" + directory)
 
     for thumbnail in all_thumbnails:
         shutil.copyfile(thumbnail, "./_build/" + thumbnail[2:])

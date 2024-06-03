@@ -1,3 +1,5 @@
+"""Dataset class for US County Demographics dataset."""
+
 import os
 import os.path as osp
 import shutil
@@ -16,31 +18,20 @@ from topobenchmarkx.data.utils import (
 class USCountyDemosDataset(InMemoryDataset):
     r"""Dataset class for US County Demographics dataset.
 
-    Args:
-        root (str): Root directory where the dataset will be saved.
-        name (str): Name of the dataset.
-        parameters (DictConfig): Configuration parameters for the dataset.
-        transform (Callable, optional): A function/transform that takes in an
-            `torch_geometric.data.Data` object and returns a transformed version.
-            The transform function is applied to the loaded data before saving it. (default: None)
-        pre_transform (Callable, optional): A function/transform that takes in an
-            `torch_geometric.data.Data` object and returns a transformed version.
-            The pre_transform function is applied to the data before the transform
-            function is applied. (default: None)
-        pre_filter (Callable, optional): A function that takes in an
-            `torch_geometric.data.Data` object and returns a boolean value
-            indicating whether the data object should be included in the dataset. (default: None)
-        force_reload (bool, optional): If set to True, the dataset will be re-downloaded
-            even if it already exists on disk. (default: True)
-        use_node_attr (bool, optional): If set to True, the node attributes will be included
-            in the dataset. (default: False)
-        use_edge_attr (bool, optional): If set to True, the edge attributes will be included
-            in the dataset. (default: False)
+    Parameters
+    ----------
+    root : str
+        Root directory where the dataset will be saved.
+    name : str
+        Name of the dataset.
+    parameters : DictConfig
+        Configuration parameters for the dataset.
 
-    Attributes:
-        URLS (dict): Dictionary containing the URLs for downloading the dataset.
-        FILE_FORMAT (dict): Dictionary containing the file formats for the dataset.
-        RAW_FILE_NAMES (dict): Dictionary containing the raw file names for the dataset.
+    Attributes
+    ----------
+    URLS (dict): Dictionary containing the URLs for downloading the dataset.
+    FILE_FORMAT (dict): Dictionary containing the file formats for the dataset.
+    RAW_FILE_NAMES (dict): Dictionary containing the raw file names for the dataset.
     """
 
     URLS: ClassVar = {
@@ -88,10 +79,24 @@ class USCountyDemosDataset(InMemoryDataset):
 
     @property
     def raw_dir(self) -> str:
+        """Return the path to the raw directory of the dataset.
+
+        Returns
+        -------
+        str
+            Path to the raw directory.
+        """
         return osp.join(self.root, self.name, "raw")
 
     @property
     def processed_dir(self) -> str:
+        """Return the path to the processed directory of the dataset.
+
+        Returns
+        -------
+        str
+            Path to the processed directory.
+        """
         self.processed_root = osp.join(
             self.root,
             self.name,
@@ -101,15 +106,28 @@ class USCountyDemosDataset(InMemoryDataset):
 
     @property
     def raw_file_names(self) -> list[str]:
+        """Return the raw file names for the dataset.
+
+        Returns
+        -------
+        list[str]
+            List of raw file names.
+        """
         return ["county_graph.csv", f"county_stats_{self.year}.csv"]
 
     @property
     def processed_file_names(self) -> str:
+        """Return the processed file name for the dataset.
+
+        Returns
+        -------
+        str
+            Processed file name.
+        """
         return "data.pt"
 
     def download(self) -> None:
-        r"""Downloads the dataset from the specified URL and saves it to the raw
-        directory.
+        r"""Download the dataset from a URL and saves it to the raw directory.
 
         Raises:
             FileNotFoundError: If the dataset URL is not found.
@@ -137,7 +155,7 @@ class USCountyDemosDataset(InMemoryDataset):
         shutil.rmtree(osp.join(folder, self.name))
 
     def process(self) -> None:
-        r"""Process the data for the dataset.
+        r"""Handle the data for the dataset.
 
         This method loads the US county demographics data, applies any pre-
         processing transformations if specified, and saves the processed data

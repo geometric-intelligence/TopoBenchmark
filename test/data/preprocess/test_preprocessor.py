@@ -13,7 +13,8 @@ from ..._utils.flow_mocker import FlowMocker
 class TestPreProcessor:
 
     @pytest.fixture(autouse=True)
-    def setup_method(self, mocker):
+    def setup_method(self, mocker_fixture):
+        mocker = mocker_fixture
 
         # Setup test parameters
         self.dataset = MagicMock(spec=torch_geometric.data.Dataset)
@@ -62,6 +63,7 @@ class TestPreProcessor:
         assert self.preprocessor.data_list == ["0", "0", "0"]
 
     def test_init_with_transform(self, mocker):
+        mocker = mocker_fixture
         val_processed_paths = ["/some/path"]
         params = [
             {"assert_args": ("created_property", "processed_data_dir")},

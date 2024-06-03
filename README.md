@@ -30,7 +30,7 @@ Assess how your model compares against state-of-the-art topological neural netwo
 
 
 <p align="center">
-  <img src="resources/photo1716928649.jpeg" width="700">
+  <img src="resources/workflow.pdf" width="700">
 </p>
 
 

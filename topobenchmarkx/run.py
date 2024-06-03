@@ -1,3 +1,5 @@
+"""Main entry point for training and testing models."""
+
 import random
 from typing import Any
 
@@ -67,17 +69,24 @@ log = RankedLogger(__name__, rank_zero_only=True)
 
 @task_wrapper
 def run(cfg: DictConfig) -> tuple[dict[str, Any], dict[str, Any]]:
-    """Trains the model. Can additionally evaluate on a testset, using best
-    weights obtained during training.
+    """Train the model.
+
+    Can additionally evaluate on a testset, using best weights obtained during training.
 
     This method is wrapped in optional @task_wrapper decorator, that controls
     the behavior during failure. Useful for multiruns, saving info about the
     crash, etc.
 
-    :param cfg: A DictConfig configuration composed by Hydra.
-    :return: A tuple with metrics and dict with all instantiated objects.
-    """
+    Parameters
+    ----------
+    cfg : DictConfig
+        Configuration composed by Hydra.
 
+    Returns
+    -------
+    tuple[dict[str, Any], dict[str, Any]]
+        A tuple with metrics and dict with all instantiated objects.
+    """
     # Set seed for random number generators in pytorch, numpy and python.random
     # if cfg.get("seed"):
     L.seed_everything(cfg.seed, workers=True)
@@ -196,13 +205,25 @@ def run(cfg: DictConfig) -> tuple[dict[str, Any], dict[str, Any]]:
 def count_number_of_parameters(
     model: torch.nn.Module, only_trainable: bool = True
 ) -> int:
-    """Counts the number of trainable params. If all params, specify
-    only_trainable = False.
+    """Count the number of trainable params.
+
+    If all params, specify only_trainable = False.
 
     Ref:
         - https://discuss.pytorch.org/t/how-do-i-check-the-number-of-parameters-of-a-model/4325/9?u=brando_miranda
         - https://stackoverflow.com/questions/49201236/check-the-total-number-of-parameters-in-a-pytorch-model/62764464#62764464
-    :return:
+
+    Parameters
+    ----------
+    model : torch.nn.Module
+        The model.
+    only_trainable : bool, optional
+        If True, only count trainable parameters (default: True).
+
+    Returns
+    -------
+    int
+        The number of parameters.
     """
     if only_trainable:
         num_params: int = sum(
@@ -220,8 +241,15 @@ def count_number_of_parameters(
 def main(cfg: DictConfig) -> float | None:
     """Main entry point for training.
 
-    :param cfg: DictConfig configuration composed by Hydra.
-    :return: Optional[float] with optimized metric value.
+    Parameters
+    ----------
+    cfg : DictConfig
+        Configuration composed by Hydra.
+
+    Returns
+    -------
+    float | None
+        Optional[float] with optimized metric value.
     """
     # apply extra utilities
     # (e.g. ask for tags if none are provided in cfg, print cfg tree, etc.)

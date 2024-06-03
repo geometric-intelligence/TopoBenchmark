@@ -1,3 +1,5 @@
+"""Utilities for logging hyperparameters."""
+
 from typing import Any
 
 from lightning_utilities.core.rank_zero import rank_zero_only
@@ -10,13 +12,15 @@ log = pylogger.RankedLogger(__name__, rank_zero_only=True)
 
 @rank_zero_only
 def log_hyperparameters(object_dict: dict[str, Any]) -> None:
-    r"""Controls which config parts are saved by Lightning loggers.
+    r"""Control which config parts are saved by Lightning loggers.
 
     Additionally saves:
         - Number of model parameters
 
-    Args:
-        object_dict (dict[str, Any]): A dictionary containing the following objects:
+    Parameters
+    ----------
+    object_dict : dict[str, Any]
+        A dictionary containing the following objects:
             - `"cfg"`: A DictConfig object containing the main config.
             - `"model"`: The Lightning model.
             - `"trainer"`: The Lightning trainer.

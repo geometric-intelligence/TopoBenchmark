@@ -1,3 +1,5 @@
+"""Utility functions for the TopoBenchMarkX library."""
+
 import warnings
 from collections.abc import Callable
 from importlib.util import find_spec
@@ -11,15 +13,17 @@ log = pylogger.RankedLogger(__name__, rank_zero_only=True)
 
 
 def extras(cfg: DictConfig) -> None:
-    r"""Applies optional utilities before the task is started.
+    r"""Apply optional utilities before the task is started.
 
     Utilities:
-        - Ignoring python warnings
-        - Setting tags from command line
-        - Rich config printing
+        - Ignoring python warnings.
+        - Setting tags from command line.
+        - Rich config printing.
 
-    Args:
-        cfg (DictConfig): A DictConfig object containing the config tree.
+    Parameters
+    ----------
+    cfg : DictConfig
+        A DictConfig object containing the config tree.
     """
     # return if no `extras` config
     if not cfg.get("extras"):
@@ -47,14 +51,13 @@ def extras(cfg: DictConfig) -> None:
 
 
 def task_wrapper(task_func: Callable) -> Callable:
-    r"""Optional decorator that controls the failure behavior when executing the
-    task function.
+    r"""Optional decorator that controls the failure behavior when executing the task function.
 
     This wrapper can be used to:
-        - make sure loggers are closed even if the task function raises an exception (prevents multirun failure)
-        - save the exception to a `.log` file
-        - mark the run as failed with a dedicated file in the `logs/` folder (so we can find and rerun it later)
-        - etc. (adjust depending on your needs)
+        - make sure loggers are closed even if the task function raises an exception (prevents multirun failure).
+        - save the exception to a `.log` file.
+        - mark the run as failed with a dedicated file in the `logs/` folder (so we can find and rerun it later).
+        - etc. (adjust depending on your needs).
 
     Example:
     ```
@@ -63,14 +66,31 @@ def task_wrapper(task_func: Callable) -> Callable:
         ...
         return metric_dict, object_dict
     ```
-    Args:
-        task_func: The task function to be wrapped.
-    Returns:
+
+    Parameters
+    ----------
+    task_func : Callable
+        The task function to be wrapped.
+
+    Returns
+    -------
+    Callable
         The wrapped task function.
     """
 
     def wrap(cfg: DictConfig) -> tuple[dict[str, Any], dict[str, Any]]:
-        # execute the task
+        """Wrapper function that executes the task function.
+
+        Parameters
+        ----------
+        cfg : DictConfig
+            A DictConfig object containing the config tree.
+
+        Returns
+        -------
+        tuple[dict[str, Any], dict[str, Any]]
+            The metric and object dictionaries returned by the task function.
+        """
         try:
             metric_dict, object_dict = task_func(cfg=cfg)
 
@@ -107,10 +127,16 @@ def get_metric_value(
 ) -> float | None:
     r"""Safely retrieves value of the metric logged in LightningModule.
 
-    Args:
-        metric_dict: A dict containing metric values.
-        metric_name: If provided, the name of the metric to retrieve.
-    Returns:
+    Parameters
+    ----------
+    metric_dict : dict
+        A dict containing metric values.
+    metric_name : str, optional
+        If provided, the name of the metric to retrieve.
+
+    Returns
+    -------
+    float, None
         If a metric name was provided, the value of the metric.
     """
     if not metric_name:

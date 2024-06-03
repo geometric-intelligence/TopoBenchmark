@@ -1,3 +1,5 @@
+"""This script is used to compute the statistics of the dataset."""
+
 import os
 import random
 from typing import Any
@@ -59,17 +61,22 @@ log = RankedLogger(__name__, rank_zero_only=True)
 
 
 def train(cfg: DictConfig) -> tuple[dict[str, Any], dict[str, Any]]:
-    """Trains the model. Can additionally evaluate on a testset, using best
-    weights obtained during training.
+    """Train the model. Can additionally evaluate on a testset.
 
     This method is wrapped in optional @task_wrapper decorator, that controls
     the behavior during failure. Useful for multiruns, saving info about the
     crash, etc.
 
-    :param cfg: A DictConfig configuration composed by Hydra.
-    :return: A tuple with metrics and dict with all instantiated objects.
-    """
+    Parameters
+    ----------
+    cfg : DictConfig
+        A DictConfig configuration composed by Hydra.
 
+    Returns
+    -------
+    tuple[dict[str, Any], dict[str, Any]]
+        A tuple with metrics and dict with all instantiated objects.
+    """
     # Set seed for random number generators in pytorch, numpy and python.random
     # if cfg.get("seed"):
     L.seed_everything(cfg.seed, workers=True)
@@ -207,8 +214,15 @@ def train(cfg: DictConfig) -> tuple[dict[str, Any], dict[str, Any]]:
 def main(cfg: DictConfig) -> float | None:
     """Main entry point for training.
 
-    :param cfg: DictConfig configuration composed by Hydra.
-    :return: Optional[float] with optimized metric value.
+    Parameters
+    ----------
+    cfg : DictConfig
+        A DictConfig configuration composed by Hydra.
+
+    Returns
+    -------
+    float | None
+        Optional[float] with optimized metric value.
     """
     # apply extra utilities
     # (e.g. ask for tags if none are provided in cfg, print cfg tree, etc.)

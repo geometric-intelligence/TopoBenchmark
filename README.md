@@ -280,7 +280,7 @@ To learn more about liftings, read appendix A :
 }
 ```
 
-For more information about TopoX, read out paper :
+For more information about TopoX :
 ```
 @misc{topox,
 	title={Topo{X}: a suite of {P}ython packages for machine learning on topological domains},

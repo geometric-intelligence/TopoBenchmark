@@ -158,7 +158,7 @@ We list the neural networks trained and evaluated by `TopoBenchmarkX`, organized
 | --- | --- |
 | CAN | [Cell Attention Network](https://arxiv.org/pdf/2209.08179) |
 | CCCN | [A learning algorithm for computational connected cellular network](https://ieeexplore.ieee.org/document/1202221) |
-| CCXN | [Cell Complex Neural Networks](https://openreview.net/pdf?id=6Tq18ySFpGU) |
+| CXN | [Cell Complex Neural Networks](https://openreview.net/pdf?id=6Tq18ySFpGU) |
 | CWN | [Weisfeiler and Lehman Go Cellular: CW Networks](https://arxiv.org/pdf/2106.12575) |
 
 ### Hypergraphs
@@ -183,7 +183,7 @@ We list the liftings used in `TopoBenchmarkX` to transform datasets. Here, a _li
 ### Graph2Cell
 | Name | Description | Reference |
 | --- | --- | --- |
-| CellCycleLifting |To lift a graph to a cell complex (CC) we proceed as follows. First, we identify a finite set of cycles (closed loops) within the graph. Second, each identified cycle in the graph is associated to a 2-cell, such that the boundary of the 2-cell is the cycle. The nodes and edges of the cell complex are inherited from the graph. | [CW Complexes](https://en.wikipedia.org/wiki/CW_complex) |
+| CellCycleLifting |To lift a graph to a cell complex (CC) we proceed as follows. First, we identify a finite set of cycles (closed loops) within the graph. Second, each identified cycle in the graph is associated to a 2-cell, such that the boundary of the 2-cell is the cycle. The nodes and edges of the cell complex are inherited from the graph. | [Appendix B](https://arxiv.org/abs/2206.00606) |
 
 ### Graph2Hypergraph
 | Name | Description | Reference |
@@ -265,5 +265,56 @@ To learn more about `TopoBenchmarkX`, we invite you to read the paper:
       archivePrefix={arXiv},
       primaryClass={cs.LG}
 }
+
+@misc{topox,
+	title={Topo{X}: a suite of {P}ython packages for machine learning on topological domains},
+	author={Mustafa Hajij
+	and Mathilde Papillon
+	and Florian Frantzen
+	and Jens Agerberg
+	and Ibrahem AlJabea
+	and Ruben Ballester
+	and Claudio Battiloro
+	and Guillermo Bern{\'a}rdez
+	and Tolga Birdal
+	and Aiden Brent
+	and Peter Chin
+	and Sergio Escalera
+	and Simone Fiorellino
+	and Odin Hoff Gardaa
+	and Gurusankar Gopalakrishnan
+	and Devendra Govil
+	and Josef Hoppe
+	and Maneel Reddy Karri
+	and Jude Khouja
+	and Manuel Lecha
+	and Neal Livesay 
+	and Jan Mei{\ss}ner
+	and Soham Mukherjee
+	and Alexander Nikitin
+	and Theodore Papamarkou
+	and Jaro Pr{\'i}lepok
+	and Karthikeyan 
+	Natesan Ramamurthy
+	and Paul Rosen
+	and Aldo Guzm{\'a}n-S{\'a}enz
+	and Alessandro Salatiello
+	and Shreyas N. Samaga
+	and Simone Scardapane
+	and Michael T. Schaub
+	and Luca Scofano
+	and Indro Spinelli
+	and Lev Telyatnikov
+	and Quang Truong
+	and Robin Walters
+	and Maosheng Yang
+	and Olga Zaghen
+	and Ghada Zamzmi
+	and Ali Zia
+	and Nina Miolane},
+	journal={arXiv},
+	year={2024}
+}
+
 ```
 If you find `TopoBenchmarkX` useful, we appreciate if you cite it!

@@ -1,3 +1,5 @@
+"""Dataloader utilities."""
+
 from collections import defaultdict
 from typing import Any
 
@@ -7,18 +9,46 @@ from torch_sparse import SparseTensor
 
 
 class DomainData(torch_geometric.data.Data):
-    r"""Data object class that overwrites some methods from
-    `torch_geometric.data.Data` so that not only sparse matrices with adj in
-    the name can work with the `torch_geometric` dataloaders."""
+    r"""Helper Data class so that not only sparse matrices with adj in the name can work with PyG dataloaders.
+
+    It overwrites some methods from `torch_geometric.data.Data`
+    """
 
     def is_valid(self, string):
-        r"""Check if the string contains any of the valid names."""
+        r"""Check if the string contains any of the valid names.
+
+        Parameters
+        ----------
+        string : str
+            String to check.
+
+        Returns
+        -------
+        bool
+            Whether the string contains any of the valid names.
+        """
         valid_names = ["adj", "incidence", "laplacian"]
         return any(name in string for name in valid_names)
 
     def __cat_dim__(self, key: str, value: Any, *args, **kwargs) -> Any:
-        r"""Overwrite the `__cat_dim__` method to handle sparse matrices to
-        handle the names specified in `is_valid`."""
+        r"""Overwrite the `__cat_dim__` method to handle sparse matrices to handle the names specified in `is_valid`.
+
+        Parameters
+        ----------
+        key : str
+            Key of the data.
+        value : Any
+            Value of the data.
+        *args : Any
+            Additional arguments.
+        **kwargs : Any
+            Additional keyword arguments.
+
+        Returns
+        -------
+        Any
+            The concatenation dimension.
+        """
         if torch_geometric.utils.is_sparse(value) and self.is_valid(key):
             return (0, 1)
         elif "index" in key or key == "face":
@@ -28,8 +58,18 @@ class DomainData(torch_geometric.data.Data):
 
 
 def to_data_list(batch):
-    """Workaround needed since `torch_geometric` doesn't work when using
-    `torch.sparse` instead of `torch_sparse`."""
+    """Workaround needed since `torch_geometric` doesn't work when using `torch.sparse` instead of `torch_sparse`.
+
+    Parameters
+    ----------
+    batch : torch_geometric.data.Batch
+        The batch of data.
+
+    Returns
+    -------
+    list
+        List of data objects.
+    """
     for key, _ in batch:
         if batch[key].is_sparse:
             sparse_data = batch[key].coalesce()
@@ -43,17 +83,19 @@ def to_data_list(batch):
 
 
 def collate_fn(batch):
-    r"""This function overwrites the `torch_geometric.data.DataLoader` collate
-    function to use the `DomainData` class. This ensures that the
-    `torch_geometric` dataloaders work with sparse matrices that are not
-    necessarily named `adj`. The function also generates the batch slices for
-    the different cell dimensions.
+    r"""Overwrite `torch_geometric.data.DataLoader` collate function to use the `DomainData` class.
 
-    Args:
-        batch (list): List of data objects (e.g., `torch_geometric.data.Data`).
+    This ensures that the `torch_geometric` dataloaders work with sparse matrices that are not necessarily named `adj`. The function also generates the batch slices for the different cell dimensions.
 
-    Returns:
-        torch_geometric.data.Batch: A `torch_geometric.data.Batch` object.
+    Parameters
+    ----------
+    batch : list
+        List of data objects (e.g., `torch_geometric.data.Data`).
+
+    Returns
+    -------
+    torch_geometric.data.Batch
+        A `torch_geometric.data.Batch` object.
     """
     data_list = []
     batch_idx_dict = defaultdict(list)
@@ -93,9 +135,9 @@ def collate_fn(batch):
                     )
 
                 else:
-                    running_idx[
-                        f"cell_running_idx_number_{cell_dim}"
-                    ] += current_number_of_cells
+                    running_idx[f"cell_running_idx_number_{cell_dim}"] += (
+                        current_number_of_cells
+                    )
 
         data_list.append(data)
 

@@ -1,4 +1,5 @@
 import os
+
 import numpy as np
 import torch
 from sklearn.model_selection import StratifiedKFold
@@ -6,23 +7,20 @@ from sklearn.model_selection import StratifiedKFold
 from topobenchmarkx.dataloader import DataloadDataset
 
 
+# Generate splits in different fasions
 def k_fold_split(labels, parameters):
-    """
-    Returns train and valid indices as in K-Fold Cross-Validation. If the split already exists, 
-    it loads it automatically; otherwise, it creates the split file for subsequent runs.
+    r"""Returns train and valid indices as in K-Fold Cross-Validation. If the
+    split already exists it loads it automatically, otherwise it creates the
+    split file for the subsequent runs.
 
-    Parameters
-    ----------
-    labels : torch.Tensor
-        Label tensor.
-    parameters : DictConfig
-        Configuration parameters.
+    Args:
+        labels (torch.Tensor): Label tensor.
+        parameters (DictConfig): Configuration parameters.
 
-    Returns
-    -------
-    dict
-        Dictionary containing the train, validation, and test indices, with keys "train", "valid", and "test".
+    Returns:
+        dict: Dictionary containing the train, validation and test indices, with keys "train", "valid", and "test".
     """
+
     data_dir = parameters.data_split_dir
     k = parameters.k
     fold = parameters.data_seed
@@ -45,7 +43,9 @@ def k_fold_split(labels, parameters):
 
         skf = StratifiedKFold(n_splits=k, shuffle=True, random_state=42)
 
-        for fold_n, (train_idx, valid_idx) in enumerate(skf.split(x_idx, labels)):
+        for fold_n, (train_idx, valid_idx) in enumerate(
+            skf.split(x_idx, labels)
+        ):
             split_idx = {
                 "train": train_idx,
                 "valid": valid_idx,
@@ -85,22 +85,15 @@ def k_fold_split(labels, parameters):
 
 
 def random_splitting(labels, parameters, global_data_seed=42):
-    """
-    Randomly splits labels into train/valid/test splits.
+    r"""Adapted from https://github.com/CUAI/Non-Homophily-Benchmarks
+    randomly splits label into train/valid/test splits.
 
-    Parameters
-    ----------
-    labels : torch.Tensor
-        Label tensor.
-    parameters : DictConfig
-        Configuration parameters.
-    global_data_seed : int, optional
-        Seed for the random number generator (default is 42).
-
-    Returns
-    -------
-    dict
-        Dictionary containing the train, validation, and test indices with keys "train", "valid", and "test".
+    Args:
+        labels (torch.Tensor): Label tensor.
+        parameters (DictConfig): Configuration parameters.
+        global_data_seed (int, optional): Seed for the random number generator. (default: 42)
+    Returns:
+        dict: Dictionary containing the train, validation and test indices with keys "train", "valid", and "test".
     """
     fold = parameters["data_seed"]
     data_dir = parameters["data_split_dir"]
@@ -164,20 +157,13 @@ def random_splitting(labels, parameters, global_data_seed=42):
 
 
 def assing_train_val_test_mask_to_graphs(dataset, split_idx):
-    """
-    Splits the graph dataset into train, validation, and test datasets.
+    r"""Splits the graph dataset into train, validation, and test datasets.
 
-    Parameters
-    ----------
-    dataset : torch_geometric.data.Dataset
-        Graph dataset.
-    split_idx : dict
-        Dictionary containing the indices for the train, validation, and test splits.
-
-    Returns
-    -------
-    list
-        List containing the train, validation, and test datasets.
+    Args:
+        dataset (torch_geometric.data.Dataset): Graph dataset.
+        split_idx (dict): Dictionary containing the indices for the train, validation, and test splits.
+    Returns:
+        list: List containing the train, validation, and test datasets.
     """
     data_train_lst, data_val_lst, data_test_lst = [], [], []
 
@@ -216,23 +202,18 @@ def assing_train_val_test_mask_to_graphs(dataset, split_idx):
 
 
 def load_transductive_splits(dataset, parameters):
-    """
-    Loads the graph dataset with the specified split.
+    r"""Loads the graph dataset with the specified split.
 
-    Parameters
-    ----------
-    dataset : torch_geometric.data.Dataset
-        Considered dataset.
-    parameters : DictConfig
-        Configuration parameters.
-
-    Returns
-    -------
-    list
-        List containing the train, validation, and test splits.
+    Args:
+        dataset (torch_geometric.data.Dataset): Considered taset.
+        parameters (DictConfig): Configuration parameters.
+    Returns:
+        list: List containing the train, validation, and test splits.
     """
     # Extract labels from dataset object
-    assert len(dataset) == 1, "Dataset should have only one graph in a transductive setting."
+    assert (
+        len(dataset) == 1
+    ), "Dataset should have only one graph in a transductive setting."
 
     data = dataset.data_list[0]
     labels = data.y.numpy()
@@ -258,31 +239,32 @@ def load_transductive_splits(dataset, parameters):
 
     if parameters.get("standardize", False):
         # Standardize the node features respecting train mask
-        data.x = (data.x - data.x[data.train_mask].mean(0)) / data.x[data.train_mask].std(0)
-        data.y = (data.y - data.y[data.train_mask].mean(0)) / data.y[data.train_mask].std(0)
+        data.x = (data.x - data.x[data.train_mask].mean(0)) / data.x[
+            data.train_mask
+        ].std(0)
+        data.y = (data.y - data.y[data.train_mask].mean(0)) / data.y[
+            data.train_mask
+        ].std(0)
 
     return DataloadDataset([data]), None, None
 
 
 def load_inductive_splits(dataset, parameters):
-    """
-    Loads multiple-graph datasets with the specified split.
+    r"""Loads multiple-graph datasets with the specified split.
 
-    Parameters
-    ----------
-    dataset : torch_geometric.data.Dataset
-        Graph dataset.
-    parameters : DictConfig
-        Configuration parameters.
-
-    Returns
-    -------
-    list
-        List containing the train, validation, and test splits.
+    Args:
+        dataset (torch_geometric.data.Dataset): Graph dataset.
+        parameters (DictConfig): Configuration parameters.
+    Returns:
+        list: List containing the train, validation, and test splits.
     """
     # Extract labels from dataset object
-    assert len(dataset) > 1, "Datasets should have more than one graph in an inductive setting."
-    labels = np.array([data.y.squeeze(0).numpy() for data in dataset.data_list])
+    assert (
+        len(dataset) > 1
+    ), "Datasets should have more than one graph in an inductive setting."
+    labels = np.array(
+        [data.y.squeeze(0).numpy() for data in dataset.data_list]
+    )
 
     if parameters.split_type == "random":
         split_idx = random_splitting(labels, parameters)
@@ -307,24 +289,19 @@ def load_inductive_splits(dataset, parameters):
 
 
 def load_coauthorship_hypergraph_splits(data, parameters, train_prop=0.5):
-    """
-    Loads the split generated by rand_train_test_idx function.
+    r"""Loads the split generated by rand_train_test_idx function.
 
-    Parameters
-    ----------
-    data : torch_geometric.data.Data
-        Graph dataset.
-    parameters : DictConfig
-        Configuration parameters.
-    train_prop : float
-        Proportion of training data.
-
-    Returns
-    -------
-    torch_geometric.data.Data
-        Graph dataset with the specified split.
+    Args:
+        data (torch_geometric.data.Data): Graph dataset.
+        parameters (DictConfig): Configuration parameters.
+        train_prop (float): Proportion of training data.
+    Returns:
+        torch_geometric.data.Data: Graph dataset with the specified split.
     """
-    data_dir = os.path.join(parameters["data_split_dir"], f"train_prop={train_prop}")
+
+    data_dir = os.path.join(
+        parameters["data_split_dir"], f"train_prop={train_prop}"
+    )
     load_path = f"{data_dir}/split_{parameters['data_seed']}.npz"
     splits = np.load(load_path, allow_pickle=True)
 
@@ -340,5 +317,4 @@ def load_coauthorship_hypergraph_splits(data, parameters, train_prop=0.5):
         ).shape[0]
         == data.num_nodes
     ), "Not all nodes within splits"
-    
     return DataloadDataset([data]), None, None

@@ -1,4 +1,5 @@
 import os
+
 import numpy as np
 import torch_geometric
 from omegaconf import DictConfig
@@ -21,29 +22,24 @@ from topobenchmarkx.datasets import (
 
 
 class GraphLoader(AbstractLoader):
-    """
-    Loader for graph datasets.
+    r"""Loader for graph datasets.
 
-    Parameters
-    ----------
-    parameters : DictConfig
-        Configuration parameters. The parameters must contain the following keys:
-        - data_dir (str): The directory where the dataset is stored.
-        - data_name (str): The name of the dataset.
-        - data_type (str): The type of the dataset.
-        - split_type (str): The type of split to be used. It can be "fixed", "random", or "k-fold".
+    Args:
+        parameters (DictConfig): Configuration parameters. The parameters must contain the following keys:
+            - data_dir (str): The directory where the dataset is stored.
+            - data_name (str): The name of the dataset.
+            - data_type (str): The type of the dataset.
+            - split_type (str): The type of split to be used. It can be "fixed", "random", or "k-fold".
 
-        If split_type is "random", the parameters must also contain the following keys:
-        - data_seed (int): The seed for the split.
-        - data_split_dir (str): The directory where the split is stored.
-        - train_prop (float): The proportion of the training set.
-
-        If split_type is "k-fold", the parameters must also contain the following keys:
-        - data_split_dir (str): The directory where the split is stored.
-        - k (int): The number of folds.
-        - data_seed (int): The seed for the split.
-
-        The parameters can be defined in a yaml file and then loaded using `omegaconf.OmegaConf.load('path/to/dataset/config.yaml')`.
+            If split_type is "random", the parameters must also contain the following keys:
+                - data_seed (int): The seed for the split.
+                - data_split_dir (str): The directory where the split is stored.
+                - train_prop (float): The proportion of the training set.
+            If split_type is "k-fold", the parameters must also contain the following keys:
+                - data_split_dir (str): The directory where the split is stored.
+                - k (int): The number of folds.
+                - data_seed (int): The seed for the split.
+            The parameters can be defined in a yaml file and then loaded using `omegaconf.OmegaConf.load('path/to/dataset/config.yaml')`.
     """
 
     def __init__(self, parameters: DictConfig, **kwargs):
@@ -54,13 +50,10 @@ class GraphLoader(AbstractLoader):
         return f"{self.__class__.__name__}(parameters={self.parameters})"
 
     def load(self) -> tuple[torch_geometric.data.Dataset, str]:
-        """
-        Load graph dataset.
+        r"""Load graph dataset.
 
-        Returns
-        -------
-        tuple[torch_geometric.data.Dataset, str]
-            A tuple containing the loaded dataset and the data directory.
+        Returns:
+            DataloadDataset: DataloadDataset object containing the loaded data.
         """
         # Define the path to the data directory
         root_data_dir = self.parameters["data_dir"]
@@ -142,78 +135,72 @@ class GraphLoader(AbstractLoader):
 
 
 class CellComplexLoader(AbstractLoader):
-    """
-    Loader for cell complex datasets.
+    r"""Loader for cell complex datasets.
 
-    Parameters
-    ----------
-    parameters : DictConfig
-        Configuration parameters.
+    Args:
+        parameters (DictConfig): Configuration parameters.
     """
 
     def __init__(self, parameters: DictConfig):
         super().__init__(parameters)
         self.parameters = parameters
 
-    def load(self) -> torch_geometric.data.Dataset:
-        """
-        Load cell complex dataset.
+    def load(
+        self,
+    ) -> torch_geometric.data.Dataset:
+        r"""Load cell complex dataset.
 
-        Returns
-        -------
-        torch_geometric.data.Dataset
-            A torch_geometric.data.Dataset object containing the loaded data.
+        Args:
+            None
+        Returns:
+            torch_geometric.data.Dataset: torch_geometric.data.Dataset object containing the loaded data.
         """
         return load_cell_complex_dataset(self.parameters)
 
 
 class SimplicialLoader(AbstractLoader):
-    """
-    Loader for simplicial datasets.
+    r"""Loader for simplicial datasets.
 
-    Parameters
-    ----------
-    parameters : DictConfig
-        Configuration parameters.
+    Args:
+        parameters (DictConfig): Configuration parameters.
     """
 
     def __init__(self, parameters: DictConfig):
         super().__init__(parameters)
         self.parameters = parameters
 
-    def load(self) -> torch_geometric.data.Dataset:
-        """
-        Load simplicial dataset.
+    def load(
+        self,
+    ) -> torch_geometric.data.Dataset:
+        r"""Load simplicial dataset.
 
-        Returns
-        -------
-        torch_geometric.data.Dataset
-            A torch_geometric.data.Dataset object containing the loaded data.
+        Args:
+            None
+        Returns:
+            torch_geometric.data.Dataset: torch_geometric.data.Dataset object containing the loaded data.
         """
         return load_simplicial_dataset(self.parameters)
 
 
 class HypergraphLoader(AbstractLoader):
-    """
-    Loader for hypergraph datasets.
+    r"""Loader for hypergraph datasets.
 
-    Parameters
-    ----------
-    parameters : DictConfig
-        Configuration parameters.
+    Args:
+        parameters (DictConfig): Configuration parameters.
     """
 
     def __init__(self, parameters: DictConfig):
         super().__init__(parameters)
         self.parameters = parameters
 
-    def load(self) -> torch_geometric.data.Dataset:
-        """
-        Load hypergraph dataset.
+    def load(
+        self,
+    ) -> torch_geometric.data.Dataset:
+        r"""Load hypergraph dataset.
 
-        Returns
-        -------
-        torch_geometric.data.Dataset
-            A torch_geometric.data.Dataset object containing the loaded data.
+        Args:
+            None
+        Returns:
+            torch_geometric.data.Dataset: torch_geometric.data.Dataset object containing the loaded data.
         """
         return load_hypergraph_pickle_dataset(self.parameters)

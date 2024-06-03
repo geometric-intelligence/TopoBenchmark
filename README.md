@@ -13,7 +13,7 @@ Assess how your model compares against state-of-the-art topological neural netwo
 <div align="center">
 
 [![Lint](https://github.com/pyt-team/TopoBenchmarkX/actions/workflows/lint.yml/badge.svg)](https://github.com/pyt-team/TopoBenchmarkX/actions/workflows/lint.yml)
-[![Test](https://github.com/pyt-team/TopoBenchmarkX/actions/workflows/python-app.yml/badge.svg)](https://github.com/pyt-team/TopoBenchmarkX/actions/workflows/python-app.yml)
+[![Test](https://github.com/pyt-team/TopoBenchmarkX/actions/workflows/test.yml/badge.svg)](https://github.com/pyt-team/TopoBenchmarkX/actions/workflows/test.yml)
 [![Python](https://img.shields.io/badge/python-3.10+-blue?logo=python)](https://www.python.org/)
 [![license](https://badgen.net/github/license/pyt-team/TopoBenchmarkX?color=green)](https://github.com/pyt-team/TopoBenchmarkX/blob/main/LICENSE)
 [![slack](https://img.shields.io/badge/chat-on%20slack-purple?logo=slack)](https://join.slack.com/t/pyt-teamworkspace/shared_invite/zt-2k63sv99s-jbFMLtwzUCc8nt3sIRWjEw)
@@ -235,19 +235,19 @@ cd TopoBenchmarkX
 
 Then, build the Docker image.
 ```
-docker build -t topobenchmark:new .
+docker build -t topobenchmarkx:new .
 ```
 
 Depending if you want to use GPUs or not, these are the commands to run the Docker image and mount the current directory.
 
 With GPUs
 ```
-docker run -it -d --gpus all --volume $(pwd):/TopoBenchmarkX topobenchmark:new
+docker run -it -d --gpus all --volume $(pwd):/TopoBenchmarkX topobenchmarkx:new
 ```
 
 With CPU
 ```
-docker run -it -d --volume $(pwd):/TopoBenchmarkX topobenchmark:new
+docker run -it -d --volume $(pwd):/TopoBenchmarkX topobenchmarkx:new
 ```
 
 Happy development!

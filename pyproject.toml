@@ -73,6 +73,7 @@ test = [
     "coverage",
     "jupyter",
     "mypy",
+    "pytest-mock"
 ]
 
 dev = ["TopoBenchmarkX[test, lint]"]

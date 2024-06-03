@@ -18,7 +18,7 @@ class TestPreProcessor:
 
         # Setup test parameters
         self.dataset = MagicMock(spec=torch_geometric.data.Dataset)
-        self.data_dir = "/fake/path"
+        self.data_dir = "fake/path"
         self.transforms_config = DictConfig(
             {"transform": {"transform_name": "CellCycleLifting"}}
         )

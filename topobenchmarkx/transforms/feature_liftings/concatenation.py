@@ -1,12 +1,16 @@
+"""Concatenation feature lifting."""
+
 import torch
 import torch_geometric
 
 
 class Concatenation(torch_geometric.transforms.BaseTransform):
-    r"""Lifts r-cell features to r+1-cells by concatenation.
+    r"""Lift r-cell features to r+1-cells by concatenation.
 
-    Args:
-        kwargs (optional): Additional arguments for the class.
+    Parameters
+    ----------
+    **kwargs : optional
+        Additional arguments for the class.
     """
 
     def __init__(self, **kwargs):
@@ -18,13 +22,17 @@ class Concatenation(torch_geometric.transforms.BaseTransform):
     def lift_features(
         self, data: torch_geometric.data.Data | dict
     ) -> torch_geometric.data.Data | dict:
-        r"""Concatenates r-cell features to r+1-cell structures using the
-        incidence matrix.
+        r"""Concatenate r-cell features to r+1-cell structures.
 
-        Args:
-            data (torch_geometric.data.Data | dict): The input data to be lifted.
-        Returns:
-            torch_geometric.data.Data | dict: The lifted data.
+        Parameters
+        ----------
+        data : torch_geometric.data.Data | dict
+            The input data to be lifted.
+
+        Returns
+        -------
+        torch_geometric.data.Data | dict
+            The lifted data.
         """
         keys = sorted(
             [key.split("_")[1] for key in data if "incidence" in key]
@@ -54,12 +62,17 @@ class Concatenation(torch_geometric.transforms.BaseTransform):
     def forward(
         self, data: torch_geometric.data.Data | dict
     ) -> torch_geometric.data.Data | dict:
-        r"""Applies the lifting to the input data.
+        r"""Apply the lifting to the input data.
 
-        Args:
-            data (torch_geometric.data.Data | dict): The input data to be lifted.
-        Returns:
-            torch_geometric.data.Data | dict: The lifted data.
+        Parameters
+        ----------
+        data : torch_geometric.data.Data | dict
+            The input data to be lifted.
+
+        Returns
+        -------
+        torch_geometric.data.Data | dict
+            The lifted data.
         """
         data = self.lift_features(data)
         return data

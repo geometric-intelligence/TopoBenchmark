@@ -1,15 +1,19 @@
+"""This module contains a transform that generates equal Gaussian features for all nodes in the input graph."""
+
 import torch
 import torch_geometric
 
 
 class EqualGausFeatures(torch_geometric.transforms.BaseTransform):
-    r"""A transform that generates equal Gaussian features for all nodes in the
-    input graph.
+    r"""A transform that generates equal Gaussian features for all nodes.
 
-    Args:
-        mean (float): The mean of the Gaussian distribution.
-        std (float): The standard deviation of the Gaussian distribution.
-        num_features (int): The number of features to generate.
+    Parameters
+    ----------
+    **kwargs : optional
+        Additional arguments for the class. It should contain the following keys:
+        - mean (float): The mean of the Gaussian distribution.
+        - std (float): The standard deviation of the Gaussian distribution.
+        - num_features (int): The number of features to generate.
     """
 
     def __init__(self, **kwargs):
@@ -30,10 +34,15 @@ class EqualGausFeatures(torch_geometric.transforms.BaseTransform):
     def forward(self, data: torch_geometric.data.Data):
         r"""Apply the transform to the input data.
 
-        Args:
-            data (torch_geometric.data.Data): The input data.
-        Returns:
-            torch_geometric.data.Data: The transformed data.
+        Parameters
+        ----------
+        data : torch_geometric.data.Data
+            The input data.
+
+        Returns
+        -------
+        torch_geometric.data.Data
+            The transformed data.
         """
         data.x = self.feature_vector.expand(data.num_nodes, -1)
         return data

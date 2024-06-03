@@ -1,11 +1,15 @@
+"""A transform that converts the node features of the input graph to float."""
+
 import torch_geometric
 
 
 class NodeFeaturesToFloat(torch_geometric.transforms.BaseTransform):
     r"""A transform that converts the node features of the input graph to float.
 
-    Args:
-        kwargs (optional): Parameters for the base transform.
+    Parameters
+    ----------
+    **kwargs : optional
+        Parameters for the base transform.
     """
 
     def __init__(self, **kwargs):
@@ -18,10 +22,15 @@ class NodeFeaturesToFloat(torch_geometric.transforms.BaseTransform):
     def forward(self, data: torch_geometric.data.Data):
         r"""Apply the transform to the input data.
 
-        Args:
-            data (torch_geometric.data.Data): The input data.
-        Returns:
-            torch_geometric.data.Data: The transformed data.
+        Parameters
+        ----------
+        data : torch_geometric.data.Data
+            The input data.
+
+        Returns
+        -------
+        torch_geometric.data.Data
+            The transformed data.
         """
         data.x = data.x.float()
         return data

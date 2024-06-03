@@ -1,13 +1,16 @@
+"""KeepOnlyConnectedComponent class definition."""
+
 import torch_geometric
 from torch_geometric.transforms import LargestConnectedComponents
 
 
 class KeepOnlyConnectedComponent(torch_geometric.transforms.BaseTransform):
-    """A transform that keeps only the largest connected components of the
-    input graph.
+    """Class to keep only the largest connected components of the input graph.
 
-    Args:
-        kwargs (optional): Parameters for the base transform.
+    Parameters
+    ----------
+    **kwargs : optional
+        Parameters for the base transform.
     """
 
     def __init__(self, **kwargs):
@@ -21,12 +24,16 @@ class KeepOnlyConnectedComponent(torch_geometric.transforms.BaseTransform):
     def forward(self, data: torch_geometric.data.Data):
         """Apply the transform to the input data.
 
-        Args:
-            data (torch_geometric.data.Data): The input data.
-        Returns:
-            torch_geometric.data.Data: The transformed data.
-        """
+        Parameters
+        ----------
+        data : torch_geometric.data.Data
+            The input data.
 
+        Returns
+        -------
+        torch_geometric.data.Data
+            The transformed data.
+        """
         # torch_geometric.transforms.largest_connected_components()
         num_components = self.parameters["num_components"]
         lcc = LargestConnectedComponents(

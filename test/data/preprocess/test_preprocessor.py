@@ -18,7 +18,7 @@ class TestPreProcessor:
 
         # Setup test parameters
         self.dataset = MagicMock(spec=torch_geometric.data.Dataset)
-        self.data_dir = "/fake/path"
+        self.data_dir = "fake/path"
         self.transforms_config = DictConfig(
             {"transform": {"transform_name": "CellCycleLifting"}}
         )
@@ -62,7 +62,7 @@ class TestPreProcessor:
         assert self.preprocessor.transforms_applied == False
         assert self.preprocessor.data_list == ["0", "0", "0"]
 
-    def test_init_with_transform(self, mocker):
+    def test_init_with_transform(self, mocker_fixture):
         mocker = mocker_fixture
         val_processed_paths = ["/some/path"]
         params = [

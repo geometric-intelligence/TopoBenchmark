@@ -1,3 +1,5 @@
+"""Graph2HypergraphLifting module."""
+
 from .base import Graph2HypergraphLifting
 from .khop import HypergraphKHopLifting
 from .knn import HypergraphKNNLifting

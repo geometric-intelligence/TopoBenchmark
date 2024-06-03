@@ -62,7 +62,7 @@ class TestPreProcessor:
         assert self.preprocessor.transforms_applied == False
         assert self.preprocessor.data_list == ["0", "0", "0"]
 
-    def test_init_with_transform(self, mocker):
+    def test_init_with_transform(self, mocker_fixture):
         mocker = mocker_fixture
         val_processed_paths = ["/some/path"]
         params = [

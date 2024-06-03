@@ -1,3 +1,5 @@
+"""Init file for load module."""
+
 from .loaders import (
     CellComplexLoader,
     GraphLoader,

@@ -1,5 +1,5 @@
 <h2 align="center">
-  <img src="resources/logo_black_purple.jpg" width="600">
+  <img src="resources/workflow.pdf" width="600">
 </h2>
 
 <h3 align="center">

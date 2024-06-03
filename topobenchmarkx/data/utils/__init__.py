@@ -1,4 +1,5 @@
-# numpydoc ignore=GL08
+"""Init file for data/utils module."""
+
 from .utils import (
     ensure_serializable,  # noqa: F401
     generate_zero_sparse_connectivity,  # noqa: F401

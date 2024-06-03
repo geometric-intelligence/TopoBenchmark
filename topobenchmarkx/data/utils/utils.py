@@ -1,3 +1,5 @@
+"""Data utilities."""
+
 import hashlib
 
 import networkx as nx
@@ -10,14 +12,21 @@ from topomodelx.utils.sparse import from_sparse
 
 
 def get_complex_connectivity(complex, max_rank, signed=False):
-    r"""Gets the connectivity matrices for the complex.
+    """Get the connectivity matrices for the complex.
 
-    Args:
-        complex (topnetx.CellComplex, topnetx.SimplicialComplex): Cell complex.
-        max_rank (int): Maximum rank of the complex.
-        signed (bool): If True, returns signed connectivity matrices.
-    Returns:
-        dict: Dictionary containing the connectivity matrices.
+    Parameters
+    ----------
+    complex : topnetx.CellComplex or topnetx.SimplicialComplex
+        Cell complex.
+    max_rank : int
+        Maximum rank of the complex.
+    signed : bool, optional
+        If True, returns signed connectivity matrices.
+
+    Returns
+    -------
+    dict
+        Dictionary containing the connectivity matrices.
     """
     practical_shape = list(
         np.pad(list(complex.shape), (0, max_rank + 1 - len(complex.shape)))
@@ -57,29 +66,46 @@ def get_complex_connectivity(complex, max_rank, signed=False):
 
 
 def generate_zero_sparse_connectivity(m, n):
-    r"""Generates a zero sparse connectivity matrix.
+    """Generate a zero sparse connectivity matrix.
 
-    Args:
-        m (int): Number of rows.
-        n (int): Number of columns.
-    Returns:
-        torch.sparse_coo_tensor: Zero sparse connectivity matrix.
+    Parameters
+    ----------
+    m : int
+        Number of rows.
+    n : int
+        Number of columns.
+
+    Returns
+    -------
+    torch.sparse_coo_tensor
+        Zero sparse connectivity matrix.
     """
     return torch.sparse_coo_tensor((m, n)).coalesce()
 
 
 def load_cell_complex_dataset(cfg):
-    r"""Loads cell complex datasets."""
+    r"""Load cell complex datasets.
+
+    Parameters
+    ----------
+    cfg : DictConfig
+        Configuration parameters.
+    """
     raise NotImplementedError
 
 
 def load_simplicial_dataset(cfg):
-    r"""Loads simplicial datasets.
+    """Load simplicial datasets.
 
-    Args:
-        cfg (DictConfig): Configuration parameters.
-    Returns:
-        torch_geometric.data.Data: Simplicial dataset.
+    Parameters
+    ----------
+    cfg : DictConfig
+        Configuration parameters.
+
+    Returns
+    -------
+    torch_geometric.data.Data
+        Simplicial dataset.
     """
     if cfg["data_name"] != "KarateClub":
         return NotImplementedError
@@ -159,7 +185,13 @@ def load_simplicial_dataset(cfg):
 
 
 def load_manual_graph():
-    """Create a manual graph for testing purposes."""
+    """Create a manual graph for testing purposes.
+
+    Returns
+    -------
+    torch_geometric.data.Data
+        Manual graph.
+    """
     # Define the vertices (just 8 vertices)
     vertices = [i for i in range(8)]
     y = [0, 1, 1, 1, 0, 0, 0, 0]
@@ -210,12 +242,17 @@ def load_manual_graph():
 
 
 def ensure_serializable(obj):
-    r"""Ensures that the object is serializable.
+    """Ensure that the object is serializable.
 
-    Args:
-        obj (object): Object to ensure serializability.
-    Returns:
-        object: Object that is serializable.
+    Parameters
+    ----------
+    obj : object
+        Object to ensure serializability.
+
+    Returns
+    -------
+    object
+        Object that is serializable.
     """
     if isinstance(obj, dict):
         for key, value in obj.items():
@@ -234,14 +271,17 @@ def ensure_serializable(obj):
 
 
 def make_hash(o):
-    r"""Makes a hash from a dictionary, list, tuple or set to any level, that
-    contains only other hashable types (including any lists, tuples, sets, and
-    dictionaries).
+    """Make a hash from a dictionary, list, tuple or set to any level, that contains only other hashable types.
 
-    Args:
-        o (dict, list, tuple, set): Object to hash.
-    Returns:
-        int: Hash of the object.
+    Parameters
+    ----------
+    o : dict, list, tuple, set
+        Object to hash.
+
+    Returns
+    -------
+    int
+        Hash of the object.
     """
     sha1 = hashlib.sha1()
     sha1.update(str.encode(str(o)))

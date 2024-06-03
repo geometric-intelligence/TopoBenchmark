@@ -1,3 +1,5 @@
+"""Data IO utilities."""
+
 import os.path as osp
 import pickle
 from urllib.parse import parse_qs, urlparse
@@ -13,16 +15,22 @@ from torch_sparse import coalesce
 
 # Function to extract file ID from Google Drive URL
 def get_file_id_from_url(url):
-    r"""Extracts the file ID from a Google Drive file URL.
+    """Extract the file ID from a Google Drive file URL.
 
-    Args:
-        url (str): The Google Drive file URL.
+    Parameters
+    ----------
+    url : str
+        The Google Drive file URL.
 
-    Returns:
-        str: The file ID extracted from the URL.
+    Returns
+    -------
+    str
+        The file ID extracted from the URL.
 
-    Raises:
-        ValueError: If the provided URL is not a valid Google Drive file URL.
+    Raises
+    ------
+    ValueError
+        If the provided URL is not a valid Google Drive file URL.
     """
     parsed_url = urlparse(url)
     query_params = parse_qs(parsed_url.query)
@@ -43,20 +51,22 @@ def get_file_id_from_url(url):
 def download_file_from_drive(
     file_link, path_to_save, dataset_name, file_format="tar.gz"
 ):
-    r"""Downloads a file from a Google Drive link and saves it to the specified
-    path.
+    """Download a file from a Google Drive link and saves it to the specified path.
 
-    Args:
-        file_link (str): The Google Drive link of the file to download.
-        path_to_save (str): The path where the downloaded file will be saved.
-        dataset_name (str): The name of the dataset.
-        file_format (str, optional): The format of the downloaded file. Defaults to "tar.gz".
+    Parameters
+    ----------
+    file_link : str
+        The Google Drive link of the file to download.
+    path_to_save : str
+        The path where the downloaded file will be saved.
+    dataset_name : str
+        The name of the dataset.
+    file_format : str, optional
+        The format of the downloaded file. Defaults to "tar.gz".
 
-    Returns:
-        None
-
-    Raises:
-        None
+    Raises
+    ------
+    None
     """
     file_id = get_file_id_from_url(file_link)
 
@@ -73,15 +83,22 @@ def download_file_from_drive(
 
 
 def read_us_county_demos(path, year=2012, y_col="Election"):
-    r"""Load US County Demos dataset.
+    """Load US County Demos dataset.
 
-    Args:
-        path (str): Path to the dataset.
-        year (int, optional): Year to load the features. (default: 2012)
-        y_col (str, optional): Column to use as label. Can be one of ['Election', 'MedianIncome',
-            'MigraRate', 'BirthRate', 'DeathRate', 'BachelorRate', 'UnemploymentRate']. (default: "Election")
-    Returns:
-        torch_geometric.data.Data: Data object of the graph for the US County Demos dataset.
+    Parameters
+    ----------
+    path : str
+        Path to the dataset.
+    year : int, optional
+        Year to load the features (default: 2012).
+    y_col : str, optional
+        Column to use as label. Can be one of ['Election', 'MedianIncome',
+        'MigraRate', 'BirthRate', 'DeathRate', 'BachelorRate', 'UnemploymentRate'] (default: "Election").
+
+    Returns
+    -------
+    torch_geometric.data.Data
+        Data object of the graph for the US County Demos dataset.
     """
     edges_df = pd.read_csv(f"{path}/county_graph.csv")
     stat = pd.read_csv(
@@ -191,12 +208,17 @@ def read_us_county_demos(path, year=2012, y_col="Election"):
 
 
 def load_hypergraph_pickle_dataset(cfg):
-    r"""Loads hypergraph datasets from pickle files.
+    """Load hypergraph datasets from pickle files.
 
-    Args:
-        cfg (DictConfig): Configuration parameters.
-    Returns:
-        torch_geometric.data.Data: Hypergraph dataset.
+    Parameters
+    ----------
+    cfg : DictConfig
+        Configuration parameters.
+
+    Returns
+    -------
+    torch_geometric.data.Data
+        Hypergraph dataset.
     """
     data_dir = cfg["data_dir"]
     print(f"Loading {cfg['data_domain']} dataset name: {cfg['data_name']}")

@@ -1,3 +1,5 @@
+"""Wrapper for the GNN models."""
+
 from topobenchmarkx.nn.wrappers.base import AbstractWrapper
 
 
@@ -11,10 +13,15 @@ class GNNWrapper(AbstractWrapper):
     def forward(self, batch):
         r"""Forward pass for the GNN wrapper.
 
-        Args:
-            batch (torch_geometric.data.Data): Batch object containing the batched data.
-        Returns:
-            dict: Dictionary containing the updated model output.
+        Parameters
+        ----------
+        batch : torch_geometric.data.Data
+            Batch object containing the batched data.
+
+        Returns
+        -------
+        dict
+            Dictionary containing the updated model output.
         """
         x_0 = self.backbone(batch.x_0, batch.edge_index)
 

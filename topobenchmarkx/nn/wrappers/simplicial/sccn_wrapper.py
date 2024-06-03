@@ -1,3 +1,5 @@
+"""Wrapper for the SCCN model."""
+
 from topobenchmarkx.nn.wrappers.base import AbstractWrapper
 
 
@@ -11,12 +13,16 @@ class SCCNWrapper(AbstractWrapper):
     def forward(self, batch):
         r"""Forward pass for the SCCN wrapper.
 
-        Args:
-            batch (torch_geometric.data.Data): Batch object containing the batched data.
-        Returns:
-            dict: Dictionary containing the updated model output.
-        """
+        Parameters
+        ----------
+        batch : torch_geometric.data.Data
+            Batch object containing the batched data.
 
+        Returns
+        -------
+        dict
+            Dictionary containing the updated model output.
+        """
         features = {
             f"rank_{r}": batch[f"x_{r}"]
             for r in range(self.backbone.layers[0].max_rank + 1)

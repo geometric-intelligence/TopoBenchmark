@@ -1,3 +1,5 @@
+"""CAN wrapper module."""
+
 import torch
 
 from topobenchmarkx.nn.wrappers.base import AbstractWrapper
@@ -15,12 +17,16 @@ class CANWrapper(AbstractWrapper):
     def forward(self, batch):
         r"""Forward pass for the CAN wrapper.
 
-        Args:
-            batch (torch_geometric.data.Data): Batch object containing the batched data.
-        Returns:
-            dict: Dictionary containing the updated model output.
-        """
+        Parameters
+        ----------
+        batch : torch_geometric.data.Data
+            Batch object containing the batched data.
 
+        Returns
+        -------
+        dict
+            Dictionary containing the updated model output.
+        """
         x_1 = self.backbone(
             x_0=batch.x_0,
             x_1=batch.x_1,

@@ -1,3 +1,5 @@
+"""Wrapper for the hypergraph models."""
+
 from topobenchmarkx.nn.wrappers.base import AbstractWrapper
 
 
@@ -11,10 +13,15 @@ class HypergraphWrapper(AbstractWrapper):
     def forward(self, batch):
         r"""Forward pass for the hypergraph wrapper.
 
-        Args:
-            batch (torch_geometric.data.Data): Batch object containing the batched data.
-        Returns:
-            dict: Dictionary containing the updated model output.
+        Parameters
+        ----------
+        batch : torch_geometric.data.Data
+            Batch object containing the batched data.
+
+        Returns
+        -------
+        dict
+            Dictionary containing the updated model output.
         """
         x_0, x_1 = self.backbone(batch.x_0, batch.incidence_hyperedges)
         model_out = {"labels": batch.y, "batch_0": batch.batch_0}

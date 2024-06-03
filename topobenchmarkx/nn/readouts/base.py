@@ -1,3 +1,5 @@
+"""Abstract base class for readout layers."""
+
 from abc import abstractmethod
 
 import torch
@@ -8,12 +10,18 @@ from torch_geometric.utils import scatter
 class AbstractZeroCellReadOut(torch.nn.Module):
     r"""Readout layer for GNNs that operates on the batch level.
 
-    Args:
-        hidden_dim (int): Hidden dimension of the GNN model.
-        out_channels (int): Number of output channels.
-        task_level (str): Task level for readout layer. Either "graph" or "node".
-        pooling_type (str): Pooling type for readout layer. Either "max", "sum" or "mean".
-        kwargs: Additional arguments.
+    Parameters
+    ----------
+    hidden_dim : int
+        Hidden dimension of the GNN model.
+    out_channels : int
+        Number of output channels.
+    task_level : str
+        Task level for readout layer. Either "graph" or "node".
+    pooling_type : str
+        Pooling type for readout layer. Either "max", "sum" or "mean".
+    **kwargs : dict
+        Additional arguments.
     """
 
     def __init__(
@@ -41,13 +49,18 @@ class AbstractZeroCellReadOut(torch.nn.Module):
     ) -> dict:
         """Readout logic based on model_output.
 
-        Args:
-            model_out (dict): Dictionary containing the model output.
-            batch (torch_geometric.data.Data): Batch object containing the batched domain data.
-        Returns:
-            dict: Dictionary containing the updated model output.
+        Parameters
+        ----------
+        model_out : dict
+            Dictionary containing the model output.
+        batch : torch_geometric.data.Data
+            Batch object containing the batched domain data.
+
+        Returns
+        -------
+        dict
+            Dictionary containing the updated model output.
         """
-        # Readout
         model_out = self.forward(model_out, batch)
 
         model_out["logits"] = self.compute_logits(
@@ -59,11 +72,17 @@ class AbstractZeroCellReadOut(torch.nn.Module):
     def compute_logits(self, x, batch):
         r"""Compute logits based on the readout layer.
 
-        Args:
-            x (torch.Tensor): Node embeddings.
-            batch (torch.Tensor): Batch index tensor.
-        Returns:
-            torch.Tensor: Logits tensor.
+        Parameters
+        ----------
+        x : torch.Tensor
+            Node embeddings.
+        batch : torch.Tensor
+            Batch index tensor.
+
+        Returns
+        -------
+        torch.Tensor
+            Logits tensor.
         """
         if self.task_level == "graph":
             if self.pooling_type == "max":
@@ -80,9 +99,10 @@ class AbstractZeroCellReadOut(torch.nn.Module):
     def forward(self, model_out: dict, batch: torch_geometric.data.Data):
         r"""Forward pass.
 
-        Args:
-            model_out (dict): Dictionary containing the model output.
-            batch (torch_geometric.data.Data): Batch object containing the batched domain data.
-        Returns:
-            dict: Dictionary containing the updated model output.
+        Parameters
+        ----------
+        model_out : dict
+            Dictionary containing the model output.
+        batch : torch_geometric.data.Data
+            Batch object containing the batched domain data.
         """

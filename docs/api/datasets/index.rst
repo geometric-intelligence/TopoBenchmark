@@ -1,6 +1,6 @@
-****
-Data
-****
+********
+Datasets
+********
 
 The `datasets` module of `TopoBenchmarkX`` implements an example of dataset integrated into the TopoBenchmarkX framework.
 

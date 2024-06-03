@@ -1,8 +1,11 @@
-**********
-Evaluators
-**********
+*********
+Evaluator
+*********
 
-This class consists of various utilities necessary for the library:
+This module implements custom Python classes to evaluate performances of models in `TopoBenchmarkX`.
 
-.. automodule:: topobenchmarkx.evaluators
+.. automodule:: topobenchmarkx.evaluator.base
+   :members:
+
+.. automodule:: topobenchmarkx.evaluator.evaluator
    :members:

@@ -1,3 +1,5 @@
+"""This module implements the CliqueLifting class, which lifts graphs to simplicial complexes."""
+
 from itertools import combinations
 from typing import Any
 
@@ -11,24 +13,31 @@ from topobenchmarkx.transforms.liftings.graph2simplicial import (
 
 
 class SimplicialCliqueLifting(Graph2SimplicialLifting):
-    r"""Lifts graphs to simplicial complex domain by identifying the cliques as
-    k-simplices.
+    r"""Lift graphs to simplicial complex domain.
 
-    Args:
-        kwargs (optional): Additional arguments for the class.
+    The algorithm creates simplices by identifying the cliques and considering them as simplices of the same dimension.
+
+    Parameters
+    ----------
+    **kwargs : optional
+        Additional arguments for the class.
     """
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
     def lift_topology(self, data: torch_geometric.data.Data) -> dict:
-        r"""Lifts the topology of a graph to a simplicial complex by identifying
-        the cliques as k-simplices.
+        r"""Lift the topology of a graph to a simplicial complex.
 
-        Args:
-            data (torch_geometric.data.Data): The input data to be lifted.
-        Returns:
-            dict: The lifted topology.
+        Parameters
+        ----------
+        data : torch_geometric.data.Data
+            The input data to be lifted.
+
+        Returns
+        -------
+        dict
+            The lifted topology.
         """
         graph = self._generate_graph_from_data(data)
         simplicial_complex = SimplicialComplex(graph)

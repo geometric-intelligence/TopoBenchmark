@@ -1,3 +1,5 @@
+"""Abstract class for topological liftings."""
+
 from abc import abstractmethod
 
 import torch_geometric
@@ -22,7 +24,7 @@ class AbstractLifting(torch_geometric.transforms.BaseTransform):
 
     @abstractmethod
     def lift_topology(self, data: torch_geometric.data.Data) -> dict:
-        r"""Lifts the topology of a graph to higher-order topological domains.
+        r"""Lift the topology of a graph to higher-order topological domains.
 
         Parameters
         ----------
@@ -39,7 +41,7 @@ class AbstractLifting(torch_geometric.transforms.BaseTransform):
     def forward(
         self, data: torch_geometric.data.Data
     ) -> torch_geometric.data.Data:
-        r"""Applies the full lifting (topology + features) to the input data.
+        r"""Apply the full lifting (topology + features) to the input data.
 
         Parameters
         ----------

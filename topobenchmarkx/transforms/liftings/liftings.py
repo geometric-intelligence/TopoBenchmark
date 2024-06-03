@@ -1,3 +1,5 @@
+"""This module implements the abstract classes for lifting graphs."""
+
 import networkx as nx
 import torch_geometric
 from torch_geometric.utils.undirected import is_undirected, to_undirected
@@ -6,8 +8,7 @@ from topobenchmarkx.transforms.liftings import AbstractLifting
 
 
 class GraphLifting(AbstractLifting):
-    r"""Abstract class for lifting graph topologies to other (topological)
-    domains.
+    r"""Abstract class for lifting graph topologies to other domains.
 
     Parameters
     ----------
@@ -29,7 +30,7 @@ class GraphLifting(AbstractLifting):
         self.preserve_edge_attr = preserve_edge_attr
 
     def _data_has_edge_attr(self, data: torch_geometric.data.Data) -> bool:
-        r"""Checks if the input data object has edge attributes.
+        r"""Check if the input data object has edge attributes.
 
         Parameters
         ----------
@@ -46,7 +47,7 @@ class GraphLifting(AbstractLifting):
     def _generate_graph_from_data(
         self, data: torch_geometric.data.Data
     ) -> nx.Graph:
-        r"""Generates a NetworkX graph from the input data object.
+        r"""Generate a NetworkX graph from the input data object.
 
         Parameters
         ----------
@@ -97,8 +98,7 @@ class GraphLifting(AbstractLifting):
 
 
 class PointCloudLifting(AbstractLifting):
-    r"""Abstract class for lifting point cloud topologies to other (topological)
-    domains.
+    r"""Abstract class for lifting point clouds to other topological domains.
 
     Parameters
     ----------
@@ -113,8 +113,7 @@ class PointCloudLifting(AbstractLifting):
 
 
 class CellComplexLifting(AbstractLifting):
-    r"""Abstract class for lifting cell complexes to other (topological)
-    domains.
+    r"""Abstract class for lifting cell complexes to other domains.
 
     Parameters
     ----------
@@ -129,8 +128,7 @@ class CellComplexLifting(AbstractLifting):
 
 
 class SimplicialLifting(AbstractLifting):
-    r"""Abstract class for lifting simplicial complexes to other (topological)
-    domains.
+    r"""Abstract class for lifting simplicial complexes to other domains.
 
     Parameters
     ----------
@@ -145,7 +143,7 @@ class SimplicialLifting(AbstractLifting):
 
 
 class HypergraphLifting(AbstractLifting):
-    r"""Abstract class for lifting hypergraphs to other (topological) domains.
+    r"""Abstract class for lifting hypergraphs to other domains.
 
     Parameters
     ----------
@@ -160,8 +158,7 @@ class HypergraphLifting(AbstractLifting):
 
 
 class CombinatorialLifting(AbstractLifting):
-    r"""Abstract class for lifting combinatorial structures to other
-    (topological) domains.
+    r"""Abstract class for lifting combinatorial complexes to other domains.
 
     Parameters
     ----------

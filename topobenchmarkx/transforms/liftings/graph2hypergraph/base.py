@@ -1,11 +1,15 @@
+"""Abstract class for lifting graphs to hypergraphs."""
+
 from topobenchmarkx.transforms.liftings import GraphLifting
 
 
 class Graph2HypergraphLifting(GraphLifting):
     r"""Abstract class for lifting graphs to hypergraphs.
 
-    Args:
-        kwargs (optional): Additional arguments for the class.
+    Parameters
+    ----------
+    **kwargs : optional
+        Additional arguments for the class.
     """
 
     def __init__(self, **kwargs):

@@ -1,4 +1,4 @@
-### Evaluator for graph classification
+"""This module contains the Evaluator class that is responsible for computing the metrics."""
 
 from torchmetrics import MetricCollection
 
@@ -6,18 +6,19 @@ from topobenchmarkx.evaluator import METRICS, AbstractEvaluator
 
 
 class TBXEvaluator(AbstractEvaluator):
-    r"""Evaluator class that is responsible for computing the metrics for a
-    given task.
+    r"""Evaluator class that is responsible for computing the metrics.
 
-    Args:
-        task (str): The task type. It can be either "classification" or "regression".
-        **kwargs : Additional arguments for the class. The arguments depend on the task.
-            In "classification" scenario, the following arguments are expected:
-            - num_classes (int): The number of classes.
-            - classification_metrics (list[str]): A list of classification metrics to be computed.
-
-            In "regression" scenario, the following arguments are expected:
-            - regression_metrics (list[str]): A list of regression metrics to be computed.
+    Parameters
+    ----------
+    task : str
+        The task type. It can be either "classification" or "regression".
+    **kwargs : dict
+        Additional arguments for the class. The arguments depend on the task.
+        In "classification" scenario, the following arguments are expected:
+        - num_classes (int): The number of classes.
+        - classification_metrics (list[str]): A list of classification metrics to be computed.
+        In "regression" scenario, the following arguments are expected:
+        - regression_metrics (list[str]): A list of regression metrics to be computed.
     """
 
     def __init__(self, task, **kwargs):
@@ -62,12 +63,19 @@ class TBXEvaluator(AbstractEvaluator):
     def update(self, model_out: dict):
         r"""Update the metrics with the model output.
 
-        Args:
-            model_out (dict): The model output. It should contain the following keys:
-                - logits : torch.Tensor
-                    The model predictions.
-                - labels : torch.Tensor
-                    The ground truth labels.
+        Parameters
+        ----------
+        model_out : dict
+            The model output. It should contain the following keys:
+            - logits : torch.Tensor
+                The model predictions.
+            - labels : torch.Tensor
+                The ground truth labels.
+
+        Raises
+        ------
+        ValueError
+            If the task is not valid.
         """
         preds = model_out["logits"].cpu()
         target = model_out["labels"].cpu()
@@ -82,7 +90,13 @@ class TBXEvaluator(AbstractEvaluator):
             raise ValueError(f"Invalid task {self.task}")
 
     def compute(self):
-        r"""Compute the metrics."""
+        r"""Compute the metrics.
+
+        Returns
+        -------
+        dict
+            Dictionary containing the computed metrics.
+        """
         return self.metrics.compute()
 
     def reset(self):

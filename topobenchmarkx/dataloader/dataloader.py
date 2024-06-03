@@ -1,3 +1,5 @@
+"TBXDataloader class."
+
 from typing import Any
 
 from lightning import LightningDataModule
@@ -8,21 +10,29 @@ from topobenchmarkx.dataloader.utils import collate_fn
 
 
 class TBXDataloader(LightningDataModule):
-    r"""This class takes care of returning the dataloaders for the training,
-    validation, and test datasets. It also handles the collate function. The
-    class is designed to work with the `torch` dataloaders.
+    r"""This class takes care of returning the dataloaders for the training, validation, and test datasets.
 
-    Args:
-        dataset_train (DataloadDataset): The training dataset.
-        dataset_val (DataloadDataset, optional): The validation dataset. (default: None)
-        dataset_test (DataloadDataset, optional): The test dataset. (default: None)
-        batch_size (int, optional): The batch size for the dataloader. (default: 1)
-        num_workers (int, optional): The number of worker processes to use for data loading. (default: 0)
-        pin_memory (bool, optional): If True, the data loader will copy tensors into pinned memory before returning them. (default: False)
-        kwargs: Additional arguments.
-    Returns:
-        None
+    It also handles the collate function. The class is designed to work with the `torch` dataloaders.
 
+    Parameters
+    ----------
+    dataset_train : DataloadDataset
+        The training dataset.
+    dataset_val : DataloadDataset, optional
+        The validation dataset (default: None).
+    dataset_test : DataloadDataset, optional
+        The test dataset (default: None).
+    batch_size : int, optional
+        The batch size for the dataloader (default: 1).
+    num_workers : int, optional
+        The number of worker processes to use for data loading (default: 0).
+    pin_memory : bool, optional
+        If True, the data loader will copy tensors into pinned memory before returning them (default: False).
+    **kwargs : optional
+        Additional arguments.
+
+    References
+    ----------
     Read the docs:
         https://lightning.ai/docs/pytorch/latest/data/datamodule.html
     """
@@ -68,8 +78,10 @@ class TBXDataloader(LightningDataModule):
     def train_dataloader(self) -> DataLoader:
         r"""Create and return the train dataloader.
 
-        Returns:
-            torch.utils.data.DataLoader: The train dataloader.
+        Returns
+        -------
+        torch.utils.data.DataLoader
+            The train dataloader.
         """
         return DataLoader(
             dataset=self.dataset_train,
@@ -84,8 +96,10 @@ class TBXDataloader(LightningDataModule):
     def val_dataloader(self) -> DataLoader:
         r"""Create and return the validation dataloader.
 
-        Returns:
-            torch.utils.data.DataLoader: The validation dataloader.
+        Returns
+        -------
+        torch.utils.data.DataLoader
+            The validation dataloader.
         """
         return DataLoader(
             dataset=self.dataset_val,
@@ -100,8 +114,10 @@ class TBXDataloader(LightningDataModule):
     def test_dataloader(self) -> DataLoader:
         r"""Create and return the test dataloader.
 
-        Returns:
-            torch.utils.data.DataLoader: The test dataloader.
+        Returns
+        -------
+        torch.utils.data.DataLoader
+            The test dataloader.
         """
         if self.dataset_test is None:
             raise ValueError("There is no test dataloader.")
@@ -116,18 +132,20 @@ class TBXDataloader(LightningDataModule):
         )
 
     def teardown(self, stage: str | None = None) -> None:
-        r"""Lightning hook for cleaning up after `trainer.fit()`,
-        `trainer.validate()`, `trainer.test()`, and `trainer.predict()`.
+        r"""Lightning hook for cleaning up after `trainer.fit()`, `trainer.validate()`, `trainer.test()`, and `trainer.predict()`.
 
-        Args:
-            stage (str, optional): The stage being torn down. Either `"fit"`, `"validate"`, `"test"`, or `"predict"`. (default: None)
+        Parameters
+        ----------
+        stage : str, optional
+            The stage being torn down. Either `"fit"`, `"validate"`, `"test"`, or `"predict"` (default: None).
         """
 
     def state_dict(self) -> dict[Any, Any]:
-        r"""Called when saving a checkpoint. Implement to generate and save the
-        datamodule state.
+        r"""Called when saving a checkpoint. Implement to generate and save the datamodule state.
 
-        Returns:
-            dict: A dictionary containing the datamodule state that you want to save.
+        Returns
+        -------
+        dict
+            A dictionary containing the datamodule state that you want to save.
         """
         return {}

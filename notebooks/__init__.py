@@ -1,1 +1,1 @@
-""" Empty file to make the notebooks folder a package."""
+"""Empty file to make the notebooks folder a package."""

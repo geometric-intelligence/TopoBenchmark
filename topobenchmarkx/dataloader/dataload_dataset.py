@@ -4,8 +4,7 @@ import torch_geometric
 
 
 class DataloadDataset(torch_geometric.data.Dataset):
-    """
-    Custom dataset to return all the values added to the dataset object.
+    """Custom dataset to return all the values added to the dataset object.
 
     Parameters
     ----------

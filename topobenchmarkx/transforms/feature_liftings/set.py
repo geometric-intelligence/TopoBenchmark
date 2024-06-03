@@ -1,4 +1,4 @@
-""" " Set lifting for r-cell features to r+1-cell features."""
+"""Set lifting for r-cell features to r+1-cell features."""
 
 import torch
 import torch_geometric

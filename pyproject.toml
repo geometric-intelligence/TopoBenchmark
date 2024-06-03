@@ -127,7 +127,7 @@ ignore = [
 ]
 
 [tool.ruff.lint.pydocstyle]
-convention = "numpy"
+convention = "google"
 
 [tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["F403"]
@@ -159,7 +159,6 @@ addopts = "--capture=no"
 pythonpath = [
   "."
 ]
-
 
 [tool.numpydoc_validation]
 checks = [

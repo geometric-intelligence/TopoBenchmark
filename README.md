@@ -252,7 +252,8 @@ docker run -it -d --volume $(pwd):/TopoBenchmarkX topobenchmark:new
 
 Happy development!
 
-## :spiral_notepad: References
+
+## 🔍 References ##
 
 To learn more about `TopoBenchmarkX`, we invite you to read the paper:
 
@@ -265,7 +266,22 @@ To learn more about `TopoBenchmarkX`, we invite you to read the paper:
       archivePrefix={arXiv},
       primaryClass={cs.LG}
 }
+```
+To learn more about liftings, read appendix A : 
 
+```
+@misc{hajij2023topological,
+      title={Topological Deep Learning: Going Beyond Graph Data},
+      author={Mustafa Hajij and Ghada Zamzmi and Theodore Papamarkou and Nina Miolane and Aldo Guzmán-Sáenz and Karthikeyan Natesan Ramamurthy and Tolga Birdal and Tamal K. Dey and Soham Mukherjee and Shreyas N. Samaga and Neal Livesay and Robin Walters and Paul Rosen and Michael T. Schaub},
+      year={2023},
+      eprint={2206.00606},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG}
+}
+```
+
+For more information about TopoX, read out paper :
+```
 @misc{topox,
 	title={Topo{X}: a suite of {P}ython packages for machine learning on topological domains},
 	author={Mustafa Hajij

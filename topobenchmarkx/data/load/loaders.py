@@ -164,8 +164,7 @@ class CellComplexLoader(AbstractLoader):
     def load(
         self,
     ) -> torch_geometric.data.Dataset:
-        """
-        Load cell complex dataset.
+        """Load cell complex dataset.
 
         Returns
         -------
@@ -196,8 +195,7 @@ class SimplicialLoader(AbstractLoader):
     def load(
         self,
     ) -> torch_geometric.data.Dataset:
-        """
-        Load simplicial dataset.
+        """Load simplicial dataset.
 
         Returns
         -------

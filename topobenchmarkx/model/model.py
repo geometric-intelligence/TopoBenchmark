@@ -261,7 +261,8 @@ class TBXModel(LightningModule):
     def on_validation_epoch_start(self) -> None:
         r"""Hook called when a validation epoch begins.
 
-        According pytorch lightning documentation this hook is called at the beginning of the validation epoch.
+        According pytorch lightning documentation this hook is called at the
+        beginning of the validation epoch.
 
         https://lightning.ai/docs/pytorch/stable/common/lightning_module.html#hooks
 

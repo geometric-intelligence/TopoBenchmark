@@ -1,16 +1,27 @@
+"""Configuration resolvers for the topobenchmarkx package."""
+
 import os
 
 
 def get_default_transform(dataset, model):
     r"""Get default transform for a given data domain and model.
 
-    Args:
-        dataset (str): Dataset name. Should be in the format "data_domain/name".
-        model (str): Model name. Should be in the format "model_domain/name".
-    Returns:
-        str: Default transform.
-    Raises:
-        ValueError: If the combination of data_domain and model is invalid.
+    Parameters
+    ----------
+    dataset : str
+        Dataset name. Should be in the format "data_domain/name".
+    model : str
+        Model name. Should be in the format "model_domain/name".
+
+    Returns
+    -------
+    str
+        Default transform.
+
+    Raises
+    ------
+    ValueError
+        If the combination of data_domain and model is invalid.
     """
     data_domain, dataset = dataset.split("/")
     model_domain = model.split("/")[0]
@@ -37,13 +48,22 @@ def get_default_transform(dataset, model):
 def get_required_lifting(data_domain, model):
     r"""Get required transform for a given data domain and model.
 
-    Args:
-        data_domain (str): Dataset domain.
-        model (str): Model name. Should be in the format "model_domain/name".
-    Returns:
-        str: Default transform.
-    Raises:
-        ValueError: If the combination of data_domain and model is invalid.
+    Parameters
+    ----------
+    data_domain : str
+        Dataset domain.
+    model : str
+        Model name. Should be in the format "model_domain/name".
+
+    Returns
+    -------
+    str
+        Required transform.
+
+    Raises
+    ------
+    ValueError
+        If the combination of data_domain and model is invalid.
     """
     data_domain = data_domain
     model_domain = model.split("/")[0]
@@ -58,15 +78,24 @@ def get_required_lifting(data_domain, model):
 
 
 def get_monitor_metric(task, metric):
-    r"""Get monitor metric for a given task and loss.
+    r"""Get monitor metric for a given task.
 
-    Args:
-        task (str): Task, either "classification" or "regression".
-        loss (str): Name of the loss function.
-    Returns:
-        str: Monitor metric.
-    Raises:
-        ValueError: If the task is invalid.
+    Parameters
+    ----------
+    task : str
+        Task, either "classification" or "regression".
+    metric : str
+        Name of the metric function.
+
+    Returns
+    -------
+    str
+        Monitor metric.
+
+    Raises
+    ------
+    ValueError
+        If the task is invalid.
     """
     if task == "classification" or task == "regression":
         return f"val/{metric}"
@@ -77,12 +106,20 @@ def get_monitor_metric(task, metric):
 def get_monitor_mode(task):
     r"""Get monitor mode for a given task.
 
-    Args:
-        task (str): Task, either "classification" or "regression".
-    Returns:
-        str: Monitor mode, either "max" or "min".
-    Raises:
-        ValueError: If the task is invalid.
+    Parameters
+    ----------
+    task : str
+        Task, either "classification" or "regression".
+
+    Returns
+    -------
+    str
+        Monitor mode, either "max" or "min".
+
+    Raises
+    ------
+    ValueError
+        If the task is invalid.
     """
     if task == "classification":
         return "max"
@@ -95,21 +132,33 @@ def get_monitor_mode(task):
 def infer_in_channels(dataset, transforms):
     r"""Infer the number of input channels for a given dataset.
 
-    Args:
-        dataset (DictConfig): Configuration parameters for the dataset.
-        transforms (DictConfig): Configuration parameters for the transforms.
-    Returns:
-        list: List with dimensions of the input channels.
+    Parameters
+    ----------
+    dataset : DictConfig
+        Configuration parameters for the dataset.
+    transforms : DictConfig
+        Configuration parameters for the transforms.
+
+    Returns
+    -------
+    list
+        List with dimensions of the input channels.
     """
 
     def find_complex_lifting(transforms):
-        r"""Find if there is a complex lifting in the dataset.
+        r"""Find if there is a complex lifting in the complex_transforms.
 
-        Args:
-        dataset (DictConfig): Configuration parameters for the dataset.
-        Returns:
-            bool: True if there is a complex lifting, False otherwise.
-            str: Name of the complex lifting, if it exists.
+        Parameters
+        ----------
+        transforms : List[str]
+            List of transforms.
+
+        Returns
+        -------
+        bool
+            True if there is a complex lifting, False otherwise.
+        str
+            Name of the complex lifting, if it exists.
         """
         if transforms is None:
             return False, None
@@ -126,11 +175,17 @@ def infer_in_channels(dataset, transforms):
     def check_for_type_feature_lifting(transforms, lifting):
         r"""Check the type of feature lifting in the dataset.
 
-        Args:
-            dataset (DictConfig): Configuration parameters for the dataset.
-            lifting (str): Name of the complex lifting.
-        Returns:
-            str: Type of feature lifting.
+        Parameters
+        ----------
+        transforms : DictConfig
+            Configuration parameters for the transforms.
+        lifting : str
+            Name of the complex lifting.
+
+        Returns
+        -------
+        str
+            Type of feature lifting.
         """
         lifting_params_keys = transforms[lifting].keys()
         if "feature_lifting" in lifting_params_keys:
@@ -165,7 +220,6 @@ def infer_in_channels(dataset, transforms):
         else:
             # Case when the dataset has edge attributes
             if not transforms[lifting].preserve_edge_attr:
-
                 if feature_lifting == "ProjectionSum":
                     return [dataset.parameters.num_features[0]] * transforms[
                         lifting
@@ -202,10 +256,17 @@ def infer_in_channels(dataset, transforms):
 def infere_num_cell_dimensions(selected_dimensions, in_channels):
     r"""Infer the length of a list.
 
-    Args:
-        list (list): Input list.
-    Returns:
-        int: Length of the input list.
+    Parameters
+    ----------
+    selected_dimensions : list
+        List of selected dimensions. If not None it will be used to infer the length.
+    in_channels : list
+        List of input channels. If selected_dimensions is None, this list will be used to infer the length.
+
+    Returns
+    -------
+    int
+        Length of the input list.
     """
     if selected_dimensions is not None:
         return len(selected_dimensions)

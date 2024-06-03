@@ -1,15 +1,19 @@
+"""DataTransform class."""
+
 import torch_geometric
 
 from topobenchmarkx.transforms import TRANSFORMS
 
 
 class DataTransform(torch_geometric.transforms.BaseTransform):
-    r"""Abstract class that provides an interface to define a custom data
-    lifting.
+    r"""Abstract class to define a custom data lifting.
 
-    Args:
-        transform_name (str): The name of the transform to be used.
-        **kwargs: Additional arguments for the class.
+    Parameters
+    ----------
+    transform_name : str
+        The name of the transform to be used.
+    **kwargs : dict
+        Additional arguments for the class. Should contain "transform_name".
     """
 
     def __init__(self, transform_name, **kwargs):
@@ -29,10 +33,15 @@ class DataTransform(torch_geometric.transforms.BaseTransform):
     ) -> torch_geometric.data.Data:
         r"""Forward pass of the lifting.
 
-        Args:
-            data (torch_geometric.data.Data): The input data to be lifted.
-        Returns:
-            transformed_data (torch_geometric.data.Data): The lifted data.
+        Parameters
+        ----------
+        data : torch_geometric.data.Data
+            The input data to be lifted.
+
+        Returns
+        -------
+        torch_geometric.data.Data
+            The lifted data.
         """
         transformed_data = self.transform(data)
         return transformed_data

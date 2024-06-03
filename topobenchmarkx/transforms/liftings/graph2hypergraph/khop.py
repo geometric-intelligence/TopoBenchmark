@@ -1,3 +1,5 @@
+"""This module implements the k-hop lifting of graphs to hypergraphs."""
+
 import torch
 import torch_geometric
 
@@ -7,13 +9,18 @@ from topobenchmarkx.transforms.liftings.graph2hypergraph import (
 
 
 class HypergraphKHopLifting(Graph2HypergraphLifting):
-    r"""Lifts graphs to hypergraph domain by considering k-hop neighborhoods of
+    r"""Lift graph to hypergraphs by considering k-hop neighborhoods.
+
+    The class transforms graphs to hypergraph domain by considering k-hop neighborhoods of
     a node. This lifting extracts a number of hyperedges equal to the number of
     nodes in the graph.
 
-    Args:
-        k_value (int, optional): The number of hops to consider. (default: 1)
-        kwargs (optional): Additional arguments for the class.
+    Parameters
+    ----------
+    k_value : int, optional
+        The number of hops to consider. Default is 1.
+    **kwargs : optional
+        Additional arguments for the class.
     """
 
     def __init__(self, k_value=1, **kwargs):
@@ -24,13 +31,17 @@ class HypergraphKHopLifting(Graph2HypergraphLifting):
         return f"{self.__class__.__name__}(k={self.k!r})"
 
     def lift_topology(self, data: torch_geometric.data.Data) -> dict:
-        r"""Lifts the topology of a graph to hypergraph domain by considering
-        k-hop neighborhoods.
+        r"""Lift a graphs to hypergraphs by considering k-hop neighborhoods.
 
-        Args:
-            data (torch_geometric.data.Data): The input data to be lifted.
-        Returns:
-            dict: The lifted topology.
+        Parameters
+        ----------
+        data : torch_geometric.data.Data
+            The input data to be lifted.
+
+        Returns
+        -------
+        dict
+            The lifted topology.
         """
         # Check if data has instance x:
         if hasattr(data, "x") and data.x is not None:

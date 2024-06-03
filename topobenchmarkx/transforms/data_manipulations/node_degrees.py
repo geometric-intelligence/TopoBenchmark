@@ -31,7 +31,7 @@ class NodeDegrees(
         """
         field_to_process = [
             key
-            for key in data
+            for key in data.to_dict()
             for field_substring in self.parameters["selected_fields"]
             if field_substring in key and key != "incidence_0"
         ]

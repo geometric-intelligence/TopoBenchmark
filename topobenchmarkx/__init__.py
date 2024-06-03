@@ -1,3 +1,5 @@
+"""Init file for topobenchmarkx package."""
+
 # Import submodules
 from . import (
     data,
@@ -10,6 +12,7 @@ from . import (
     transforms,
     utils,
 )
+from .run import initialize_hydra
 
 __all__ = [
     "data",
@@ -21,6 +24,7 @@ __all__ = [
     "dataloader",
     "datasets",
     "model",
+    "initialize_hydra",
 ]
 
 

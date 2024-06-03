@@ -35,7 +35,7 @@ class KeepSelectedDataFields(
             + self.parameters["preserved_fields"]
         )
 
-        for key in data:
+        for key in data.to_dict():
             if key not in fields_to_keep:
                 del data[key]
         return data

@@ -235,6 +235,19 @@ def count_number_of_parameters(
     return int(num_params)
 
 
+def initialize_hydra() -> DictConfig:
+    """Initialize Hydra when main is not an option (e.g. tests).
+
+    Returns
+    -------
+    DictConfig
+        A DictConfig object containing the config tree.
+    """
+    hydra.initialize(config_path="../configs", job_name="run")
+    cfg = hydra.compose(config_name="run.yaml")
+    return cfg
+
+
 @hydra.main(
     version_base="1.3", config_path="../configs", config_name="run.yaml"
 )

@@ -11,9 +11,6 @@ class NNModuleAutoTest:
     """
     def __init__(self, params):
         self.params = params
-        #for param in self.params:
-            #if "num_return_tensors" not in param:
-            #    param["num_return_tensors"] = 1
 
     def run(self):
         for param in self.params:

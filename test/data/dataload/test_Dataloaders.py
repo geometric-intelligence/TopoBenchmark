@@ -3,11 +3,13 @@
 import hydra
 import rootutils
 import torch
-from hydra import compose, initialize
+from hydra import compose, initialize_config_dir
 
 from topobenchmarkx.data.preprocess.preprocessor import PreProcessor
 from topobenchmarkx.dataloader import TBXDataloader
 from topobenchmarkx.dataloader.utils import to_data_list
+
+from topobenchmarkx.run import initialize_hydra
 
 rootutils.setup_root("./", indicator=".project-root", pythonpath=True)
 
@@ -16,11 +18,11 @@ class TestCollateFunction:
     """Test collate_fn."""
 
     def setup_method(self):
-        initialize(
-            version_base="1.3", config_path="../../../configs", job_name="job"
-        )
-        cfg = compose(config_name="run.yaml", overrides=["dataset=graph/ZINC"])
-
+        # initialize_config_dir(
+        #     version_base="1.3", config_dir=str(rootutils.find_root() / "configs"), job_name="job"
+        # )
+        # cfg = compose(config_name="test.yaml", overrides=["dataset=graph/ZINC", "model=simplicial/sccn", "transforms=dataset_defaults/ZINC"])
+        cfg = initialize_hydra()
         graph_loader = hydra.utils.instantiate(cfg.dataset, _recursive_=False)
 
         datasets, dataset_dir = graph_loader.loader.load()

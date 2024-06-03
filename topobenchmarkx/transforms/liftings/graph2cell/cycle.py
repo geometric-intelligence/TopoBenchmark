@@ -1,3 +1,5 @@
+"""This module implements the cycle lifting for graphs to cell complexes."""
+
 import networkx as nx
 import torch_geometric
 from toponetx.classes import CellComplex
@@ -8,11 +10,16 @@ from topobenchmarkx.transforms.liftings.graph2cell.base import (
 
 
 class CellCycleLifting(Graph2CellLifting):
-    r"""Lifts graphs to cell complexes by identifying the cycles as 2-cells.
+    r"""Lift graphs to cell complexes.
 
-    Args:
-        max_cell_length (int, optional): The maximum length of the cycles to be lifted. (default: None)
-        kwargs (optional): Additional arguments for the class.
+    The algorithm creates 2-cells by identifying the cycles and considering them as 2-cells.
+
+    Parameters
+    ----------
+    max_cell_length : int, optional
+        The maximum length of the cycles to be lifted. Default is None.
+    **kwargs : optional
+        Additional arguments for the class.
     """
 
     def __init__(self, max_cell_length=None, **kwargs):
@@ -21,7 +28,7 @@ class CellCycleLifting(Graph2CellLifting):
         self.max_cell_length = max_cell_length
 
     def lift_topology(self, data: torch_geometric.data.Data) -> dict:
-        r"""Finds the cycles of a graph and lifts them to 2-cells.
+        r"""Find the cycles of a graph and lifts them to 2-cells.
 
         Parameters
         ----------

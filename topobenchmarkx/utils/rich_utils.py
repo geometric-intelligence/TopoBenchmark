@@ -1,3 +1,5 @@
+"""This module contains utility functions for printing and saving Hydra configs."""
+
 from collections.abc import Sequence
 from pathlib import Path
 
@@ -29,14 +31,19 @@ def print_config_tree(
     resolve: bool = False,
     save_to_file: bool = False,
 ) -> None:
-    r"""Prints the contents of a DictConfig as a tree structure using the Rich
-    library.
+    r"""Print the contents of a DictConfig using the Rich library.
 
-    Args:
-        cfg (DictConfig): A DictConfig composed by Hydra.
-        print_order (Sequence[str], optional): Determines in what order config components are printed. (default: `("data", "model", "callbacks", "logger", "trainer", "paths", "extras")`).
-        resolve (bool, optional): Whether to resolve reference fields of DictConfig. (default: False)
-        save_to_file (bool, optional): Whether to export config to the hydra output folder. (default: False)
+    Parameters
+    ----------
+    cfg : DictConfig
+        A DictConfig object containing the config tree.
+    print_order : Sequence[str], optional
+        Determines in what order config components are printed, by default
+        `("data", "model", "callbacks", "logger", "trainer", "paths", "extras")`.
+    resolve : bool, optional
+        Whether to resolve reference fields of DictConfig, by default False.
+    save_to_file : bool, optional
+        Whether to export config to the hydra output folder, by default False.
     """
     style = "dim"
     tree = rich.tree.Tree("CONFIG", style=style, guide_style=style)
@@ -81,12 +88,14 @@ def print_config_tree(
 
 @rank_zero_only
 def enforce_tags(cfg: DictConfig, save_to_file: bool = False) -> None:
-    r"""Prompts user to input tags from command line if no tags are provided in
-    config.
+    r"""Prompt user to input tags from terminal if no tags are provided in config.
 
-    Args:
-        cfg (DictConfig): A DictConfig composed by Hydra.
-        save_to_file (bool, optional): Whether to export tags to the hydra output folder. (default: False).
+    Parameters
+    ----------
+    cfg : DictConfig
+        A DictConfig composed by Hydra.
+    save_to_file : bool, optional
+        Whether to export tags to the hydra output folder (default: False).
     """
     if not cfg.get("tags"):
         if "id" in HydraConfig().cfg.hydra.job:

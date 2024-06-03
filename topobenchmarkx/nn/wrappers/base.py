@@ -1,3 +1,5 @@
+"""Abstract class that provides an interface to handle the network output."""
+
 from abc import ABC, abstractmethod
 
 import torch
@@ -7,10 +9,14 @@ import torch.nn as nn
 class AbstractWrapper(ABC, torch.nn.Module):
     r"""Abstract class that provides an interface to handle the network output.
 
-    Args:
-        backbone (torch.nn.Module): Backbone model.
-        out_channels (int): Number of output channels.
-        num_cell_dimensions (int): Number of cell dimensions.
+    Parameters
+    ----------
+    backbone : torch.nn.Module
+        Backbone model.
+    **kwargs : dict
+        Additional arguments for the class. It should contain the following keys:
+        - out_channels (int): Number of output channels.
+        - num_cell_dimensions (int): Number of cell dimensions.
     """
 
     def __init__(self, backbone, **kwargs):
@@ -33,6 +39,16 @@ class AbstractWrapper(ABC, torch.nn.Module):
         r"""Forward pass for the model.
 
         This method calls the forward method and adds the residual connection.
+
+        Parameters
+        ----------
+        batch : torch_geometric.data.Data
+            Batch object containing the batched data.
+
+        Returns
+        -------
+        dict
+            Dictionary containing the model output.
         """
         model_out = self.forward(batch)
         model_out = self.residual_connection(model_out=model_out, batch=batch)
@@ -44,6 +60,18 @@ class AbstractWrapper(ABC, torch.nn.Module):
         This method sums, for the embeddings of the cells of any rank, the
         output of the model with the input embeddings and applies layer
         normalization.
+
+        Parameters
+        ----------
+        model_out : dict
+            Dictionary containing the model output.
+        batch : torch_geometric.data.Data
+            Batch object containing the batched data.
+
+        Returns
+        -------
+        dict
+            Dictionary containing the updated model output.
         """
         for i in self.dimensions:
             if (
@@ -57,11 +85,10 @@ class AbstractWrapper(ABC, torch.nn.Module):
 
     @abstractmethod
     def forward(self, batch):
-        r"""Forward pass for the model. This method should be implemented by the
-        child class.
+        r"""Forward pass for the model.
 
-        Args:
-            batch (torch_geometric.data.Data): Batch object containing the batched data.
-        Returns:
-            dict: Dictionary containing the updated model output.
+        Parameters
+        ----------
+        batch : torch_geometric.data.Data
+            Batch object containing the batched data.
         """

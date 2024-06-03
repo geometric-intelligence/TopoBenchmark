@@ -1,3 +1,5 @@
+"""Readout layer that does not perform any operation on the node embeddings."""
+
 import torch_geometric
 
 from topobenchmarkx.nn.readouts.base import AbstractZeroCellReadOut
@@ -7,6 +9,11 @@ class NoReadOut(AbstractZeroCellReadOut):
     r"""No readout layer.
 
     This readout layer does not perform any operation on the node embeddings.
+
+    Parameters
+    ----------
+    **kwargs : dict, optional
+        Additional keyword arguments.
     """
 
     def __init__(self, **kwargs):
@@ -15,14 +22,21 @@ class NoReadOut(AbstractZeroCellReadOut):
     def forward(
         self, model_out: dict, batch: torch_geometric.data.Data
     ) -> dict:
-        r"""Forward pass of the no readout layer. It returns the model output
-        without any modification.
+        r"""Forward pass of the no readout layer.
 
-        Args:
-            model_out (dict): Dictionary containing the model output.
-            batch (torch_geometric.data.Data): Batch object containing the batched domain data.
-        Returns:
-            model_out (dict): Dictionary containing the model output.
+        It returns the model output without any modification.
+
+        Parameters
+        ----------
+        model_out : dict
+            Dictionary containing the model output.
+        batch : torch_geometric.data.Data
+            Batch object containing the batched domain data.
+
+        Returns
+        -------
+        dict
+            Dictionary containing the model output.
         """
         return model_out
 

@@ -1,3 +1,5 @@
+"""This module contains the transforms for the topobenchmarkx package."""
+
 from typing import Any
 
 from topobenchmarkx.transforms.data_manipulations import DATA_MANIPULATIONS

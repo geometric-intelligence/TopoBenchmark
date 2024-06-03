@@ -1,3 +1,5 @@
+"""Wrapper for the SAN model."""
+
 import torch
 
 from topobenchmarkx.nn.wrappers.base import AbstractWrapper
@@ -15,10 +17,15 @@ class SANWrapper(AbstractWrapper):
     def forward(self, batch):
         r"""Forward pass for the SAN wrapper.
 
-        Args:
-            batch (torch_geometric.data.Data): Batch object containing the batched data.
-        Returns:
-            dict: Dictionary containing the updated model output.
+        Parameters
+        ----------
+        batch : torch_geometric.data.Data
+            Batch object containing the batched data.
+
+        Returns
+        -------
+        dict
+            Dictionary containing the updated model output.
         """
         x_1 = self.backbone(
             batch.x_1, batch.up_laplacian_1, batch.down_laplacian_1

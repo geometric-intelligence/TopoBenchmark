@@ -1,3 +1,5 @@
+"""Class implementing the EDGNN model."""
+
 import numpy as np
 import torch
 import torch.nn as nn
@@ -7,22 +9,36 @@ import torch_scatter
 
 
 class EDGNN(nn.Module):
-    """EDGNN.
+    """EDGNN model.
 
-    Args:
-        num_features (int): number of input features
-        input_dropout (float, optional): dropout rate for input features. Defaults to 0.2.
-        dropout (float, optional): dropout rate for hidden layers. Defaults to 0.2.
-        activation (str, optional): activation function. Defaults to 'relu'.
-        MLP_num_layers (int, optional): number of layers in MLP. Defaults to 2.
-        MLP2_num_layers (int, optional): number of layers in the second MLP. Defaults to -1.
-        MLP3_num_layers (int, optional): number of layers in the third MLP. Defaults to -1.
-        All_num_layers (int, optional): number of layers in the EDConv. Defaults to 2.
-        edconv_type (str, optional): type of EDConv. Defaults to 'EquivSet'.
-        restart_alpha (float, optional): restart alpha. Defaults to 0.5.
-        aggregate (str, optional): aggregation method. Defaults to 'add'.
-        normalization (str, optional): normalization method. Defaults to 'None'.
-        AllSet_input_norm (bool, optional): whether to normalize input features. Defaults to False.
+    Parameters
+    ----------
+    num_features : int
+        Number of input features.
+    input_dropout : float, optional
+        Dropout rate for input features. Defaults to 0.2.
+    dropout : float, optional
+        Dropout rate for hidden layers. Defaults to 0.2.
+    activation : str, optional
+        Activation function. Defaults to 'relu'.
+    MLP_num_layers : int, optional
+        Number of layers in MLP. Defaults to 2.
+    MLP2_num_layers : int, optional
+        Number of layers in the second MLP. Defaults to -1.
+    MLP3_num_layers : int, optional
+        Number of layers in the third MLP. Defaults to -1.
+    All_num_layers : int, optional
+        Number of layers in the EDConv. Defaults to 2.
+    edconv_type : str, optional
+        Type of EDConv. Defaults to 'EquivSet'.
+    restart_alpha : float, optional
+        Restart alpha. Defaults to 0.5.
+    aggregate : str, optional
+        Aggregation method. Defaults to 'add'.
+    normalization : str, optional
+        Normalization method. Defaults to 'None'.
+    AllSet_input_norm : bool, optional
+        Whether to normalize input features. Defaults to False.
     """
 
     def __init__(
@@ -100,12 +116,19 @@ class EDGNN(nn.Module):
     def forward(self, x, edge_index):
         r"""Forward pass.
 
-        Args:
-            x (Tensor): input features
-            edge_index (LongTensor): edge index
-        Returns:
-            Tensor: output features
-            None
+        Parameters
+        ----------
+        x : Tensor
+            Input features.
+        edge_index : LongTensor
+            Edge index.
+
+        Returns
+        -------
+        Tensor
+            Output features.
+        None
+            None object needed for compatibility.
         """
         if edge_index.layout == torch.sparse_coo:
             edge_index, _ = torch_geometric.utils.to_edge_index(edge_index)
@@ -120,16 +143,26 @@ class EDGNN(nn.Module):
 
 
 class MLP(nn.Module):
-    """Adapted from https://github.com/CUAI/CorrectAndSmooth/blob/master/gen_models.py
+    """Class implementing a multi-layer perceptron.
 
-    Args:
-        in_channels (int): number of input features
-        hidden_channels (int): number of hidden features
-        out_channels (int): number of output features
-        num_layers (int): number of layers
-        dropout (float, optional): dropout rate. Defaults to 0.5.
-        Normalization (str, optional): normalization method. Defaults to 'bn'.
-        InputNorm (bool, optional): whether to normalize input features. Defaults to False.
+    Adapted from https://github.com/CUAI/CorrectAndSmooth/blob/master/gen_models.py
+
+    Parameters
+    ----------
+    in_channels : int
+        Number of input features.
+    hidden_channels : int
+        Number of hidden features.
+    out_channels : int
+        Number of output features.
+    num_layers : int
+        Number of layers.
+    dropout : float, optional
+        Dropout rate. Defaults to 0.5.
+    Normalization : str, optiona
+        Normalization method. Defaults to 'bn'.
+    InputNorm : bool, optional
+        Whether to normalize input features. Defaults to False.
     """
 
     def __init__(
@@ -224,10 +257,15 @@ class MLP(nn.Module):
     def forward(self, x):
         r"""Forward pass.
 
-        Args:
-            x (Tensor): input features
-        Returns:
-            Tensor: output features
+        Parameters
+        ----------
+        x : Tensor
+            Input features.
+
+        Returns
+        -------
+        Tensor
+            Output features.
         """
         x = self.normalizations[0](x)
         for i, lin in enumerate(self.lins[:-1]):
@@ -241,10 +279,15 @@ class MLP(nn.Module):
     def flops(self, x):
         r"""Calculate FLOPs.
 
-        Args:
-            x (Tensor): input features
-        Returns:
-            int: FLOPs
+        Parameters
+        ----------
+        x : Tensor
+            Input features.
+
+        Returns
+        -------
+        int
+            FLOPs.
         """
         num_samples = np.prod(x.shape[:-1])
         flops = num_samples * self.in_channels  # first normalization
@@ -266,14 +309,22 @@ class MLP(nn.Module):
 
 
 class PlainMLP(nn.Module):
-    """adapted from https://github.com/CUAI/CorrectAndSmooth/blob/master/gen_models.py
+    """Class implementing a multi-layer perceptron without normalization.
 
-    Args:
-        in_channels (int): number of input features
-        hidden_channels (int): number of hidden features
-        out_channels (int): number of output features
-        num_layers (int): number of layers
-        dropout (float, optional): dropout rate. Defaults to 0.5.
+    Adapted from https://github.com/CUAI/CorrectAndSmooth/blob/master/gen_models.py.
+
+    Parameters
+    ----------
+    in_channels : int
+        Number of input features.
+    hidden_channels : int
+        Number of hidden features.
+    out_channels : int
+        Number of output features.
+    num_layers : int
+        Number of layers.
+    dropout : float, optional
+        Dropout rate. Defaults to 0.5.
     """
 
     def __init__(
@@ -301,10 +352,15 @@ class PlainMLP(nn.Module):
     def forward(self, x):
         r"""Forward pass.
 
-        Args:
-            x (Tensor): input features
-        Returns:
-            Tensor: output features
+        Parameters
+        ----------
+        x : Tensor
+            Input features.
+
+        Returns
+        -------
+        Tensor
+            Output features.
         """
         for lin in self.lins[:-1]:
             x = lin(x)
@@ -315,6 +371,32 @@ class PlainMLP(nn.Module):
 
 
 class EquivSetConv(nn.Module):
+    """Class implementing the Equivariant Set Convolution.
+
+    Parameters
+    ----------
+    in_features : int
+        Number of input features.
+    out_features : int
+        Number of output features.
+    mlp1_layers : int, optional
+        Number of layers in the first MLP. Defaults to 1.
+    mlp2_layers : int, optional
+        Number of layers in the second MLP. Defaults to 1.
+    mlp3_layers : int, optional
+        Number of layers in the third MLP. Defaults to 1.
+    aggr : str, optional
+        Aggregation method. Defaults to 'add'.
+    alpha : float, optional
+        Alpha value. Defaults to 0.5.
+    dropout : float, optional
+        Dropout rate. Defaults to 0.0.
+    normalization : str, optional
+        Normalization method. Defaults to 'None'.
+    input_norm : bool, optional
+        Whether to normalize input features. Defaults to False.
+    """
+
     def __init__(
         self,
         in_features,
@@ -373,6 +455,7 @@ class EquivSetConv(nn.Module):
         self.dropout = dropout
 
     def reset_parameters(self):
+        """Reset parameters."""
         if isinstance(self.W1, MLP):
             self.W1.reset_parameters()
         if isinstance(self.W2, MLP):
@@ -381,6 +464,24 @@ class EquivSetConv(nn.Module):
             self.W.reset_parameters()
 
     def forward(self, X, vertex, edges, X0):
+        """Forward pass.
+
+        Parameters
+        ----------
+        X : Tensor
+            Input features.
+        vertex : LongTensor
+            Vertex index.
+        edges : LongTensor
+            Edge index.
+        X0 : Tensor
+            Initial features.
+
+        Returns
+        -------
+        Tensor
+            Output features.
+        """
         N = X.shape[-2]
 
         Xve = self.W1(X)[..., vertex, :]  # [nnz, C]
@@ -403,6 +504,22 @@ class EquivSetConv(nn.Module):
 
 
 class JumpLinkConv(nn.Module):
+    """Class implementing the JumpLink Convolution.
+
+    Parameters
+    ----------
+    in_features : int
+        Number of input features.
+    out_features : int
+        Number of output features.
+    mlp_layers : int, optional
+        Number of layers in the MLP. Defaults to 2.
+    aggr : str, optional
+        Aggregation method. Defaults to 'add'.
+    alpha : float, optional
+        Alpha value. Defaults to 0.5.
+    """
+
     def __init__(
         self, in_features, out_features, mlp_layers=2, aggr="add", alpha=0.5
     ):
@@ -421,9 +538,30 @@ class JumpLinkConv(nn.Module):
         self.alpha = alpha
 
     def reset_parameters(self):
+        """Reset parameters."""
         self.W.reset_parameters()
 
     def forward(self, X, vertex, edges, X0, beta=1.0):
+        """Forward pass.
+
+        Parameters
+        ----------
+        X : Tensor
+            Input features.
+        vertex : LongTensor
+            Vertex index.
+        edges : LongTensor
+            Edge index.
+        X0 : Tensor
+            Initial features.
+        beta : float, optional
+            Beta value. Defaults to 1.0.
+
+        Returns
+        -------
+        Tensor
+            Output features.
+        """
         N = X.shape[-2]
 
         Xve = X[..., vertex, :]  # [nnz, C]
@@ -445,6 +583,24 @@ class JumpLinkConv(nn.Module):
 
 
 class MeanDegConv(nn.Module):
+    """Class implementing the Mean Degree Convolution.
+
+    Parameters
+    ----------
+    in_features : int
+        Number of input features.
+    out_features : int
+        Number of output features.
+    init_features : int, optional
+        Number of initial features. Defaults to None.
+    mlp1_layers : int, optional
+        Number of layers in the first MLP. Defaults to 1.
+    mlp2_layers : int, optional
+        Number of layers in the second MLP. Defaults to 1.
+    mlp3_layers : int, optional
+        Number of layers in the third MLP. Defaults to 2.
+    """
+
     def __init__(
         self,
         in_features,
@@ -486,11 +642,30 @@ class MeanDegConv(nn.Module):
         )
 
     def reset_parameters(self):
+        """Reset parameters."""
         self.W1.reset_parameters()
         self.W2.reset_parameters()
         self.W3.reset_parameters()
 
     def forward(self, X, vertex, edges, X0):
+        """Forward pass.
+
+        Parameters
+        ----------
+        X : Tensor
+            Input features.
+        vertex : LongTensor
+            Vertex index.
+        edges : LongTensor
+            Edge index.
+        X0 : Tensor
+            Initial features.
+
+        Returns
+        -------
+        Tensor
+            Output features.
+        """
         N = X.shape[-2]
 
         Xve = self.W1(X[..., vertex, :])  # [nnz, C]

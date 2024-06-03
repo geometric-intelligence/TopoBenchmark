@@ -1,3 +1,5 @@
+"""Wrapper for the SCNW model."""
+
 import torch
 
 from topobenchmarkx.nn.wrappers.base import AbstractWrapper
@@ -13,12 +15,16 @@ class SCNWrapper(AbstractWrapper):
     def forward(self, batch):
         r"""Forward pass for the SCNW wrapper.
 
-        Args:
-            batch (torch_geometric.data.Data): Batch object containing the batched data.
-        Returns:
-            dict: Dictionary containing the updated model output.
-        """
+        Parameters
+        ----------
+        batch : torch_geometric.data.Data
+            Batch object containing the batched data.
 
+        Returns
+        -------
+        dict
+            Dictionary containing the updated model output.
+        """
         laplacian_0 = self.normalize_matrix(batch.hodge_laplacian_0)
         laplacian_1 = self.normalize_matrix(batch.hodge_laplacian_1)
         laplacian_2 = self.normalize_matrix(batch.hodge_laplacian_2)
@@ -39,14 +45,19 @@ class SCNWrapper(AbstractWrapper):
         return model_out
 
     def normalize_matrix(self, matrix):
-        r"""Normalize the input matrix. The normalization is performed using the
-        diagonal matrix of the inverse square root of the sum of the absolute
-        values of the rows.
+        r"""Normalize the input matrix.
 
-        Args:
-            matrix (torch.sparse.FloatTensor): Input matrix to be normalized.
-        Returns:
-            torch.sparse.FloatTensor: Normalized matrix.
+        The normalization is performed using the diagonal matrix of the inverse square root of the sum of the absolute values of the rows.
+
+        Parameters
+        ----------
+        matrix : torch.sparse.FloatTensor
+            Input matrix to be normalized.
+
+        Returns
+        -------
+        torch.sparse.FloatTensor
+            Normalized matrix.
         """
         matrix_ = matrix.to_dense()
         n, _ = matrix_.shape

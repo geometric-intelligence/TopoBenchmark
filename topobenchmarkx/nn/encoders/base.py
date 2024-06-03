@@ -1,3 +1,5 @@
+"""Abstract class for feature encoders."""
+
 from abc import abstractmethod
 
 import torch
@@ -5,12 +7,7 @@ import torch_geometric
 
 
 class AbstractFeatureEncoder(torch.nn.Module):
-    r"""Abstract class that provides an interface to define a custom feature
-    encoder.
-
-    Args:
-        kwargs: Additional arguments.
-    """
+    r"""Abstract class to define a custom feature encoder."""
 
     def __init__(self):
         super().__init__()
@@ -24,8 +21,8 @@ class AbstractFeatureEncoder(torch.nn.Module):
     ) -> torch_geometric.data.Data:
         r"""Forward pass of the feature encoder model.
 
-        Args:
-            data (torch_geometric.data.Data): Input data object which should contain x features.
-        Returns:
-            torch_geometric.data.Data: Output data object with updated x features.
+        Parameters
+        ----------
+        data : torch_geometric.data.Data
+            Input data object which should contain x features.
         """

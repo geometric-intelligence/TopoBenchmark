@@ -1,3 +1,5 @@
+"""This module implements the wrappers for the neural networks."""
+
 from topobenchmarkx.nn.wrappers.base import AbstractWrapper
 from topobenchmarkx.nn.wrappers.cell import (
     CANWrapper,

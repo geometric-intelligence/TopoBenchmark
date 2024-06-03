@@ -1,3 +1,5 @@
+"""Feature lifting transforms."""
+
 from .concatenation import Concatenation
 from .identity import Identity
 from .projection_sum import ProjectionSum

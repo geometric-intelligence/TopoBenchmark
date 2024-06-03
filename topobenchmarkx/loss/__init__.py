@@ -1,3 +1,5 @@
+"""This module implements the loss functions for the topobenchmarkx package."""
+
 from .base import AbstractLoss
 from .loss import TBXLoss
 

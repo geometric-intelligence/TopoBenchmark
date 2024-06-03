@@ -18,8 +18,7 @@ from topobenchmarkx.transforms.data_transform import DataTransform
 
 
 class PreProcessor(torch_geometric.data.InMemoryDataset):
-    """
-    Preprocessor for datasets.
+    """Preprocessor for datasets.
 
     Parameters
     ----------
@@ -63,8 +62,7 @@ class PreProcessor(torch_geometric.data.InMemoryDataset):
 
     @property
     def processed_dir(self) -> str:
-        """
-        Return the path to the processed directory.
+        """Return the path to the processed directory.
 
         Returns
         -------
@@ -78,8 +76,7 @@ class PreProcessor(torch_geometric.data.InMemoryDataset):
 
     @property
     def processed_file_names(self) -> str:
-        """
-        Return the name of the processed file.
+        """Return the name of the processed file.
 
         Returns
         -------
@@ -91,8 +88,7 @@ class PreProcessor(torch_geometric.data.InMemoryDataset):
     def instantiate_pre_transform(
         self, data_dir, transforms_config
     ) -> torch_geometric.transforms.Compose:
-        """
-        Instantiate the pre-transforms.
+        """Instantiate the pre-transforms.
 
         Parameters
         ----------
@@ -122,8 +118,7 @@ class PreProcessor(torch_geometric.data.InMemoryDataset):
     def set_processed_data_dir(
         self, pre_transforms_dict, data_dir, transforms_config
     ) -> None:
-        """
-        Set the processed data directory.
+        """Set the processed data directory.
 
         Parameters
         ----------
@@ -147,9 +142,7 @@ class PreProcessor(torch_geometric.data.InMemoryDataset):
         )
 
     def save_transform_parameters(self) -> None:
-        """
-        Save the transform parameters.
-        """
+        """Save the transform parameters."""
         # Check if root/params_dict.json exists, if not, save it
         path_transform_parameters = os.path.join(
             self.processed_data_dir, "path_transform_parameters_dict.json"
@@ -172,9 +165,7 @@ class PreProcessor(torch_geometric.data.InMemoryDataset):
             )
 
     def process(self) -> None:
-        """
-        Method that processes the data.
-        """
+        """Method that processes the data."""
         self.data_list = (
             [self.pre_transform(d) for d in self.data_list]
             if self.pre_transform is not None
@@ -192,8 +183,7 @@ class PreProcessor(torch_geometric.data.InMemoryDataset):
     ) -> tuple[
         DataloadDataset, DataloadDataset | None, DataloadDataset | None
     ]:
-        """
-        Load the dataset splits.
+        """Load the dataset splits.
 
         Parameters
         ----------

@@ -48,9 +48,9 @@ dependencies=[
     "jupyterlab",
     "rich",
     "rootutils",
-    #"toponetx @ git+https://github.com/pyt-team/TopoNetX.git",
-    #"topomodelx @ git+https://github.com/pyt-team/TopoModelX.git",
-    #"topoembedx @ git+https://github.com/pyt-team/TopoEmbedX.git",
+    "toponetx @ git+https://github.com/pyt-team/TopoNetX.git",
+    "topomodelx @ git+https://github.com/pyt-team/TopoModelX.git",
+    "topoembedx @ git+https://github.com/pyt-team/TopoEmbedX.git",
     "lightning",
 ]
 
@@ -73,6 +73,7 @@ test = [
     "coverage",
     "jupyter",
     "mypy",
+    "pytest-mock"
 ]
 
 dev = ["TopoBenchmarkX[test, lint]"]

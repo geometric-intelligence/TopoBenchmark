@@ -1,3 +1,5 @@
+"""Abstract class for lifting graphs to cell complexes."""
+
 import networkx as nx
 import torch
 from toponetx.classes import CellComplex
@@ -9,9 +11,12 @@ from topobenchmarkx.transforms.liftings import GraphLifting
 class Graph2CellLifting(GraphLifting):
     r"""Abstract class for lifting graphs to cell complexes.
 
-    Args:
-        complex_dim (int, optional): The dimension of the cell complex to be generated. (default: 2)
-        kwargs (optional): Additional arguments for the class.
+    Parameters
+    ----------
+    complex_dim : int, optional
+        The dimension of the cell complex to be generated. Default is 2.
+    **kwargs : optional
+        Additional arguments for the class.
     """
 
     def __init__(self, complex_dim=2, **kwargs):
@@ -22,13 +27,19 @@ class Graph2CellLifting(GraphLifting):
     def _get_lifted_topology(
         self, cell_complex: CellComplex, graph: nx.Graph
     ) -> dict:
-        r"""Returns the lifted topology.
+        r"""Return the lifted topology.
 
-        Args:
-            cell_complex (CellComplex): The cell complex.
-            graph (nx.Graph): The input graph.
-        Returns:
-            dict: The lifted topology.
+        Parameters
+        ----------
+        cell_complex : CellComplex
+            The cell complex.
+        graph : nx.Graph
+            The input graph.
+
+        Returns
+        -------
+        dict
+            The lifted topology.
         """
         lifted_topology = get_complex_connectivity(
             cell_complex, self.complex_dim

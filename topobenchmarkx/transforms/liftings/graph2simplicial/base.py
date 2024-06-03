@@ -1,3 +1,5 @@
+"""Abstract class for lifting graphs to simplicial complexes."""
+
 import networkx as nx
 import torch
 from toponetx.classes import SimplicialComplex
@@ -9,9 +11,12 @@ from topobenchmarkx.transforms.liftings import GraphLifting
 class Graph2SimplicialLifting(GraphLifting):
     r"""Abstract class for lifting graphs to simplicial complexes.
 
-    Args:
-        complex_dim (int, optional): The maximum dimension of the simplicial complex to be generated. (default: 2)
-        kwargs (optional): Additional arguments for the class.
+    Parameters
+    ----------
+    complex_dim : int, optional
+        The maximum dimension of the simplicial complex to be generated. Default is 2.
+    **kwargs : optional
+        Additional arguments for the class.
     """
 
     def __init__(self, complex_dim=2, **kwargs):
@@ -23,13 +28,19 @@ class Graph2SimplicialLifting(GraphLifting):
     def _get_lifted_topology(
         self, simplicial_complex: SimplicialComplex, graph: nx.Graph
     ) -> dict:
-        r"""Returns the lifted topology.
+        r"""Return the lifted topology.
 
-        Args:
-            simplicial_complex (SimplicialComplex): The simplicial complex.
-            graph (nx.Graph): The input graph.
-        Returns:
-            dict: The lifted topology.
+        Parameters
+        ----------
+        simplicial_complex : SimplicialComplex
+            The simplicial complex.
+        graph : nx.Graph
+            The input graph.
+
+        Returns
+        -------
+        dict
+            The lifted topology.
         """
         lifted_topology = get_complex_connectivity(
             simplicial_complex, self.complex_dim, signed=self.signed

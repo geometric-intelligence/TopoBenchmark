@@ -1,3 +1,5 @@
+"""This module implements the k-hop lifting of graphs to simplicial complexes."""
+
 import random
 from itertools import combinations
 from typing import Any
@@ -11,15 +13,20 @@ from topobenchmarkx.transforms.liftings.graph2simplicial.base import (
 
 
 class SimplicialKHopLifting(Graph2SimplicialLifting):
-    r"""Lifts graphs to simplicial complex domain by considering k-hop
+    r"""Lift graphs to simplicial complex domain.
+
+    The function lifts a graph to a simplicial complex by considering k-hop
     neighborhoods. For each node its neighborhood is selected and then all the
     possible simplices, when considering the neighborhood as a clique, are
     added to the simplicial complex. For this reason this lifting does not
     conserve the initial graph topology.
 
-    Args:
-        max_k_simplices (int, optional): The maximum number of k-simplices to consider. (default: 5000)
-        kwargs (optional): Additional arguments for the class.
+    Parameters
+    ----------
+    max_k_simplices : int, optional
+        The maximum number of k-simplices to consider. Default is 5000.
+    **kwargs : optional
+        Additional arguments for the class.
     """
 
     def __init__(self, max_k_simplices=5000, **kwargs):
@@ -30,13 +37,17 @@ class SimplicialKHopLifting(Graph2SimplicialLifting):
         return f"{self.__class__.__name__}(max_k_simplices={self.max_k_simplices!r})"
 
     def lift_topology(self, data: torch_geometric.data.Data) -> dict:
-        r"""Lifts the topology of a graph to simplicial complex domain by
-        considering k-hop neighborhoods.
+        r"""Lift the topology to simplicial complex domain.
 
-        Args:
-            data (torch_geometric.data.Data): The input data to be lifted.
-        Returns:
-            dict: The lifted topology.
+        Parameters
+        ----------
+        data : torch_geometric.data.Data
+            The input data to be lifted.
+
+        Returns
+        -------
+        dict
+            The lifted topology.
         """
         graph = self._generate_graph_from_data(data)
         simplicial_complex = SimplicialComplex(graph)

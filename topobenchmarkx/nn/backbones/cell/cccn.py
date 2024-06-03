@@ -1,3 +1,5 @@
+"""Convolutional Cell Convolutional Network (CCCN) model."""
+
 import torch.nn as nn
 import torch.nn.functional as F
 from torch_geometric.nn import GCNConv
@@ -6,11 +8,16 @@ from torch_geometric.nn import GCNConv
 class CCCN(nn.Module):
     r"""CCCN model.
 
-    Args:
-        in_channels (int): Number of input channels.
-        n_layers (int, optional): Number of layers. (default: 2)
-        dropout (float, optional): Dropout rate. (default: 0)
-        last_act (bool, optional): If True, the last activation function is applied. (default: False)
+    Parameters
+    ----------
+    in_channels : int
+        Number of input channels.
+    n_layers : int, optional
+        Number of layers (default: 2).
+    dropout : float, optional
+        Dropout rate (default: 0).
+    last_act : bool, optional
+        If True, the last activation function is applied (default: False).
     """
 
     def __init__(self, in_channels, n_layers=2, dropout=0.0, last_act=False):
@@ -24,12 +31,19 @@ class CCCN(nn.Module):
     def forward(self, x, Ld, Lu):
         r"""Forward pass.
 
-        Args:
-            x (torch.Tensor): Input tensor.
-            Ld (torch.Tensor): Domain adjacency matrix.
-            Lu (torch.Tensor): Label adjacency matrix.
-        Returns:
-            torch.Tensor: Output tensor.
+        Parameters
+        ----------
+        x : torch.Tensor
+            Input tensor.
+        Ld : torch.Tensor
+            Domain adjacency matrix.
+        Lu : torch.Tensor
+            Label adjacency matrix.
+
+        Returns
+        -------
+        torch.Tensor
+            Output tensor.
         """
         for i, c in enumerate(self.convs):
             x = c(F.dropout(x, p=self.d, training=self.training), Lu, Ld)
@@ -42,9 +56,12 @@ class CCCN(nn.Module):
 class CW(nn.Module):
     r"""Layer of the CCCN model.
 
-    Args:
-        F_in (int): Number of input channels.
-        F_out (int): Number of output channels.
+    Parameters
+    ----------
+    F_in : int
+        Number of input channels.
+    F_out : int
+        Number of output channels.
     """
 
     def __init__(self, F_in, F_out):
@@ -56,12 +73,19 @@ class CW(nn.Module):
     def forward(self, xe, Lu, Ld):
         r"""Forward pass.
 
-        Args:
-            xe (torch.Tensor): Input tensor.
-            Ld (torch.Tensor): Domain adjacency matrix.
-            Lu (torch.Tensor): Label adjacency matrix.
-        Returns:
-            torch.Tensor: Output tensor.
+        Parameters
+        ----------
+        xe : torch.Tensor
+            Input tensor.
+        Lu : torch.Tensor
+            Domain adjacency matrix.
+        Ld : torch.Tensor
+            Label adjacency matrix.
+
+        Returns
+        -------
+        torch.Tensor
+            Output tensor.
         """
         z_h = self.har(xe)
         z_s = self.sol(xe, Lu)

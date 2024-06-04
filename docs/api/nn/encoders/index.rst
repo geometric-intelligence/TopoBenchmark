@@ -3,7 +3,7 @@ Encoders
 ********
 
 .. automodule:: topobenchmarkx.nn.encoders.base
-   :members:
+    :members:
 
 .. automodule:: topobenchmarkx.nn.encoders.all_cell_encoders
-   :members:
+    :members:

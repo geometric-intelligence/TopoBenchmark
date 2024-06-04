@@ -1,15 +1,15 @@
-*********
-Backbones
-*********
+****************
+Feature Liftings
+****************
 
-.. automodule:: topobenchmarkx.nn.backbones.cell.cccn
-   :members:
+.. automodule:: topobenchmarkx.transforms.feature_liftings.concatenation
+    :members:
 
-.. automodule:: topobenchmarkx.nn.backbones.cell.cin
-   :members:
+.. automodule:: topobenchmarkx.transforms.feature_liftings.identity
+    :members:
 
-.. automodule:: topobenchmarkx.nn.hypergraph.edgnn
-   :members:
+.. automodule:: topobenchmarkx.transforms.feature_liftings.projection_sum
+    :members:
 
-.. automodule:: topobenchmarkx.nn.simplicial.sccnn
-   :members:
+.. automodule:: topobenchmarkx.transforms.feature_liftings.set
+    :members:

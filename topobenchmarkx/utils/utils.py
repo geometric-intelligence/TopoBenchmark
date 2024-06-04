@@ -54,10 +54,10 @@ def task_wrapper(task_func: Callable) -> Callable:
     r"""Optional decorator that controls the failure behavior when executing the task function.
 
     This wrapper can be used to:
-        - make sure loggers are closed even if the task function raises an exception (prevents multirun failure).
-        - save the exception to a `.log` file.
-        - mark the run as failed with a dedicated file in the `logs/` folder (so we can find and rerun it later).
-        - etc. (adjust depending on your needs).
+    - make sure loggers are closed even if the task function raises an exception (prevents multirun failure).
+    - save the exception to a `.log` file.
+    - mark the run as failed with a dedicated file in the `logs/` folder (so we can find and rerun it later).
+    - etc. (adjust depending on your needs).
 
     Example:
     ```

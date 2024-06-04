@@ -29,22 +29,26 @@ class GraphLoader(AbstractLoader):
     Parameters
     ----------
     parameters : DictConfig
-        Configuration parameters. The parameters must contain the following keys:
-        - data_dir (str): The directory where the dataset is stored.
-        - data_name (str): The name of the dataset.
-        - data_type (str): The type of the dataset.
-        - split_type (str): The type of split to be used. It can be "fixed", "random", or "k-fold".
-        If split_type is "random", the parameters must also contain the following keys:
-            - data_seed (int): The seed for the split.
-            - data_split_dir (str): The directory where the split is stored.
-            - train_prop (float): The proportion of the training set.
-        If split_type is "k-fold", the parameters must also contain the following keys:
-            - data_split_dir (str): The directory where the split is stored.
-            - k (int): The number of folds.
-            - data_seed (int): The seed for the split.
-        The parameters can be defined in a yaml file and then loaded using `omegaconf.OmegaConf.load('path/to/dataset/config.yaml')`.
+        Configuration parameters.
     **kwargs : dict
         Additional keyword arguments.
+
+    Notes
+    -----
+    The parameters must contain the following keys:
+    - data_dir (str): The directory where the dataset is stored.
+    - data_name (str): The name of the dataset.
+    - data_type (str): The type of the dataset.
+    - split_type (str): The type of split to be used. It can be "fixed", "random", or "k-fold".
+    If split_type is "random", the parameters must also contain the following keys:
+    - data_seed (int): The seed for the split.
+    - data_split_dir (str): The directory where the split is stored.
+    - train_prop (float): The proportion of the training set.
+    If split_type is "k-fold", the parameters must also contain the following keys:
+    - data_split_dir (str): The directory where the split is stored.
+    - k (int): The number of folds.
+    - data_seed (int): The seed for the split.
+    The parameters can be defined in a yaml file and then loaded using `omegaconf.OmegaConf.load('path/to/dataset/config.yaml')`.
     """
 
     def __init__(self, parameters: DictConfig, **kwargs):

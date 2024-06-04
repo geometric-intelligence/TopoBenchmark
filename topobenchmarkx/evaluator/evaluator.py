@@ -14,11 +14,11 @@ class TBXEvaluator(AbstractEvaluator):
         The task type. It can be either "classification" or "regression".
     **kwargs : dict
         Additional arguments for the class. The arguments depend on the task.
-        In "classification" scenario, the following arguments are expected:
-        - num_classes (int): The number of classes.
-        - classification_metrics (list[str]): A list of classification metrics to be computed.
-        In "regression" scenario, the following arguments are expected:
-        - regression_metrics (list[str]): A list of regression metrics to be computed.
+    In "classification" scenario, the following arguments are expected:
+    - num_classes (int): The number of classes.
+    - classification_metrics (list[str]): A list of classification metrics to be computed.
+    In "regression" scenario, the following arguments are expected:
+    - regression_metrics (list[str]): A list of regression metrics to be computed.
     """
 
     def __init__(self, task, **kwargs):
@@ -68,9 +68,9 @@ class TBXEvaluator(AbstractEvaluator):
         model_out : dict
             The model output. It should contain the following keys:
             - logits : torch.Tensor
-                The model predictions.
+            The model predictions.
             - labels : torch.Tensor
-                The ground truth labels.
+            The ground truth labels.
 
         Raises
         ------

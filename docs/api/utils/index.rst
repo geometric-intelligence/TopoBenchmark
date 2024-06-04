@@ -7,9 +7,6 @@ This module implements implements additional utilities to handle the training pr
 .. automodule:: topobenchmarkx.utils.config_resolvers
     :members:
 
-.. automodule:: topobenchmarkx.utils.dataset_statistics
-    :members:
-
 .. automodule:: topobenchmarkx.utils.instantiators
     :members:
 

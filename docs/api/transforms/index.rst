@@ -7,7 +7,7 @@ The `transforms` module of `TopoBenchmarkX`` consists of several submodules:
 1. :doc:`data_manipulations <data_manipulations/index>`
 2. :doc:`feature_liftings <feature_liftings/index>`
 3. :doc:`liftings <liftings/index>`
-4. :doc:`data_transforms <data_transforms/index>`
+4. :doc:`data_transform <data_transform/index>`
 
 .. toctree::
    :maxdepth: 2
@@ -16,4 +16,4 @@ The `transforms` module of `TopoBenchmarkX`` consists of several submodules:
    data_manipulations/index
    feature_liftings/index
    liftings/index
-   data_transforms/index
+   data_transform/index

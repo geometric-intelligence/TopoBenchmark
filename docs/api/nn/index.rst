@@ -2,10 +2,10 @@
 Neural Networks
 ***************
 
-The nn module of TopoBenchmarkX consists of several submodules:
+The `nn` module of `TopoBenchmarkX`` consists of several submodules:
 
-1. :doc:`encoders <encoders/index>`
-2. :doc:`losses <losses/index>`
+1. :doc:`backbones <backbones/index>`
+2. :doc:`encoders <encoders/index>`
 3. :doc:`readouts <readouts/index>`
 4. :doc:`wrappers <wrappers/index>`
 
@@ -13,8 +13,8 @@ The nn module of TopoBenchmarkX consists of several submodules:
    :maxdepth: 2
    :hidden:
 
+   backbones/index
    encoders/index
-   losses/index
    readouts/index
    wrappers/index
 

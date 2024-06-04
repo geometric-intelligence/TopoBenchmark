@@ -31,7 +31,7 @@ jobs:
         source env_setup.sh
     - name: Test with pytest
       run: |
-        pytest --cov --cov-report=xml:coverage.xml test/data test/transforms
+        pytest --cov=topobenchmarkx --cov-report=xml:coverage.xml test/data test/transforms
     - name: Upload coverage reports to Codecov
       uses: codecov/codecov-action@v4.0.1
       with:

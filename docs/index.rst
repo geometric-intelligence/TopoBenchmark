@@ -1,7 +1,7 @@
 🌐 TopoBenchmarkX (TBX) 🍩
 ==========================
 
-.. figure:: https://github.com/pyt-team/TopoBenchmarkX/blob/main/resources/logo_black_purple.jpg
+.. figure:: https://github.com/pyt-team/TopoBenchmarkX/raw/main/resources/logo_black_purple.jpg
    :alt: topobenchmarkx
    :class: with-shadow
    :width: 1000px
@@ -10,7 +10,7 @@
 In particular, TBX allows to train and compare the performances of all sorts of Topological Neural Networks (TNNs) across the different topological domains, 
 where by *topological domain* we refer to a graph, a simplicial complex, a cellular complex, or a hypergraph.
 
-.. figure:: https://github.com/pyt-team/TopoBenchmarkX/blob/main/resources/workflow.jpg
+.. figure:: https://github.com/pyt-team/TopoBenchmarkX/raw/main/resources/workflow.jpg
    :alt: workflow
    :class: with-shadow
    :width: 1000px

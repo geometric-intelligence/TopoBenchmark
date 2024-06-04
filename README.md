@@ -39,7 +39,7 @@ Assess how your model compares against state-of-the-art topological neural netwo
 `TopoBenchmarkX` (TBX) is a modular Python library designed to standardize benchmarking and accelerate research in Topological Deep Learning (TDL). In particular, TBX allows to train and compare the performances of all sorts of Topological Neural Networks (TNNs) across the different topological domains, where by _topological domain_ we refer to a graph, a simplicial complex, a cellular complex, or a hypergraph.
 
 <p align="center">
-  <img src="resources/workflow.jpeg" width="700">
+  <img src="resources/workflow.jpg" width="700">
 </p>
 
 The main pipeline trains and evaluates a wide range of state-of-the-art TNNs and Graph Neural Networks (GNNs) (see <a href="#gear-neural-networks">:gear: Neural Networks</a>) on numerous and varied datasets and benchmark tasks (see <a href="#books-datasets">:books: Datasets</a> ). 
@@ -109,7 +109,7 @@ We list the neural networks trained and evaluated by `TopoBenchmarkX`, organized
 | Model | Reference |
 | --- | --- |
 | CAN | [Cell Attention Network](https://arxiv.org/pdf/2209.08179) |
-| CCCN | [A learning algorithm for computational connected cellular network](https://ieeexplore.ieee.org/document/1202221) |
+| CCCN | Inspired by [A learning algorithm for computational connected cellular network](https://ieeexplore.ieee.org/document/1202221), implementation adapted from [Generalized Simplicial Attention Neural Networks](https://arxiv.org/abs/2309.02138)|
 | CXN | [Cell Complex Neural Networks](https://openreview.net/pdf?id=6Tq18ySFpGU) |
 | CWN | [Weisfeiler and Lehman Go Cellular: CW Networks](https://arxiv.org/pdf/2106.12575) |
 

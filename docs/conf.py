@@ -106,9 +106,10 @@ def copy_thumbnails():
     des_directory_walked = os.walk(src_directory)
     all_thumbnails = []
 
-    for root, _, png in des_directory_walked:
-        full_filename = root + "/" + png
-        all_thumbnails.append(full_filename)
+    for root, _, pngs in des_directory_walked:
+        for png in pngs:
+            full_filename = root + "/" + png
+            all_thumbnails.append(full_filename)
 
     os.mkdir("./_build")
     os.mkdir(des_directory)

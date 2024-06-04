@@ -3,7 +3,7 @@
 
 `TopoBenchmarkX` (TBX) is a modular Python library designed to standardize benchmarking and accelerate research in Topological Deep Learning (TDL). 
 In particular, TBX allows to train and compare the performances of all sorts of Topological Neural Networks (TNNs) across the different topological domains, 
-where by _topological domain_ we refer to a graph, a simplicial complex, a cellular complex, or a hypergraph.
+where by *topological domain* we refer to a graph, a simplicial complex, a cellular complex, or a hypergraph.
 
 📌 Overview
 -----------
@@ -12,19 +12,18 @@ The main pipeline trains and evaluates a wide range of state-of-the-art TNNs and
 (see :ref:`⚙️ Neural Networks`) on numerous and varied datasets and benchmark
 tasks (see :ref:`📚 Datasets`). 
 
-Additionally, the library offers the ability to transform, i.e. _lift_, each dataset from one topological domain to another 
+Additionally, the library offers the ability to transform, i.e., *lift*, each dataset from one topological domain to another 
 (see :ref:`🚀 Liftings`), enabling for the first time an exhaustive inter-domain comparison of TNNs.
 
 
-⚙️ Neural Networks
------------------
+Neural Networks
+---------------
 
-We list the neural networks trained and evaluated by `TopoBenchmarkX`, organized by the topological domain over which they operate: graph, simplicial complex, cellular complex or hypergraph. Many of these neural networks were originally implemented in [`TopoModelX`](https://github.com/pyt-team/TopoModelX).
+We list the neural networks trained and evaluated by `TopoBenchmarkX`, organized by the topological domain over which they operate: graph, simplicial complex, cellular complex or hypergraph. Many of these neural networks were originally implemented in `TopoModelX <https://github.com/pyt-team/TopoModelX>`_.
 
 
 Graphs
 ******
-
 .. rst-class:: table
 
 +-------+----------------------------------------------------+
@@ -39,10 +38,6 @@ Graphs
 
 Simplicial complexes
 ********************
-
-Simplicial complexes
-********************
-
 .. rst-class:: table
 
 +-------+----------------------------------------------------+
@@ -74,10 +69,6 @@ Cellular complexes
 
 Hypergraphs
 ***********
-
-Hypergraphs
-***********
-
 .. rst-class:: table
 +----------------+----------------------------------------------------+
 | Model          | Reference                                          |
@@ -96,7 +87,7 @@ Hypergraphs
 🚀 Liftings
 -----------
 
-We list the liftings used in `TopoBenchmarkX` to transform datasets. Here, a _lifting_ refers to a function that transforms a dataset defined on a topological domain (_e.g._, on a graph) into the same dataset but supported on a different topological domain (_e.g._, on a simplicial complex).
+We list the liftings used in `TopoBenchmarkX` to transform datasets. Here, a *lifting* refers to a function that transforms a dataset defined on a topological domain (*e.g.*, on a graph) into the same dataset but supported on a different topological domain (*e.g.*, on a simplicial complex).
 
 Graph2Simplicial
 ****************
@@ -125,7 +116,7 @@ Graph2Cell
 +------------------+--------------------------------------------------------------------------------------------------------------------+
 | Name             | Description                                                                                                        |
 +==================+====================================================================================================================+
-| CellCycleLifting | To lift a graph to a cell complex (CC) we proceed as follows. First, we identify a finite set of cycles (closed loops) within the graph. Second, each identified cycle in the graph is associated to a 2-cell, such that the boundary of the 2-cell is the cycle. The nodes and edges of the cell complex are inherited from the graph. | [Appendix B](https://arxiv.org/abs/2206.00606) |
+| CellCycleLifting | To lift a graph to a cell complex (CC) we proceed as follows. First, we identify a finite set of cycles (closed loops) within the graph. Second, each identified cycle in the graph is associated to a 2-cell, such that the boundary of the 2-cell is the cycle. The nodes and edges of the cell complex are inherited from the graph. | ` Appendix B <https://arxiv.org/abs/2206.00606>`_ |
 +------------------+--------------------------------------------------------------------------------------------------------------------+
 
 Graph2Hypergraph
@@ -138,12 +129,12 @@ Graph2Hypergraph
 +========================+====================================================================================================================+
 | KHopLifting            | For each node in the graph, the algorithm finds the set of nodes that are at most k connections away from the       |
 |                        | initial node. This set is then used to create a hyperedge. The process is repeated for all nodes in the graph.      |
-|                        | [Section 3.4](https://ieeexplore.ieee.org/abstract/document/9264674)                                              |
+|                        | `Section 3.4 <https://ieeexplore.ieee.org/abstract/document/9264674>`_                                              |
 +------------------------+--------------------------------------------------------------------------------------------------------------------+
 | KNearestNeighborsLifting| For each node in the graph, the method finds the k nearest nodes by using the Euclidean distance between the vectors |
 |                        | of features. The set of k nodes found is considered as a hyperedge. The process is repeated for all nodes in the     |
 |                        | graph.                                                                                                             |
-|                        | [Section 3.1](https://ieeexplore.ieee.org/abstract/document/9264674)                                              |
+|                        | `Section 3.1 <https://ieeexplore.ieee.org/abstract/document/9264674)>`_                                             |
 +------------------------+--------------------------------------------------------------------------------------------------------------------+
 
 📚 Datasets
@@ -195,14 +186,15 @@ Graph2Hypergraph
 To learn more about `TopoBenchmarkX`, we invite you to read the paper:
 
 .. code-block:: BibTeX
-   @misc{topobenchmarkx2024,
+
+    @misc{topobenchmarkx2024,
             title={TopoBenchmarkX},
             author={PyT-Team},
             year={2024},
             eprint={TBD},
             archivePrefix={arXiv},
             primaryClass={cs.LG}
-   }
+    }
 
 If you find `TopoBenchmarkX` useful, we would appreciate if you cite us!
 

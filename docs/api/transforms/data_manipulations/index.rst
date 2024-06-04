@@ -3,31 +3,31 @@ Data Manipulations
 ******************
 
 .. automodule:: topobenchmarkx.transforms.data_manipulations.calculate_simplicial_curvature
-   :members:
+    :members:
 
 .. automodule:: topobenchmarkx.transforms.data_manipulations.equal_gauss_features
-   :members:
+    :members:
 
 .. automodule:: topobenchmarkx.transforms.data_manipulations.identity_transform
-   :members:
+    :members:
 
 .. automodule:: topobenchmarkx.transforms.data_manipulations.infere_knn_connectivity
-   :members:
+    :members:
 
 .. automodule:: topobenchmarkx.transforms.data_manipulations.infere_radius_connectivity
-   :members:
+    :members:
 
 .. automodule:: topobenchmarkx.transforms.data_manipulations.keep_only_connected_components
-   :members:
+    :members:
 
 .. automodule:: topobenchmarkx.transforms.data_manipulations.keep_selected_data_fields
-   :members:
+    :members:
 
 .. automodule:: topobenchmarkx.transforms.data_manipulations.node_degrees
-   :members:
+    :members:
 
 .. automodule:: topobenchmarkx.transforms.data_manipulations.node_features_to_float
-   :members:
+    :members:
 
 .. automodule:: topobenchmarkx.transforms.data_manipulations.one_hot_degree_features
-   :members:
+    :members:

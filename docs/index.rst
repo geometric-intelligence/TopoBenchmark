@@ -26,8 +26,8 @@ Additionally, the library offers the ability to transform, i.e., *lift*, each da
 (see :ref:`Liftings`), enabling for the first time an exhaustive inter-domain comparison of TNNs.
 
 
-Neural Networks
----------------
+⚙ Neural Networks
+-----------------
 
 We list the neural networks trained and evaluated by `TopoBenchmarkX`, organized by the topological domain over which they operate: graph, simplicial complex, cellular complex or hypergraph. Many of these neural networks were originally implemented in `TopoModelX <https://github.com/pyt-team/TopoModelX>`_.
 

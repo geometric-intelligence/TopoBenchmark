@@ -1,7 +1,12 @@
+"""
+Module for automated testing of neural network modules.
+
+This module contains functions and utilities to automate the testing
+of various neural network modules using the NNModuleAutoTest class.
+"""
 import torch
 from .._utils.nn_module_auto_test import NNModuleAutoTest
 from topobenchmarkx.nn.backbones.cell.cccn import CCCN
-from topobenchmarkx.nn.backbones.cell.cin import CWN
 from topobenchmarkx.nn.backbones.hypergraph.edgnn import (
     EDGNN,
     MLP as edgnn_MLP,
@@ -11,6 +16,9 @@ from topobenchmarkx.nn.backbones.hypergraph.edgnn import (
 
 
 def test_auto():
+    """
+    Function to automate the testing of the modules.
+    """
     num_nodes = 8
     d_feat = 12
     x = torch.randn(num_nodes, 12)
@@ -31,12 +39,6 @@ def test_auto():
             "forward": (x, edges_1, edges_2),
             "assert_shape": (num_nodes, d_feat)
         },
-        #{
-        #    "module" : CWN, 
-        #    "init": (d_feat, d_feat_1, d_feat_2, hid_channels, n_layers),
-        #    "forward": (x, x_1, x_2, edges_1, edges_1, edges_1),
-        #    #"assert_shape": (num_nodes, d_feat)
-        #},
         {
             "module" : EDGNN, 
             "init": (d_feat, ),

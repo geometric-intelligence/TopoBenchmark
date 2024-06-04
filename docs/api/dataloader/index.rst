@@ -2,9 +2,9 @@
 DataLoader
 **********
 
-The `dataloader` module of `TopoBenchmarkX` implements custom dataloaders for training.
+The `dataloader` module implements custom dataloaders for training.
 
-.. automodule:: topobenchmarkx.dataloader.dataloader_dataset
+.. automodule:: topobenchmarkx.dataloader.dataload_dataset
     :members:
 
 .. automodule:: topobenchmarkx.dataloader.dataloader

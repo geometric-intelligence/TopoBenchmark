@@ -15,7 +15,7 @@ The API reference gives an overview of `TopoBenchmarkX`, which consists of sever
 - `utils` implements utilities to handle the training process.
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
    :caption: Packages & Modules
 
    data/index

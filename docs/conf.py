@@ -121,7 +121,9 @@ def copy_thumbnails():
 copy_thumbnails()
 
 nbsphinx_thumbnails = {
-    "notebooks/can_train": "_thumbnails/can_train.png",
+    "notebooks/tutorial_dataset": "_thumbnails/tutorial_dataset.png",
+    "notebooks/tutorial_lifting": "_thumbnails/tutorial_lifting.png",
+    "notebooks/tutorial_model": "_thumbnails/tutorial_model.png",
 }
 
 # configure intersphinx

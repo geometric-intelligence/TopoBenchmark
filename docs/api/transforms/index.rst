@@ -4,16 +4,16 @@ Transforms
 
 The `transforms` module of `TopoBenchmarkX`` consists of several submodules:
 
-1. :doc:`backbones <backbones/index>`
-2. :doc:`encoders <encoders/index>`
-3. :doc:`readouts <readouts/index>`
-4. :doc:`wrappers <wrappers/index>`
+1. :doc:`data_manipulations <data_manipulations/index>`
+2. :doc:`feature_liftings <feature_liftings/index>`
+3. :doc:`liftings <liftings/index>`
+4. :doc:`data_transforms <data_transforms/index>`
 
 .. toctree::
    :maxdepth: 2
    :hidden:
 
-   backbones/index
-   encoders/index
-   readouts/index
-   wrappers/index
+   data_manipulations/index
+   feature_liftings/index
+   liftings/index
+   data_transforms/index

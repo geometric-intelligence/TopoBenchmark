@@ -24,7 +24,8 @@ We list the neural networks trained and evaluated by `TopoBenchmarkX`, organized
 
 Graphs
 ******
-.. rst-class:: table
+.. list-table::
+ :widths: 50 , 50 
 
 +-------+----------------------------------------------------+
 | Model | Reference                                          |
@@ -38,7 +39,8 @@ Graphs
 
 Simplicial complexes
 ********************
-.. rst-class:: table
+.. list-table::
+ :widths: 50 , 50 
 
 +-------+----------------------------------------------------+
 | Model | Reference                                          |
@@ -54,7 +56,9 @@ Simplicial complexes
 
 Cellular complexes
 ******************
-.. rst-class:: table
+.. list-table::
+ :widths: 50 , 50 
+ :header-rows: 1 
 +-------+----------------------------------------------------+
 | Model | Reference                                          |
 +=======+====================================================+
@@ -69,7 +73,9 @@ Cellular complexes
 
 Hypergraphs
 ***********
-.. rst-class:: table
+.. list-table::
+ :widths: 50 , 50 
+ :header-rows: 1 
 +----------------+----------------------------------------------------+
 | Model          | Reference                                          |
 +================+====================================================+
@@ -92,7 +98,8 @@ We list the liftings used in `TopoBenchmarkX` to transform datasets. Here, a *li
 Graph2Simplicial
 ****************
 
-.. rst-class:: table
+.. list-table::
+ :widths: 50 , 50 
 
 +----------------+--------------------------------------------------------------------------------------------------------------------+
 | Name           | Description                                                                                                        |
@@ -111,7 +118,8 @@ Graph2Simplicial
 Graph2Cell
 **********
 
-.. rst-class:: table
+.. list-table::
+ :widths: 50 , 50 
 
 +------------------+--------------------------------------------------------------------------------------------------------------------+
 | Name             | Description                                                                                                        |
@@ -122,7 +130,8 @@ Graph2Cell
 Graph2Hypergraph
 ****************
 
-.. rst-class:: table
+.. list-table::
+ :widths: 50 , 50 
 
 +------------------------+--------------------------------------------------------------------------------------------------------------------+
 | Name                   | Description                                                                                                        |
@@ -140,7 +149,8 @@ Graph2Hypergraph
 📚 Datasets
 -----------
 
-.. rst-class:: table
+.. list-table::
+ :widths: 50 , 50 
 
 +----------+-------------------+-----------------------------------------+----------------------------------------------------+
 | Dataset  | Task              | Description                             | Reference                                          |

@@ -63,6 +63,22 @@ OmegaConf.register_new_resolver(
     "parameter_multiplication", lambda x, y: int(int(x) * int(y))
 )
 
+
+def initialize_hydra() -> DictConfig:
+    """Initialize Hydra when main is not an option (e.g. tests).
+
+    Returns
+    -------
+    DictConfig
+        A DictConfig object containing the config tree.
+    """
+    hydra.initialize(
+        version_base="1.3", config_path="../configs", job_name="run"
+    )
+    cfg = hydra.compose(config_name="run.yaml")
+    return cfg
+
+
 torch.set_num_threads(1)
 log = RankedLogger(__name__, rank_zero_only=True)
 
@@ -233,19 +249,6 @@ def count_number_of_parameters(
         num_params: int = sum(p.numel() for p in model.parameters() if p)
     assert num_params > 0, f"Err: {num_params=}"
     return int(num_params)
-
-
-def initialize_hydra() -> DictConfig:
-    """Initialize Hydra when main is not an option (e.g. tests).
-
-    Returns
-    -------
-    DictConfig
-        A DictConfig object containing the config tree.
-    """
-    hydra.initialize(config_path="../configs", job_name="run")
-    cfg = hydra.compose(config_name="run.yaml")
-    return cfg
 
 
 @hydra.main(

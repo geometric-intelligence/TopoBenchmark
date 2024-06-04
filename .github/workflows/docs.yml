@@ -29,9 +29,10 @@ jobs:
           cache-dependency-path: "pyproject.toml"
       - name: Install dependencies [pip]
         run: |
-          pip install --upgrade pip setuptools wheel
-          pip install -e .[doc]
-          pip install torch==${{ matrix.torch-version}} --extra-index-url https://download.pytorch.org/whl/cpu
+          python -m pip install --upgrade pip
+          pip install pytest
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          source env_setup.sh
       - name: Install Pandoc [apt-get]
         run: |
           sudo apt-get -y install pandoc

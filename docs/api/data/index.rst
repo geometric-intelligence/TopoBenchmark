@@ -2,7 +2,7 @@
 Data
 ****
 
-The `data` module of `TopoBenchmarkX`` consists of several submodules:
+The `data` module of `TopoBenchmarkX` consists of several submodules:
 
 1. `load`
 2. `preprocess`

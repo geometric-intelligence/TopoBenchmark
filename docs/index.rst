@@ -20,10 +20,10 @@ where by *topological domain* we refer to a graph, a simplicial complex, a cellu
 
 The main pipeline trains and evaluates a wide range of state-of-the-art TNNs and Graph Neural Networks (GNNs) 
 (see :ref:`Neural Networks`) on numerous and varied datasets and benchmark
-tasks (see :ref:`📚 Datasets`). 
+tasks (see :ref:`Datasets`). 
 
 Additionally, the library offers the ability to transform, i.e., *lift*, each dataset from one topological domain to another 
-(see :ref:`🚀 Liftings`), enabling for the first time an exhaustive inter-domain comparison of TNNs.
+(see :ref:`Liftings`), enabling for the first time an exhaustive inter-domain comparison of TNNs.
 
 
 Neural Networks

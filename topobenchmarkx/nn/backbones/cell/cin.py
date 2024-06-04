@@ -25,6 +25,13 @@ class CWN(torch.nn.Module):
         Dimension of hidden features.
     n_layers : int
         Number of CWN layers.
+
+    References
+    ----------
+    .. [1] Bodnar, et al.
+        Weisfeiler and Lehman go cellular: CW networks.
+        NeurIPS 2021.
+        https://arxiv.org/abs/2106.12575
     """
 
     def __init__(
@@ -135,6 +142,13 @@ class CWNLayer(nn.Module):
         A module that updates the aggregated representations of r-cells (default: None).
     eps : float, optional
         A learnable parameter that scales the input features before the first convolutional layer (default: 0.01).
+
+    References
+    ----------
+    .. [1] Bodnar, et al.
+        Weisfeiler and Lehman go cellular: CW networks.
+        NeurIPS 2021.
+        https://arxiv.org/abs/2106.12575
     """
 
     def __init__(

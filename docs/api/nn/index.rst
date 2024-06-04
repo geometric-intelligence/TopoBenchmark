@@ -17,5 +17,3 @@ The `nn` module of `TopoBenchmarkX`` consists of several submodules:
    encoders/index
    readouts/index
    wrappers/index
-
-

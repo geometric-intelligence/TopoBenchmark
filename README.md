@@ -15,6 +15,7 @@ Assess how your model compares against state-of-the-art topological neural netwo
 [![Lint](https://github.com/pyt-team/TopoBenchmarkX/actions/workflows/lint.yml/badge.svg)](https://github.com/pyt-team/TopoBenchmarkX/actions/workflows/lint.yml)
 [![Test](https://github.com/pyt-team/TopoBenchmarkX/actions/workflows/test.yml/badge.svg)](https://github.com/pyt-team/TopoBenchmarkX/actions/workflows/test.yml)
 [![Codecov](https://codecov.io/gh/pyt-team/TopoBenchmarkX/branch/main/graph/badge.svg)](https://app.codecov.io/gh/pyt-team/TopoBenchmarkX)
+[![Docs](https://img.shields.io/badge/docs-website-brightgreen)](https://pyt-team.github.io/topobenchmarkx/index.html)
 [![Python](https://img.shields.io/badge/python-3.10+-blue?logo=python)](https://www.python.org/)
 [![license](https://badgen.net/github/license/pyt-team/TopoBenchmarkX?color=green)](https://github.com/pyt-team/TopoBenchmarkX/blob/main/LICENSE)
 [![slack](https://img.shields.io/badge/chat-on%20slack-purple?logo=slack)](https://join.slack.com/t/pyt-teamworkspace/shared_invite/zt-2k63sv99s-jbFMLtwzUCc8nt3sIRWjEw)

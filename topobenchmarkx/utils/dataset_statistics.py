@@ -18,7 +18,6 @@ from topobenchmarkx.utils import (
     extras,
 )
 from topobenchmarkx.utils.config_resolvers import (
-    get_default_transform,
     get_monitor_metric,
     get_monitor_mode,
     infer_in_channels,
@@ -45,7 +44,6 @@ rootutils.setup_root(__file__, indicator=".project-root", pythonpath=True)
 # ------------------------------------------------------------------------------------ #
 
 
-OmegaConf.register_new_resolver("get_default_transform", get_default_transform)
 OmegaConf.register_new_resolver("get_monitor_metric", get_monitor_metric)
 OmegaConf.register_new_resolver("get_monitor_mode", get_monitor_mode)
 OmegaConf.register_new_resolver("infer_in_channels", infer_in_channels)

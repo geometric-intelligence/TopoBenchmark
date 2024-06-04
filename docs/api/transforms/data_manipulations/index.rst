@@ -5,7 +5,7 @@ Data Manipulations
 .. automodule:: topobenchmarkx.transforms.data_manipulations.calculate_simplicial_curvature
     :members:
 
-.. automodule:: topobenchmarkx.transforms.data_manipulations.equal_gauss_features
+.. automodule:: topobenchmarkx.transforms.data_manipulations.equal_gaus_features
     :members:
 
 .. automodule:: topobenchmarkx.transforms.data_manipulations.identity_transform
@@ -17,7 +17,7 @@ Data Manipulations
 .. automodule:: topobenchmarkx.transforms.data_manipulations.infere_radius_connectivity
     :members:
 
-.. automodule:: topobenchmarkx.transforms.data_manipulations.keep_only_connected_components
+.. automodule:: topobenchmarkx.transforms.data_manipulations.keep_only_connected_component
     :members:
 
 .. automodule:: topobenchmarkx.transforms.data_manipulations.keep_selected_data_fields

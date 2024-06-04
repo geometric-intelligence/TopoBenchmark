@@ -24,7 +24,7 @@ We list the neural networks trained and evaluated by `TopoBenchmarkX`, organized
 
 Graphs
 ******
-.. rst-class:: table
+.. list-table::
 
 +-------+----------------------------------------------------+
 | Model | Reference                                          |
@@ -38,7 +38,7 @@ Graphs
 
 Simplicial complexes
 ********************
-.. rst-class:: table
+.. list-table::
 
 +-------+----------------------------------------------------+
 | Model | Reference                                          |
@@ -54,7 +54,8 @@ Simplicial complexes
 
 Cellular complexes
 ******************
-.. rst-class:: table
+.. list-table::
+
 +-------+----------------------------------------------------+
 | Model | Reference                                          |
 +=======+====================================================+
@@ -69,7 +70,8 @@ Cellular complexes
 
 Hypergraphs
 ***********
-.. rst-class:: table
+.. list-table::
+
 +----------------+----------------------------------------------------+
 | Model          | Reference                                          |
 +================+====================================================+
@@ -92,7 +94,7 @@ We list the liftings used in `TopoBenchmarkX` to transform datasets. Here, a *li
 Graph2Simplicial
 ****************
 
-.. rst-class:: table
+.. list-table::
 
 +----------------+--------------------------------------------------------------------------------------------------------------------+
 | Name           | Description                                                                                                        |
@@ -111,7 +113,7 @@ Graph2Simplicial
 Graph2Cell
 **********
 
-.. rst-class:: table
+.. list-table::
 
 +------------------+--------------------------------------------------------------------------------------------------------------------+
 | Name             | Description                                                                                                        |
@@ -122,7 +124,7 @@ Graph2Cell
 Graph2Hypergraph
 ****************
 
-.. rst-class:: table
+.. list-table::
 
 +------------------------+--------------------------------------------------------------------------------------------------------------------+
 | Name                   | Description                                                                                                        |
@@ -140,7 +142,7 @@ Graph2Hypergraph
 📚 Datasets
 -----------
 
-.. rst-class:: table
+.. list-table::
 
 +----------+-------------------+-----------------------------------------+----------------------------------------------------+
 | Dataset  | Task              | Description                             | Reference                                          |

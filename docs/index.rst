@@ -1,7 +1,7 @@
 🌐 TopoBenchmarkX (TBX) 🍩
 ==========================
 
-.. figure:: https://github.com/pyt-team/TopoBenchmarkX/raw/main/resources/logo_black_purple.jpg
+.. figure:: https://github.com/pyt-team/TopoBenchmarkX/raw/main/resources/logo.jpeg
    :alt: topobenchmarkx
    :class: with-shadow
    :width: 1000px

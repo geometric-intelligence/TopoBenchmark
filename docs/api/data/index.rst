@@ -4,9 +4,17 @@ Data
 
 The `data` module of `TopoBenchmarkX` consists of several submodules:
 
-1. `load`
-2. `preprocess`
-3. `utils`
+1. `datasets`
+2. `load`
+3. `preprocess`
+4. `utils`
+
+Datasets
+--------
+
+.. automodule:: topobenchmarkx.data.datasets.us_county_demos_dataset
+    :members:
+    
 
 Load
 ----

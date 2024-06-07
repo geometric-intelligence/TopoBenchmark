@@ -6,6 +6,13 @@ import numpy as np
 import torch_geometric
 from omegaconf import DictConfig
 
+from topobenchmarkx.data.datasets import (
+    FIXED_SPLITS_DATASETS,
+    HETEROPHILIC_DATASETS,
+    PLANETOID_DATASETS,
+    TU_DATASETS,
+    USCountyDemosDataset,
+)
 from topobenchmarkx.data.load.base import AbstractLoader
 from topobenchmarkx.data.utils import (
     load_cell_complex_dataset,
@@ -14,13 +21,6 @@ from topobenchmarkx.data.utils import (
     load_simplicial_dataset,
 )
 from topobenchmarkx.dataloader import DataloadDataset
-from topobenchmarkx.datasets import (
-    FIXED_SPLITS_DATASETS,
-    HETEROPHILIC_DATASETS,
-    PLANETOID_DATASETS,
-    TU_DATASETS,
-    USCountyDemosDataset,
-)
 
 
 class GraphLoader(AbstractLoader):

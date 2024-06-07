@@ -4,7 +4,6 @@
 from . import (
     data,
     dataloader,
-    datasets,
     evaluator,
     loss,
     model,
@@ -22,7 +21,6 @@ __all__ = [
     "transforms",
     "utils",
     "dataloader",
-    "datasets",
     "model",
     "initialize_hydra",
 ]

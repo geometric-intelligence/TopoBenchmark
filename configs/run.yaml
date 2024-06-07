@@ -7,8 +7,7 @@ defaults:
   - dataset: graph/ZINC
   - model: simplicial/sccn
   - transforms: ${get_default_transform:${dataset},${model}} #no_transform
-  - optimizer: adam
-  - scheduler: step_lr
+  - optimizer: default
   - loss: default
   - evaluator: default
   - callbacks: default

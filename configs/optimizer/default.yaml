@@ -1,0 +1,10 @@
+_target_: topobenchmarkx.optimizer.TBXOptimizer
+
+optimizer:
+  _target_: torch.optim.Adam
+  _partial_: true
+  lr: 0.001
+  weight_decay: 0.0
+
+defaults:
+  - scheduler: step_lr # Default scheduler. Set to null to disable.

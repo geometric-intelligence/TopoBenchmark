@@ -27,8 +27,6 @@ class TBXModel(LightningModule):
         The evaluator class (default: None).
     optimizer : Any, optional
         The optimizer class (default: None).
-    scheduler : Any, optional
-        The scheduler class (default: None).
     **kwargs : Any
         Additional keyword arguments.
     """
@@ -42,7 +40,6 @@ class TBXModel(LightningModule):
         feature_encoder: torch.nn.Module | None = None,
         evaluator: Any = None,
         optimizer: Any = None,
-        scheduler: Any = None,
         **kwargs,
     ) -> None:
         super().__init__()
@@ -64,9 +61,8 @@ class TBXModel(LightningModule):
         self.evaluator = evaluator
         self.train_metrics_logged = False
 
-        # Optimizer and Scheduler
+        # Optimizer (it also internally manages Scheduler if provided)
         self.optimizer = optimizer
-        self.scheduler = scheduler
 
         # Loss function
         self.loss = loss
@@ -354,19 +350,7 @@ class TBXModel(LightningModule):
         dict:
             A dict containing the configured optimizers and learning-rate schedulers to be used for training.
         """
-        optimizer = self.optimizer(
-            params=list(self.trainer.model.parameters())
-            + list(self.readout.parameters())
+        optimizer_config = self.optimizer.configure_optimizer(
+            list(self.backbone.parameters()) + list(self.readout.parameters())
         )
-        if self.scheduler is not None:
-            scheduler = self.scheduler(optimizer=optimizer)
-            return {
-                "optimizer": optimizer,
-                "lr_scheduler": {
-                    "scheduler": scheduler,
-                    "monitor": "val/loss",
-                    "interval": "epoch",
-                    "frequency": 1,
-                },
-            }
-        return {"optimizer": optimizer}
+        return optimizer_config

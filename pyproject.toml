@@ -99,7 +99,7 @@ extend-exclude = ["test", "tutorials", "notebooks"]
 line-length = 79  # PEP 8 standard for maximum line length
 
 [tool.ruff.format]
-docstring-code-format = false
+docstring-code-format = true
 
 [tool.ruff.lint]
 select = [
@@ -129,7 +129,7 @@ ignore = [
 ]
 
 [tool.ruff.lint.pydocstyle]
-convention = "google"
+convention = "numpy"
 
 [tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["F403"]

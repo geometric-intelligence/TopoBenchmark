@@ -51,16 +51,26 @@ rootutils.setup_root(__file__, indicator=".project-root", pythonpath=True)
 # ------------------------------------------------------------------------------------ #
 
 
-OmegaConf.register_new_resolver("get_default_transform", get_default_transform)
-OmegaConf.register_new_resolver("get_required_lifting", get_required_lifting)
-OmegaConf.register_new_resolver("get_monitor_metric", get_monitor_metric)
-OmegaConf.register_new_resolver("get_monitor_mode", get_monitor_mode)
-OmegaConf.register_new_resolver("infer_in_channels", infer_in_channels)
 OmegaConf.register_new_resolver(
-    "infere_num_cell_dimensions", infere_num_cell_dimensions
+    "get_default_transform", get_default_transform, replace=True
 )
 OmegaConf.register_new_resolver(
-    "parameter_multiplication", lambda x, y: int(int(x) * int(y))
+    "get_required_lifting", get_required_lifting, replace=True
+)
+OmegaConf.register_new_resolver(
+    "get_monitor_metric", get_monitor_metric, replace=True
+)
+OmegaConf.register_new_resolver(
+    "get_monitor_mode", get_monitor_mode, replace=True
+)
+OmegaConf.register_new_resolver(
+    "infer_in_channels", infer_in_channels, replace=True
+)
+OmegaConf.register_new_resolver(
+    "infere_num_cell_dimensions", infere_num_cell_dimensions, replace=True
+)
+OmegaConf.register_new_resolver(
+    "parameter_multiplication", lambda x, y: int(int(x) * int(y)), replace=True
 )
 
 
@@ -142,7 +152,6 @@ def run(cfg: DictConfig) -> tuple[dict[str, Any], dict[str, Any]]:
         cfg.model,
         evaluator=cfg.evaluator,
         optimizer=cfg.optimizer,
-        scheduler=cfg.get("scheduler", None),
         loss=cfg.loss,
     )
 

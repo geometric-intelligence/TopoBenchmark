@@ -99,7 +99,7 @@ extend-exclude = ["test", "tutorials", "notebooks"]
 line-length = 79  # PEP 8 standard for maximum line length
 
 [tool.ruff.format]
-docstring-code-format = true
+docstring-code-format = false
 
 [tool.ruff.lint]
 select = [

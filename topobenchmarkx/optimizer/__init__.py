@@ -2,4 +2,6 @@
 
 from .optimizer import TBXOptimizer
 
-__all__ = ["TBXOptimizer"]
+__all__ = [
+    "TBXOptimizer",
+]

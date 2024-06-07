@@ -1,11 +1,10 @@
-"""Test the collate function."""
+"""Test the Dataloader class."""
 
 import hydra
 import rootutils
 import torch
-from hydra import compose, initialize_config_dir
 
-from topobenchmarkx.data.preprocess.preprocessor import PreProcessor
+from topobenchmarkx.data.preprocessor import PreProcessor
 from topobenchmarkx.dataloader import TBXDataloader
 from topobenchmarkx.dataloader.utils import to_data_list
 
@@ -18,10 +17,7 @@ class TestCollateFunction:
     """Test collate_fn."""
 
     def setup_method(self):
-        # initialize_config_dir(
-        #     version_base="1.3", config_dir=str(rootutils.find_root() / "configs"), job_name="job"
-        # )
-        # cfg = compose(config_name="test.yaml", overrides=["dataset=graph/ZINC", "model=simplicial/sccn", "transforms=dataset_defaults/ZINC"])
+        """Setup the test."""
         cfg = initialize_hydra()
         graph_loader = hydra.utils.instantiate(cfg.dataset, _recursive_=False)
 
@@ -44,15 +40,22 @@ class TestCollateFunction:
     def test_lift_features(self):
         """Test the collate funciton.
 
-        To test the collate function we use the TBXDataloader class to create a dataloader that uses the collate function. We then first check that the batched data has the expected shape. We then convert the batched data back to a list and check that the data in the list is the same as the original data.
-
-        Parameters
-        ----------
-        None
+        To test the collate function we use the TBXDataloader class to create a dataloader that uses the collate function. 
+        We then first check that the batched data has the expected shape. We then convert the batched data back to a list and check that the data in the list is the same as the original data.
         """
 
         def check_shape(batch, elems, key):
-            """Check that the batched data has the expected shape."""
+            """Check that the batched data has the expected shape.
+            
+            Parameters
+            ----------
+            batch : dict
+                The batched data.
+            elems : list
+                A list of the original data.
+            key : str
+                The key of the data to check.
+            """
             if "x_" in key or key == "x":  # or "edge_attr" in key:
                 rows = 0
                 for i in range(len(elems)):
@@ -80,14 +83,32 @@ class TestCollateFunction:
                     assert batch[key].shape[i] == i_elems
 
         def check_separation(matrix, n_elems_0_row, n_elems_0_col):
-            """Check that the matrix is separated into two parts diagonally
-            concatenated."""
+            """Check that the matrix is separated into two parts diagonally concatenated.
+            
+            Parameters
+            ----------
+            matrix : torch.Tensor
+                The matrix to check.
+            n_elems_0_row : int
+                The number of elements in the first part of the matrix.
+            n_elems_0_col : int
+                The number of elements in the first part of the matrix.
+            """
             assert torch.all(matrix[:n_elems_0_row, n_elems_0_col:] == 0)
             assert torch.all(matrix[n_elems_0_row:, :n_elems_0_col] == 0)
 
         def check_values(matrix, m1, m2):
-            """Check that the values in the matrix are the same as the values
-            in the original data."""
+            """Check that the values in the matrix are the same as the values in the original data.
+            
+            Parameters
+            ----------
+            matrix : torch.Tensor
+                The matrix to check.
+            m1 : torch.Tensor
+                The first part of the matrix.
+            m2 : torch.Tensor
+                The second part of the matrix.
+            """
             assert torch.allclose(matrix[: m1.shape[0], : m1.shape[1]], m1)
             assert torch.allclose(matrix[m1.shape[0] :, m1.shape[1] :], m2)
 

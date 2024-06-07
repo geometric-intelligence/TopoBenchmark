@@ -1,19 +1,29 @@
+"""Test the GraphLoader class."""
+
 from unittest.mock import ANY, MagicMock, patch
 
 import pytest
 import torch_geometric
 from omegaconf import DictConfig
 
-from topobenchmarkx.data.preprocess.preprocessor import PreProcessor
+from topobenchmarkx.data.preprocessor import PreProcessor
 
 from ..._utils.flow_mocker import FlowMocker
 
 
 @pytest.mark.usefixtures("mocker_fixture")
 class TestPreProcessor:
+    """Test the PreProcessor class."""
 
     @pytest.fixture(autouse=True)
     def setup_method(self, mocker_fixture):
+        """Test setup.
+        
+        Parameters
+        ----------
+        mocker_fixture : MockerFixture
+            A fixture that provides a mocker object.
+        """
         mocker = mocker_fixture
 
         # Setup test parameters
@@ -49,10 +59,12 @@ class TestPreProcessor:
         self.preprocessor = PreProcessor(self.dataset, self.data_dir, None)
 
     def teardown_method(self):
+        """Test teardown."""
         del self.preprocessor
         del self.flow_mocker
 
     def test_init(self):
+        """Test the initialization of the PreProcessor class."""
         self.flow_mocker.get("mock_inmemory_init").assert_called_once_with(
             self.data_dir, None, None
         )
@@ -63,6 +75,13 @@ class TestPreProcessor:
         assert self.preprocessor.data_list == ["0", "0", "0"]
 
     def test_init_with_transform(self, mocker_fixture):
+        """Test the initialization of the PreProcessor class with transforms.
+        
+        Parameters
+        ----------
+        mocker_fixture : MockerFixture
+            A fixture that provides a mocker object.
+        """
         mocker = mocker_fixture
         val_processed_paths = ["/some/path"]
         params = [
@@ -96,8 +115,15 @@ class TestPreProcessor:
         )
         self.flow_mocker.assert_all(self.preprocessor_with_tranform)
 
-    @patch("topobenchmarkx.data.preprocess.preprocessor.load_inductive_splits")
+    @patch("topobenchmarkx.data.preprocessor.preprocessor.load_inductive_splits")
     def test_load_dataset_splits_inductive(self, mock_load_inductive_splits):
+        """Test loading dataset splits for inductive learning.
+        
+        Parameters
+        ----------
+        mock_load_inductive_splits : MagicMock
+            A mock of the load_inductive_splits function.
+        """
         split_params = DictConfig({"learning_setting": "inductive"})
         self.preprocessor.load_dataset_splits(split_params)
         mock_load_inductive_splits.assert_called_once_with(
@@ -105,11 +131,18 @@ class TestPreProcessor:
         )
 
     @patch(
-        "topobenchmarkx.data.preprocess.preprocessor.load_transductive_splits"
+        "topobenchmarkx.data.preprocessor.preprocessor.load_transductive_splits"
     )
     def test_load_dataset_splits_transductive(
         self, mock_load_transductive_splits
     ):
+        """Test loading dataset splits for transductive learning.
+        
+        Parameters
+        ----------
+        mock_load_transductive_splits : MagicMock
+            A mock of the load_transductive_splits function.
+        """
         split_params = DictConfig({"learning_setting": "transductive"})
         self.preprocessor.load_dataset_splits(split_params)
         mock_load_transductive_splits.assert_called_once_with(
@@ -117,6 +150,7 @@ class TestPreProcessor:
         )
 
     def test_invalid_learning_setting(self):
+        """Test an invalid learning setting."""
         split_params = DictConfig({"learning_setting": "invalid"})
         with pytest.raises(ValueError):
             self.preprocessor.load_dataset_splits(split_params)

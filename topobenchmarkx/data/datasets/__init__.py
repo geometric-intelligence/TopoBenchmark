@@ -1,4 +1,4 @@
-"""This module contains the dataset classes for the topological benchmarking experiments."""
+"""This module contains the implemented dataset classes for the topological benchmarking experiments."""
 
 from .us_county_demos_dataset import USCountyDemosDataset
 

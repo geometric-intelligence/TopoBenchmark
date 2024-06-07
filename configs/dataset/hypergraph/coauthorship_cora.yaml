@@ -1,4 +1,4 @@
-_target_: topobenchmarkx.data.load.loaders.HypergraphLoader
+_target_: topobenchmarkx.data.loaders.HypergraphLoader
 
 defaults:
   - transforms: ${get_default_transform:hypergraph,${model}}

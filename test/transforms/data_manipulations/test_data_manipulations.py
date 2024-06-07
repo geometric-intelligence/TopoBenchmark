@@ -1,10 +1,9 @@
-"""Test the collate function."""
+"""Test implemented Data Manipulations transforms."""
 
 import rootutils
 import torch
 import torch_geometric
 
-# from topobenchmarkx.data.load.loaders import manual_simple_graph
 from topobenchmarkx.transforms.data_manipulations import (
     InfereKNNConnectivity,
     InfereRadiusConnectivity,
@@ -21,6 +20,7 @@ class TestCollateFunction:
     """Test collate_fn."""
 
     def setup_method(self):
+        """Test setup."""
         # Data 1
         x = torch.tensor(
             [
@@ -68,14 +68,17 @@ class TestCollateFunction:
         )
 
     def test_infere_connectivity(self):
+        """Test inferring connectivity."""
         data = self.infere_by_knn(self.data.clone())
         assert "edge_index" in data, "No edges in Data object"
 
     def test_radius_connectivity(self):
+        """Test inferring connectivity by radius."""
         data = self.infere_by_radius(self.data.clone())
         assert "edge_index" in data, "No edges in Data object"
 
     def test_keep_selected_data_fields(self):
+        """Test keeping selected fields."""
         data = self.keep_selected_fields(self.data.clone())
         assert set() == set(data.keys()) - set(
             self.keep_selected_fields.parameters["base_fields"]
@@ -83,6 +86,7 @@ class TestCollateFunction:
         ), "Some fields are not deleted"
 
     def test_node_degress(self):
+        """Test node degrees."""
         data = self.node_degress(self.data_2.clone())
         expected_degrees = torch.tensor([[3], [0], [1], [0]]).float()
         assert (
@@ -90,10 +94,12 @@ class TestCollateFunction:
         ).all(), "Node degrees do not match"
 
     def test_node_feature_float(self):
+        """Test node features to float."""
         data = self.node_feature_float(self.data_2.clone())
         assert data.x.is_floating_point(), "Node features are not float"
 
     def test_one_hot_degree_features(self):
+        """Test one-hot degree features."""
         data = self.node_degress(self.data_2.clone())
         data = self.one_hot_degree_features(data)
         expected_vals = torch.tensor(

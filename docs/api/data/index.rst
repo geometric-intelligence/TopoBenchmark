@@ -19,17 +19,17 @@ Datasets
 Load
 ----
 
-.. automodule:: topobenchmarkx.data.load.base
+.. automodule:: topobenchmarkx.data.loaders.base
     :members:
 
-.. automodule:: topobenchmarkx.data.load.loaders
+.. automodule:: topobenchmarkx.data.loaders.loaders
     :members:
 
 
 Preprocess
 ----------
 
-.. automodule:: topobenchmarkx.data.preprocess.preprocessor
+.. automodule:: topobenchmarkx.data.preprocessor.preprocessor
     :members:
 
 

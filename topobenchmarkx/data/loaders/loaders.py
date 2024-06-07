@@ -13,7 +13,7 @@ from topobenchmarkx.data.datasets import (
     TU_DATASETS,
     USCountyDemosDataset,
 )
-from topobenchmarkx.data.load.base import AbstractLoader
+from topobenchmarkx.data.loaders.base import AbstractLoader
 from topobenchmarkx.data.utils import (
     load_cell_complex_dataset,
     load_hypergraph_pickle_dataset,

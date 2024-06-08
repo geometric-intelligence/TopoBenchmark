@@ -120,3 +120,21 @@ def simple_graph_2():
         y=torch.tensor(y),
     )
     return data
+
+@pytest.fixture
+def random_graph_input():
+    num_nodes = 8
+    d_feat = 12
+    x = torch.randn(num_nodes, 12)
+    edges_1 = torch.randint(0, num_nodes, (2, num_nodes*2))
+    edges_2 = torch.randint(0, num_nodes, (2, num_nodes*2))
+    
+    d_feat_1, d_feat_2 = 5, 17
+    #hid_channels = 4
+    #out_channels = 10
+    #n_layers = 2
+    x_1 = torch.randn(num_nodes*2, d_feat_1)
+    x_2 = torch.randn(num_nodes*2, d_feat_2)
+
+    return x, x_1, x_2, edges_1, edges_2
+

@@ -1,3 +1,7 @@
+"""
+Class for automated testing of neural network modules.
+"""
+
 import torch
 import copy
 
@@ -9,6 +13,8 @@ class NNModuleAutoTest:
     3) Assert returned shape. 
         Important! If module returns multiple tensor. The shapes for assertion must be in list() not (!!!) tuple()
     """
+    SEED = 0
+
     def __init__(self, params):
         self.params = params
 
@@ -16,12 +22,9 @@ class NNModuleAutoTest:
         for param in self.params:
             assert "module" in param and "init" in param and "forward" in param
             module = self.exec_func(param["module"], param["init"])
-            cloned_inp = self.clone_input( param["forward"])
+            cloned_inp = self.clone_input(param["forward"])
             
-            module.eval()
-            result = self.exec_func(module, param["forward"])
-            result_2 = self.exec_func(module, cloned_inp)
-            module.train()
+            result, result_2 = self.exec_twice(module, param["forward"], cloned_inp)
 
             if type(result) != tuple:
                 result = (result, )
@@ -36,6 +39,14 @@ class NNModuleAutoTest:
 
                 self.assert_shape(result, param["assert_shape"])
 
+    def exec_twice(self, module, inp_1, inp_2):
+        torch.manual_seed(self.SEED)
+        result = self.exec_func(module, inp_1)
+        
+        torch.manual_seed(self.SEED)
+        result_2 = self.exec_func(module, inp_2)
+
+        return result, result_2
 
     def exec_func(self, func, args):
         if type(args) == tuple:

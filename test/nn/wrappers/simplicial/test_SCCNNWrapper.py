@@ -19,7 +19,12 @@ class TestSCCNNWrapper:
         sc_order = 3
         init_args = (data.x_0.shape[1], data.x_1.shape[1], data.x_2.shape[1]), (out_dim, out_dim, out_dim), conv_order, sc_order
 
-        wrapper = SCCNNWrapper(SCCNNCustom(*init_args), out_channels=out_dim, num_cell_dimensions=3)
+        wrapper = SCCNNWrapper(
+            SCCNNCustom(*init_args), 
+            out_channels=out_dim, 
+            num_cell_dimensions=3
+        )
         out = wrapper(data)
+        # Assert keys in output
         for key in ["labels", "batch_0", "x_0", "x_1", "x_2"]:
             assert key in out

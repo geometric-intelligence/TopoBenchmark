@@ -3,7 +3,10 @@ import pytest
 import torch
 import torch_geometric
 from topobenchmarkx.transforms.liftings.graph2simplicial import (
-    SimplicialCliqueLifting,
+    SimplicialCliqueLifting
+)
+from topobenchmarkx.transforms.liftings.graph2cell import (
+    CellCycleLifting
 )
 
 
@@ -73,6 +76,13 @@ def sg1_clique_lifted(simple_graph_1):
                 complex_dim=3, signed=True
             )
     data = lifting_signed(simple_graph_1)
+    data.batch_0 = "null"
+    return data
+
+@pytest.fixture
+def sg1_cell_lifted(simple_graph_1):
+    lifting = CellCycleLifting()
+    data = lifting(simple_graph_1)
     data.batch_0 = "null"
     return data
 

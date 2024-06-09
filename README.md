@@ -82,9 +82,19 @@ Next, train the neural networks by running the following command:
 python -m topobenchmarkx 
 ```
 
+Thanks to `hydra` implementation, one can easily override the default experiment configuration through the command line. For instance, the model and dataset can be selected as:
+
+```
+python -m topobenchmarkx model=cell/cwn dataset=graph/MUTAG
+```
+
+**Remark:** By default, our pipeline identifies the source and destination topological domains, and applies a default lifting between them if required.
+
+The same CLI override mechanism also applies when modifying more finer configurations within a `CONFIG GROUP`. Please, refer to the official [`hydra`documentation](https://hydra.cc/docs/intro/) for further details.
+
 ## :anchor: Tutorials
 
-Explore our [tutorials](https://github.com/pyt-team/TopoBenchmarkX/tree/main/tutorials) for further details of how to add new datasets, transforms/liftings, and benchmark tasks. 
+Explore our [tutorials](https://github.com/pyt-team/TopoBenchmarkX/tree/main/tutorials) for further details on how to add new datasets, transforms/liftings, and benchmark tasks. 
 
 ## :gear: Neural Networks
 

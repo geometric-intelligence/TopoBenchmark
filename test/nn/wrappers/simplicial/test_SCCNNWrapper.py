@@ -16,7 +16,16 @@ from topobenchmarkx.nn.wrappers import (
 )
 
 class TestSimplicialWrappers:
+    """Test simplicial model wrappers."""
+
     def test_SCCNNWrapper(self, sg1_clique_lifted):
+        """Test SCCNNWrapper.
+        
+        Parameters
+        ----------
+        sg1_clique_lifted : torch_geometric.data.Data
+            A fixture of simple graph 1 lifted with SimlicialCliqueLifting
+        """
         data = sg1_clique_lifted
         out_dim = 4
         conv_order = 1
@@ -34,6 +43,13 @@ class TestSimplicialWrappers:
             assert key in out
 
     def test_SANWarpper(self, sg1_clique_lifted):
+        """Test SANWarpper.
+        
+        Parameters
+        ----------
+        sg1_clique_lifted : torch_geometric.data.Data
+            A fixture of simple graph 1 lifted with SimlicialCliqueLifting 
+        """
         data = sg1_clique_lifted
         out_dim = data.x_0.shape[1]
         hidden_channels = data.x_0.shape[1]
@@ -49,6 +65,13 @@ class TestSimplicialWrappers:
             assert key in out
 
     def test_SCNWrapper(self, sg1_clique_lifted):
+        """Test SCNWrapper.
+        
+        Parameters
+        ----------
+        sg1_clique_lifted : torch_geometric.data.Data
+            A fixture of simple graph 1 lifted with SimlicialCliqueLifting 
+        """
         data = sg1_clique_lifted
         out_dim = data.x_0.shape[1]
 
@@ -63,6 +86,13 @@ class TestSimplicialWrappers:
             assert key in out
 
     def test_SCCNWrapper(self, sg1_clique_lifted):
+        """Test SCCNWrapper.
+        
+        Parameters
+        ----------
+        sg1_clique_lifted : torch_geometric.data.Data
+            A fixture of simple graph 1 lifted with SimlicialCliqueLifting 
+        """
         data = sg1_clique_lifted
         out_dim = data.x_0.shape[1]
         max_rank = 2

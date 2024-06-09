@@ -144,6 +144,7 @@ class TestGraphLoader:
             loader.load()
 
     def test_load_us_county_dataset(self):
+        """Test loading US County dataset."""
         loader_config = {
             "data_domain": "graph",
             "data_type": "cornel",
@@ -158,6 +159,6 @@ class TestGraphLoader:
         data = dataset[0]
 
         assert data.x.shape == (3224, 6)
-
+        
         read_us_county_demos(loader_config.data_dir + "/US-county-demos/raw")
 

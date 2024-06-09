@@ -1,4 +1,4 @@
-"""Unit tests for cell wrappers"""
+"""Unit tests for cell model wrappers"""
 
 import torch
 from torch_geometric.utils import get_laplacian

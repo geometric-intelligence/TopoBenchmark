@@ -32,7 +32,7 @@ class FlowMocker:
                         init_args["return_value"] = init_args["property_val"]
                         init_args["new_callable"] = PropertyMock
                         del init_args["property_val"]
-                    # Create mock object for instance
+                    # Create mock object for the instance
                     mock_obj = mocker.patch.object(*patch_obj, **init_args)
                 elif type(patch_obj) == str:
                     # Create mock object for class method

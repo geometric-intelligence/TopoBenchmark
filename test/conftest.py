@@ -2,10 +2,17 @@ import networkx as nx
 import pytest
 import torch
 import torch_geometric
+from topobenchmarkx.transforms.liftings.graph2simplicial import (
+    SimplicialCliqueLifting
+)
+from topobenchmarkx.transforms.liftings.graph2cell import (
+    CellCycleLifting
+)
 
 
 @pytest.fixture
 def mocker_fixture(mocker):
+    """Return pytest mocker. It is used when one want to use mocker in setup_method"""
     return mocker
 
 
@@ -59,6 +66,24 @@ def simple_graph_1():
         num_nodes=len(vertices),
         y=torch.tensor(y),
     )
+    return data
+
+
+
+@pytest.fixture
+def sg1_clique_lifted(simple_graph_1):
+    lifting_signed = SimplicialCliqueLifting(
+                complex_dim=3, signed=True
+            )
+    data = lifting_signed(simple_graph_1)
+    data.batch_0 = "null"
+    return data
+
+@pytest.fixture
+def sg1_cell_lifted(simple_graph_1):
+    lifting = CellCycleLifting()
+    data = lifting(simple_graph_1)
+    data.batch_0 = "null"
     return data
 
 
@@ -120,3 +145,21 @@ def simple_graph_2():
         y=torch.tensor(y),
     )
     return data
+
+
+@pytest.fixture
+def random_graph_input():
+    """Create a random graph for testing purposes."""
+    num_nodes = 8
+    d_feat = 12
+    x = torch.randn(num_nodes, 12)
+    edges_1 = torch.randint(0, num_nodes, (2, num_nodes*2))
+    edges_2 = torch.randint(0, num_nodes, (2, num_nodes*2))
+    
+    d_feat_1, d_feat_2 = 5, 17
+
+    x_1 = torch.randn(num_nodes*2, d_feat_1)
+    x_2 = torch.randn(num_nodes*2, d_feat_2)
+
+    return x, x_1, x_2, edges_1, edges_2
+

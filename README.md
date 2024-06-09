@@ -84,7 +84,7 @@ python -m topobenchmarkx
 
 ## :anchor: Tutorials
 
-To add a new dataset and benchmark task, you can explore our [tutorials](https://github.com/pyt-team/TopoBenchmarkX/tree/main/tutorials).
+Explore our [tutorials](https://github.com/pyt-team/TopoBenchmarkX/tree/main/tutorials) for further details of how to add new datasets, transforms/liftings, and benchmark tasks. 
 
 ## :gear: Neural Networks
 

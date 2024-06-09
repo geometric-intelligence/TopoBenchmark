@@ -10,6 +10,7 @@ The API reference gives an overview of `TopoBenchmarkX`, which consists of sever
 - `loss` implements the loss functions.
 - `model` implements the classes to handle the neural networks.
 - `nn` implements utilities regarding neural networks.
+- `optimizer` implements funtionalities to manage both optimizers and schedulers.
 - `transforms` implements utilities to preprocess datasets, including lifting procedures.
 - `utils` implements utilities to handle the training process.
 
@@ -23,5 +24,6 @@ The API reference gives an overview of `TopoBenchmarkX`, which consists of sever
    loss/index
    model/index
    nn/index
+   optimizer/index
    transforms/index
    utils/index

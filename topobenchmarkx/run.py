@@ -24,6 +24,7 @@ from topobenchmarkx.utils import (
     task_wrapper,
 )
 from topobenchmarkx.utils.config_resolvers import (
+    get_default_metrics,
     get_default_transform,
     get_monitor_metric,
     get_monitor_mode,
@@ -51,6 +52,9 @@ rootutils.setup_root(__file__, indicator=".project-root", pythonpath=True)
 # ------------------------------------------------------------------------------------ #
 
 
+OmegaConf.register_new_resolver(
+    "get_default_metrics", get_default_metrics, replace=True
+)
 OmegaConf.register_new_resolver(
     "get_default_transform", get_default_transform, replace=True
 )

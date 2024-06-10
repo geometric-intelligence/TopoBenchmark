@@ -183,3 +183,6 @@ wandb/
 
 # ruff
 .ruff_cache/
+
+# test temporary
+.test_tmp/

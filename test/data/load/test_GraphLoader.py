@@ -1,12 +1,15 @@
 """Test the GraphLoader class."""
 
 from unittest.mock import MagicMock, patch
-
+import torch
 import pytest
-from omegaconf import DictConfig
+from omegaconf import DictConfig, OmegaConf
 
 from topobenchmarkx.data.loaders import GraphLoader
-
+from topobenchmarkx.data.utils.io_utils import (
+    read_us_county_demos,
+    load_hypergraph_pickle_dataset
+)
 
 class TestGraphLoader:
     """Test the GraphLoader class."""
@@ -134,8 +137,28 @@ class TestGraphLoader:
     def test_load_unsupported_dataset(self):
         """Test loading an unsupported dataset."""
         parameters = DictConfig(
-            {"data_dir": "/path/to/data", "data_name": "UnknownDataset"}
+            {"data_dir": "path/to/data", "data_name": "UnknownDataset"}
         )
         loader = GraphLoader(parameters)
         with pytest.raises(NotImplementedError):
             loader.load()
+
+    def test_load_us_county_dataset(self):
+        """Test loading US County dataset."""
+        loader_config = {
+            "data_domain": "graph",
+            "data_type": "cornel",
+            "data_name": "US-county-demos",
+            "year": 2012,
+            "data_dir": "./.test_tmp/data/US_COUNTY",
+            "task_variable": "MigraRate"
+        }
+        loader_config = OmegaConf.create(loader_config)
+        graph_loader = GraphLoader(loader_config)
+        dataset, dataset_dir = graph_loader.load()
+        data = dataset[0]
+
+        assert data.x.shape == (3224, 6)
+        
+        read_us_county_demos(loader_config.data_dir + "/US-county-demos/raw")
+

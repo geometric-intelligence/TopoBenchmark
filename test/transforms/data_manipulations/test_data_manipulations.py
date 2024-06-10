@@ -11,7 +11,9 @@ from topobenchmarkx.transforms.data_manipulations import (
     NodeDegrees,
     NodeFeaturesToFloat,
     OneHotDegreeFeatures,
+    CalculateSimplicialCurvature,
 )
+from topobenchmarkx.transforms.liftings.graph2simplicial import SimplicialCliqueLifting
 
 rootutils.setup_root("./", indicator=".project-root", pythonpath=True)
 
@@ -111,3 +113,23 @@ class TestCollateFunction:
             ]
         )
         assert (data.one_hot_degree == expected_vals).all()
+    
+    def test_simplicial_curvature(self, simple_graph_1):
+        """" Test simplicial curvature calculation.
+        
+        Parameters
+        ----------
+        simple_graph_1 : torch_geometric.data.Data
+            A simple graph.
+        """
+        simplicial_curvature = CalculateSimplicialCurvature()
+        lifting_unsigned = SimplicialCliqueLifting(
+            complex_dim=3, signed=False
+        )
+        data = lifting_unsigned(simple_graph_1)
+        data['0_cell_degrees'] = torch.unsqueeze(torch.sum(data['incidence_1'], dim=1).to_dense(), dim=1)
+        data['1_cell_degrees'] = torch.unsqueeze(torch.sum(data['incidence_2'], dim=1).to_dense(), dim=1)
+        data['2_cell_degrees'] = torch.unsqueeze(torch.sum(data['incidence_3'], dim=1).to_dense(), dim=1)
+        repr = simplicial_curvature.__repr__()
+        
+        res = simplicial_curvature(data)

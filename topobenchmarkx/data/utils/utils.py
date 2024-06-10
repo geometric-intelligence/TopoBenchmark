@@ -111,6 +111,7 @@ def load_simplicial_dataset(cfg):
         return NotImplementedError
     data = graph.karate_club(complex_type="simplicial", feat_dim=2)
     max_rank = data.dim
+    print(max_rank)
     features = {}
     dict_feat_equivalence = {
         0: "node_feat",
@@ -118,7 +119,7 @@ def load_simplicial_dataset(cfg):
         2: "face_feat",
         3: "tetrahedron_feat",
     }
-    for rank_idx in range(max_rank + 1):
+    for rank_idx in range(max_rank):
         try:
             features[f"x_{rank_idx}"] = torch.tensor(
                 np.stack(

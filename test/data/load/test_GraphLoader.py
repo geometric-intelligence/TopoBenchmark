@@ -10,6 +10,7 @@ from topobenchmarkx.data.utils.io_utils import (
     read_us_county_demos,
     load_hypergraph_pickle_dataset
 )
+from topobenchmarkx.data.utils.utils import load_simplicial_dataset, load_manual_graph, ensure_serializable
 
 class TestGraphLoader:
     """Test the GraphLoader class."""
@@ -162,3 +163,37 @@ class TestGraphLoader:
         
         read_us_county_demos(loader_config.data_dir + "/US-county-demos/raw")
 
+    def test_load_karate_dataset(self):
+        """ Test loading the KarateClub dataset."""
+        cfg = {
+            "data_name": "KarateClub",
+        }
+        cfg = OmegaConf.create(cfg)
+        data = load_simplicial_dataset(cfg)
+        assert data.y.shape == (34,)
+        
+    def test_manual_loader(self):
+        """ Test loading a manual graph."""
+        data = load_manual_graph()
+        assert data.y.shape == (8,)
+        
+    def test_ensure_serialization(self):
+        """Test that the class is serializable."""
+        obj1 = (1,2)
+        obj2 = set([1,2,3,3])
+        cfg = {
+            "data_name": "KarateClub",
+        }
+        obj3 = OmegaConf.create(cfg)
+        obj4 = load_manual_graph()
+        
+        res1 = ensure_serializable(obj1)
+        res2 = ensure_serializable(obj2)
+        res3 = ensure_serializable(obj3)
+        res4 = ensure_serializable(obj4)
+        
+        assert res1 is not None
+        assert res2 is not None
+        assert res3 is not None
+        assert res4 is None
+        

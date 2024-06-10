@@ -1,6 +1,7 @@
 """Optimizer class responsible of managing both optimizer and scheduler."""
 
 import functools
+from typing import Any
 
 import torch.optim
 
@@ -11,16 +12,16 @@ TORCH_SCHEDULERS = torch.optim.lr_scheduler.__dict__
 
 
 class TBXOptimizer(AbstractOptimizer):
-    """Optimizer class that manage both optimizer and scheduler.
+    """Optimizer class that manage both optimizer and scheduler, fully compatible with `torch.optim` classes.
 
     Parameters
     ----------
-    optimizer_id : torch.optim.Optimizer
-        Optimizer to be used.
+    optimizer_id : str
+        Name of the torch optimizer class to be used.
     parameters : dict
         Parameters to be passed to the optimizer.
-    scheduler : torch.optim.lr_scheduler._LRScheduler, optional
-        Scheduler to be used. Default is None.
+    scheduler : dict, optional
+        Scheduler id and parameters to be used. Default is None.
     """
 
     def __init__(self, optimizer_id, parameters, scheduler=None) -> None:
@@ -43,10 +44,11 @@ class TBXOptimizer(AbstractOptimizer):
         else:
             return f"{self.__class__.__name__}(optimizer={self.optimizer.__name__})"
 
-    def configure_optimizer(self, model_parameters):
+    def configure_optimizer(self, model_parameters) -> dict[str:Any]:
         """Configure the optimizer and scheduler.
 
-        Act as a wrapper to provide Trainer the required config dict.
+        Act as a wrapper to provide the LightningTrainer module the required config dict
+        when it calls `TBXModel`'s `configure_optimizers()` method.
 
         Parameters
         ----------

@@ -14,11 +14,11 @@ class TBXEvaluator(AbstractEvaluator):
         The task type. It can be either "classification" or "regression".
     **kwargs : dict
         Additional arguments for the class. The arguments depend on the task.
-    In "classification" scenario, the following arguments are expected:
-    - num_classes (int): The number of classes.
-    - classification_metrics (list[str]): A list of classification metrics to be computed.
-    In "regression" scenario, the following arguments are expected:
-    - regression_metrics (list[str]): A list of regression metrics to be computed.
+        In "classification" scenario, the following arguments are expected:
+        - num_classes (int): The number of classes.
+        - metrics (list[str]): A list of classification metrics to be computed.
+        In "regression" scenario, the following arguments are expected:
+        - metrics (list[str]): A list of regression metrics to be computed.
     """
 
     def __init__(self, task, **kwargs):
@@ -32,16 +32,16 @@ class TBXEvaluator(AbstractEvaluator):
             # This setup should work correctly
             parameters = {"num_classes": kwargs["num_classes"]}
             parameters["task"] = "multiclass"
-            metric_names = kwargs["classification_metrics"]
+            metric_names = kwargs["metrics"]
 
         elif self.task == "multilabel classification":
             parameters = {"num_classes": kwargs["num_classes"]}
             parameters["task"] = "multilabel"
-            metric_names = kwargs["classification_metrics"]
+            metric_names = kwargs["metrics"]
 
         elif self.task == "regression":
             parameters = {}
-            metric_names = kwargs["regression_metrics"]
+            metric_names = kwargs["metrics"]
 
         else:
             raise ValueError(f"Invalid task {kwargs['task']}")

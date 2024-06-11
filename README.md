@@ -146,6 +146,9 @@ We list the neural networks trained and evaluated by `TopoBenchmarkX`, organized
 
 We list the liftings used in `TopoBenchmarkX` to transform datasets. Here, a _lifting_ refers to a function that transforms a dataset defined on a topological domain (_e.g._, on a graph) into the same dataset but supported on a different topological domain (_e.g._, on a simplicial complex).
 
+<details>
+<summary><b> Topology Liftings </b></summary>
+
 ### Graph2Simplicial
 | Name | Description | Reference |
 | --- | --- | --- |
@@ -162,7 +165,17 @@ We list the liftings used in `TopoBenchmarkX` to transform datasets. Here, a _li
 | --- | --- | --- |
 | KHopLifting | For each node in the graph, the algorithm finds the set of nodes that are at most k connections away from the initial node. This set is then used to create an hyperedge. The process is repeated for all nodes in the graph. | [Section 3.4](https://ieeexplore.ieee.org/abstract/document/9264674) |
 | KNearestNeighborsLifting | For each node in the graph, the method finds the k nearest nodes by using the Euclidean distance between the vectors of features. The set of k nodes found is considered as an hyperedge. The proces is repeated for all nodes in the graph. | [Section 3.1](https://ieeexplore.ieee.org/abstract/document/9264674) |
+</details>
 
+<details>
+  <summary><b> Feature Liftings <b></summary>
+
+| Name                | Description                                                                 | Supported Domains |
+|---------------------|-----------------------------------------------------------------------------|-------------------|
+| ProjectionSum       | Projects r-cell features of a graph to r+1-cell structures utilizing incidence matrices \(B_{r}\). | Simplicial, Cell  |
+| ConcatenationLifting | Concatenate r-cell features to obtain r+1-cell features.                   | Simplicial        |
+
+</details>
 ## :books: Datasets
 
 | Dataset | Task | Description | Reference |

@@ -22,7 +22,7 @@ class Concatenation(torch_geometric.transforms.BaseTransform):
     def lift_features(
         self, data: torch_geometric.data.Data | dict
     ) -> torch_geometric.data.Data | dict:
-        r"""Concatenate r-cell features to r+1-cell structures.
+        r"""Concatenate r-cell features to obtain r+1-cell features.
 
         Parameters
         ----------

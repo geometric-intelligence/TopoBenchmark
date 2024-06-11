@@ -11,12 +11,20 @@ class TestConcatentionLifting:
     """Test the ConcatentionLifting class."""
 
     def setup_method(self):
+        """Set up the test."""
         # Initialize a lifting class
         self.lifting = SimplicialCliqueLifting(
             feature_lifting="Concatenation", complex_dim=3
         )
 
     def test_lift_features(self, simple_graph_1):
+        """Test the lift_features method.
+        
+        Parameters
+        ----------
+        simple_graph_1 : torch_geometric.data.Data
+            A simple graph data object.
+        """
         data = simple_graph_1
         # Test the lift_features method
         lifted_data = self.lifting.forward(data.clone())

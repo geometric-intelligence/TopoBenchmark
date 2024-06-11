@@ -93,7 +93,7 @@ python -m topobenchmarkx model=cell/cwn dataset=graph/MUTAG
 The same CLI override mechanism also applies when modifying more finer configurations within a `CONFIG GROUP`. Please, refer to the official [`hydra`documentation](https://hydra.cc/docs/intro/) for further details.
 
 ## :bike: Experiments Reproducibility
-To reproduce Table 1 from the paper, please run the following command: 
+To reproduce Table 1 from the `TopoBenchmarkX: A Framework for Benchmarking Topological Deep Learning` paper, please run the following command:
 
 ```
 bash scripts/reproduce.sh

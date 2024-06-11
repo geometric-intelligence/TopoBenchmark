@@ -54,7 +54,6 @@ class PreProcessor(torch_geometric.data.InMemoryDataset):
         else:
             self.transforms_applied = False
             super().__init__(data_dir, None, None, **kwargs)
-            self.data = dataset
             self.load(data_dir + "/processed/data.pt")
 
         self.data_list = [self.get(idx) for idx in range(len(self))]

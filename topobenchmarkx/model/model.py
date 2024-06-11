@@ -351,6 +351,9 @@ class TBXModel(LightningModule):
             A dict containing the configured optimizers and learning-rate schedulers to be used for training.
         """
         optimizer_config = self.optimizer.configure_optimizer(
-            list(self.backbone.parameters()) + list(self.readout.parameters())
+            list(self.backbone.parameters())
+            + list(self.readout.parameters())
+            + list(self.feature_encoder.parameters())
         )
+
         return optimizer_config

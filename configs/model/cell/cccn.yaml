@@ -1,6 +1,6 @@
 _target_: topobenchmarkx.model.TBXModel
 
-model_name: cwn_dcm
+model_name: cccn
 model_domain: cell
 
 feature_encoder:

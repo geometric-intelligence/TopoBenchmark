@@ -37,7 +37,7 @@ Assess how your model compares against state-of-the-art topological neural netwo
 
 ## :pushpin: Overview
 
-`TopoBenchmarkX` (TBX) is a modular Python library designed to standardize benchmarking and accelerate research in Topological Deep Learning (TDL). In particular, TBX allows to train and compare the performances of all sorts of Topological Neural Networks (TNNs) across the different topological domains, where by _topological domain_ we refer to a graph, a simplicial complex, a cellular complex, or a hypergraph.
+`TopoBenchmarkX` (TBX) is a modular Python library designed to standardize benchmarking and accelerate research in Topological Deep Learning (TDL). In particular, TBX allows to train and compare the performances of all sorts of Topological Neural Networks (TNNs) across the different topological domains, where by _topological domain_ we refer to a graph, a simplicial complex, a cellular complex, or a hypergraph. For detailed information, please refer to the [`TopoBenchmarkX: A Framework for Benchmarking Topological Deep Learning`](https://arxiv.org/pdf/2406.06642) paper.
 
 <p align="center">
   <img src="resources/workflow.jpg" width="700">
@@ -93,12 +93,12 @@ python -m topobenchmarkx model=cell/cwn dataset=graph/MUTAG
 The same CLI override mechanism also applies when modifying more finer configurations within a `CONFIG GROUP`. Please, refer to the official [`hydra`documentation](https://hydra.cc/docs/intro/) for further details.
 
 ## :bike: Experiments Reproducibility
-To reproduce Table 1 from the `TopoBenchmarkX: A Framework for Benchmarking Topological Deep Learning` paper, please run the following command:
+To reproduce Table 1 from the [`TopoBenchmarkX: A Framework for Benchmarking Topological Deep Learning`](https://arxiv.org/pdf/2406.06642) paper, please run the following command:
 
 ```
 bash scripts/reproduce.sh
 ```
-**Remark:** We have additionally provided a public W&B (Weights & Biases) project with logs for the corresponding runs (updated on June 11, 2024).
+**Remark:** We have additionally provided a public [W&B (Weights & Biases) project](https://wandb.ai/telyatnikov_sap/TopoBenchmarkX_main?nw=nwusertelyatnikov_sap) with logs for the corresponding runs (updated on June 11, 2024).
 
 
 ## :anchor: Tutorials

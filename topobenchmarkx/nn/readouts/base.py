@@ -85,14 +85,8 @@ class AbstractZeroCellReadOut(torch.nn.Module):
             Logits tensor.
         """
         if self.task_level == "graph":
-            if self.pooling_type == "max":
-                x = scatter(x, batch, dim=0, reduce="max")
+            x = scatter(x, batch, dim=0, reduce=self.pooling_type)
 
-            elif self.pooling_type == "mean":
-                x = scatter(x, batch, dim=0, reduce="mean")
-
-            elif self.pooling_type == "sum":
-                x = scatter(x, batch, dim=0, reduce="sum")
         return self.linear(x)
 
     @abstractmethod

@@ -6,6 +6,7 @@ import os
 import hydra
 import torch
 import torch_geometric
+from torch_geometric.io import fs
 
 from topobenchmarkx.data.utils import (
     ensure_serializable,
@@ -54,6 +55,7 @@ class PreProcessor(torch_geometric.data.InMemoryDataset):
             self.transforms_applied = False
             super().__init__(data_dir, None, None, **kwargs)
             self.load(data_dir + "/processed/data.pt")
+
         self.data_list = [self.get(idx) for idx in range(len(self))]
         # Some datasets have fixed splits, and those are stored as split_idx during loading
         # We need to store this information to be able to reproduce the splits afterwards
@@ -177,6 +179,29 @@ class PreProcessor(torch_geometric.data.InMemoryDataset):
 
         assert isinstance(self._data, torch_geometric.data.Data)
         self.save(self.data_list, self.processed_paths[0])
+
+    def load(self, path: str) -> None:
+        r"""Load the dataset from the file path `path`.
+
+        Parameters
+        ----------
+        path : str
+            The path to the processed data.
+        """
+        out = fs.torch_load(path)
+        assert isinstance(out, tuple)
+        assert len(out) >= 2 and len(out) <= 4
+        if len(out) == 2:  # Backward compatibility (1).
+            data, self.slices = out
+        elif len(out) == 3:  # Backward compatibility (2).
+            data, self.slices, data_cls = out
+        else:  # TU Datasets store additional element (__class__) in the processed file
+            data, self.slices, sizes, data_cls = out
+
+        if not isinstance(data, dict):  # Backward compatibility.
+            self.data = data
+        else:
+            self.data = data_cls.from_dict(data)
 
     def load_dataset_splits(
         self, split_params

@@ -7,14 +7,14 @@ from topobenchmarkx.transforms.liftings.graph2simplicial import (
 )
 
 
-class TestSetLifting:
-    """Test the SetLifting class."""
+class TestProjectionSum:
+    """Test the ConcatentionLifting class."""
 
     def setup_method(self):
         """Set up the test."""
         # Initialize a lifting class
         self.lifting = SimplicialCliqueLifting(
-            feature_lifting="Set", complex_dim=3
+            feature_lifting="ProjectionSum", complex_dim=3
         )
 
     def test_lift_features(self, simple_graph_1):
@@ -25,33 +25,44 @@ class TestSetLifting:
         simple_graph_1 : torch_geometric.data.Data
             A simple graph data object.
         """
-        # Test the lift_features method
         data = simple_graph_1
+        # Test the lift_features method
         lifted_data = self.lifting.forward(data.clone())
 
         expected_x1 = torch.tensor(
             [
-                [0, 1],
-                [0, 2],
-                [0, 4],
-                [0, 7],
-                [1, 2],
-                [1, 4],
-                [2, 3],
-                [2, 4],
-                [2, 5],
-                [2, 7],
-                [3, 6],
-                [5, 6],
-                [5, 7],
+                [   6.],
+                [  11.],
+                [ 101.],
+                [5001.],
+                [  15.],
+                [ 105.],
+                [  60.],
+                [ 110.],
+                [ 510.],
+                [5010.],
+                [1050.],
+                [1500.],
+                [5500.]
             ]
         )
 
         expected_x2 = torch.tensor(
-            [[0, 1, 2], [0, 1, 4], [0, 2, 4], [0, 2, 7], [1, 2, 4], [2, 5, 7]]
+            [
+                [   32.],
+                [  212.],
+                [  222.],
+                [10022.],
+                [  230.],
+                [11020.]
+            ]
         )
 
-        expected_x3 = torch.tensor([[0, 1, 2, 4]])
+        expected_x3 = torch.tensor(
+            [
+                [696.]
+            ]
+        )
 
         assert (
             expected_x1 == lifted_data.x_1

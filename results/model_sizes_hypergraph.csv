@@ -1,4 +1,0 @@
-Model,Cora,IMDB-BINARY,IMDB-MULTI,MUTAG,NCI1,NCI109,PROTEINS,PubMed,REDDIT-BINARY,US-county-demos-BachelorRate,US-county-demos-BirthRate,US-county-demos-DeathRate,US-county-demos-Election,US-county-demos-MedianIncome,US-county-demos-MigraRate,US-county-demos-UnemploymentRate,ZINC,amazon_ratings,citeseer,minesweeper,roman_empire,tolokers
-allsettransformer,60.26K,114.24K,111.3K,80.77K,57.47K,221.57K,14.34K,280.83K,106.18K,316.93K,30.21K,316.93K,217.34K,217.34K,80.64K,105.86K,106.82K,155.91K,132.87K,118.02K,257.17K,217.99K
-edgnn,113.29K,9.86K,27.01K,5.73K,88.19K,88.32K,5.6K,147.59K,5.83K,84.1K,84.1K,84.1K,21.57K,21.57K,21.57K,21.57K,22.53K,122.24K,258.5K,21.7K,41.49K,21.89K
-unignn2,109.06K,100.61K,8.32K,84.1K,104.32K,4.61K,21.31K,114.56K,68.1K,3.55K,13.25K,51.07K,4.58K,4.58K,51.07K,5.6K,102.14K,89.22K,541.32K,51.33K,90.9K,13.57K

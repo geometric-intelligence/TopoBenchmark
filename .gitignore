@@ -168,3 +168,5 @@ cython_debug/
 /notebooks/*.csv
 notebooks/tmp
 *.pickle
+results/
+results_1/

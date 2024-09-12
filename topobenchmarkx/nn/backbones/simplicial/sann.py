@@ -46,13 +46,22 @@ class SANN(torch.nn.Module):
 
         # Set of simplices layers
         self.layers_0 = torch.nn.ModuleList(
-            [SANNLayer(dim_2, dim_3, update_func="relu") for i in range(3)]
+            [
+                SANNLayer([dim_2] * 3, [dim_3] * 3, update_func="lrelu")
+                for i in range(3)
+            ]
         )
         self.layers_1 = torch.nn.ModuleList(
-            [SANNLayer(dim_3, dim_3, update_func="relu") for i in range(3)]
+            [
+                SANNLayer([dim_3] * 3, [dim_3] * 3, update_func="lrelu")
+                for i in range(3)
+            ]
         )
         self.layers_2 = torch.nn.ModuleList(
-            [SANNLayer(dim_3, dim_3, update_func="relu") for i in range(3)]
+            [
+                SANNLayer([dim_3] * 3, [dim_3] * 3, update_func="lrelu")
+                for i in range(3)
+            ]
         )
 
         # All layers for all simplices
@@ -120,37 +129,6 @@ class SANN(torch.nn.Module):
                 x_i_to_0, x_i_to_1, x_i_to_2 = layer[i](x_emb[i])
                 # Update the i-th simplex to all other simplices embeddings
                 x_emb[i] = (x_i_to_0, x_i_to_1, x_i_to_2)
-
-        # Here we have the out embeddings
-
-        # xi_in0 = torch.cat(
-        #     (
-        #         torch.sum((out0_1), 0),
-        #         torch.sum((out0_2), 0),
-        #         torch.sum((out0_3), 0),
-        #     ),
-        #     0,
-        # )
-        # xi_in1 = torch.cat(
-        #     (
-        #         torch.sum((out1_1), 0),
-        #         torch.sum((out1_2), 0),
-        #         torch.sum((out1_3), 0),
-        #     ),
-        #     0,
-        # )
-        # xi_in2 = torch.cat(
-        #     (
-        #         torch.sum((out2_1), 0),
-        #         torch.sum((out2_2), 0),
-        #         torch.sum((out2_3), 0),
-        #     ),
-        #     0,
-        # )
-
-        # phi_in = torch.cat(((xi_in0), (xi_in1), (xi_in2)))
-        # final_out = self.D(phi_in)
-
         return x_emb
 
 
@@ -201,7 +179,6 @@ class SANNLayer(torch.nn.Module):
         self.initialization = initialization
 
         assert initialization in ["xavier_uniform", "xavier_normal"]
-        assert self.conv_order > 0
 
         self.weight_0 = Parameter(
             torch.Tensor(
@@ -276,6 +253,8 @@ class SANNLayer(torch.nn.Module):
             return torch.sigmoid(x)
         if self.update_func == "relu":
             return torch.nn.functional.relu(x)
+        if self.update_func == "lrelu":
+            return torch.nn.functional.leaky_relu(x)
         return None
 
     def forward(self, x_all: dict[int, torch.Tensor]):

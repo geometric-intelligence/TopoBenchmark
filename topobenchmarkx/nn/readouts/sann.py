@@ -11,47 +11,31 @@ class SANNReadout(AbstractZeroCellReadOut):
 
     Parameters
     ----------
-    hidden_dimensions_1 : int
-        Dimension of the embeddings.
-    hidden_dimensions_2 : int
-        Dimension of the hidden layers.
-    out_channels : int
-        Number of classes.
-    task_level : str
-        Task level.
-    pooling_type : str
-        Pooling type.
+    **kwargs : dict
+        Additional keyword arguments. It should contain the following keys:
+        - hidden_dim_1 (int):  Dimension of the embeddings.
+        - hidden_dim_2 (int): Dimension of the hidden layers.
+        - out_channels (int): Number of classes.
+        - pooling_type (str): Type of pooling operationg
     """
 
-    def __init__(
-        self,
-        hidden_dimensions_1,
-        hidden_dimensions_2,
-        out_channels,
-        task_level: str,
-        pooling_type: str = "sum",
-    ):
-        """Readout function for the zero-cell model.
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
-        Parameters:
-        -----------
-        hidden_dimesions_1 : int
-            Dimension of the embeddings.
-        hidden_dimensions_2 : int
-            Dimension of the hidden layers.
-        out_channels : int
-            Number of classes.
-        """
+        hidden_dimensions_1 = kwargs["hidden_dim"]
+        hidden_dimensions_2 = kwargs["hidden_dim_2"]
+        out_channels = kwargs["out_channels"]
+        pooling_type = kwargs["pooling_type"]
 
         self.linear = torch.nn.Sequential(
             torch.nn.Linear(3 * 3 * hidden_dimensions_1, hidden_dimensions_2),
-            torch.functional.F.relu,
+            torch.nn.ReLU(),
             torch.nn.Linear(hidden_dimensions_2, hidden_dimensions_2),
-            torch.functional.F.relu,
+            torch.nn.ReLU(),
             torch.nn.Linear(hidden_dimensions_2, hidden_dimensions_2),
-            torch.functional.F.relu,
+            torch.nn.ReLU(),
             torch.nn.Linear(hidden_dimensions_2, out_channels),
-            torch.functional.F.sigmoid,
+            torch.nn.Sigmoid(),
         )  # nn.Softmax(dim=0) for multi-class
 
         assert pooling_type in ["max", "sum", "mean"], "Invalid pooling_type"
@@ -117,31 +101,37 @@ class SANNReadout(AbstractZeroCellReadOut):
             Dictionary containing the updated model output.
         """
 
+        # From 0-simplex to all simplex embedding
         xi_in0 = torch.cat(
             (
-                torch.sum((model_out["x0_1"]), 0),
-                torch.sum((model_out["x0_2"]), 0),
-                torch.sum((model_out["x0_3"]), 0),
+                torch.sum((model_out[0][0]), 0),
+                torch.sum((model_out[0][1]), 0),
+                torch.sum((model_out[0][2]), 0),
             ),
             0,
         )
+
+        # From 1-simplex to all simplex embedding
         xi_in1 = torch.cat(
             (
-                torch.sum((model_out["x1_1"]), 0),
-                torch.sum((model_out["x1_2"]), 0),
-                torch.sum((model_out["x1_3"]), 0),
+                torch.sum((model_out[1][0]), 0),
+                torch.sum((model_out[1][1]), 0),
+                torch.sum((model_out[1][2]), 0),
             ),
             0,
         )
+
+        # From 2-simplex to all simplex embedding
         xi_in2 = torch.cat(
             (
-                torch.sum((model_out["x2_1"]), 0),
-                torch.sum((model_out["x2_2"]), 0),
-                torch.sum((model_out["x2_3"]), 0),
+                torch.sum((model_out[2][0]), 0),
+                torch.sum((model_out[2][1]), 0),
+                torch.sum((model_out[2][2]), 0),
             ),
             0,
         )
-        # Concatenate the embeddings
-        model_out["x_0"] = torch.cat(((xi_in0), (xi_in1), (xi_in2)))
 
-        return model_out
+        # Concatenate the embeddings
+        x = torch.cat(((xi_in0), (xi_in1), (xi_in2)))
+
+        return self.compute_logits(x, batch)

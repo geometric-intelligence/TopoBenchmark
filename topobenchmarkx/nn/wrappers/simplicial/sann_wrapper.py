@@ -6,6 +6,24 @@ from topobenchmarkx.nn.wrappers import AbstractWrapper
 class SANNWrapper(AbstractWrapper):
     r"""Wrapper for the SANN."""
 
+    def __call__(self, batch):
+        r"""Forward pass for the model.
+
+        This method calls the forward method and adds the residual connection.
+
+        Parameters
+        ----------
+        batch : torch_geometric.data.Data
+            Batch object containing the batched data.
+
+        Returns
+        -------
+        dict
+            Dictionary containing the model output.
+        """
+        model_out = self.forward(batch)
+        return model_out
+
     def forward(self, batch):
         """Forward pass of the SANN.
 

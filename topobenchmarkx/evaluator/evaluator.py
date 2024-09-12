@@ -44,7 +44,7 @@ class TBXEvaluator(AbstractEvaluator):
             metric_names = kwargs["metrics"]
 
         else:
-            raise ValueError(f"Invalid task {kwargs['task']}")
+            raise ValueError(f"Invalid task {self.task}")
 
         metrics = {}
         for name in metric_names:

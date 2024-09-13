@@ -1,5 +1,8 @@
 """Data manipulations module."""
 
+from topobenchmarkx.transforms.data_manipulations.rewire import RewireAFRC3
+from topobenchmarkx.transforms.data_manipulations.rewire2 import AFRCN
+
 from .calculate_simplicial_curvature import (
     CalculateSimplicialCurvature,
 )
@@ -24,6 +27,8 @@ DATA_MANIPULATIONS = {
     "CalculateSimplicialCurvature": CalculateSimplicialCurvature,
     "KeepOnlyConnectedComponent": KeepOnlyConnectedComponent,
     "KeepSelectedDataFields": KeepSelectedDataFields,
+    "RewireAFRC3": RewireAFRC3,
+    "AFRCN": AFRCN,
 }
 
 __all__ = [
@@ -37,5 +42,7 @@ __all__ = [
     "CalculateSimplicialCurvature",
     "OneHotDegreeFeatures",
     "KeepSelectedDataFields",
+    "RewireAFRC3",
+    "AFRCN",
     "DATA_MANIPULATIONS",
 ]

@@ -1,0 +1,4 @@
+_target_: topobenchmarkx.transforms.data_transform.DataTransform
+transform_name: "RewireAFRC3"
+transform_type: "rewire the graph"
+loops: 2

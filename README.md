@@ -176,6 +176,7 @@ We list the liftings used in `TopoBenchmarkX` to transform datasets. Here, a _li
 | ConcatenationLifting | Concatenate r-cell features to obtain r+1-cell features.                   | Simplicial        |
 
 </details>
+
 ## :books: Datasets
 
 | Dataset | Task | Description | Reference |

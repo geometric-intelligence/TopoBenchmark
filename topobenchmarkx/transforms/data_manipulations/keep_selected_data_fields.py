@@ -39,7 +39,12 @@ class KeepSelectedDataFields(torch_geometric.transforms.BaseTransform):
             + self.parameters["preserved_fields"]
         )
 
+        # In case we need to move from topological domain to graph
+        if len(data["shape"]) > 1:
+            data["shape"] = data["shape"][0]
+
         for key in data.to_dict():
             if key not in fields_to_keep:
                 del data[key]
+
         return data

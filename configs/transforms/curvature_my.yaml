@@ -1,0 +1,208 @@
+# @package _global_
+
+transforms:
+  G2S_l:
+    _target_: topobenchmarkx.transforms.data_transform.DataTransform
+    transform_type: lifting
+    transform_name: SimplicialCliqueLifting
+    complex_dim: 3
+    preserve_edge_attr: false
+    signed: false
+    feature_lifting: ProjectionSum
+
+  ND:
+    _target_: topobenchmarkx.transforms.data_transform.DataTransform
+    transform_name: "NodeDegrees"
+    transform_type: "data manipulation"
+    selected_fields: ["edge_index", "incidence"]
+  
+  SC:
+    _target_: topobenchmarkx.transforms.data_transform.DataTransform
+    transform_name: "CalculateSimplicialCurvature"
+    transform_type: "data manipulation"
+######
+  R:
+    _target_: topobenchmarkx.transforms.data_transform.DataTransform
+    transform_name: "RewireAFRC3"
+    transform_type: "rewire the graph"
+    lower_bound_eq: "correct" # "incorrect" or "correct"
+    compute_every_it: True
+    loops: 3
+    # _target_: topobenchmarkx.transforms.data_transform.DataTransform
+    # transform_name: "AFRCN"
+    # transform_type: "R the graph"
+  
+  KSF:
+    _target_: topobenchmarkx.transforms.data_transform.DataTransform
+    transform_name: "KeepSelectedDataFields"
+    transform_type: "data manipulation"
+    # Fields that must be for pipeline
+    base_fields: ["x", "y", "val_mask", "test_mask", "train_mask", "edge_index"]
+
+    # Fields that optional for the pipeline
+    preserved_fields: ["nodes_curvature_w"]
+    
+  G2S_l2:
+    _target_: topobenchmarkx.transforms.data_transform.DataTransform
+    transform_type: lifting
+    transform_name: SimplicialCliqueLifting
+    complex_dim: 3
+    preserve_edge_attr: false
+    signed: false
+    feature_lifting: ProjectionSum
+
+  ND2:
+    _target_: topobenchmarkx.transforms.data_transform.DataTransform
+    transform_name: "NodeDegrees"
+    transform_type: "data manipulation"
+    selected_fields: ["edge_index", "incidence"]
+  
+  SC2:
+    _target_: topobenchmarkx.transforms.data_transform.DataTransform
+    transform_name: "CalculateSimplicialCurvature"
+    transform_type: "data manipulation"
+  
+  #########################################################
+
+  # R2:
+  #   _target_: topobenchmarkx.transforms.data_transform.DataTransform
+  #   transform_name: "AFRCN"
+  #   transform_type: "R the graph"
+  
+  # KSF2:
+  #   _target_: topobenchmarkx.transforms.data_transform.DataTransform
+  #   transform_name: "KeepSelectedDataFields"
+  #   transform_type: "data manipulation"
+  #   # Fields that must be for pipeline
+  #   base_fields: ["x", "y", "val_mask", "test_mask", "train_mask", "edge_index"]
+
+  #   # Fields that optional for the pipeline
+  #   preserved_fields: []
+    
+  # G2S_l3:
+  #   _target_: topobenchmarkx.transforms.data_transform.DataTransform
+  #   transform_type: lifting
+  #   transform_name: SimplicialCliqueLifting
+  #   complex_dim: 3
+  #   preserve_edge_attr: false
+  #   signed: false
+  #   feature_lifting: ProjectionSum
+
+  # ND3:
+  #   _target_: topobenchmarkx.transforms.data_transform.DataTransform
+  #   transform_name: "NodeDegrees"
+  #   transform_type: "data manipulation"
+  #   selected_fields: ["edge_index", "incidence"]
+  
+  # SC3:
+  #   _target_: topobenchmarkx.transforms.data_transform.DataTransform
+  #   transform_name: "CalculateSimplicialCurvature"
+  #   transform_type: "data manipulation"
+
+  # R3:
+  #   _target_: topobenchmarkx.transforms.data_transform.DataTransform
+  #   transform_name: "AFRCN"
+  #   transform_type: "R the graph"
+  
+  # KSF3:
+  #   _target_: topobenchmarkx.transforms.data_transform.DataTransform
+  #   transform_name: "KeepSelectedDataFields"
+  #   transform_type: "data manipulation"
+  #   # Fields that must be for pipeline
+  #   base_fields: ["x", "y", "val_mask", "test_mask", "train_mask", "edge_index"]
+
+  #   # Fields that optional for the pipeline
+  #   preserved_fields: ["nodes_curvature_w"]
+    
+  # G2S_l4:
+  #   _target_: topobenchmarkx.transforms.data_transform.DataTransform
+  #   transform_type: lifting
+  #   transform_name: SimplicialCliqueLifting
+  #   complex_dim: 3
+  #   preserve_edge_attr: false
+  #   signed: false
+  #   feature_lifting: ProjectionSum
+
+  # ND4:
+  #   _target_: topobenchmarkx.transforms.data_transform.DataTransform
+  #   transform_name: "NodeDegrees"
+  #   transform_type: "data manipulation"
+  #   selected_fields: ["edge_index", "incidence"]
+  
+  # SC4:
+  #   _target_: topobenchmarkx.transforms.data_transform.DataTransform
+  #   transform_name: "CalculateSimplicialCurvature"
+  #   transform_type: "data manipulation"
+
+  # # R4:
+  # #   _target_: topobenchmarkx.transforms.data_transform.DataTransform
+  # #   transform_name: "AFRCN"
+  # #   transform_type: "R the graph"
+  
+  # # KSF4:
+  # #   _target_: topobenchmarkx.transforms.data_transform.DataTransform
+  # #   transform_name: "KeepSelectedDataFields"
+  # #   transform_type: "data manipulation"
+  # #   # Fields that must be for pipeline
+  # #   base_fields: ["x", "y", "val_mask", "test_mask", "train_mask", "edge_index"]
+
+  # #   # Fields that optional for the pipeline
+  # #   preserved_fields: []
+    
+  # # G2S_l5:
+  # #   _target_: topobenchmarkx.transforms.data_transform.DataTransform
+  # #   transform_type: lifting
+  # #   transform_name: SimplicialCliqueLifting
+  # #   complex_dim: 3
+  # #   preserve_edge_attr: false
+  # #   signed: false
+  # #   feature_lifting: ProjectionSum
+
+  # # ND5:
+  # #   _target_: topobenchmarkx.transforms.data_transform.DataTransform
+  # #   transform_name: "NodeDegrees"
+  # #   transform_type: "data manipulation"
+  # #   selected_fields: ["edge_index", "incidence"]
+  
+  # # SC5:
+  # #   _target_: topobenchmarkx.transforms.data_transform.DataTransform
+  # #   transform_name: "CalculateSimplicialCurvature"
+  # #   transform_type: "data manipulation"
+
+  # # R5:
+  # #   _target_: topobenchmarkx.transforms.data_transform.DataTransform
+  # #   transform_name: "AFRCN"
+  # #   transform_type: "R the graph"
+  
+  # # KSF5:
+  # #   _target_: topobenchmarkx.transforms.data_transform.DataTransform
+  # #   transform_name: "KeepSelectedDataFields"
+  # #   transform_type: "data manipulation"
+  # #   # Fields that must be for pipeline
+  # #   base_fields: ["x", "y", "val_mask", "test_mask", "train_mask", "edge_index"]
+
+  # #   # Fields that optional for the pipeline
+  # #   preserved_fields: ["nodes_curvature_w"]
+    
+  # # G2S_l6:
+  # #   _target_: topobenchmarkx.transforms.data_transform.DataTransform
+  # #   transform_type: lifting
+  # #   transform_name: SimplicialCliqueLifting
+  # #   complex_dim: 3
+  # #   preserve_edge_attr: false
+  # #   signed: false
+  # #   feature_lifting: ProjectionSum
+
+  # # ND6:
+  # #   _target_: topobenchmarkx.transforms.data_transform.DataTransform
+  # #   transform_name: "NodeDegrees"
+  # #   transform_type: "data manipulation"
+  # #   selected_fields: ["edge_index", "incidence"]
+  
+  # # SC6:
+  # #   _target_: topobenchmarkx.transforms.data_transform.DataTransform
+  # #   transform_name: "CalculateSimplicialCurvature"
+  # #   transform_type: "data manipulation"
+  
+
+  

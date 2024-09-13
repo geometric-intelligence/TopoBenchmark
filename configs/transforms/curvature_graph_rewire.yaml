@@ -1,0 +1,27 @@
+# @package _global_
+
+transforms:
+  keep_connected_component:
+    _target_: topobenchmarkx.transforms.data_transform.DataTransform
+    transform_name: "KeepOnlyConnectedComponent"
+    transform_type: "data manipulation"
+    num_components: 1
+  R:
+    _target_: topobenchmarkx.transforms.data_transform.DataTransform
+    transform_name: "RewireAFRC3"
+    transform_type: "rewire the graph"
+    lower_bound_eq: "correct" # "incorrect" or "correct"
+    compute_every_it: True
+    loops: 3
+  
+  # KSF:
+  #   _target_: topobenchmarkx.transforms.data_transform.DataTransform
+  #   transform_name: "KeepSelectedDataFields"
+  #   transform_type: "data manipulation"
+  #   # Fields that must be for pipeline
+  #   base_fields: ["x", "y", "val_mask", "test_mask", "train_mask", "edge_index"]
+
+  #   # Fields that optional for the pipeline
+  #   preserved_fields: ["nodes_curvature_w"]
+
+  

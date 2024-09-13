@@ -8,6 +8,8 @@ PLANETOID_DATASETS = [
     "PubMed",
 ]
 
+WEBKB_DATASETS = ["Cornell", "Texas", "Wisconsin"]
+
 TU_DATASETS = [
     "MUTAG",
     "ENZYMES",

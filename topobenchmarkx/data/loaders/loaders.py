@@ -11,6 +11,7 @@ from topobenchmarkx.data.datasets import (
     HETEROPHILIC_DATASETS,
     PLANETOID_DATASETS,
     TU_DATASETS,
+    WEBKB_DATASETS,
     USCountyDemosDataset,
 )
 from topobenchmarkx.data.loaders.base import AbstractLoader
@@ -84,7 +85,22 @@ class GraphLoader(AbstractLoader):
                 root=root_data_dir,
                 name=self.parameters["data_name"],
             )
+        elif (
+            self.parameters.data_name in WEBKB_DATASETS
+            and self.parameters.data_type == "WebKB"
+        ):
+            dataset = torch_geometric.datasets.WebKB(
+                root=root_data_dir,
+                name=self.parameters["data_name"],
+            )
 
+            dataset.data.edge_index = torch_geometric.utils.to_undirected(
+                dataset.data.edge_index
+            )
+            # dataset.data.edge_index = torch_geometric.utils.coalesce(dataset.data.edge_index)
+            dataset.data.edge_index = torch_geometric.utils.remove_self_loops(
+                dataset.data.edge_index
+            )[0]
         elif self.parameters.data_name in TU_DATASETS:
             dataset = torch_geometric.datasets.TUDataset(
                 root=root_data_dir,

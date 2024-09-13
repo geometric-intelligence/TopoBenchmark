@@ -1,4 +1,8 @@
 # @package _global_
 
-defaults:
-  - transforms@_here_: null
+transforms:
+  keep_connected_component:
+    _target_: topobenchmarkx.transforms.data_transform.DataTransform
+    transform_name: "KeepOnlyConnectedComponent"
+    transform_type: "data manipulation"
+    num_components: 1

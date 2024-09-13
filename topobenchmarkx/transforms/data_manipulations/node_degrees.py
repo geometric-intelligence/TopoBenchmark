@@ -63,6 +63,13 @@ class NodeDegrees(torch_geometric.transforms.BaseTransform):
         """
         if data[field].is_sparse:
             degrees = abs(data[field].to_dense()).sum(1)
+            # # Get the absolute sum per row
+            # data[field] = data[field].coalesce()
+            # abs_values = torch.abs(data[field].values())
+            # indices = data[field].indices()
+            # degrees = torch.zeros(data[field].size(0))
+            # degrees.index_add_(0, indices[0], abs_values)
+
         else:
             assert (
                 field == "edge_index"

@@ -3,7 +3,7 @@ requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "TopoBenchmarkX"
+name = "TopoTuneBenchmarkX"
 dynamic = ["version"]
 authors = [
     {name = "PyT-Team Authors", email = "tlscabinet@gmail.com"}
@@ -77,8 +77,8 @@ test = [
     "pytest-mock"
 ]
 
-dev = ["TopoBenchmarkX[test, lint]"]
-all = ["TopoBenchmarkX[dev, doc]"]
+dev = ["TopoTuneBenchmarkX[test, lint]"]
+all = ["TopoTuneBenchmarkX[dev, doc]"]
 
 [project.urls]
 homepage="https://github.com/pyt-team/TopoBenchmarkX"

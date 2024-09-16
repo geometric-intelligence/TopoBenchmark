@@ -88,11 +88,32 @@ class TopoTune(torch.nn.Module):
             src_rank, dst_rank = route
             if src_rank != dst_rank and (src_rank, dst_rank) not in nbhd_cache:
                 n_dst_nodes = getattr(params, f"x_{dst_rank}").shape[0]
-                nbhd_cache[(src_rank, dst_rank)] = interrank_boundary_index(
-                    getattr(params, f"x_{src_rank}"),
-                    getattr(params, f"incidence_{src_rank}").indices(),
-                    n_dst_nodes,
-                )
+                if src_rank == dst_rank + 1:
+                    boundary = getattr(
+                        params, f"incidence_{src_rank}"
+                    ).coalesce()
+                    nbhd_cache[(src_rank, dst_rank)] = (
+                        interrank_boundary_index(
+                            getattr(params, f"x_{src_rank}"),
+                            boundary.indices(),
+                            n_dst_nodes,
+                        )
+                    )
+                elif src_rank == dst_rank - 1:
+                    coboundary = getattr(
+                        params, f"incidence_{dst_rank}"
+                    ).T.coalesce()
+                    nbhd_cache[(src_rank, dst_rank)] = (
+                        interrank_boundary_index(
+                            getattr(params, f"x_{src_rank}"),
+                            coboundary.indices(),
+                            n_dst_nodes,
+                        )
+                    )
+                else:
+                    raise NotImplementedError(
+                        "Only 1-hop dimensional boundaries are implemented."
+                    )
         return nbhd_cache
 
     def intrarank_expand(self, params, src_rank, nbhd):
@@ -153,7 +174,9 @@ class TopoTune(torch.nn.Module):
         )
         return out
 
-    def interrank_expand(self, params, src_rank, nbhd_cache, membership):
+    def interrank_expand(
+        self, params, src_rank, dst_rank, nbhd_cache, membership
+    ):
         """Expand the complex into an interrank Hasse graph.
 
         Parameters
@@ -162,6 +185,8 @@ class TopoTune(torch.nn.Module):
             The parameters of the batch, containting the complex.
         src_rank : int
             The source rank.
+        dst_rank : int
+            The destination rank.
         nbhd_cache : dict
             The neighborhood cache containing the expanded boundary index and edge attributes.
         membership : dict
@@ -173,12 +198,11 @@ class TopoTune(torch.nn.Module):
             The expanded batch of interrank Hasse graphs for this route.
         """
         src_batch = membership[src_rank]
-        dst_batch = membership[src_rank - 1]
+        dst_batch = membership[dst_rank]
         edge_index, edge_attr = nbhd_cache
         device = getattr(
             params, f"x_{src_rank}"
         ).device  # params[src_rank].x.device
-        dst_rank = int(src_rank - 1)
         feat_on_dst = torch.zeros_like(
             getattr(params, f"x_{dst_rank}")
         )  # torch.zeros_like(params[dst_rank].x)
@@ -412,7 +436,7 @@ class TopoTune(torch.nn.Module):
                     nbhd = nbhd_cache[(src_rank, dst_rank)]
 
                     batch_route = self.interrank_expand(
-                        batch, src_rank, nbhd, membership
+                        batch, src_rank, dst_rank, nbhd, membership
                     )
                     x_out = self.interrank_gnn_forward(
                         batch_route,
@@ -435,11 +459,12 @@ class TopoTune(torch.nn.Module):
                     batch, f"x_{rank}", x_out_per_rank[rank]
                 )  # params[rank].x = x_out_per_rank[rank]
 
-        if 2 in x_out_per_rank:
-            membership, x_out_per_rank[2] = self.correct_no_face_graphs(
-                membership, x_out_per_rank[2]
-            )
-        else:
+        # if 2 in x_out_per_rank:
+        #     membership, x_out_per_rank[2] = self.correct_no_face_graphs(
+        #         membership, x_out_per_rank[2]
+        #     )
+        # else:
+        if 2 not in x_out_per_rank:
             x_out_per_rank[2] = batch.x_2
 
         return x_out_per_rank

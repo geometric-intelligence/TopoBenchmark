@@ -27,11 +27,16 @@ backbone:
     #heads: 4
     norm: BatchNorm
   routes:
-    - [0, 0]
-    - [1, 0]
-    - [1, 1]
-    - [1, 1]
-    - [2, 1]
+    - - [0, 0]
+      - up
+    - - [1, 0]
+      - incidence
+    - - [1, 1]
+      - up
+    - - [1, 1]
+      - down
+    - - [2, 1]
+      - incidence
   neighborhoods:
     - up
     - incidence

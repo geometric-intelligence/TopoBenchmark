@@ -166,6 +166,8 @@ class TopoTune(torch.nn.Module):
         torch.tensor
             The output of the GNN (updated features).
         """
+        if batch_route.x.shape[0] < 2:
+            return batch_route.x  # If there are 0 or 1 sample, do nothing
         out = self.graph_routes[layer_idx][route_index](
             batch_route.x,
             batch_route.edge_index,
@@ -301,8 +303,6 @@ class TopoTune(torch.nn.Module):
                     for elem in list
                 ]
             )
-            .unsqueeze(1)
-            .squeeze()
             for j in range(max_dim)
         }
         return membership

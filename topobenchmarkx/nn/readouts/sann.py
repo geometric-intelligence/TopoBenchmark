@@ -59,11 +59,15 @@ class SANNReadout(AbstractZeroCellReadOut):
             Dictionary containing the updated model output.
         """
         model_out = self.forward(model_out, batch)
-
         model_out["logits"] = self.compute_logits(
-            model_out["x_0"], batch["batch_0"]
+            model_out["x"], batch["batch_0"]
         )
 
+        # Add a logit for the complement of the input
+        model_out["logits"] = torch.cat(
+            (1 - model_out["logits"], model_out["logits"])
+        ).unsqueeze(0)
+        # model_out["logits"] = torch.argmax(torch.cat((1-model_out['logits'], model_out['logits']))).unsqueeze(0)
         return model_out
 
     def compute_logits(self, x: torch.Tensor, batch: torch.Tensor):
@@ -104,9 +108,9 @@ class SANNReadout(AbstractZeroCellReadOut):
         # From 0-simplex to all simplex embedding
         xi_in0 = torch.cat(
             (
-                torch.sum((model_out[0][0]), 0),
-                torch.sum((model_out[0][1]), 0),
-                torch.sum((model_out[0][2]), 0),
+                torch.sum((model_out["x_0"][0]), 0),
+                torch.sum((model_out["x_0"][1]), 0),
+                torch.sum((model_out["x_0"][2]), 0),
             ),
             0,
         )
@@ -114,9 +118,9 @@ class SANNReadout(AbstractZeroCellReadOut):
         # From 1-simplex to all simplex embedding
         xi_in1 = torch.cat(
             (
-                torch.sum((model_out[1][0]), 0),
-                torch.sum((model_out[1][1]), 0),
-                torch.sum((model_out[1][2]), 0),
+                torch.sum((model_out["x_1"][0]), 0),
+                torch.sum((model_out["x_1"][1]), 0),
+                torch.sum((model_out["x_1"][2]), 0),
             ),
             0,
         )
@@ -124,14 +128,14 @@ class SANNReadout(AbstractZeroCellReadOut):
         # From 2-simplex to all simplex embedding
         xi_in2 = torch.cat(
             (
-                torch.sum((model_out[2][0]), 0),
-                torch.sum((model_out[2][1]), 0),
-                torch.sum((model_out[2][2]), 0),
+                torch.sum((model_out["x_2"][0]), 0),
+                torch.sum((model_out["x_2"][1]), 0),
+                torch.sum((model_out["x_2"][2]), 0),
             ),
             0,
         )
 
         # Concatenate the embeddings
         x = torch.cat(((xi_in0), (xi_in1), (xi_in2)))
-
-        return self.compute_logits(x, batch)
+        model_out["x"] = x
+        return model_out

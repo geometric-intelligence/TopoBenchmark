@@ -11,7 +11,7 @@ class SANN(torch.nn.Module):
     Parameters
     ----------
     dim_1 : int
-        Dimension of the input.
+        Dimension of the input feature vector for 0-simplices (unused).
     dim_2 : int
         Dimension of the hidden layers.
     dim_3 : int
@@ -20,29 +20,6 @@ class SANN(torch.nn.Module):
 
     def __init__(self, dim_1, dim_2, dim_3):
         super().__init__()
-
-        # k-simplex to 0-simplex (k=0,1,2)
-        self.in_linear_0 = torch.nn.ModuleList(
-            torch.nn.Linear(dim_1, dim_2) for i in range(3)
-        )
-
-        # k-simplex to 1-simplex (k=0,1,2)
-        self.in_linear_1 = torch.nn.ModuleList(
-            [
-                torch.nn.Linear(6, dim_2),
-                torch.nn.Linear(12, dim_2),
-                torch.nn.Linear(9, dim_2),
-            ]
-        )
-
-        # k-simplex to 2-simplex (k=0,1,2)
-        self.in_linear_2 = torch.nn.ModuleList(
-            [
-                torch.nn.Linear(18, dim_2),
-                torch.nn.Linear(39, dim_2),
-                torch.nn.Linear(30, dim_2),
-            ]
-        )
 
         # Set of simplices layers
         self.layers_0 = torch.nn.ModuleList(
@@ -114,12 +91,8 @@ class SANN(torch.nn.Module):
         # x_1_tup = tuple(self.in_linear_1[i](x[1][i]) for i in range(3))
         # # For each k: 2 to k (k=0,1,2)
         # x_2_tup = tuple(self.in_linear_2[i](x[2][i]) for i in range(3))
-        x_emb = {
-            i: tuple(
-                [getattr(self, f"in_linear_{i}")[j](x[i][j]) for j in range(3)]
-            )
-            for i in range(3)
-        }
+
+        x_emb = {i: tuple([x[j][i] for j in range(3)]) for i in range(3)}
 
         # For each layer in the network
         for layer in self.layers:
@@ -280,9 +253,9 @@ class SANNLayer(torch.nn.Module):
         x_2 = x_all[2]
 
         # k-simplex to k-simplex
-        x_k_to_0 = torch.mm(self.weight_0, x_0)
-        x_k_to_1 = torch.mm(self.weight_0, x_1)
-        x_k_to_2 = torch.mm(self.weight_0, x_2)
+        x_k_to_0 = torch.mm(x_0, self.weight_0)
+        x_k_to_1 = torch.mm(x_1, self.weight_1)
+        x_k_to_2 = torch.mm(x_2, self.weight_2)
 
         # TODO Check aggregation as list of ys
         # Need to check that this einsums are correct

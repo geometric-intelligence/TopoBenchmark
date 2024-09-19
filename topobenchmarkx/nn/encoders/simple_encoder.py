@@ -14,7 +14,7 @@ class SANNCellEncoder(AbstractFeatureEncoder):
 
     Parameters
     ----------
-    in_channels : list[int]
+    in_channels : list[list[int]]
         Input dimensions for the features.
     out_channels : list[int]
         Output dimensions for the features.
@@ -22,6 +22,8 @@ class SANNCellEncoder(AbstractFeatureEncoder):
         Dropout for the BaseEncoders (default: 0).
     selected_dimensions : list[int], optional
         List of indexes to apply the BaseEncoders to (default: None).
+    selected_hops : list[int], optional
+        List of indexes to apply the BaseEncoders to in terms of hops (default: None).
     **kwargs : dict, optional
         Additional keyword arguments.
     """
@@ -32,6 +34,7 @@ class SANNCellEncoder(AbstractFeatureEncoder):
         out_channels,
         proj_dropout=0,
         selected_dimensions=None,
+        selected_hops=None,
         **kwargs,
     ):
         super().__init__()
@@ -45,16 +48,24 @@ class SANNCellEncoder(AbstractFeatureEncoder):
             )  # and len(selected_dimensions) <= len(self.in_channels))
             else range(len(self.in_channels))
         )
+        self.hops = (
+            selected_hops
+            if (
+                selected_hops is not None
+            )  # and len(selected_dimensions) <= len(self.in_channels))
+            else range(len(self.in_channels[0]))
+        )
         for i in self.dimensions:
-            setattr(
-                self,
-                f"encoder_{i}",
-                SimpleEncoder(
-                    self.in_channels[i],
-                    self.out_channels,
-                    dropout=proj_dropout,
-                ),
-            )
+            for j in self.hops:
+                setattr(
+                    self,
+                    f"encoder_{i}_{j}",
+                    SimpleEncoder(
+                        self.in_channels[i][j],
+                        self.out_channels,
+                        dropout=proj_dropout,
+                    ),
+                )
 
     def __repr__(self):
         return f"{self.__class__.__name__}(in_channels={self.in_channels}, out_channels={self.out_channels}, dimensions={self.dimensions})"
@@ -76,7 +87,11 @@ class SANNCellEncoder(AbstractFeatureEncoder):
         torch_geometric.data.Data
             Output data object with updated x_{i} features.
         """
-
+        for i in self.dimensions:
+            for j in self.hops:
+                data[f"x{i}_{j}"] = getattr(self, f"encoder_{i}_{j}")(
+                    data[f"x{i}_{j}"]
+                )
         return data
 
 
@@ -96,7 +111,6 @@ class SimpleEncoder(torch.nn.Module):
     def __init__(self, in_channels, out_channels, dropout=0):
         super().__init__()
         self.linear1 = torch.nn.Linear(in_channels, out_channels)
-        self.relu = torch.nn.ReLU()
 
     def __repr__(self):
         return f"{self.__class__.__name__}(in_channels={self.linear1.in_features}, out_channels={self.linear1.out_features})"
@@ -117,27 +131,4 @@ class SimpleEncoder(torch.nn.Module):
             Output tensor of shape [N, out_channels].
         """
         x = self.linear1(x)
-        x = self.relu(x)
         return x
-
-        # self.in_linear_0 = torch.nn.ModuleList(
-        #     torch.nn.Linear(dim_1, dim_2) for i in range(3)
-        # )
-
-        # # k-simplex to 1-simplex (k=0,1,2)
-        # self.in_linear_1 = torch.nn.ModuleList(
-        #     [
-        #         torch.nn.Linear(6, dim_2),
-        #         torch.nn.Linear(12, dim_2),
-        #         torch.nn.Linear(9, dim_2),
-        #     ]
-        # )
-
-        # # k-simplex to 2-simplex (k=0,1,2)
-        # self.in_linear_2 = torch.nn.ModuleList(
-        #     [
-        #         torch.nn.Linear(18, dim_2),
-        #         torch.nn.Linear(39, dim_2),
-        #         torch.nn.Linear(30, dim_2),
-        #     ]
-        # )

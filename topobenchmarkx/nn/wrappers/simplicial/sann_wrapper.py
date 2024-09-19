@@ -37,12 +37,16 @@ class SANNWrapper(AbstractWrapper):
         dict
             Dictionary containing the model output.
         """
+        # Maximum dimension is a 2-simplex
+        max_simplex_dim = 2
         # Prepare the input data for the backbone
         # by aggregating the data in a dictionary
+        # (source_simplex_dim, (target_simplex_dim, torch.Tensor with embeddings))
         x_all = dict()
-        for i in range(3):
+        for i in range(max_simplex_dim + 1):
+            # (target_simplex_dim, torch.Tensor with embeddings)
             x_tmp = dict()
-            for j in range(3):
+            for j in range(max_simplex_dim + 1):
                 x_tmp[j] = batch[f"x{i}_{j}"]
             x_all[i] = x_tmp
 

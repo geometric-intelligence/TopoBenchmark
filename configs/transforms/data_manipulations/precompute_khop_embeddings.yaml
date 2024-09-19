@@ -1,0 +1,5 @@
+_target_: topobenchmarkx.transforms.data_transform.DataTransform
+transform_name: "PrecomputeKhopFeatures"
+transform_type: "data manipulation"
+max_hop: 2
+

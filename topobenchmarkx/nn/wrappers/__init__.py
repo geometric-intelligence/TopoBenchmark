@@ -7,6 +7,7 @@ from topobenchmarkx.nn.wrappers.cell import (
     CCXNWrapper,
     CWNWrapper,
 )
+from topobenchmarkx.nn.wrappers.combinatorial import TuneWrapper
 from topobenchmarkx.nn.wrappers.graph import GNNWrapper
 from topobenchmarkx.nn.wrappers.hypergraph import HypergraphWrapper
 from topobenchmarkx.nn.wrappers.simplicial import (
@@ -35,6 +36,7 @@ __all__ = [
     "CCCNWrapper",
     "CWNWrapper",
     "CCXNWrapper",
+    "TuneWrapper",
     # "OtherWrapper1",
     # "OtherWrapper2",
     # ... add other readout classes here

@@ -2,7 +2,7 @@ _target_: topobenchmarkx.model.TBXModel
 
 model_name: tune
 model_domain: simplicial
-tune_gnn: GCN
+tune_gnn: IdentityGIN
 
 feature_encoder:
   _target_: topobenchmarkx.nn.encoders.${model.feature_encoder.encoder_name}
@@ -18,37 +18,29 @@ feature_encoder:
 backbone:
   _target_: topobenchmarkx.nn.backbones.combinatorial.gccxn.TopoTune
   GNN:
-    _target_: torch_geometric.nn.models.${model.tune_gnn}
+    # _target_: torch_geometric.nn.models.${model.tune_gnn}
+    _target_: topobenchmarkx.nn.backbones.graph.${model.tune_gnn}
     in_channels: ${model.feature_encoder.out_channels}
     out_channels: ${model.feature_encoder.out_channels}
     hidden_channels: ${model.feature_encoder.out_channels}
     num_layers: 2
     dropout: 0.0
     #heads: 4
+    #act: torch.nn.Identity()
     norm: BatchNorm
   routes:
-    - - [0, 0]
-      - up
-    - - [1, 0]
-      - incidence
     - - [1, 1]
-      - up
-    - - [1, 1]
-      - down
+      - adjacency
+    - - [0, 1]
+      - cbdry
     - - [2, 1]
-      - incidence
-  neighborhoods:
-    - up
-    - incidence
-    - up
-    - down
-    - incidence
+      - bdry
   layers: 2
   use_edge_attr: false
   activation: relu
 
 backbone_wrapper:
-  _target_: topobenchmarkx.nn.wrappers.cell.TuneWrapper
+  _target_: topobenchmarkx.nn.wrappers.combinatorial.TuneWrapper
   _partial_: true
   wrapper_name: TuneWrapper
   out_channels: ${model.feature_encoder.out_channels}

@@ -19,8 +19,6 @@ class TopoTune(torch.nn.Module):
         The GNN class to use. ex: GAT, GCN.
     routes : list of tuples
         The routes to use. Combination of src_rank, dst_rank. ex: [[0, 0], [1, 0], [1, 1], [1, 1], [2, 1]].
-    neighborhoods : list of strings
-        The neighborhoods to use. 'up', 'down', 'boundary'.
     layers : int
         The number of layers to use. Each layer contains one GNN.
     use_edge_attr : bool
@@ -33,7 +31,6 @@ class TopoTune(torch.nn.Module):
         self,
         GNN,
         routes,
-        neighborhoods,
         layers,
         use_edge_attr,
         activation,
@@ -136,12 +133,12 @@ class TopoTune(torch.nn.Module):
         batch_route = Data(
             x=getattr(params, f"x_{src_rank}"),  # params[src_rank].x,
             edge_index=getattr(
-                params, f"{nbhd}_laplacian_{src_rank}"
+                params, f"{nbhd}_{src_rank}"
             ).indices(),  # params[src_rank][nbhd + "_index"],
-            edge_weight=getattr(params, f"{nbhd}_laplacian_{src_rank}")
+            edge_weight=getattr(params, f"{nbhd}_{src_rank}")
             .values()
             .squeeze(),  # params[src_rank]["kwargs"][nbhd + "_attr"].squeeze(),
-            edge_attr=getattr(params, f"{nbhd}_laplacian_{src_rank}")
+            edge_attr=getattr(params, f"{nbhd}_{src_rank}")
             .values()
             .squeeze(),  # params[src_rank]["kwargs"][nbhd + "_attr"].squeeze(),
             requires_grad=True,
@@ -307,73 +304,6 @@ class TopoTune(torch.nn.Module):
         }
         return membership
 
-    # def get_membership(self, batch):
-    #     """Get the membership of the graphs.
-
-    #     Parameters
-    #     ----------
-    #     batch : Complex or ComplexBatch(Complex)
-    #         The input data.
-
-    #     Returns
-    #     -------
-    #     membership : dict
-    #         The batch membership of the graphs per rank.
-    #     """
-    #     node_membership = batch.cochains[0].batch.unsqueeze(1).squeeze()
-    #     edge_membership = batch.cochains[1].batch.unsqueeze(1).squeeze()
-    #     face_membership = batch.cochains[2].batch.unsqueeze(1).squeeze()
-    #     membership = {0: node_membership, 1: edge_membership, 2: face_membership}
-    #     return membership
-
-    def correct_no_face_graphs(self, membership, x_out_per_rank_2):
-        """Correct the membership and x_out_per_rank_2 for graphs without faces.
-
-        This is necessary to be able to sum 2-to-1 outputs, with, for instance, 1-1 outputs.
-
-        Parameters
-        ----------
-        membership : dict
-            The membership of the graphs.
-        x_out_per_rank_2 : torch.tensor
-            The output of the model on faces.
-
-        Returns
-        -------
-        dict
-            The corrected membership.
-        torch.tensor
-            The corrected output of the model.
-        """
-        num_graphs = torch.unique(membership[0]).size(0)
-        face_membership = membership[2]
-        graphs_with_faces = torch.unique(face_membership)
-        graphs_wo_faces = list(
-            set(range(num_graphs)) - set(graphs_with_faces.tolist())
-        )
-
-        membership_corrected = membership
-        x_out_per_rank_2_corrected = x_out_per_rank_2
-        if graphs_wo_faces:
-            fake_faces = torch.zeros(
-                len(graphs_wo_faces), self.hidden_channels
-            ).to(x_out_per_rank_2.device)
-            x_out_per_rank_2_corrected = torch.cat(
-                [x_out_per_rank_2, fake_faces], dim=0
-            )
-            face_membership_corrected = torch.cat(
-                [
-                    face_membership,
-                    torch.tensor(
-                        graphs_wo_faces, device=face_membership.device
-                    ),
-                ],
-                dim=0,
-            )
-            membership_corrected[2] = face_membership_corrected
-
-        return membership_corrected, x_out_per_rank_2_corrected
-
     def readout(self, x):
         """Readout function for the model.
 
@@ -459,26 +389,11 @@ class TopoTune(torch.nn.Module):
                     batch, f"x_{rank}", x_out_per_rank[rank]
                 )  # params[rank].x = x_out_per_rank[rank]
 
-        # if 2 in x_out_per_rank:
-        #     membership, x_out_per_rank[2] = self.correct_no_face_graphs(
-        #         membership, x_out_per_rank[2]
-        #     )
-        # else:
-        if 2 not in x_out_per_rank:
-            x_out_per_rank[2] = batch.x_2
+        for rank in range(self.max_rank + 1):
+            if rank not in x_out_per_rank:
+                x_out_per_rank[rank] = getattr(batch, f"x_{rank}")
 
         return x_out_per_rank
-        # x_pooled = {}
-        # for rank, lin1 in zip(x_out_per_rank, self.lin1s):
-        #     x_pooled[rank] = act(lin1(
-        #         global_mean_pool(x_out_per_rank[rank], membership[rank])
-        #         ))
-        # x = torch.stack(tuple(x_pooled.values()), dim=0)
-        # x = self.readout(x)
-        # x = self.lin2(x)
-        # x = act(x)
-        # x = self.lin3(x)
-        # return x
 
 
 def interrank_boundary_index(x_src, boundary_index, n_dst_nodes):
@@ -525,8 +440,6 @@ def interrank_boundary_index(x_src, boundary_index, n_dst_nodes):
     edge_index[1, :] = adjusted_edge_ids
 
     edge_attr = x_src[edge_ids].squeeze()
-    # edge_attr = edge_attr.repeat_interleave(2, dim=0)
-    # edge_attr = torch.cat([edge_attr_directed, edge_attr_directed], dim=0)
 
     return edge_index, edge_attr
 

@@ -18,9 +18,13 @@ class CCCN(nn.Module):
         Dropout rate (default: 0).
     last_act : bool, optional
         If True, the last activation function is applied (default: False).
+    **kwargs : dict, optional
+        Additional keyword arguments.
     """
 
-    def __init__(self, in_channels, n_layers=2, dropout=0.0, last_act=False):
+    def __init__(
+        self, in_channels, n_layers=2, dropout=0.0, last_act=False, **kwargs
+    ):
         super().__init__()
         self.d = dropout
         self.convs = nn.ModuleList()

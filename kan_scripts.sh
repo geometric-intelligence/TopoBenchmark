@@ -1,55 +1,10 @@
 python -m topobenchmarkx \
-    dataset=graph/MUTAG \
+    dataset=graph/cocitation_cora \
     model=cell/cccn \
     model.feature_encoder.out_channels=8,16,32,64,128 \
     optimizer.parameters.lr=0.001 \
     model.backbone.n_layers=1,2,4 \
     model.feature_encoder.proj_dropout=0.25 \
-    dataset.dataloader_params.batch_size=32 \
-    dataset.split_params.data_seed=1,3,5,7,9 \
-    model.readout.readout_name=PropagateSignalDown \
-    logger.wandb.project=KAN \
-    trainer.max_epochs=1000 \
-    trainer.min_epochs=50 \
-    trainer.devices=\[1\] \
-    trainer.check_val_every_n_epoch=1 \
-    callbacks.early_stopping.patience=50 \
-    tags="[FirstExperiments]" \
-    --multirun &
-
-python -m topobenchmarkx \
-    dataset=graph/MUTAG \
-    model=cell/kan_cccn \
-    model.feature_encoder.out_channels=8,16,32 \
-    model.kan_params.grid_size=3,4,5 \
-    model.kan_params.spline_order=1,2 \
-    model.feature_encoder.encoder_name=KANAllCellFeatureEncoder \
-    optimizer.parameters.lr=0.001 \
-    model.backbone.n_layers=1,2,4 \
-    model.feature_encoder.proj_dropout=0.25 \
-    dataset.dataloader_params.batch_size=32 \
-    dataset.split_params.data_seed=1,3,5,7,9 \
-    model.readout.readout_name=PropagateSignalDown \
-    logger.wandb.project=KAN \
-    trainer.max_epochs=1000 \
-    trainer.min_epochs=50 \
-    trainer.devices=\[2\] \
-    trainer.check_val_every_n_epoch=1 \
-    callbacks.early_stopping.patience=50 \
-    tags="[FirstExperiments]" \
-    --multirun &
-
-python -m topobenchmarkx \
-    dataset=graph/MUTAG \
-    model=cell/kan_cccn \
-    model.feature_encoder.out_channels=8,16,32 \
-    model.kan_params.grid_size=3,4,5 \
-    model.kan_params.spline_order=3,4 \
-    model.feature_encoder.encoder_name=KANAllCellFeatureEncoder \
-    optimizer.parameters.lr=0.001 \
-    model.backbone.n_layers=1,2,4 \
-    model.feature_encoder.proj_dropout=0.25 \
-    dataset.dataloader_params.batch_size=32 \
     dataset.split_params.data_seed=1,3,5,7,9 \
     model.readout.readout_name=PropagateSignalDown \
     logger.wandb.project=KAN \
@@ -62,7 +17,49 @@ python -m topobenchmarkx \
     --multirun &
 
 python -m topobenchmarkx \
-    dataset=graph/MUTAG \
+    dataset=graph/cocitation_cora \
+    model=cell/kan_cccn \
+    model.feature_encoder.out_channels=8,16,32 \
+    model.kan_params.grid_size=3,4,5 \
+    model.kan_params.spline_order=1,2 \
+    model.feature_encoder.encoder_name=KANAllCellFeatureEncoder \
+    optimizer.parameters.lr=0.001 \
+    model.backbone.n_layers=1,2,4 \
+    model.feature_encoder.proj_dropout=0.25 \
+    dataset.split_params.data_seed=1,3,5,7,9 \
+    model.readout.readout_name=PropagateSignalDown \
+    logger.wandb.project=KAN \
+    trainer.max_epochs=1000 \
+    trainer.min_epochs=50 \
+    trainer.devices=\[2\] \
+    trainer.check_val_every_n_epoch=1 \
+    callbacks.early_stopping.patience=50 \
+    tags="[FirstExperiments]" \
+    --multirun &
+
+python -m topobenchmarkx \
+    dataset=graph/cocitation_cora \
+    model=cell/kan_cccn \
+    model.feature_encoder.out_channels=8,16,32 \
+    model.kan_params.grid_size=3,4,5 \
+    model.kan_params.spline_order=3,4 \
+    model.feature_encoder.encoder_name=KANAllCellFeatureEncoder \
+    optimizer.parameters.lr=0.001 \
+    model.backbone.n_layers=1,2,4 \
+    model.feature_encoder.proj_dropout=0.25 \
+    dataset.split_params.data_seed=1,3,5,7,9 \
+    model.readout.readout_name=PropagateSignalDown \
+    logger.wandb.project=KAN \
+    trainer.max_epochs=1000 \
+    trainer.min_epochs=50 \
+    trainer.devices=\[1\] \
+    trainer.check_val_every_n_epoch=1 \
+    callbacks.early_stopping.patience=50 \
+    tags="[FirstExperiments]" \
+    --multirun &
+
+python -m topobenchmarkx \
+    dataset=graph/cocitation_cora \
     model=cell/kan_cccn \
     model.feature_encoder.out_channels=8,16,32 \
     model.kan_params.grid_size=3,4,5 \
@@ -71,7 +68,6 @@ python -m topobenchmarkx \
     optimizer.parameters.lr=0.001 \
     model.backbone.n_layers=1,2,4 \
     model.feature_encoder.proj_dropout=0.25 \
-    dataset.dataloader_params.batch_size=32 \
     dataset.split_params.data_seed=1,3,5,7,9 \
     model.readout.readout_name=PropagateSignalDown \
     logger.wandb.project=KAN \
@@ -84,7 +80,7 @@ python -m topobenchmarkx \
     --multirun &
 
 python -m topobenchmarkx \
-    dataset=graph/MUTAG \
+    dataset=graph/cocitation_cora \
     model=cell/kan_cccn \
     model.feature_encoder.out_channels=8,16,32 \
     model.kan_params.grid_size=3,4,5 \
@@ -93,7 +89,6 @@ python -m topobenchmarkx \
     optimizer.parameters.lr=0.001 \
     model.backbone.n_layers=1,2,4 \
     model.feature_encoder.proj_dropout=0.25 \
-    dataset.dataloader_params.batch_size=32 \
     dataset.split_params.data_seed=1,3,5,7,9 \
     model.readout.readout_name=PropagateSignalDown \
     logger.wandb.project=KAN \
@@ -106,7 +101,7 @@ python -m topobenchmarkx \
     --multirun &
 
 python -m topobenchmarkx \
-    dataset=graph/MUTAG \
+    dataset=graph/cocitation_cora \
     model=cell/kan_cccn \
     model.feature_encoder.out_channels=8,16,32,64,128 \
     model.kan_params.grid_size=3,4,5 \
@@ -116,7 +111,6 @@ python -m topobenchmarkx \
     optimizer.parameters.lr=0.001 \
     model.backbone.n_layers=1,2,4 \
     model.feature_encoder.proj_dropout=0.25 \
-    dataset.dataloader_params.batch_size=32 \
     dataset.split_params.data_seed=1,3,5,7,9 \
     model.readout.readout_name=PropagateSignalDown \
     logger.wandb.project=KAN \

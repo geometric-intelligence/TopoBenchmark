@@ -1,0 +1,10 @@
+grid_size: 5
+spline_order: 3
+scale_noise: 0.1
+scale_base_mu: 0.0
+scale_base_sigma: 1.0
+base_activation: "silu"
+grid_eps: 0.02
+grid_range:  
+  - -1.0
+  - 1.0

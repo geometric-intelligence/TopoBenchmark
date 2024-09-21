@@ -188,4 +188,4 @@ wandb/
 .test_tmp/
 
 # KAN
-model/
+/model/

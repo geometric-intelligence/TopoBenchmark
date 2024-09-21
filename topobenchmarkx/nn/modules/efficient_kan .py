@@ -6,7 +6,7 @@ import torch
 import torch.nn.functional as F
 
 
-class KANLinear(torch.nn.Module):
+class EfficientKANLinear(torch.nn.Module):
     """Efficient KAN linear layer.
 
     This is a PyTorch implementation of the Efficient KAN linear layer as described in
@@ -357,7 +357,7 @@ class KANLinear(torch.nn.Module):
         )
 
 
-class KAN(torch.nn.Module):
+class EfficientKAN(torch.nn.Module):
     """Efficient KAN model.
 
     Parameters
@@ -406,7 +406,7 @@ class KAN(torch.nn.Module):
             layers_hidden, layers_hidden[1:], strict=False
         ):
             self.layers.append(
-                KANLinear(
+                EfficientKANLinear(
                     in_features,
                     out_features,
                     grid_size=grid_size,

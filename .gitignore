@@ -186,3 +186,6 @@ wandb/
 
 # test temporary
 .test_tmp/
+
+# KAN
+model/

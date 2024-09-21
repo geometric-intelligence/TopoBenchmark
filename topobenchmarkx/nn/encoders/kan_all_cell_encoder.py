@@ -4,7 +4,7 @@ import torch
 import torch_geometric
 
 from topobenchmarkx.nn.encoders.base import AbstractFeatureEncoder
-from topobenchmarkx.nn.kan_modules import KAN
+from topobenchmarkx.nn.modules import KAN
 
 
 class KANAllCellFeatureEncoder(AbstractFeatureEncoder):
@@ -23,6 +23,8 @@ class KANAllCellFeatureEncoder(AbstractFeatureEncoder):
         Output dimensions for the features.
     selected_dimensions : list[int], optional
         List of indexes to apply the BaseEncoders to (default: None).
+    kan_params : dict, optional
+        Additional keyword arguments for the BaseEncoder (default: None).
     **kwargs : dict, optional
         Additional keyword arguments.
     """
@@ -32,6 +34,7 @@ class KANAllCellFeatureEncoder(AbstractFeatureEncoder):
         in_channels,
         out_channels,
         selected_dimensions=None,
+        kan_params={},  # noqa: B006
         **kwargs,
     ):
         super().__init__()
@@ -52,6 +55,7 @@ class KANAllCellFeatureEncoder(AbstractFeatureEncoder):
                 KANBaseEncoder(
                     self.in_channels[i],
                     self.out_channels,
+                    kan_params=kan_params,
                 ),
             )
 
@@ -100,22 +104,8 @@ class KANBaseEncoder(torch.nn.Module):
         Dimensions of output features.
     hidden_layers : list[int], optional
         List of hidden layer dimensions (default: None).
-    grid_size : int, optional
-        Number of grid points (default: 5).
-    spline_order : int, optional
-        Order of the spline interpolation (default: 3).
-    scale_noise : float, optional
-        Scale of the noise added to the features (default: 0.1).
-    scale_base : float, optional
-        Scale of the base function (default: 1.0).
-    scale_spline : float, optional
-        Scale of the spline function (default: 1.0).
-    base_activation : torch.nn.Module, optional
-        Activation function for the base function (default: torch.nn.SiLU).
-    grid_eps : float, optional
-        Epsilon for the grid (default: 0.02).
-    grid_range : tuple(float), optional
-        Range of the grid (default: (-1, 1)).
+    kan_params : dict, optional
+        Additional keyword arguments for the KAN layer (default: {}).
     **kwargs : dict, optional
         Additional keyword arguments.
     """
@@ -125,31 +115,15 @@ class KANBaseEncoder(torch.nn.Module):
         in_channels,
         out_channels,
         hidden_layers=None,
-        grid_size=5,
-        spline_order=3,
-        scale_noise=0.1,
-        scale_base=1.0,
-        scale_spline=1.0,
-        base_activation=torch.nn.SiLU,
-        grid_eps=0.02,
-        grid_range=(-1, 1),
+        kan_params={},  # noqa: B006
         **kwargs,
     ):
         super().__init__()
-        if hidden_layers is None:
-            hidden_layers = [in_channels, out_channels]
-        else:
-            hidden_layers = [in_channels, *hidden_layers, out_channels]
         self.KAN = KAN(
-            hidden_layers,
-            grid_size,
-            spline_order,
-            scale_noise,
-            scale_base,
-            scale_spline,
-            base_activation,
-            grid_eps,
-            grid_range,
+            in_channels=in_channels,
+            out_channels=out_channels,
+            hidden_layers=hidden_layers,
+            **kan_params,
         )
 
     # def __repr__(self):

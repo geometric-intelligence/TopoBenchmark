@@ -2,7 +2,7 @@ _target_: topobenchmarkx.model.TBXModel
 
 model_name: onetune
 model_domain: simplicial
-tune_gnn: IdentityGCN
+tune_gnn: GCN
 
 feature_encoder:
   _target_: topobenchmarkx.nn.encoders.${model.feature_encoder.encoder_name}

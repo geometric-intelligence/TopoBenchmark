@@ -4,8 +4,8 @@ python -m topobenchmarkx \
     model=simplicial/tune \
     model.feature_encoder.out_channels=128 \
     model.tune_gnn=GCN \
-    model.backbone.GNN._target_=torch_geometric.nn.models.GCN \
-    model.backbone.GNN.num_layers=1,2 \
+    model.backbone.GNN._target_=topobenchmarkx.nn.backbones.graph.IdentityGCN \
+    model.backbone.GNN.num_layers=1 \
     model.backbone.routes=\[\[\[0,0\],up_laplacian\],\[\[0,1\],coincidence\],\[\[1,0\],incidence\],\[\[1,1\],down_laplacian\],\[\[1,1\],up_laplacian\],\[\[1,2\],coincidence\],\[\[2,1\],incidence\],\[\[2,2\],down_laplacian\]\] \
     model.backbone.layers=3 \
     dataset.split_params.data_seed=1,3,5,7,9 \
@@ -27,9 +27,9 @@ python -m topobenchmarkx \
     dataset=graph/NCI1 \
     model=simplicial/tune \
     model.feature_encoder.out_channels=64 \
-    model.backbone.GNN.num_layers=1,2 \
+    model.backbone.GNN.num_layers=1 \
     model.tune_gnn=GCN \
-    model.backbone.GNN._target_=torch_geometric.nn.models.GCN \
+    model.backbone.GNN._target_=topobenchmarkx.nn.backbones.graph.IdentityGCN \
     model.backbone.routes=\[\[\[0,0\],up_laplacian\],\[\[0,1\],coincidence\],\[\[1,0\],incidence\],\[\[1,1\],down_laplacian\],\[\[1,1\],up_laplacian\],\[\[1,2\],coincidence\],\[\[2,1\],incidence\],\[\[2,2\],down_laplacian\]\] \
     model.backbone.layers=3 \
     model.feature_encoder.proj_dropout=0.5 \
@@ -51,9 +51,9 @@ python -m topobenchmarkx \
     dataset=graph/NCI109 \
     model=simplicial/tune \
     model.feature_encoder.out_channels=64 \
-    model.backbone.GNN.num_layers=1,2 \
+    model.backbone.GNN.num_layers=1 \
     model.tune_gnn=GCN \
-    model.backbone.GNN._target_=torch_geometric.nn.models.GCN \
+    model.backbone.GNN._target_=topobenchmarkx.nn.backbones.graph.IdentityGCN \
     model.backbone.routes=\[\[\[0,0\],up_laplacian\],\[\[0,1\],coincidence\],\[\[1,0\],incidence\],\[\[1,1\],down_laplacian\],\[\[1,1\],up_laplacian\],\[\[1,2\],coincidence\],\[\[2,1\],incidence\],\[\[2,2\],down_laplacian\]\] \
     model.backbone.layers=4 \
     model.readout.readout_name=NoReadOut \
@@ -75,8 +75,8 @@ python -m topobenchmarkx \
 python -m topobenchmarkx \
     model=simplicial/tune \
     model.tune_gnn=GCN \
-    model.backbone.GNN.num_layers=1,2 \
-    model.backbone.GNN._target_=torch_geometric.nn.models.GCN \
+    model.backbone.GNN.num_layers=1 \
+    model.backbone.GNN._target_=topobenchmarkx.nn.backbones.graph.IdentityGCN \
     model.backbone.routes=\[\[\[0,0\],up_laplacian\],\[\[0,1\],coincidence\],\[\[1,0\],incidence\],\[\[1,1\],down_laplacian\],\[\[1,1\],up_laplacian\],\[\[1,2\],coincidence\],\[\[2,1\],incidence\],\[\[2,2\],down_laplacian\]\] \
     dataset=graph/PROTEINS \
     optimizer.parameters.lr=0.01 \
@@ -100,8 +100,8 @@ python -m topobenchmarkx \
     model=simplicial/tune \
     dataset=graph/ZINC \
     model.tune_gnn=GCN \
-    model.backbone.GNN.num_layers=1,2 \
-    model.backbone.GNN._target_=torch_geometric.nn.models.GCN \
+    model.backbone.GNN.num_layers=1 \
+    model.backbone.GNN._target_=topobenchmarkx.nn.backbones.graph.IdentityGCN \
     model.backbone.routes=\[\[\[0,0\],up_laplacian\],\[\[0,1\],coincidence\],\[\[1,0\],incidence\],\[\[1,1\],down_laplacian\],\[\[1,1\],up_laplacian\],\[\[1,2\],coincidence\],\[\[2,1\],incidence\],\[\[2,2\],down_laplacian\]\] \
     optimizer.parameters.lr=0.001 \
     model.feature_encoder.out_channels=128 \
@@ -124,8 +124,8 @@ python -m topobenchmarkx \
 python -m topobenchmarkx \
     model=simplicial/tune \
     model.tune_gnn=GCN \
-    model.backbone.GNN.num_layers=1,2 \
-    model.backbone.GNN._target_=torch_geometric.nn.models.GCN \
+    model.backbone.GNN.num_layers=1 \
+    model.backbone.GNN._target_=topobenchmarkx.nn.backbones.graph.IdentityGCN \
     model.backbone.routes=\[\[\[0,0\],up_laplacian\],\[\[0,1\],coincidence\],\[\[1,0\],incidence\],\[\[1,1\],down_laplacian\],\[\[1,1\],up_laplacian\],\[\[1,2\],coincidence\],\[\[2,1\],incidence\],\[\[2,2\],down_laplacian\]\] \
     dataset=graph/cocitation_citeseer \
     optimizer.parameters.lr=0.01 \
@@ -147,8 +147,8 @@ python -m topobenchmarkx \
 python -m topobenchmarkx \
     model=simplicial/tune \
     model.tune_gnn=GCN \
-    model.backbone.GNN.num_layers=1,2 \
-    model.backbone.GNN._target_=torch_geometric.nn.models.GCN \
+    model.backbone.GNN.num_layers=1 \
+    model.backbone.GNN._target_=topobenchmarkx.nn.backbones.graph.IdentityGCN \
     model.backbone.routes=\[\[\[0,0\],up_laplacian\],\[\[0,1\],coincidence\],\[\[1,0\],incidence\],\[\[1,1\],down_laplacian\],\[\[1,1\],up_laplacian\],\[\[1,2\],coincidence\],\[\[2,1\],incidence\],\[\[2,2\],down_laplacian\]\] \
     dataset=graph/cocitation_cora \
     optimizer.parameters.lr=0.01 \

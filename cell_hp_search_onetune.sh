@@ -12,7 +12,7 @@ python -m topobenchmarkx \
     logger.wandb.project=TopoTune_oneCell \
     trainer.max_epochs=1000 \
     trainer.min_epochs=50 \
-    trainer.devices=\[1\] \
+    trainer.devices=\[0\] \
     trainer.check_val_every_n_epoch=1 \
     callbacks.early_stopping.patience=50 \
     tags="[FirstExperiments]" \
@@ -172,7 +172,7 @@ python -m topobenchmarkx \
     logger.wandb.project=TopoTune_oneCell \
     trainer.max_epochs=1000 \
     trainer.min_epochs=50 \
-    trainer.devices=\[1\] \
+    trainer.devices=\[0\] \
     trainer.check_val_every_n_epoch=1 \
     callbacks.early_stopping.patience=50 \
     tags="[FirstExperiments]" \

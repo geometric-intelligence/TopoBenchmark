@@ -178,22 +178,23 @@ class OneGraphTopoTune(torch.nn.Module):
                         f"Unsupported src_rank for 'cbdry' neighborhood: {src_rank}"
                     )
                 coincidence_indices = (
-                    getattr(params, f"incidence_{src_rank}")
+                    getattr(params, f"incidence_{src_rank + 1}")
                     .T.coalesce()
                     .indices()
                     .to(device)
+                    + adjustment
                 )
 
-                edge_indices.append(coincidence_indices + adjustment)
-                edge_attrs.append(
-                    getattr(params, f"incidence_{src_rank}")
-                    .T.coalesce()
-                    .values()
-                    .squeeze()
-                )
+                edge_indices.append(coincidence_indices)
+                # edge_attrs.append(
+                #     getattr(params, f"incidence_{src_rank}")
+                #     .T.coalesce()
+                #     .values()
+                #     .squeeze()
+                # )
 
         edge_index = torch.cat(edge_indices, dim=1)
-        edge_attr = torch.cat(edge_attrs, dim=0)
+        # edge_attr = torch.cat(edge_attrs, dim=0)
 
         batch_expanded = torch.cat(
             [membership[0], membership[1], membership[2]], dim=0
@@ -202,7 +203,7 @@ class OneGraphTopoTune(torch.nn.Module):
         return Data(
             x=x,
             edge_index=edge_index,
-            edge_attr=edge_attr,
+            # edge_attr=edge_attr,
             batch=batch_expanded,
         )
 
@@ -225,8 +226,6 @@ class OneGraphTopoTune(torch.nn.Module):
         torch.tensor
             The output of the GNN (updated features).
         """
-        if batch_route.x.shape[0] < 2:
-            return batch_route.x  # If there are 0 or 1 sample, do nothing
         out = self.graph_routes[layer_idx](
             batch_route.x,
             batch_route.edge_index,
@@ -313,6 +312,12 @@ class OneGraphTopoTune(torch.nn.Module):
         self.membership = self.generate_membership_vectors(
             batch
         )  # self.get_membership(batch)
+        if batch.x_2.shape[0] == 0:
+            x_out_per_rank = {}
+            x_out_per_rank[0] = batch.x_0
+            x_out_per_rank[1] = batch.x_1
+            x_out_per_rank[2] = batch.x_2
+            return x_out_per_rank  # If there are 0 or 1 sample, do nothing
 
         for layer_idx in range(self.layers):
             batch_route = self.all_nbhds_expand(batch, self.membership)

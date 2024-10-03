@@ -81,9 +81,6 @@ class SANN(torch.nn.Module):
 
         x_emb = dict()
 
-        # TODO: Make a ModuleList over the intial embeddings
-        # TODO Do this as a FeatureEncoder
-
         # The follwing line will mean the same as:
         # # For each k: 0 to k (k=0,1,2)
         # x_0_tup = tuple(self.in_linear_0[i](x[0][i]) for i in range(3))
@@ -92,7 +89,7 @@ class SANN(torch.nn.Module):
         # # For each k: 2 to k (k=0,1,2)
         # x_2_tup = tuple(self.in_linear_2[i](x[2][i]) for i in range(3))
 
-        x_emb = {i: tuple([x[j][i] for j in range(3)]) for i in range(3)}
+        x_emb = {i: tuple([x[i][j] for j in range(3)]) for i in range(3)}
 
         # For each layer in the network
         for layer in self.layers:
@@ -269,5 +266,4 @@ class SANNLayer(torch.nn.Module):
 
         if self.update_func is None:
             return y_0, y_1, y_2
-
         return self.update(y_0), self.update(y_1), self.update(y_2)

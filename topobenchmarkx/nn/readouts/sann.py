@@ -2,6 +2,7 @@
 
 import torch
 import torch_geometric
+from torch_scatter import scatter
 
 from topobenchmarkx.nn.readouts.base import AbstractZeroCellReadOut
 
@@ -35,7 +36,7 @@ class SANNReadout(AbstractZeroCellReadOut):
             torch.nn.Linear(hidden_dimensions_2, hidden_dimensions_2),
             torch.nn.ReLU(),
             torch.nn.Linear(hidden_dimensions_2, out_channels),
-            torch.nn.Sigmoid(),
+            torch.nn.Softmax(dim=0),
         )  # nn.Softmax(dim=0) for multi-class
 
         assert pooling_type in ["max", "sum", "mean"], "Invalid pooling_type"
@@ -60,14 +61,10 @@ class SANNReadout(AbstractZeroCellReadOut):
         """
         model_out = self.forward(model_out, batch)
         model_out["logits"] = self.compute_logits(
-            model_out["x"], batch["batch_0"]
+            model_out["x_all"], batch["batch_0"]
         )
 
         # Add a logit for the complement of the input
-        model_out["logits"] = torch.cat(
-            (1 - model_out["logits"], model_out["logits"])
-        ).unsqueeze(0)
-        # model_out["logits"] = torch.argmax(torch.cat((1-model_out['logits'], model_out['logits']))).unsqueeze(0)
         return model_out
 
     def compute_logits(self, x: torch.Tensor, batch: torch.Tensor):
@@ -105,37 +102,56 @@ class SANNReadout(AbstractZeroCellReadOut):
             Dictionary containing the updated model output.
         """
 
-        # From 0-simplex to all simplex embedding
-        xi_in0 = torch.cat(
-            (
-                torch.sum((model_out["x_0"][0]), 0),
-                torch.sum((model_out["x_0"][1]), 0),
-                torch.sum((model_out["x_0"][2]), 0),
-            ),
-            0,
-        )
+        x_all = []
+        # Source
+        for i in range(3):
+            # Target
+            x_i_all = []
+            for j in range(3):
+                # (dim_i_j, batch_size)
+                # print(i, j)
+                # print(model_out[f'x_{i}'][j].shape)
+                # print(model_out[f'batch_{i}'].shape)
+                x_i_j_batched = scatter(
+                    model_out[f"x_{i}"][j],
+                    batch[f"batch_{i}"],
+                    dim=0,
+                    reduce=self.pooling_type,
+                )
+                # print('Batch shape: ', batch[f'batch_{i}'].shape)
+                # print('Batch Max node: ', batch[f'batch_{i}'].max())
+                # print('Output scatter shape: ', x_i_j_batched.shape)
+                x_i_all.append(x_i_j_batched)
+            # (dim_i_0 + dim_i_1 + dim_i_2, batch_size)
+            x_i_all_cat = torch.cat(x_i_all, 1)
+            # assert x_i_all_cat.shape[0] == 32, f"Expected 32, got {x_i_all_cat.shape}"
+            x_all.append(x_i_all_cat)
 
-        # From 1-simplex to all simplex embedding
-        xi_in1 = torch.cat(
-            (
-                torch.sum((model_out["x_1"][0]), 0),
-                torch.sum((model_out["x_1"][1]), 0),
-                torch.sum((model_out["x_1"][2]), 0),
-            ),
-            0,
-        )
-
-        # From 2-simplex to all simplex embedding
-        xi_in2 = torch.cat(
-            (
-                torch.sum((model_out["x_2"][0]), 0),
-                torch.sum((model_out["x_2"][1]), 0),
-                torch.sum((model_out["x_2"][2]), 0),
-            ),
-            0,
-        )
-
-        # Concatenate the embeddings
-        x = torch.cat(((xi_in0), (xi_in1), (xi_in2)))
-        model_out["x"] = x
+        new_x_all = []
+        try:
+            x_all_cat = torch.cat(x_all, 1)
+        except RuntimeError:
+            last_size = -1
+            for i, i_complex in enumerate(x_all):
+                if i == 0:
+                    last_size = i_complex.shape[0]
+                    new_x_all.append(i_complex)
+                    continue
+                if i_complex.shape[0] < last_size:
+                    new_complex = torch.cat(
+                        (
+                            i_complex,
+                            torch.zeros(
+                                last_size - i_complex.shape[0],
+                                i_complex.shape[1],
+                            ),
+                        ),
+                        dim=0,
+                    )
+                    new_x_all.append(new_complex)
+                else:
+                    new_x_all.append(i_complex)
+        if len(new_x_all) > 0:
+            x_all_cat = torch.cat(new_x_all, 1)
+        model_out["x_all"] = x_all_cat
         return model_out

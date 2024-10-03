@@ -52,7 +52,13 @@ class SANNWrapper(AbstractWrapper):
 
         x_out = self.backbone(x_all)
 
-        model_out = {"labels": batch.y, "batch_0": batch.batch_0}
+        model_out = {
+            "labels": batch.y,
+            "batch_0": batch.batch_0,
+            "batch_1": batch.batch_1,
+            "batch_2": batch.batch_2,
+            "batch_3": batch.batch_3,
+        }
 
         model_out["x_0"] = x_out[0]
         model_out["x_1"] = x_out[1]

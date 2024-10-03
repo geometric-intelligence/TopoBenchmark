@@ -89,6 +89,9 @@ class SANNCellEncoder(AbstractFeatureEncoder):
         """
         for i in self.dimensions:
             for j in self.hops:
+                # x_0_0 == x_0
+                # x_0_1 = (dim(x_0)[0],  dim(x_0][1] * 2 + 2)
+                # x_3 = x_0_1 (n, f)
                 data[f"x{i}_{j}"] = getattr(self, f"encoder_{i}_{j}")(
                     data[f"x{i}_{j}"]
                 )

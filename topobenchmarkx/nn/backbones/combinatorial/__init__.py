@@ -1,9 +1,9 @@
 """Combinatorial backbones."""
 
-from .gccxn import TopoTune
-from .gccxn_onehasse import OneGraphTopoTune
+from .gccn import TopoTune
+from .gccn_onehasse import TopoTune_OneHasse
 
 __all__ = [
     "TopoTune",
-    "OneGraphTopoTune",
+    "TopoTune_OneHasse",
 ]

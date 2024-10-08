@@ -1,6 +1,6 @@
 _target_: topobenchmarkx.model.TBXModel
 
-model_name: onetune
+model_name: topotune_onehasse
 model_domain: cell
 tune_gnn: IdentityGCN
 
@@ -16,7 +16,7 @@ feature_encoder:
     - 2
 
 backbone:
-  _target_: topobenchmarkx.nn.backbones.combinatorial.gccxn_onehasse.TopoTune_OneHasse
+  _target_: topobenchmarkx.nn.backbones.combinatorial.gccn_onehasse.TopoTune_OneHasse
   GNN:
     _target_: torch_geometric.nn.models.${model.tune_gnn}
     # _target_: topobenchmarkx.nn.backbones.graph.${model.tune_gnn}

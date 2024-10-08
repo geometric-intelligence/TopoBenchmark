@@ -1,6 +1,6 @@
 _target_: topobenchmarkx.model.TBXModel
 
-model_name: tune
+model_name: topotune
 model_domain: simplicial
 tune_gnn: IdentityGIN
 
@@ -16,7 +16,7 @@ feature_encoder:
     - 2
 
 backbone:
-  _target_: topobenchmarkx.nn.backbones.combinatorial.gccxn.TopoTune
+  _target_: topobenchmarkx.nn.backbones.combinatorial.gccn.TopoTune
   GNN:
     _target_: torch_geometric.nn.models.${model.tune_gnn}
     # _target_: topobenchmarkx.nn.backbones.graph.${model.tune_gnn}

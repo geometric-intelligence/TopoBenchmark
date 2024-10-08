@@ -1,4 +1,4 @@
-"""Define the TopoTune class, a flexibly high-order GNN model."""
+"""Define the TopoTune class, which, given a choice of hyperparameters, instantiates a GCCN expecting a collection of strictly augmented Hasse graphs as input."""
 
 import copy
 
@@ -39,8 +39,6 @@ class TopoTune(torch.nn.Module):
         routes = OmegaConf.to_object(routes)
         self.routes = [[int(elem[0][0]), int(elem[0][1])] for elem in routes]
         self.neighborhoods = [elem[1] for elem in routes]
-        # self.routes = routes
-        # self.neighborhoods = neighborhoods
         self.layers = layers
         self.use_edge_attr = use_edge_attr
         self.max_rank = max([max(route) for route in self.routes])
@@ -59,13 +57,6 @@ class TopoTune(torch.nn.Module):
 
         self.hidden_channels = GNN.hidden_channels
         self.out_channels = GNN.out_channels
-        # self.rrwp_posenc = False
-
-        # self.lin1s = torch.nn.ModuleList()
-        # for _ in range(len((set(map(lambda x: x[1], routes))))):
-        #     self.lin1s.append(torch.nn.Linear(self.hidden_channels, final_hidden_multiplier * self.hidden_channels))
-        # self.lin2 = torch.nn.Linear(final_hidden_multiplier * self.hidden_channels, int(final_hidden_multiplier * self.hidden_channels / 2))
-        # self.lin3 = torch.nn.Linear(int(final_hidden_multiplier * self.hidden_channels / 2), self.out_channels)
 
     def get_nbhd_cache(self, params):
         """Cache the nbhd information into a dict for the complex at hand.
@@ -131,16 +122,12 @@ class TopoTune(torch.nn.Module):
             The expanded batch of intrarank Hasse graphs for this route.
         """
         batch_route = Data(
-            x=getattr(params, f"x_{src_rank}"),  # params[src_rank].x,
-            edge_index=getattr(
-                params, f"{nbhd}_{src_rank}"
-            ).indices(),  # params[src_rank][nbhd + "_index"],
+            x=getattr(params, f"x_{src_rank}"),
+            edge_index=getattr(params, f"{nbhd}_{src_rank}").indices(),
             edge_weight=getattr(params, f"{nbhd}_{src_rank}")
             .values()
-            .squeeze(),  # params[src_rank]["kwargs"][nbhd + "_attr"].squeeze(),
-            edge_attr=getattr(params, f"{nbhd}_{src_rank}")
-            .values()
-            .squeeze(),  # params[src_rank]["kwargs"][nbhd + "_attr"].squeeze(),
+            .squeeze(),
+            edge_attr=getattr(params, f"{nbhd}_{src_rank}").values().squeeze(),
             requires_grad=True,
         )
 
@@ -164,7 +151,7 @@ class TopoTune(torch.nn.Module):
             The output of the GNN (updated features).
         """
         if batch_route.x.shape[0] < 2:
-            return batch_route.x  # If there are 0 or 1 sample, do nothing
+            return batch_route.x
         out = self.graph_routes[layer_idx][route_index](
             batch_route.x,
             batch_route.edge_index,
@@ -199,15 +186,9 @@ class TopoTune(torch.nn.Module):
         src_batch = membership[src_rank]
         dst_batch = membership[dst_rank]
         edge_index, edge_attr = nbhd_cache
-        device = getattr(
-            params, f"x_{src_rank}"
-        ).device  # params[src_rank].x.device
-        feat_on_dst = torch.zeros_like(
-            getattr(params, f"x_{dst_rank}")
-        )  # torch.zeros_like(params[dst_rank].x)
-        x_in = torch.vstack(
-            [feat_on_dst, getattr(params, f"x_{src_rank}")]
-        )  # params[src_rank].x])
+        device = getattr(params, f"x_{src_rank}").device
+        feat_on_dst = torch.zeros_like(getattr(params, f"x_{dst_rank}"))
+        x_in = torch.vstack([feat_on_dst, getattr(params, f"x_{src_rank}")])
         batch_expanded = torch.cat([dst_batch, src_batch], dim=0)
 
         batch_route = Data(
@@ -244,7 +225,7 @@ class TopoTune(torch.nn.Module):
         expanded_out = self.graph_routes[layer_idx][route_index](
             batch_route.x,
             batch_route.edge_index,
-            #    batch_route.edge_weight, # TODO Mathilde : some gnns take edge_weight (1d) and some take edge_attr.
+            #    batch_route.edge_weight, # TODO : some gnns take edge_weight (1d) and some take edge_attr.
             #    batch_route.edge_attr,
         )
         out = expanded_out[:n_dst_cells]
@@ -340,13 +321,10 @@ class TopoTune(torch.nn.Module):
         dict
             The output hidden states of the model per rank.
         """
-        # params = batch.get_all_cochain_params(max_dim=self.max_rank, include_down_features=True)
         act = get_activation(self.activation)
 
         nbhd_cache = self.get_nbhd_cache(batch)
-        membership = self.generate_membership_vectors(
-            batch
-        )  # self.get_membership(batch)
+        membership = self.generate_membership_vectors(batch)
 
         x_out_per_route = {}
         for layer_idx in range(self.layers):
@@ -372,9 +350,7 @@ class TopoTune(torch.nn.Module):
                         batch_route,
                         layer_idx,
                         route_index,
-                        getattr(batch, f"x_{dst_rank}").shape[
-                            0
-                        ],  # params[dst_rank].x.shape[0]
+                        getattr(batch, f"x_{dst_rank}").shape[0],
                     )
 
                     x_out_per_route[route_index] = x_out
@@ -385,9 +361,7 @@ class TopoTune(torch.nn.Module):
             # update and replace the features for next layer
             for rank in x_out_per_rank:
                 x_out_per_rank[rank] = act(x_out_per_rank[rank])
-                setattr(
-                    batch, f"x_{rank}", x_out_per_rank[rank]
-                )  # params[rank].x = x_out_per_rank[rank]
+                setattr(batch, f"x_{rank}", x_out_per_rank[rank])
 
         for rank in range(self.max_rank + 1):
             if rank not in x_out_per_rank:
@@ -416,9 +390,9 @@ def interrank_boundary_index(x_src, boundary_index, n_dst_nodes):
 
     Returns
     -------
-    list of lists
+    edge_index : list of lists
         The edge_index[0][i] and edge_index[1][i] are the two nodes of edge i.
-    tensor
+    edge_attr : tensor
         Edge features are given by feature of bounding node represnting an edge. Shape [n_edges, n_features].
     """
     node_ids = (

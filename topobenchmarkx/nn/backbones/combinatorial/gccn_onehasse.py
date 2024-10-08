@@ -1,4 +1,4 @@
-"""Define the TopoTune class, a flexibly high-order GNN model."""
+"""Define the TopoTune class, which, given a choice of hyperparameters, instantiates a GCCN expecting a single Hasse graph as input."""
 
 import copy
 
@@ -12,7 +12,8 @@ class TopoTune_OneHasse(torch.nn.Module):
     """Tunes a GNN model using higher-order relations.
 
     This class takes a GNN and its kwargs as inputs, and tunes it with specified additional relations.
-    Unlike the case of
+    Unlike the case of TopoTune, this class expects a single Hasse graph as input, where all
+    higher-order neighborhoods are represented as a single adjacency matrix.
 
     Parameters
     ----------
@@ -309,9 +310,7 @@ class TopoTune_OneHasse(torch.nn.Module):
         # params = batch.get_all_cochain_params(max_dim=self.max_rank, include_down_features=True)
         act = get_activation(self.activation)
 
-        self.membership = self.generate_membership_vectors(
-            batch
-        )  # self.get_membership(batch)
+        self.membership = self.generate_membership_vectors(batch)
         if batch.x_2.shape[0] == 0:
             x_out_per_rank = {}
             x_out_per_rank[0] = batch.x_0

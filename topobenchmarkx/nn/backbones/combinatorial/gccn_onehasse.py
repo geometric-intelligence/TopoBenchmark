@@ -307,7 +307,6 @@ class TopoTune_OneHasse(torch.nn.Module):
         dict
             The output hidden states of the model per rank.
         """
-        # params = batch.get_all_cochain_params(max_dim=self.max_rank, include_down_features=True)
         act = get_activation(self.activation)
 
         self.membership = self.generate_membership_vectors(batch)
@@ -316,7 +315,7 @@ class TopoTune_OneHasse(torch.nn.Module):
             x_out_per_rank[0] = batch.x_0
             x_out_per_rank[1] = batch.x_1
             x_out_per_rank[2] = batch.x_2
-            return x_out_per_rank  # If there are 0 or 1 sample, do nothing
+            return x_out_per_rank
 
         for layer_idx in range(self.layers):
             batch_route = self.all_nbhds_expand(batch, self.membership)

@@ -1,8 +1,8 @@
 _target_: topobenchmarkx.model.TBXModel
 
-model_name: onetune
-model_domain: simplicial
-tune_gnn: GCN
+model_name: tune
+model_domain: cell
+tune_gnn: IdentityGIN
 
 feature_encoder:
   _target_: topobenchmarkx.nn.encoders.${model.feature_encoder.encoder_name}
@@ -16,7 +16,7 @@ feature_encoder:
     - 2
 
 backbone:
-  _target_: topobenchmarkx.nn.backbones.combinatorial.oneg_gccxn.OneGraphTopoTune
+  _target_: topobenchmarkx.nn.backbones.combinatorial.gccxn.TopoTune
   GNN:
     _target_: torch_geometric.nn.models.${model.tune_gnn}
     # _target_: topobenchmarkx.nn.backbones.graph.${model.tune_gnn}
@@ -25,6 +25,8 @@ backbone:
     hidden_channels: ${model.feature_encoder.out_channels}
     num_layers: 2
     dropout: 0.0
+    #heads: 4
+    #act: torch.nn.Identity()
     norm: BatchNorm
   routes:
     - - [1, 1]

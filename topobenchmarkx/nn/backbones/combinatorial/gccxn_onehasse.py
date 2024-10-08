@@ -8,7 +8,7 @@ from omegaconf import OmegaConf
 from torch_geometric.data import Data
 
 
-class OneGraphTopoTune(torch.nn.Module):
+class TopoTune_OneHasse(torch.nn.Module):
     """Tunes a GNN model using higher-order relations.
 
     This class takes a GNN and its kwargs as inputs, and tunes it with specified additional relations.

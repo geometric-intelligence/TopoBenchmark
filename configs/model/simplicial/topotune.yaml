@@ -1,7 +1,7 @@
 _target_: topobenchmarkx.model.TBXModel
 
 model_name: tune
-model_domain: cell
+model_domain: simplicial
 tune_gnn: IdentityGIN
 
 feature_encoder:
@@ -18,8 +18,8 @@ feature_encoder:
 backbone:
   _target_: topobenchmarkx.nn.backbones.combinatorial.gccxn.TopoTune
   GNN:
-    # _target_: torch_geometric.nn.models.${model.tune_gnn}
-    _target_: topobenchmarkx.nn.backbones.graph.${model.tune_gnn}
+    _target_: torch_geometric.nn.models.${model.tune_gnn}
+    # _target_: topobenchmarkx.nn.backbones.graph.${model.tune_gnn}
     in_channels: ${model.feature_encoder.out_channels}
     out_channels: ${model.feature_encoder.out_channels}
     hidden_channels: ${model.feature_encoder.out_channels}

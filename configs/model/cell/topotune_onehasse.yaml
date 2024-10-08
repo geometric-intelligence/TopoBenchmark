@@ -16,7 +16,7 @@ feature_encoder:
     - 2
 
 backbone:
-  _target_: topobenchmarkx.nn.backbones.combinatorial.oneg_gccxn.OneGraphTopoTune
+  _target_: topobenchmarkx.nn.backbones.combinatorial.gccxn_onehasse.TopoTune_OneHasse
   GNN:
     _target_: torch_geometric.nn.models.${model.tune_gnn}
     # _target_: topobenchmarkx.nn.backbones.graph.${model.tune_gnn}

@@ -149,12 +149,54 @@ We list the neural networks trained and evaluated by `TopoBenchmarkX`, organized
 
 ## :bulb: TopoTune
 
-We include TopoTune, a comprehensive framework for easily defining and training new, general TDL models (GCCNs, pictured below) on any domain using any (graph) neural network ω as a backbone, as well as reproducing existing models. To train and test a GCCN, it is sufficient to specify the chocie of domain, neighborhood structure, and backbone model in the configuration. We provide scripts to reproduce a broad class of GCCNs in `scripts/topotune` and reproduce iterations of existing neural networks in `scripts/topotune/existing_models`, as previously reported.
+We include TopoTune, a comprehensive framework for easily defining and training new, general TDL models (GCCNs, pictured below) on any domain using any (graph) neural network ω as a backbone. In a GCCN, the input complex is represented as an ensemble of strictly augmented Hasse graphs, one per neighborhood of the complex. Each of these Hasse graphs is processed by a sub model ω, and the outputs are rank-wise aggregated in between layers.
 
 <p align="center">
   <img src="resources/gccn.jpg" width="700">
 </p>
 
+### Defining and training a GCCN
+To implement and train a GCCN, run the following command line with the desired choice of dataset, lifting domain (ex: `cell`, `simplicial`), PyTorch Geometric backbone model (ex: `GCN`, `GIN`, `GAT`, `GraphSAGE`) and parameters (ex. `model.backbone.GNN.num_layers=2`), neighborhood structure (routes), and other hyperparameters.
+
+
+```
+python -m topobenchmarkx \
+    dataset=graph/PROTEINS \
+    dataset.split_params.data_seed=1 \
+    model=cell/topotune\
+    model.tune_gnn=GCN \
+    model.backbone.GNN.num_layers=2 \
+    model.backbone.routes=\[\[\[0,0\],up_laplacian\],\[\[2,1\],boundary\]\] \
+    model.backbone.layers=4 \
+    model.feature_encoder.out_channels=32 \
+    model.feature_encoder.proj_dropout=0.3 \
+    model.readout.readout_name=PropagateSignalDown \
+    logger.wandb.project=TopoTune_cell \
+    trainer.max_epochs=1000 \
+    callbacks.early_stopping.patience=50 \
+```
+
+To use a single augmented Hasse graph expansion, use `model={domain}}/topotune_onehasse` instead of `model={domain}}/topotune`.
+
+To specify a set of neighborhoods (routes) on the complex, use a list of neighborhoods each specified as `\[\[{source_rank}, {destination_rank}\], {neighborhood}\]`. Currently, the following options for `{neighborhood}` are supported:
+- `up_laplacian`, from rank $r$ to $r$
+- `down_laplacian`, from rank $r$ to $r$
+- `boundary`, from rank $r$ to $r-1$
+- `coboundary`, from rank $r$ to $r+1$
+- `adjacency`, from rank $r$ to $r$ (stand-in for `up_adjacency`, as `down_adjacency` not yet supported in TopoBenchmarkX)
+
+
+### Using backbone models from any package
+By default, backbone models are imported from `torch_geometric.nn.models`. To import and specify a backbone model from any other package, such as `torch.nn.Transformer` or `dgl.nn.GATConv`, it is sufficient to 1) make sure the package is installed and 2) specify in the command line:
+
+```
+model.tune_gnn = {backbone_model}
+model.backbone.GNN._target_={package}.{backbone_model}
+```
+
+### Reproducing experiments
+We provide scripts to reproduce experiments on a broad class of GCCNs in [`scripts/topotune`](scripts/topotune) and reproduce iterations of existing neural networks in [`scripts/topotune/existing_models`](scripts/topotune/existing_models), as previously reported.
+We invite users interested in running extensive sweeps on new GCCNs to replicate the `--multirun` flag in the scripts, which is a hydra shortcut for running every possible combination of the specified parameters in a single command.
 
 ## :rocket: Liftings
 

@@ -149,7 +149,7 @@ We list the neural networks trained and evaluated by `TopoBenchmarkX`, organized
 
 ## :bulb: TopoTune
 
-We include TopoTune, a comprehensive framework for easily defining and training new, general TDL models (GCCNs, pictured below) on any domain using any (graph) neural network ω as a backbone. In a GCCN, the input complex is represented as an ensemble of strictly augmented Hasse graphs, one per neighborhood of the complex. Each of these Hasse graphs is processed by a sub model ω, and the outputs are rank-wise aggregated in between layers.
+We include TopoTune, a comprehensive framework for easily defining and training new, general TDL models on any domain using any (graph) neural network ω as a backbone. The pre-print detailing this framework is [TopoTune: A Framework for Generalized Combinatorial Complex Neural Networks](https://arxiv.org/user/). In a GCCN (pictured below), the input complex is represented as an ensemble of strictly augmented Hasse graphs, one per neighborhood of the complex. Each of these Hasse graphs is processed by a sub model ω, and the outputs are rank-wise aggregated in between layers. 
 
 <p align="center">
   <img src="resources/gccn.jpg" width="700">
@@ -176,7 +176,7 @@ python -m topobenchmarkx \
     callbacks.early_stopping.patience=50 \
 ```
 
-To use a single augmented Hasse graph expansion, use `model={domain}}/topotune_onehasse` instead of `model={domain}}/topotune`.
+To use a single augmented Hasse graph expansion, use `model={domain}/topotune_onehasse` instead of `model={domain}/topotune`.
 
 To specify a set of neighborhoods (routes) on the complex, use a list of neighborhoods each specified as `\[\[{source_rank}, {destination_rank}\], {neighborhood}\]`. Currently, the following options for `{neighborhood}` are supported:
 - `up_laplacian`, from rank $r$ to $r$
@@ -195,8 +195,10 @@ model.backbone.GNN._target_={package}.{backbone_model}
 ```
 
 ### Reproducing experiments
-We provide scripts to reproduce experiments on a broad class of GCCNs in [`scripts/topotune`](scripts/topotune) and reproduce iterations of existing neural networks in [`scripts/topotune/existing_models`](scripts/topotune/existing_models), as previously reported.
-We invite users interested in running extensive sweeps on new GCCNs to replicate the `--multirun` flag in the scripts, which is a hydra shortcut for running every possible combination of the specified parameters in a single command.
+
+We provide scripts to reproduce experiments on a broad class of GCCNs in [`scripts/topotune`](scripts/topotune) and reproduce iterations of existing neural networks in [`scripts/topotune/existing_models`](scripts/topotune/existing_models), as previously reported in the [TopoTune paper](https://arxiv.org/abs/2402.02441).
+
+We invite users interested in running extensive sweeps on new GCCNs to replicate the `--multirun` flag in the scripts. This is a shortcut for running every possible combination of the specified parameters in a single command.
 
 ## :rocket: Liftings
 

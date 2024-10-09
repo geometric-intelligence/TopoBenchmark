@@ -43,7 +43,7 @@ Assess how your model compares against state-of-the-art topological neural netwo
   <img src="resources/workflow.jpg" width="700">
 </p>
 
-The main pipeline trains and evaluates a wide range of state-of-the-art TNNs and Graph Neural Networks (GNNs) (see <a href="#gear-neural-networks">:gear: Neural Networks</a>) on numerous and varied datasets and benchmark tasks (see <a href="#books-datasets">:books: Datasets</a> ). 
+The main pipeline trains and evaluates a wide range of state-of-the-art TNNs and Graph Neural Networks (GNNs) (see <a href="#gear-neural-networks">:gear: Neural Networks</a>) on numerous and varied datasets and benchmark tasks (see <a href="#books-datasets">:books: Datasets</a> ). Through TopoTune (see <a href="#bulb-topotune">:bulb: TopoTune</a>), the library provides easy access to training and testing an entire landscape of graph-based TNNs, new or existing, on any topological domain.
 
 Additionally, the library offers the ability to transform, i.e. _lift_, each dataset from one topological domain to another (see <a href="#rocket-liftings">:rocket: Liftings</a>), enabling for the first time an exhaustive inter-domain comparison of TNNs.
 
@@ -141,6 +141,20 @@ We list the neural networks trained and evaluated by `TopoBenchmarkX`, organized
 | EDGNN | [Equivariant Hypergraph Diffusion Neural Operators](https://arxiv.org/pdf/2207.06680) |
 | UniGNN | [UniGNN: a Unified Framework for Graph and Hypergraph Neural Networks](https://arxiv.org/pdf/2105.00956) |
 | UniGNN2 | [UniGNN: a Unified Framework for Graph and Hypergraph Neural Networks](https://arxiv.org/pdf/2105.00956) |
+
+### Combinatorial complexes
+| Model | Reference |
+| --- | --- |
+| GCCN | Generalized Combinatorial Complex Neural Networks |
+
+## :bulb: TopoTune
+
+We include TopoTune, a comprehensive framework for easily defining and training new, general TDL models (GCCNs, pictured below) on any domain using any (graph) neural network ω as a backbone, as well as reproducing existing models. To train and test a GCCN, it is sufficient to specify the chocie of domain, neighborhood structure, and backbone model in the configuration. We provide scripts to reproduce a broad class of GCCNs in `scripts/topotune` and reproduce iterations of existing neural networks in `scripts/topotune/existing_models`, as previously reported.
+
+<p align="center">
+  <img src="resources/gccn.jpg" width="700">
+</p>
+
 
 ## :rocket: Liftings
 

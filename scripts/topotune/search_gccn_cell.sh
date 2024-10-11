@@ -1,6 +1,6 @@
 python -m topobenchmarkx \
     dataset=graph/NCI109 \
-    model=cell/topotune, cell/topotune_onehasse \
+    model=cell/topotune,cell/topotune_onehasse \
     model.feature_encoder.out_channels=32 \
     model.tune_gnn=GCN,GIN,GAT,GraphSAGE \
     model.backbone.GNN.num_layers=1,2 \
@@ -20,7 +20,7 @@ python -m topobenchmarkx \
 
 python -m topobenchmarkx \
     dataset=graph/cocitation_cora \
-    model=cell/topotune, cell/topotune_onehasse \
+    model=cell/topotune,cell/topotune_onehasse \
     model.feature_encoder.out_channels=32 \
     model.tune_gnn=GCN,GIN,GAT,GraphSAGE \
     model.backbone.GNN.num_layers=1,2 \
@@ -40,7 +40,7 @@ python -m topobenchmarkx \
 
 python -m topobenchmarkx \
     dataset=graph/PROTEINS \
-    model=cell/topotune, cell/topotune_onehasse \
+    model=cell/topotune,cell/topotune_onehasse \
     model.feature_encoder.out_channels=32 \
     model.tune_gnn=GCN,GIN,GAT,GraphSAGE \
     model.backbone.GNN.num_layers=1,2 \
@@ -60,7 +60,7 @@ python -m topobenchmarkx \
 
 python -m topobenchmarkx \
     dataset=graph/MUTAG \
-    model=cell/topotune, cell/topotune_onehasse \
+    model=cell/topotune,cell/topotune_onehasse \
     model.feature_encoder.out_channels=32 \
     model.tune_gnn=GCN,GIN,GAT,GraphSAGE \
     model.backbone.GNN.num_layers=1,2 \
@@ -80,7 +80,7 @@ python -m topobenchmarkx \
 
 python -m topobenchmarkx \
     dataset=graph/ZINC \
-    model=cell/topotune, cell/topotune_onehasse \
+    model=cell/topotune,cell/topotune_onehasse \
     model.feature_encoder.out_channels=32 \
     model.tune_gnn=GCN,GIN,GAT,GraphSAGE \
     model.backbone.GNN.num_layers=1,2 \
@@ -101,7 +101,7 @@ python -m topobenchmarkx \
 
 python -m topobenchmarkx \
     dataset=graph/cocitation_citeseer \
-    model=cell/topotune, cell/topotune_onehasse \
+    model=cell/topotune,cell/topotune_onehasse \
     model.feature_encoder.out_channels=32 \
     model.tune_gnn=GCN,GIN,GAT,GraphSAGE \
     model.backbone.GNN.num_layers=1,2 \
@@ -121,7 +121,7 @@ python -m topobenchmarkx \
 
 python -m topobenchmarkx \
     dataset=graph/NCI1 \
-    model=cell/topotune, cell/topotune_onehasse \
+    model=cell/topotune,cell/topotune_onehasse \
     model.feature_encoder.out_channels=32 \
     model.tune_gnn=GCN,GIN,GAT,GraphSAGE \
     model.backbone.GNN.num_layers=1,2 \
@@ -141,7 +141,7 @@ python -m topobenchmarkx \
 
 python -m topobenchmarkx \
     dataset=graph/cocitation_pubmed \
-    model=cell/topotune, cell/topotune_onehasse \
+    model=cell/topotune,cell/topotune_onehasse \
     model.feature_encoder.out_channels=32 \
     model.tune_gnn=GCN,GIN,GAT,GraphSAGE \
     model.backbone.GNN.num_layers=1,2 \
@@ -161,7 +161,7 @@ python -m topobenchmarkx \
 
 python -m topobenchmarkx \
     dataset=graph/NCI109 \
-    model=cell/topotune, cell/topotune_onehasse \
+    model=cell/topotune,cell/topotune_onehasse \
     model.feature_encoder.out_channels=32 \
     model.tune_gnn=GCN,GIN,GAT,GraphSAGE \
     model.backbone.GNN.num_layers=1,2 \
@@ -181,7 +181,7 @@ python -m topobenchmarkx \
 
 python -m topobenchmarkx \
     dataset=graph/cocitation_cora \
-    model=cell/topotune, cell/topotune_onehasse \
+    model=cell/topotune,cell/topotune_onehasse \
     model.feature_encoder.out_channels=32 \
     model.tune_gnn=GCN,GIN,GAT,GraphSAGE \
     model.backbone.GNN.num_layers=1,2 \
@@ -201,7 +201,7 @@ python -m topobenchmarkx \
 
 python -m topobenchmarkx \
     dataset=graph/PROTEINS \
-    model=cell/topotune, cell/topotune_onehasse \
+    model=cell/topotune,cell/topotune_onehasse \
     model.feature_encoder.out_channels=32 \
     model.tune_gnn=GCN,GIN,GAT,GraphSAGE \
     model.backbone.GNN.num_layers=1,2 \
@@ -221,7 +221,7 @@ python -m topobenchmarkx \
 
 python -m topobenchmarkx \
     dataset=graph/MUTAG \
-    model=cell/topotune, cell/topotune_onehasse \
+    model=cell/topotune,cell/topotune_onehasse \
     model.feature_encoder.out_channels=32 \
     model.tune_gnn=GCN,GIN,GAT,GraphSAGE \
     model.backbone.GNN.num_layers=1,2 \
@@ -241,7 +241,7 @@ python -m topobenchmarkx \
 
 python -m topobenchmarkx \
     dataset=graph/cocitation_citeseer \
-    model=cell/topotune, cell/topotune_onehasse \
+    model=cell/topotune,cell/topotune_onehasse \
     model.feature_encoder.out_channels=32 \
     model.tune_gnn=GCN,GIN,GAT,GraphSAGE \
     model.backbone.GNN.num_layers=1,2 \
@@ -261,7 +261,7 @@ python -m topobenchmarkx \
 
 python -m topobenchmarkx \
     dataset=graph/NCI1 \
-    model=cell/topotune, cell/topotune_onehasse \
+    model=cell/topotune,cell/topotune_onehasse \
     model.feature_encoder.out_channels=32 \
     model.tune_gnn=GCN,GIN,GAT,GraphSAGE \
     model.backbone.GNN.num_layers=1,2 \
@@ -281,7 +281,7 @@ python -m topobenchmarkx \
 
 python -m topobenchmarkx \
     dataset=graph/cocitation_pubmed \
-    model=cell/topotune, cell/topotune_onehasse \
+    model=cell/topotune,cell/topotune_onehasse \
     model.feature_encoder.out_channels=32 \
     model.tune_gnn=GCN,GIN,GAT,GraphSAGE \
     model.backbone.GNN.num_layers=1,2 \

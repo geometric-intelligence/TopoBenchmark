@@ -1,5 +1,5 @@
 <h2 align="center">
-  <img src="resources/logo.jpeg" width="800">
+  <img src="resources/logo.jpg" width="800">
 </h2>
 
 <h3 align="center">
@@ -37,7 +37,7 @@ Assess how your model compares against state-of-the-art topological neural netwo
 
 ## :pushpin: Overview
 
-`TopoBenchmark` (TBX) is a modular Python library designed to standardize benchmarking and accelerate research in Topological Deep Learning (TDL). In particular, TBX allows to train and compare the performances of all sorts of Topological Neural Networks (TNNs) across the different topological domains, where by _topological domain_ we refer to a graph, a simplicial complex, a cellular complex, or a hypergraph. For detailed information, please refer to the [`TopoBenchmark: A Framework for Benchmarking Topological Deep Learning`](https://arxiv.org/pdf/2406.06642) paper.
+`TopoBenchmark` (TB) is a modular Python library designed to standardize benchmarking and accelerate research in Topological Deep Learning (TDL). In particular, TB allows to train and compare the performances of all sorts of Topological Neural Networks (TNNs) across the different topological domains, where by _topological domain_ we refer to a graph, a simplicial complex, a cellular complex, or a hypergraph. For detailed information, please refer to the [`TopoBenchmark: A Framework for Benchmarking Topological Deep Learning`](https://arxiv.org/pdf/2406.06642) paper.
 
 <p align="center">
   <img src="resources/workflow.jpg" width="700">
@@ -301,13 +301,14 @@ Happy development!
 To learn more about `TopoBenchmark`, we invite you to read the paper:
 
 ```
-@misc{topobenchmarkx2024,
-      title={TopoBenchmark},
-      author={PyT-Team},
+@article{telyatnikov2024topobenchmark,
+      title={TopoBenchmark: A Framework for Benchmarking Topological Deep Learning}, 
+      author={Lev Telyatnikov and Guillermo Bernardez and Marco Montagna and Pavlo Vasylenko and Ghada Zamzmi and Mustafa Hajij and Michael T Schaub and Nina Miolane and Simone Scardapane and Theodore Papamarkou},
       year={2024},
-      eprint={TBD},
+      eprint={2406.06642},
       archivePrefix={arXiv},
-      primaryClass={cs.LG}
+      primaryClass={cs.LG},
+      url={https://arxiv.org/abs/2406.06642}, 
 }
 ```
 If you find `TopoBenchmark` useful, we would appreciate if you cite us!

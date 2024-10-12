@@ -12,13 +12,13 @@ Assess how your model compares against state-of-the-art topological neural netwo
 
 <div align="center">
 
-[![Lint](https://github.com/pyt-team/TopoBenchmarkX/actions/workflows/lint.yml/badge.svg)](https://github.com/pyt-team/TopoBenchmarkX/actions/workflows/lint.yml)
-[![Test](https://github.com/pyt-team/TopoBenchmarkX/actions/workflows/test.yml/badge.svg)](https://github.com/pyt-team/TopoBenchmarkX/actions/workflows/test.yml)
-[![Codecov](https://codecov.io/gh/pyt-team/TopoBenchmarkX/branch/main/graph/badge.svg)](https://app.codecov.io/gh/pyt-team/TopoBenchmarkX)
-[![Docs](https://img.shields.io/badge/docs-website-brightgreen)](https://pyt-team.github.io/topobenchmarkx/index.html)
+[![Lint](https://github.com/geometric-intelligence/TopoBenchmark/actions/workflows/lint.yml/badge.svg)](https://github.com/geometric-intelligence/TopoBenchmark/actions/workflows/lint.yml)
+[![Test](https://github.com/geometric-intelligence/TopoBenchmark/actions/workflows/test.yml/badge.svg)](https://github.com/geometric-intelligence/TopoBenchmark/actions/workflows/test.yml)
+[![Codecov](https://codecov.io/gh/geometric-intelligence/TopoBenchmark/branch/main/graph/badge.svg)](https://app.codecov.io/gh/geometric-intelligence/TopoBenchmark)
+[![Docs](https://img.shields.io/badge/docs-website-brightgreen)](https://geometric-intelligence.github.io/topobenchmarkx/index.html)
 [![Python](https://img.shields.io/badge/python-3.10+-blue?logo=python)](https://www.python.org/)
-[![license](https://badgen.net/github/license/pyt-team/TopoBenchmarkX?color=green)](https://github.com/pyt-team/TopoBenchmarkX/blob/main/LICENSE)
-[![slack](https://img.shields.io/badge/chat-on%20slack-purple?logo=slack)](https://join.slack.com/t/pyt-teamworkspace/shared_invite/zt-2k63sv99s-jbFMLtwzUCc8nt3sIRWjEw)
+[![license](https://badgen.net/github/license/geometric-intelligence/TopoBenchmark?color=green)](https://github.com/geometric-intelligence/TopoBenchmark/blob/main/LICENSE)
+[![slack](https://img.shields.io/badge/chat-on%20slack-purple?logo=slack)](https://join.slack.com/t/geometric-intelligenceworkspace/shared_invite/zt-2k63sv99s-jbFMLtwzUCc8nt3sIRWjEw)
 
 
 </div>
@@ -37,7 +37,7 @@ Assess how your model compares against state-of-the-art topological neural netwo
 
 ## :pushpin: Overview
 
-`TopoBenchmarkX` (TBX) is a modular Python library designed to standardize benchmarking and accelerate research in Topological Deep Learning (TDL). In particular, TBX allows to train and compare the performances of all sorts of Topological Neural Networks (TNNs) across the different topological domains, where by _topological domain_ we refer to a graph, a simplicial complex, a cellular complex, or a hypergraph. For detailed information, please refer to the [`TopoBenchmarkX: A Framework for Benchmarking Topological Deep Learning`](https://arxiv.org/pdf/2406.06642) paper.
+`TopoBenchmark` (TBX) is a modular Python library designed to standardize benchmarking and accelerate research in Topological Deep Learning (TDL). In particular, TBX allows to train and compare the performances of all sorts of Topological Neural Networks (TNNs) across the different topological domains, where by _topological domain_ we refer to a graph, a simplicial complex, a cellular complex, or a hypergraph. For detailed information, please refer to the [`TopoBenchmark: A Framework for Benchmarking Topological Deep Learning`](https://arxiv.org/pdf/2406.06642) paper.
 
 <p align="center">
   <img src="resources/workflow.jpg" width="700">
@@ -53,11 +53,11 @@ Additionally, the library offers the ability to transform, i.e. _lift_, each dat
 
 If you do not have conda on your machine, please follow [their guide](https://docs.anaconda.com/free/miniconda/miniconda-install/) to install it. 
 
-First, clone the `TopoBenchmarkX` repository and set up a conda environment `tbx` with python 3.11.3. 
+First, clone the `TopoBenchmark` repository and set up a conda environment `tbx` with python 3.11.3. 
 
 ```
-git clone git@github.com:pyt-team/topobenchmarkx.git
-cd TopoBenchmarkX
+git clone git@github.com:geometric-intelligence/topobenchmarkx.git
+cd TopoBenchmark
 conda create -n tbx python=3.11.3
 ```
 
@@ -72,7 +72,7 @@ Next, set up the environment with the following command.
 ```
 source env_setup.sh
 ```
-This command installs the `TopoBenchmarkX` library and its dependencies. 
+This command installs the `TopoBenchmark` library and its dependencies. 
 
 ### Run Training Pipeline
 
@@ -93,21 +93,21 @@ python -m topobenchmarkx model=cell/cwn dataset=graph/MUTAG
 The same CLI override mechanism also applies when modifying more finer configurations within a `CONFIG GROUP`. Please, refer to the official [`hydra`documentation](https://hydra.cc/docs/intro/) for further details.
 
 ## :bike: Experiments Reproducibility
-To reproduce Table 1 from the [`TopoBenchmarkX: A Framework for Benchmarking Topological Deep Learning`](https://arxiv.org/pdf/2406.06642) paper, please run the following command:
+To reproduce Table 1 from the [`TopoBenchmark: A Framework for Benchmarking Topological Deep Learning`](https://arxiv.org/pdf/2406.06642) paper, please run the following command:
 
 ```
 bash scripts/reproduce.sh
 ```
-**Remark:** We have additionally provided a public [W&B (Weights & Biases) project](https://wandb.ai/telyatnikov_sap/TopoBenchmarkX_main?nw=nwusertelyatnikov_sap) with logs for the corresponding runs (updated on June 11, 2024).
+**Remark:** We have additionally provided a public [W&B (Weights & Biases) project](https://wandb.ai/telyatnikov_sap/TopoBenchmark_main?nw=nwusertelyatnikov_sap) with logs for the corresponding runs (updated on June 11, 2024).
 
 
 ## :anchor: Tutorials
 
-Explore our [tutorials](https://github.com/pyt-team/TopoBenchmarkX/tree/main/tutorials) for further details on how to add new datasets, transforms/liftings, and benchmark tasks. 
+Explore our [tutorials](https://github.com/geometric-intelligence/TopoBenchmark/tree/main/tutorials) for further details on how to add new datasets, transforms/liftings, and benchmark tasks. 
 
 ## :gear: Neural Networks
 
-We list the neural networks trained and evaluated by `TopoBenchmarkX`, organized by the topological domain over which they operate: graph, simplicial complex, cellular complex or hypergraph. Many of these neural networks were originally implemented in [`TopoModelX`](https://github.com/pyt-team/TopoModelX).
+We list the neural networks trained and evaluated by `TopoBenchmark`, organized by the topological domain over which they operate: graph, simplicial complex, cellular complex or hypergraph. Many of these neural networks were originally implemented in [`TopoModelX`](https://github.com/pyt-team/TopoModelX).
 
 
 ### Graphs
@@ -183,7 +183,7 @@ To specify a set of neighborhoods (routes) on the complex, use a list of neighbo
 - `down_laplacian`, from rank $r$ to $r$
 - `boundary`, from rank $r$ to $r-1$
 - `coboundary`, from rank $r$ to $r+1$
-- `adjacency`, from rank $r$ to $r$ (stand-in for `up_adjacency`, as `down_adjacency` not yet supported in TopoBenchmarkX)
+- `adjacency`, from rank $r$ to $r$ (stand-in for `up_adjacency`, as `down_adjacency` not yet supported in TopoBenchmark)
 
 
 ### Using backbone models from any package
@@ -202,7 +202,7 @@ We invite users interested in running extensive sweeps on new GCCNs to replicate
 
 ## :rocket: Liftings
 
-We list the liftings used in `TopoBenchmarkX` to transform datasets. Here, a _lifting_ refers to a function that transforms a dataset defined on a topological domain (_e.g._, on a graph) into the same dataset but supported on a different topological domain (_e.g._, on a simplicial complex).
+We list the liftings used in `TopoBenchmark` to transform datasets. Here, a _lifting_ refers to a function that transforms a dataset defined on a topological domain (_e.g._, on a graph) into the same dataset but supported on a different topological domain (_e.g._, on a simplicial complex).
 
 <details>
 <summary><b> Topology Liftings </b></summary>
@@ -257,7 +257,7 @@ We list the liftings used in `TopoBenchmarkX` to transform datasets. Here, a _li
 
 ## :hammer_and_wrench: Development
 
-To join the development of `TopoBenchmarkX`, you should install the library in dev mode. 
+To join the development of `TopoBenchmark`, you should install the library in dev mode. 
 
 For this, you can create an environment using either conda or docker. Both options are detailed below.
 
@@ -268,12 +268,12 @@ Follow the steps in <a href="#jigsaw-get-started">:jigsaw: Get Started</a>.
 
 ### :whale: Using Docker
 
-For ease of use, TopoBenchmarkX employs <img src="https://github.com/wesbos/Font-Awesome-Docker-Icon/blob/master/docker-white.svg" width="20" height="20"> [Docker](https://www.docker.com/). To set it up on your system you can follow [their guide](https://docs.docker.com/get-docker/). once installed, please follow the next steps:
+For ease of use, TopoBenchmark employs <img src="https://github.com/wesbos/Font-Awesome-Docker-Icon/blob/master/docker-white.svg" width="20" height="20"> [Docker](https://www.docker.com/). To set it up on your system you can follow [their guide](https://docs.docker.com/get-docker/). once installed, please follow the next steps:
 
 First, clone the repository and navigate to the correct folder.
 ```
-git clone git@github.com:pyt-team/topobenchmarkx.git
-cd TopoBenchmarkX
+git clone git@github.com:geometric-intelligence/topobenchmarkx.git
+cd TopoBenchmark
 ```
 
 Then, build the Docker image.
@@ -285,12 +285,12 @@ Depending if you want to use GPUs or not, these are the commands to run the Dock
 
 With GPUs
 ```
-docker run -it -d --gpus all --volume $(pwd):/TopoBenchmarkX topobenchmarkx:new
+docker run -it -d --gpus all --volume $(pwd):/TopoBenchmark topobenchmarkx:new
 ```
 
 With CPU
 ```
-docker run -it -d --volume $(pwd):/TopoBenchmarkX topobenchmarkx:new
+docker run -it -d --volume $(pwd):/TopoBenchmark topobenchmarkx:new
 ```
 
 Happy development!
@@ -298,11 +298,11 @@ Happy development!
 
 ## :mag: References ##
 
-To learn more about `TopoBenchmarkX`, we invite you to read the paper:
+To learn more about `TopoBenchmark`, we invite you to read the paper:
 
 ```
 @misc{topobenchmarkx2024,
-      title={TopoBenchmarkX},
+      title={TopoBenchmark},
       author={PyT-Team},
       year={2024},
       eprint={TBD},
@@ -310,7 +310,7 @@ To learn more about `TopoBenchmarkX`, we invite you to read the paper:
       primaryClass={cs.LG}
 }
 ```
-If you find `TopoBenchmarkX` useful, we would appreciate if you cite us!
+If you find `TopoBenchmark` useful, we would appreciate if you cite us!
 
 
 

@@ -2,6 +2,7 @@
 
 import torch
 import torch_geometric
+from torch_geometric.nn.norm import GraphNorm
 
 from topobenchmarkx.nn.encoders.base import AbstractFeatureEncoder
 
@@ -87,13 +88,18 @@ class SANNCellEncoder(AbstractFeatureEncoder):
         torch_geometric.data.Data
             Output data object with updated x_{i} features.
         """
+        last_size = -1
         for i in self.dimensions:
+            batch = getattr(data, f"batch_{i}")
+            if last_size == -1:
+                last_size = batch.max()
+            # assert batch.max() == last_size
             for j in self.hops:
                 # x_0_0 == x_0
                 # x_0_1 = (dim(x_0)[0],  dim(x_0][1] * 2 + 2)
                 # x_3 = x_0_1 (n, f)
                 data[f"x{i}_{j}"] = getattr(self, f"encoder_{i}_{j}")(
-                    data[f"x{i}_{j}"]
+                    data[f"x{i}_{j}"], batch
                 )
         return data
 
@@ -114,11 +120,15 @@ class SimpleEncoder(torch.nn.Module):
     def __init__(self, in_channels, out_channels, dropout=0):
         super().__init__()
         self.linear1 = torch.nn.Linear(in_channels, out_channels)
+        # self.linear2 = torch.nn.Linear(out_channels, out_channels)
+        self.relu = torch.nn.ReLU()
+        self.BN = GraphNorm(out_channels)
+        # self.dropout = torch.nn.Dropout(dropout)
 
     def __repr__(self):
         return f"{self.__class__.__name__}(in_channels={self.linear1.in_features}, out_channels={self.linear1.out_features})"
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
+    def forward(self, x: torch.Tensor, batch: torch.Tensor) -> torch.Tensor:
         r"""Forward pass of the encoder.
 
         Applies a linear layer and a ReLu activation.
@@ -127,11 +137,15 @@ class SimpleEncoder(torch.nn.Module):
         ----------
         x : torch.Tensor
             Input tensor of dimensions [N, in_channels].
+        batch : torch.Tensor
+            The batch vector which assigns each element to a specific example.
 
         Returns
         -------
         torch.Tensor
             Output tensor of shape [N, out_channels].
         """
+
         x = self.linear1(x)
+        # x = self.BN(x, batch=batch) if batch.shape[0] > 0 else self.BN(x)
         return x

@@ -1,5 +1,7 @@
 """Wrapper for the SANN model."""
 
+import torch
+
 from topobenchmarkx.nn.wrappers import AbstractWrapper
 
 
@@ -53,11 +55,10 @@ class SANNWrapper(AbstractWrapper):
         x_out = self.backbone(x_all)
 
         model_out = {
-            "labels": batch.y,
+            "labels": batch.y.type(torch.float32),
             "batch_0": batch.batch_0,
             "batch_1": batch.batch_1,
             "batch_2": batch.batch_2,
-            "batch_3": batch.batch_3,
         }
 
         model_out["x_0"] = x_out[0]

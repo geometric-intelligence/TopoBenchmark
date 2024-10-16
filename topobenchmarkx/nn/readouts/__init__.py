@@ -3,6 +3,7 @@
 from .base import AbstractZeroCellReadOut
 from .identical import NoReadOut
 from .propagate_signal_down import PropagateSignalDown
+from .sann import SANNReadout
 
 # ... import other readout classes here
 # For example:
@@ -14,6 +15,7 @@ __all__ = [
     "AbstractZeroCellReadOut",
     "PropagateSignalDown",
     "NoReadOut",
+    "SANNReadout",
     # "OtherReadout1",
     # "OtherReadout2",
     # ... add other readout classes here

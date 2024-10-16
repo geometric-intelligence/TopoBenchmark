@@ -57,17 +57,17 @@ class PrecomputeKHopFeatures(torch_geometric.transforms.BaseTransform):
         Bs_new = Bc  # [torch.ones_like(Bs[0])] * len(Bs)
         Bc_new = Bs  # [torch.ones_like(Bc[0])] * len(Bc)
 
-        # N0 = (UP[0].size())[0]  # (number of 0-simplices)
-        # N1 = (UP[1].size())[0]  # Number of 1-simplices
-        # N2 = (DOWN[1].size())[0]  # Number of 2-simplices
-        # N3 = (DOWN[2].size())[0]  # Number of 3-simplices
+        N0 = (UP[0].size())[0]  # (number of 0-simplices)
+        N1 = (UP[1].size())[0]  # Number of 1-simplices
+        N2 = (DOWN[1].size())[0]  # Number of 2-simplices
+        N3 = (DOWN[2].size())[0]  # Number of 3-simplices
 
-        # x_is = [
-        #     torch.ones((N0, 1)),
-        #     torch.ones((N1, 1)),
-        #     torch.ones((N2, 1)),
-        #     torch.ones((N3, 1)),
-        # ]
+        x_is = [
+            torch.ones((N0, 1)),
+            torch.ones((N1, 1)),
+            torch.ones((N2, 1)),
+            torch.ones((N3, 1)),
+        ]
 
         # Create a dictionary that stores the i-simplices, the
         # j-th hop features matrix
@@ -80,53 +80,53 @@ class PrecomputeKHopFeatures(torch_geometric.transforms.BaseTransform):
         # TODO Sometimes te normalizations results in 0
         # for non-connected simplices which blows up
         # Compute normalization matrices D_k
-        # for i in range(K + 1):
-        #     LS = torch.mm(UP[i], x_is[i]).flatten()
-        #     D_i = LS - torch.diag(torch.abs(UP[i].to_dense())).flatten()
-        #     # Check no zeroes that blow up the division
-        #     D_i = torch.diagflat(torch.div(1, torch.sqrt(D_i)))
-        #     # TODO Check this is correct
+        for i in range(K + 1):
+            LS = torch.mm(UP[i], x_is[i]).flatten()
+            D_i = LS  # - torch.diag(torch.abs(UP[i].to_dense())).flatten()
+            # Check no zeroes that blow up the division
+            D_i = torch.diagflat(torch.div(1, torch.sqrt(D_i + 1)))
+            # TODO Check this is correct
 
-        #     if i > 0:
-        #         DOWN[i - 1] = torch.mm(torch.mm(D_i, DOWN[i - 1]), D_i)
-        #         D_i_i_minus_1 = torch.mm(
-        #             torch.abs(Bc[i - 1]), x_is[i - 1]
-        #         ).flatten()
-        #         D_i_i_minus_1 = torch.diagflat(
-        #             torch.div(1, torch.sqrt(D_i_i_minus_1))
-        #         )
+            if i > 0:
+                DOWN[i - 1] = torch.mm(torch.mm(D_i, DOWN[i - 1]), D_i)
+                D_i_i_minus_1 = torch.mm(
+                    torch.abs(Bc[i - 1]), x_is[i - 1]
+                ).flatten()
+                D_i_i_minus_1 = torch.diagflat(
+                    torch.div(1, torch.sqrt(D_i_i_minus_1 + 1))
+                )
 
-        #         D_i_minus_1_i = torch.mm(Bs[i - 1], x_is[i]).flatten()
-        #         D_i_minus_1_i = torch.diagflat(
-        #             torch.div(1, torch.sqrt(D_i_minus_1_i))
-        #         )
+                D_i_minus_1_i = torch.mm(Bs[i - 1], x_is[i]).flatten()
+                D_i_minus_1_i = torch.diagflat(
+                    torch.div(1, torch.sqrt(D_i_minus_1_i + 1))
+                )
 
-        #         # D_{i, i-1} B_{i-1} D_{i-1, i}
-        #         Bs_new[i - 1] = torch.mm(
-        #             torch.mm(D_i_i_minus_1, Bc[i - 1]), D_i_minus_1_i
-        #         )
+                # D_{i, i-1} B_{i-1} D_{i-1, i}
+                Bs_new[i - 1] = torch.mm(
+                    torch.mm(D_i_i_minus_1, Bc[i - 1]), D_i_minus_1_i
+                )
 
-        #     if i < K:
-        #         D_i_i_plus_1 = torch.mm(Bs[i], x_is[i + 1]).flatten()
-        #         D_i_i_plus_1 = torch.diagflat(
-        #             torch.div(1, torch.sqrt(D_i_i_plus_1))
-        #         )
+            if i < K:
+                D_i_i_plus_1 = torch.mm(Bs[i], x_is[i + 1]).flatten()
+                D_i_i_plus_1 = torch.diagflat(
+                    torch.div(1, torch.sqrt(D_i_i_plus_1 + 1))
+                )
 
-        #         D_i_plus_1_i = torch.mm(torch.abs(Bc[i]), x_is[i]).flatten()
-        #         D_i_plus_1_i = torch.diagflat(
-        #             torch.div(1, torch.sqrt(D_i_plus_1_i))
-        #         )
+                D_i_plus_1_i = torch.mm(torch.abs(Bc[i]), x_is[i]).flatten()
+                D_i_plus_1_i = torch.diagflat(
+                    torch.div(1, torch.sqrt(D_i_plus_1_i + 1))
+                )
 
-        #         # D_{i, i-1} B_{i-1} D_{i-1, i}
-        #         Bc_new[i] = torch.mm(
-        #             torch.mm(D_i_i_plus_1, Bs[i]), D_i_plus_1_i
-        #         )
-        #     # Update UP at the end
-        #     UP[i] = torch.mm(torch.mm(D_i, UP[i]), D_i)
+                # D_{i, i-1} B_{i-1} D_{i-1, i}
+                Bc_new[i] = torch.mm(
+                    torch.mm(D_i_i_plus_1, Bs[i]), D_i_plus_1_i
+                )
+            # Update UP at the end
+            UP[i] = torch.mm(torch.mm(D_i, UP[i]), D_i)
 
         # Set the information for the 0-hop embeddings
         for i in range(K + 1):
-            x_all[f"x{i}_0"] = data[f"x_{i}"]
+            x_all[f"x{i}_0"] = data[f"x_{i}"].size()
 
         # For each hop t=1,...,T
         for t in range(1, T + 1):

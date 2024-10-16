@@ -30,13 +30,13 @@ class SANNReadout(AbstractZeroCellReadOut):
 
         self.linear = torch.nn.Sequential(
             torch.nn.Linear(3 * 3 * hidden_dimensions_1, hidden_dimensions_2),
-            torch.nn.ReLU(),
+            torch.nn.LeakyReLU(),
             torch.nn.Linear(hidden_dimensions_2, hidden_dimensions_2),
-            torch.nn.ReLU(),
+            torch.nn.LeakyReLU(),
             torch.nn.Linear(hidden_dimensions_2, hidden_dimensions_2),
-            torch.nn.ReLU(),
+            torch.nn.LeakyReLU(),
             torch.nn.Linear(hidden_dimensions_2, out_channels),
-            torch.nn.Softmax(dim=0),
+            #         torch.nn.Softmax(dim=0),
         )  # nn.Softmax(dim=0) for multi-class
 
         assert pooling_type in ["max", "sum", "mean"], "Invalid pooling_type"
@@ -63,7 +63,7 @@ class SANNReadout(AbstractZeroCellReadOut):
         model_out["logits"] = self.compute_logits(
             model_out["x_all"], batch["batch_0"]
         )
-
+        model_out["logits"] = torch.max(model_out["logits"], dim=1)[0]
         # Add a logit for the complement of the input
         return model_out
 
@@ -127,31 +127,6 @@ class SANNReadout(AbstractZeroCellReadOut):
             # assert x_i_all_cat.shape[0] == 32, f"Expected 32, got {x_i_all_cat.shape}"
             x_all.append(x_i_all_cat)
 
-        new_x_all = []
-        try:
-            x_all_cat = torch.cat(x_all, 1)
-        except RuntimeError:
-            last_size = -1
-            for i, i_complex in enumerate(x_all):
-                if i == 0:
-                    last_size = i_complex.shape[0]
-                    new_x_all.append(i_complex)
-                    continue
-                if i_complex.shape[0] < last_size:
-                    new_complex = torch.cat(
-                        (
-                            i_complex,
-                            torch.zeros(
-                                last_size - i_complex.shape[0],
-                                i_complex.shape[1],
-                            ),
-                        ),
-                        dim=0,
-                    )
-                    new_x_all.append(new_complex)
-                else:
-                    new_x_all.append(i_complex)
-        if len(new_x_all) > 0:
-            x_all_cat = torch.cat(new_x_all, 1)
+        x_all_cat = torch.cat(x_all, 1)
         model_out["x_all"] = x_all_cat
         return model_out

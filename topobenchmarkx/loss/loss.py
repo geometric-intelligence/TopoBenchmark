@@ -22,7 +22,8 @@ class TBXLoss(AbstractLoss):
         self.task = task
         if task == "classification" and loss_type == "cross_entropy":
             self.criterion = torch.nn.CrossEntropyLoss()
-
+        elif task == "classification" and loss_type == "bce":
+            self.criterion = torch.nn.BCEWithLogitsLoss()
         elif task == "regression" and loss_type == "mse":
             self.criterion = torch.nn.MSELoss()
 

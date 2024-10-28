@@ -12,6 +12,7 @@ from topobenchmarkx.data.datasets import (
     PLANETOID_DATASETS,
     TU_DATASETS,
     USCountyDemosDataset,
+    LanguageDataset,
 )
 from topobenchmarkx.data.loaders.base import AbstractLoader
 from topobenchmarkx.data.utils import (
@@ -139,11 +140,31 @@ class GraphLoader(AbstractLoader):
             )
             # Need to redefine data_dir for the (year, task_variable) pair chosen
             data_dir = dataset.processed_root
-
+        
         elif self.parameters.data_name in ["manual"]:
             data = load_manual_graph()
             dataset = DataloadDataset([data], data_dir)
-
+        
+        # Add LanguageDataset (see Tutorial "add_new_dataset.ipynb")
+        elif self.parameters.data_name in ["LanguageDataset"]:
+            dataset = LanguageDataset(
+                root=root_data_dir,
+                name=self.parameters["data_name"],
+                parameters=self.parameters,
+            )
+            
+            data_dir = dataset.processed_root
+        
+        # Add your dataset here following the template:
+        # elif self.parameters.data_name in ["YourDatasetName"]:  # Replace with your dataset class name
+        # dataset = YourDatasetName(
+        #     root=root_data_dir,
+        #     name=self.parameters["data_name"],
+        #     parameters=self.parameters,
+        # )
+        
+        # data_dir = dataset.processed_root 
+        
         else:
             raise NotImplementedError(
                 f"Dataset {self.parameters.data_name} not implemented"

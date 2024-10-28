@@ -28,9 +28,14 @@ def get_default_transform(dataset, model):
     if data_domain == "graph" and model_domain != "combinatorial":
         # Check if there is a default transform for the dataset at ./configs/transforms/dataset_defaults/
         # If not, use the default lifting transform for the dataset to be compatible with the model
+        base_dir = os.path.dirname(
+            os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        )
+        configs_dir = os.path.join(
+            base_dir, "configs", "transforms", "dataset_defaults"
+        )
         datasets_with_defaults = [
-            f.split(".")[0]
-            for f in os.listdir("./configs/transforms/dataset_defaults/")
+            f.split(".")[0] for f in os.listdir(configs_dir)
         ]
         if dataset in datasets_with_defaults:
             return f"dataset_defaults/{dataset}"

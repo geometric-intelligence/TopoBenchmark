@@ -1,0 +1,5 @@
+# Step 1.4: Create a configuration file associted with the transform to allow for configuration (see Tutorial "add_new_dataset.ipynb")
+_target_: topobenchmarkx.transforms.data_transform.DataTransform
+transform_name: "Attention2Graph"
+transform_type: "data manipulation"
+threshold: 0.1

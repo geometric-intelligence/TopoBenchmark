@@ -12,6 +12,7 @@ from topobenchmarkx.data.datasets import (
     PLANETOID_DATASETS,
     TU_DATASETS,
     CitationHypergraphDataset,
+    MantraDataset,
     USCountyDemosDataset,
 )
 from topobenchmarkx.data.loaders.base import AbstractLoader
@@ -251,4 +252,15 @@ class SimplicialLoader(AbstractLoader):
         torch_geometric.data.Dataset
             Dataset object containing the loaded data.
         """
+        root_data_dir = self.parameters["data_dir"]
+        data_dir = os.path.join(root_data_dir, self.parameters["data_name"])
+        if self.parameters.data_name in ["MANTRA"]:
+            dataset = MantraDataset(
+                root=root_data_dir,
+                name=self.parameters["data_name"],
+                parameters=self.parameters,
+            )
+            # Redefine dir for chosen manifold dimension
+            data_dir = dataset.processed_root
+            return dataset, data_dir
         return load_simplicial_dataset(self.parameters)

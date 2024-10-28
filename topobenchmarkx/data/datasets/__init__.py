@@ -1,6 +1,7 @@
 """This module contains the implemented dataset classes for the topological benchmarking experiments."""
 
 from .citation_hypergaph_dataset import CitationHypergraphDataset
+from .mantra_dataset import MantraDataset
 from .us_county_demos_dataset import USCountyDemosDataset
 
 PLANETOID_DATASETS = [
@@ -46,4 +47,5 @@ __all__ = [
     "FIXED_SPLITS_DATASETS",
     "HETEROPHILIC_DATASETS",
     "CitationHypergraphDataset",
+    "MantraDataset",
 ]

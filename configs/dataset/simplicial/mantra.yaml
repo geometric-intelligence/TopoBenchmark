@@ -1,0 +1,23 @@
+_target_: topobenchmarkx.data.loaders.SimplicialLoader
+
+# Data definition
+parameters:
+  data_domain: simplicial
+  data_type: topological 
+  data_name: mantra
+  manifold_dim: 2
+  data_dir: ${paths.data_dir}/${dataset.parameters.data_domain}/${dataset.parameters.data_type}/${dataset.parameters.data_name}
+  data_split_dir: ${paths.data_dir}/data_splits/${dataset.parameters.data_name}
+
+  # Dataset parameters
+  task: classification
+  loss_type: cross_entropy
+  monitor_metric: accuracy
+  task_level: graph 
+  data_seed: 0
+
+  # Dataloader parameters
+  batch_size: 128 # Needs to be divisible by the number of devices (e.g., if in a distributed setup)
+  # train_val_test_split: [55_000, 5_000, 10_000]
+  num_workers: 0
+  pin_memory: False

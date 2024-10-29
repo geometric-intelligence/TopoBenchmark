@@ -207,7 +207,7 @@ def read_us_county_demos(path, year=2012, y_col="Election"):
     return data
 
 
-def load_hypergraph_pickle_dataset(cfg):
+def load_hypergraph_pickle_dataset(data_dir, data_name):
     """Load hypergraph datasets from pickle files.
 
     Parameters
@@ -220,8 +220,7 @@ def load_hypergraph_pickle_dataset(cfg):
     torch_geometric.data.Data
         Hypergraph dataset.
     """
-    data_dir = cfg["data_dir"]
-    print(f"Loading {cfg['data_domain']} dataset name: {cfg['data_name']}")
+    data_dir = osp.join(data_dir, data_name)
 
     # Load node features:
 

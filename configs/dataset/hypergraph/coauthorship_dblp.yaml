@@ -4,13 +4,13 @@ loader:
   parameters: 
     data_domain: hypergraph
     data_type: coauthorship
-    data_name: coauthorship_cora
+    data_name: coauthorship_dblp
     data_dir: ${paths.data_dir}/${dataset.loader.parameters.data_domain}/${dataset.loader.parameters.data_type}
 
 # Dataset parameters
 parameters:
-  num_features: 1433
-  num_classes: 7
+  num_features: 1425
+  num_classes: 6
   task: classification
   loss_type: cross_entropy
   monitor_metric: accuracy

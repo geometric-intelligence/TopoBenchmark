@@ -40,7 +40,7 @@ dependencies=[
     "hydra-core==1.3.2",
     "hydra-colorlog==1.2.0",
     "hydra-optuna-sweeper==1.2.0",
-    "wandb==0.16.4",
+    "wandb",
     "einops==0.7.0",
     "tabulate",
     "ipykernel",
@@ -76,8 +76,8 @@ test = [
     "pytest-mock"
 ]
 
-dev = ["TopoTuneBenchmarkX[test, lint]"]
-all = ["TopoTuneBenchmarkX[dev, doc]"]
+dev = ["TopoBenchmark[test, lint]"]
+all = ["TopoBenchmark[dev, doc]"]
 
 [project.urls]
 homepage="https://github.com/pyt-team/TopoBenchmarkX"

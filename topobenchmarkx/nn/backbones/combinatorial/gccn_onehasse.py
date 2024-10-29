@@ -144,7 +144,7 @@ class TopoTune_OneHasse(torch.nn.Module):
                     .squeeze()
                 )
 
-            elif neighborhood == "incidence" or neighborhood == "bdry":
+            elif neighborhood == "boundary" or neighborhood == "bdry":
                 if src_rank == 1:  # edge-to-face
                     adjustment = torch.tensor([[0], [max_node_id]]).to(device)
                 elif src_rank == 2:  # face-to-edge
@@ -167,7 +167,7 @@ class TopoTune_OneHasse(torch.nn.Module):
                     getattr(params, f"incidence_{src_rank}").values().squeeze()
                 )
 
-            elif neighborhood == "coincidence" or neighborhood == "cbdry":
+            elif neighborhood == "coboundary" or neighborhood == "cobdry":
                 if src_rank == 0:  # node-to-edge
                     adjustment = torch.tensor([[max_node_id], [0]]).to(device)
                 elif src_rank == 1:  # edge-to-face

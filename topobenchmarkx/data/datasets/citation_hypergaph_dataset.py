@@ -37,17 +37,17 @@ class CitationHypergraphDataset(InMemoryDataset):
     URLS: ClassVar = {
         "coauthorship_cora": "https://drive.google.com/file/d/1J5fLPABWrM9SH_7m85n7--oHDVmwJeib/view?usp=sharing",
         "coauthorship_dblp": "https://drive.google.com/file/d/16ryf4Ve-t0_nAla0VfjtSxSAG8Sye8TZ/view?usp=sharing",
-        "cocitation_cora_hypergraph": "https://drive.google.com/file/d/1WVRx5yDxSdZpvL6FK5Ji8H3lOnyYlraN/view?usp=sharing",
-        "cocitation_citeseer_hypergraph": "https://drive.google.com/file/d/1XWfu1jtijsmHmfCP6UQxyLsuPM8GBNJb/view?usp=sharing",
-        "cocitation_pubmed_hypergraph": "https://drive.google.com/file/d/1XbqDJnHnV0HYvie3fcM8rquamnQsLTpK/view?usp=sharing",
+        "cocitation_cora": "https://drive.google.com/file/d/1WVRx5yDxSdZpvL6FK5Ji8H3lOnyYlraN/view?usp=sharing",
+        "cocitation_citeseer": "https://drive.google.com/file/d/1XWfu1jtijsmHmfCP6UQxyLsuPM8GBNJb/view?usp=sharing",
+        "cocitation_pubmed": "https://drive.google.com/file/d/1XbqDJnHnV0HYvie3fcM8rquamnQsLTpK/view?usp=sharing",
     }
 
     FILE_FORMAT: ClassVar = {
         "coauthorship_cora": "zip",
         "coauthorship_dblp": "zip",
-        "cocitation_cora_hypergraph": "zip",
-        "cocitation_citeseer_hypergraph": "zip",
-        "cocitation_pubmed_hypergraph": "zip",
+        "cocitation_cora": "zip",
+        "cocitation_citeseer": "zip",
+        "cocitation_pubmed": "zip",
     }
 
     RAW_FILE_NAMES: ClassVar = {}

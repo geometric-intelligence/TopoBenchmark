@@ -4,7 +4,7 @@ loader:
   parameters: 
     data_domain: hypergraph
     data_type: cocitation
-    data_name: cocitation_citeseer_hypergraph
+    data_name: cocitation_citeseer
     data_dir: ${paths.data_dir}/${dataset.loader.parameters.data_domain}/${dataset.loader.parameters.data_type}
 
 # Dataset parameters

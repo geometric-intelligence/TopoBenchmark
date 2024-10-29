@@ -10,7 +10,7 @@ from topobenchmarkx.dataloader.utils import to_data_list
 
 from topobenchmarkx.run import initialize_hydra
 
-# rootutils.setup_root("./", indicator=".project-root", pythonpath=True)
+rootutils.setup_root("./", indicator=".project-root", pythonpath=True)
 
 
 class TestCollateFunction:
@@ -68,7 +68,6 @@ class TestCollateFunction:
                     cols += elems[i][key].shape[1]
                 assert batch[key].shape[0] == 2
                 assert batch[key].shape[1] == cols
-            
             # elif "batch_" in key:
             #    assert 0
             #    rows = 0
@@ -76,7 +75,6 @@ class TestCollateFunction:
             #    for i in range(len(elems)):
             #        rows += elems[i][f"x_{n}"].shape[0]
             #    assert batch[key].shape[0] == rows
-
             elif key in elems[0]:
                 for i in range(len(batch[key].shape)):
                     i_elems = 0

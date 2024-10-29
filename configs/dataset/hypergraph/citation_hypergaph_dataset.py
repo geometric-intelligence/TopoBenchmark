@@ -1,23 +1,22 @@
-"""Dataset class for Language dataset (see Tutorial "add_new_dataset.ipynb")."""
+"""Dataset class for US County Demographics dataset."""
 
-import json
 import os
 import os.path as osp
 import shutil
 from typing import ClassVar
 
-import torch
 from omegaconf import DictConfig
 from torch_geometric.data import Data, InMemoryDataset, extract_zip
 from torch_geometric.io import fs
 
 from topobenchmarkx.data.utils import (
     download_file_from_drive,
+    load_hypergraph_pickle_dataset,
 )
 
 
-class LanguageDataset(InMemoryDataset):
-    r"""Dataset class for Language dataset.
+class CitationHypergraphDataset(InMemoryDataset):
+    r"""Dataset class for US County Demographics dataset.
 
     Parameters
     ----------
@@ -36,11 +35,19 @@ class LanguageDataset(InMemoryDataset):
     """
 
     URLS: ClassVar = {
-        "LanguageDataset": "https://drive.google.com/file/d/1jU8HGeXbMDIFph-kNsUmMwWHcCz44MC-/view?usp=sharing"
+        "coauthorship_cora": "https://drive.google.com/file/d/1J5fLPABWrM9SH_7m85n7--oHDVmwJeib/view?usp=sharing",
+        "coauthorship_dblp": "https://drive.google.com/file/d/16ryf4Ve-t0_nAla0VfjtSxSAG8Sye8TZ/view?usp=sharing",
+        "cocitation_cora_hypergraph": "https://drive.google.com/file/d/1WVRx5yDxSdZpvL6FK5Ji8H3lOnyYlraN/view?usp=sharing",
+        "cocitation_citeseer_hypergraph": "https://drive.google.com/file/d/1XWfu1jtijsmHmfCP6UQxyLsuPM8GBNJb/view?usp=sharing",
+        "cocitation_pubmed_hypergraph": "https://drive.google.com/file/d/1XbqDJnHnV0HYvie3fcM8rquamnQsLTpK/view?usp=sharing",
     }
 
     FILE_FORMAT: ClassVar = {
-        "LanguageDataset": "zip",
+        "coauthorship_cora": "zip",
+        "coauthorship_dblp": "zip",
+        "cocitation_cora_hypergraph": "zip",
+        "cocitation_citeseer_hypergraph": "zip",
+        "cocitation_pubmed_hypergraph": "zip",
     }
 
     RAW_FILE_NAMES: ClassVar = {}
@@ -57,7 +64,6 @@ class LanguageDataset(InMemoryDataset):
         # self.task_variable = parameters.task_variable
         super().__init__(
             root,
-            force_reload=True,
         )
 
         out = fs.torch_load(self.processed_paths[0])
@@ -77,7 +83,7 @@ class LanguageDataset(InMemoryDataset):
         assert isinstance(self._data, Data)
 
     def __repr__(self) -> str:
-        return f"{self.name}(self.root={self.root}, self.name={self.name}, self.force_reload={self.force_reload})"
+        return f"{self.name}(self.root={self.root}, self.name={self.name}, self.parameters={self.parameters}, self.force_reload={self.force_reload})"
 
     @property
     def raw_dir(self) -> str:
@@ -99,11 +105,8 @@ class LanguageDataset(InMemoryDataset):
         str
             Path to the processed directory.
         """
-        self.processed_root = osp.join(
-            self.root,
-            self.name,
-        )
-        return osp.join(self.processed_root, "processed")
+
+        return osp.join(self.root, self.name, "processed")
 
     @property
     def raw_file_names(self) -> list[str]:
@@ -114,7 +117,7 @@ class LanguageDataset(InMemoryDataset):
         list[str]
             List of raw file names.
         """
-        return []
+        return []  # ["county_graph.csv", f"county_stats_{self.year}.csv"]
 
     @property
     def processed_file_names(self) -> str:
@@ -133,89 +136,45 @@ class LanguageDataset(InMemoryDataset):
         Raises:
             FileNotFoundError: If the dataset URL is not found.
         """
-        # Step 1: download data from the source
+        # Step 1: Download data from the source
         self.url = self.URLS[self.name]
         self.file_format = self.FILE_FORMAT[self.name]
+
         download_file_from_drive(
             file_link=self.url,
             path_to_save=self.raw_dir,
             dataset_name=self.name,
             file_format=self.file_format,
         )
-
-        # Step 2: extract file
+        # Extract zip file
         folder = self.raw_dir
         filename = f"{self.name}.{self.file_format}"
         path = osp.join(folder, filename)
         extract_zip(path, folder)
-        os.unlink(path)  # Delete zip file
+        # Delete zip file
+        os.unlink(path)
 
-        # Step 3: move the extracted files to the folder with corresponding name
         # Move files from osp.join(folder, name_download) to folder
         for file in os.listdir(osp.join(folder, self.name)):
-            if file.endswith("ipynb"):
-                continue
             shutil.move(
                 osp.join(folder, self.name, file), osp.join(folder, file)
             )
-
         # Delete osp.join(folder, self.name) dir
         shutil.rmtree(osp.join(folder, self.name))
 
     def process(self) -> None:
         r"""Handle the data for the dataset.
 
-        This method loads the Language dataser, applies any pre-
-        processing transformations, and saves the processed data
+        This method loads the US county demographics data, applies any pre-
+        processing transformations if specified, and saves the processed data
         to the appropriate location.
         """
-        # Step 1: extract the data
-        folder = self.raw_dir
-        with open(folder + "/token_tag_id_data.json") as file:
-            token_tag_id_data = json.load(file)
-        model_state_dict = torch.load(
-            folder + "/Test_attention_all_head.pth",
-            map_location=torch.device("cpu"),
-        )
-        graph_sentences = []
-        for sentence in range(len(model_state_dict)):
-            ids = token_tag_id_data[str(sentence)]["ids"]
-            tokens = token_tag_id_data[str(sentence)]["tokens"]
-            tags = token_tag_id_data[str(sentence)]["tags"]
-            for head in range(len(model_state_dict[sentence])):
-                attention_scores = model_state_dict[sentence][head]
-                # edge_index = []
-                # for i in range(len(attention_scores)):
-                #     for j in range(len(attention_scores[0])):
-                #         edge_index.append([i, j])
-                edge_index = [
-                    [i, j]
-                    for i in range(len(attention_scores))
-                    for j in range(len(attention_scores[0]))
-                ]
-                edge_index = torch.transpose(
-                    torch.FloatTensor(edge_index), 0, 1
-                )
+        data, _ = load_hypergraph_pickle_dataset(self.name, self.raw_dir)
 
-                graph = Data(
-                    edge_index=edge_index,
-                    attention_scores=attention_scores.flatten(),
-                    attention_shape=attention_scores.shape,
-                    ids=ids,
-                    tokens=tokens,
-                    tags=tags,
-                    num_nodes=len(tokens),
-                )
-                graph_sentences.append(graph)
-
-        # Step 2: collate the graphs
-        self.data, self.slices = self.collate(graph_sentences)
+        data_list = [data]
+        self.data, self.slices = self.collate(data_list)
         self._data_list = None  # Reset cache.
-
-        # Step 3: save processed data
         fs.torch_save(
             (self._data.to_dict(), self.slices, {}, self._data.__class__),
             self.processed_paths[0],
         )
-
-        self.graph = graph_sentences

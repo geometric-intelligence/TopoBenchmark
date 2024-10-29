@@ -12,7 +12,6 @@ from topobenchmarkx.data.datasets import (
     PLANETOID_DATASETS,
     TU_DATASETS,
     CitationHypergraphDataset,
-    LanguageDataset,
     USCountyDemosDataset,
 )
 from topobenchmarkx.data.loaders.base import AbstractLoader
@@ -145,26 +144,6 @@ class GraphLoader(AbstractLoader):
             data = load_manual_graph()
             dataset = DataloadDataset([data], data_dir)
 
-        # Add LanguageDataset (see Tutorial "add_new_dataset.ipynb")
-        elif self.parameters.data_name in ["LanguageDataset"]:
-            dataset = LanguageDataset(
-                root=root_data_dir,
-                name=self.parameters["data_name"],
-                parameters=self.parameters,
-            )
-
-            data_dir = dataset.processed_root
-
-        # Add your dataset here following the template:
-        # elif self.parameters.data_name in ["YourDatasetName"]:  # Replace with your dataset class name
-        # dataset = YourDatasetName(
-        #     root=root_data_dir,
-        #     name=self.parameters["data_name"],
-        #     parameters=self.parameters,
-        # )
-
-        # data_dir = dataset.processed_root
-
         else:
             raise NotImplementedError(
                 f"Dataset {self.parameters.data_name} not implemented"
@@ -186,9 +165,7 @@ class HypergraphLoader(AbstractLoader):
         super().__init__(parameters)
         self.parameters = parameters
 
-    def load(
-        self,
-    ) -> torch_geometric.data.Dataset:
+    def load(self) -> torch_geometric.data.Dataset:
         r"""Load hypergraph dataset.
 
         Returns

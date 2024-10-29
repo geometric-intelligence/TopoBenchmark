@@ -3,14 +3,14 @@ loader:
   _target_: topobenchmarkx.data.loaders.HypergraphLoader
   parameters: 
     data_domain: hypergraph
-    data_type: coauthorship
-    data_name: coauthorship_cora
+    data_type: cocitation
+    data_name: cocitation_pubmed
     data_dir: ${paths.data_dir}/${dataset.loader.parameters.data_domain}/${dataset.loader.parameters.data_type}
 
 # Dataset parameters
 parameters:
-  num_features: 1433
-  num_classes: 7
+  num_features: 500
+  num_classes: 3
   task: classification
   loss_type: cross_entropy
   monitor_metric: accuracy

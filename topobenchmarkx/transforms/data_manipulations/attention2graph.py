@@ -38,18 +38,15 @@ class Attention2Graph(torch_geometric.transforms.BaseTransform):
         # Reshape the initial attention scores to the original shape
         attention_shape = data.attention_shape
         attention_scores = data.attention_scores.reshape(attention_shape)
-        
+
         mask = attention_scores > self.parameters["threshold"]
 
-        edge_index = torch.stack(torch.where(mask==1))
+        edge_index = torch.stack(torch.where(mask == 1))
 
         edge_index = torch_geometric.utils.remove_self_loops(edge_index)[0]
 
         edge_index = torch_geometric.utils.to_undirected(edge_index)
 
         data.edge_index = edge_index
-       
 
         return data
-
-   

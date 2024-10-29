@@ -1,5 +1,7 @@
 """Data manipulations module."""
 
+# Step 1.1: Import the transform that you have created: Attention2Graph (see Tutorial "add_new_dataset.ipynb")
+from .attention2graph import Attention2Graph
 from .calculate_simplicial_curvature import (
     CalculateSimplicialCurvature,
 )
@@ -13,10 +15,6 @@ from .node_degrees import NodeDegrees
 from .node_features_to_float import NodeFeaturesToFloat
 from .one_hot_degree_features import OneHotDegreeFeatures
 
-# Step 1.1: Import the transform that you have created: Attention2Graph (see Tutorial "add_new_dataset.ipynb")
-from .attention2graph import Attention2Graph
-
-
 DATA_MANIPULATIONS = {
     "Identity": IdentityTransform,
     "InfereKNNConnectivity": InfereKNNConnectivity,
@@ -28,14 +26,12 @@ DATA_MANIPULATIONS = {
     "CalculateSimplicialCurvature": CalculateSimplicialCurvature,
     "KeepOnlyConnectedComponent": KeepOnlyConnectedComponent,
     "KeepSelectedDataFields": KeepSelectedDataFields,
-    
     # Step 1.2: Add a transform you have created to a dict of available transforms (see Tutorial "add_new_dataset.ipynb")
     "Attention2Graph": Attention2Graph,
 }
 
 __all__ = [
     "DATA_MANIPULATIONS",
-    
     # Transforms
     "IdentityTransform",
     "InfereKNNConnectivity",
@@ -47,8 +43,6 @@ __all__ = [
     "CalculateSimplicialCurvature",
     "OneHotDegreeFeatures",
     "KeepSelectedDataFields",
-
     # Step 1.3: Add a transform to a list to allow it to be imported through topobenchmarkx.transforms.data_manipulations (see Tutorial "add_new_dataset.ipynb")
-    "Attention2Graph"
-    
+    "Attention2Graph",
 ]

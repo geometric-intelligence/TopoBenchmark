@@ -10,7 +10,7 @@ from topobenchmarkx.dataloader.utils import to_data_list
 
 from topobenchmarkx.run import initialize_hydra
 
-rootutils.setup_root("./", indicator=".project-root", pythonpath=True)
+# rootutils.setup_root("./", indicator=".project-root", pythonpath=True)
 
 
 class TestCollateFunction:
@@ -156,3 +156,9 @@ class TestCollateFunction:
                         assert torch.allclose(
                             batch_list[i][key], elems[i][key]
                         )
+
+
+if __name__ == "__main__":
+    t = TestCollateFunction()
+    t.setup_method()
+    t.test_lift_features()

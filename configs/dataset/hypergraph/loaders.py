@@ -165,9 +165,7 @@ class HypergraphLoader(AbstractLoader):
         super().__init__(parameters)
         self.parameters = parameters
 
-    def load(
-        self,
-    ) -> torch_geometric.data.Dataset:
+    def load(self) -> torch_geometric.data.Dataset:
         r"""Load hypergraph dataset.
 
         Returns
@@ -180,9 +178,9 @@ class HypergraphLoader(AbstractLoader):
         if self.parameters.data_name in [
             "coauthorship_cora",
             "coauthorship_dblp",
-            "cocitation_citeseer_hypergraph",
-            "cocitation_cora_hypergraph",
-            "cocitation_pubmed_hypergraph",
+            "cocitation_citeseer",
+            "cocitation_cora",
+            "cocitation_pubmed",
         ]:
             dataset = CitationHypergraphDataset(
                 root=root_data_dir,

@@ -1,7 +1,7 @@
 """This module contains the implemented dataset classes for the topological benchmarking experiments."""
 
-from .us_county_demos_dataset import USCountyDemosDataset
 from .citation_hypergaph_dataset import CitationHypergraphDataset
+from .us_county_demos_dataset import USCountyDemosDataset
 
 PLANETOID_DATASETS = [
     "Cora",

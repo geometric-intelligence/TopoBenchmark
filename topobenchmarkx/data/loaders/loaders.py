@@ -12,7 +12,7 @@ from topobenchmarkx.data.datasets import (
     PLANETOID_DATASETS,
     TU_DATASETS,
     USCountyDemosDataset,
-    HypergraphDataset,
+    CitationHypergraphDataset,
 )
 from topobenchmarkx.data.loaders.base import AbstractLoader
 from topobenchmarkx.data.utils import (
@@ -151,7 +151,8 @@ class GraphLoader(AbstractLoader):
             )
 
         return dataset, data_dir
-s
+
+
 class HypergraphLoader(AbstractLoader):
     r"""Loader for hypergraph datasets.
 
@@ -181,13 +182,20 @@ class HypergraphLoader(AbstractLoader):
         """
         
         root_data_dir = self.parameters["data_dir"]
-        if self.parameters.data_name in ["coathorship_cora"]:
-            data, data_dir = HypergraphDataset(
+        if self.parameters.data_name in [
+            "coauthorship_cora",
+            "coauthorship_dblp",
+            "cocitation_citeseer",
+            "cocitation_cora",
+            "cocitation_pubmed",
+        ]:
+            dataset = CitationHypergraphDataset(
                 root=root_data_dir,
                 name=self.parameters["data_name"],
                 parameters=self.parameters,
             )   
-            dataset = DataloadDataset([data], data_dir)     
+            
+            data_dir = os.path.join(root_data_dir, self.parameters["data_name"])
         
         return dataset, data_dir
     

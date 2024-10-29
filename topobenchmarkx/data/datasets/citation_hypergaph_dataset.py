@@ -15,7 +15,7 @@ from topobenchmarkx.data.utils import (
     )
 
 
-class HypergraphDataset(InMemoryDataset):
+class CitationHypergraphDataset(InMemoryDataset):
     r"""Dataset class for US County Demographics dataset.
 
     Parameters
@@ -35,18 +35,21 @@ class HypergraphDataset(InMemoryDataset):
     """
 
     URLS: ClassVar = {
-        "coathorship_cora": "https://drive.google.com/file/d/1xRHJxbgvTcDYKnlM8eayavtjvcAgoJpZ/view?usp=sharing",
-        "coathorship_dblp": "https://drive.google.com/file/d/1xRHJxbgvTcDYKnlM8eayavtjvcAgoJpZ/view?usp=sharing",
+        "coauthorship_cora": "https://drive.google.com/file/d/1J5fLPABWrM9SH_7m85n7--oHDVmwJeib/view?usp=sharing",
+        "coauthorship_dblp": "https://drive.google.com/file/d/16ryf4Ve-t0_nAla0VfjtSxSAG8Sye8TZ/view?usp=sharing",
         
-        "cocitation_cora": "https://drive.google.com/file/d/15TY1rAalL1STIXGkFTe5rCSyizkiFk9h/view?usp=sharing",
-        "cocitation_citeseer": "https://drive.google.com/file/d/15TY1rAalL1STIXGkFTe5rCSyizkiFk9h/view?usp=sharing",
+        "cocitation_cora": "https://drive.google.com/file/d/1WVRx5yDxSdZpvL6FK5Ji8H3lOnyYlraN/view?usp=sharing",
+        "cocitation_citeseer": "https://drive.google.com/file/d/1XWfu1jtijsmHmfCP6UQxyLsuPM8GBNJb/view?usp=sharing",
+        "cocitation_pubmed": "https://drive.google.com/file/d/1XbqDJnHnV0HYvie3fcM8rquamnQsLTpK/view?usp=sharing",
+
     }
         
     FILE_FORMAT: ClassVar = {
-        "coathorship_cora": "zip",
-        "coathorship_dblp": "zip",
+        "coauthorship_cora": "zip",
+        "coauthorship_dblp": "zip",
         "cocitation_cora": "zip",
         "cocitation_citeseer": "zip",
+        "cocitation_pubmed":"zip"
     }
 
     RAW_FILE_NAMES: ClassVar = {}
@@ -104,12 +107,8 @@ class HypergraphDataset(InMemoryDataset):
         str
             Path to the processed directory.
         """
-        self.processed_root = osp.join(
-            self.root,
-            self.name,
-            "_".join([str(self.year), self.task_variable]),
-        )
-        return osp.join(self.processed_root, "processed")
+       
+        return osp.join(self.root, self.name, "processed")
 
     @property
     def raw_file_names(self) -> list[str]:
@@ -156,9 +155,10 @@ class HypergraphDataset(InMemoryDataset):
         extract_zip(path, folder)
         # Delete zip file
         os.unlink(path)
+        
         # Move files from osp.join(folder, name_download) to folder
         for file in os.listdir(osp.join(folder, self.name)):
-            shutil.move(osp.join(folder, self.name, file), folder)
+            shutil.move(osp.join(folder, self.name, file), osp.join(folder, file))
         # Delete osp.join(folder, self.name) dir
         shutil.rmtree(osp.join(folder, self.name))
 
@@ -169,9 +169,11 @@ class HypergraphDataset(InMemoryDataset):
         processing transformations if specified, and saves the processed data
         to the appropriate location.
         """
-        data = load_hypergraph_pickle_dataset(
-            self.name, self.root, self.task_variable
+        data, _ = load_hypergraph_pickle_dataset(
+            self.name, 
+            self.raw_dir
         )
+
         data_list = [data]
         self.data, self.slices = self.collate(data_list)
         self._data_list = None  # Reset cache.

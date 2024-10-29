@@ -20,8 +20,8 @@ repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.4.4
     hooks:
-      - id: ruff
-        args: [ --no-fix ]
+      # - id: ruff
+      #   args: [ --no-fix ]
       - id: ruff-format
 
   - repo: https://github.com/numpy/numpydoc

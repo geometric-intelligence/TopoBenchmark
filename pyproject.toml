@@ -3,7 +3,7 @@ requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "TopoTuneBenchmarkX"
+name = "TopoBenchmark"
 dynamic = ["version"]
 authors = [
     {name = "PyT-Team Authors", email = "tlscabinet@gmail.com"}
@@ -40,7 +40,7 @@ dependencies=[
     "hydra-core==1.3.2",
     "hydra-colorlog==1.2.0",
     "hydra-optuna-sweeper==1.2.0",
-    "wandb==0.16.4",
+    "wandb",
     "einops==0.7.0",
     "tabulate",
     "ipykernel",
@@ -50,8 +50,7 @@ dependencies=[
     "rootutils",
     "toponetx @ git+https://github.com/pyt-team/TopoNetX.git",
     "topomodelx @ git+https://github.com/pyt-team/TopoModelX.git",
-    "topoembedx @ git+https://github.com/pyt-team/TopoEmbedX.git",
-    "lightning==2.2.5",
+    "lightning==2.4.0",
 ]
 
 [project.optional-dependencies]
@@ -77,8 +76,8 @@ test = [
     "pytest-mock"
 ]
 
-dev = ["TopoTuneBenchmarkX[test, lint]"]
-all = ["TopoTuneBenchmarkX[dev, doc]"]
+dev = ["TopoBenchmark[test, lint]"]
+all = ["TopoBenchmark[dev, doc]"]
 
 [project.urls]
 homepage="https://github.com/pyt-team/TopoBenchmarkX"

@@ -50,7 +50,7 @@ dependencies=[
     "rootutils",
     "toponetx @ git+https://github.com/pyt-team/TopoNetX.git",
     "topomodelx @ git+https://github.com/pyt-team/TopoModelX.git",
-    "lightning==2.4",
+    "lightning==2.4.0",
 ]
 
 [project.optional-dependencies]

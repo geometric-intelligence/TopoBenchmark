@@ -3,7 +3,7 @@ requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "TopoTuneBenchmarkX"
+name = "TopoBenchmark"
 dynamic = ["version"]
 authors = [
     {name = "PyT-Team Authors", email = "tlscabinet@gmail.com"}
@@ -50,8 +50,7 @@ dependencies=[
     "rootutils",
     "toponetx @ git+https://github.com/pyt-team/TopoNetX.git",
     "topomodelx @ git+https://github.com/pyt-team/TopoModelX.git",
-    "topoembedx @ git+https://github.com/pyt-team/TopoEmbedX.git",
-    "lightning==2.2.5",
+    "lightning==2.4",
 ]
 
 [project.optional-dependencies]

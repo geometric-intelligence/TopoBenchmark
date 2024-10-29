@@ -1,6 +1,7 @@
 """This module contains the implemented dataset classes for the topological benchmarking experiments."""
 
 from .us_county_demos_dataset import USCountyDemosDataset
+from .hypergaph import HypergraphDataset
 
 PLANETOID_DATASETS = [
     "Cora",
@@ -44,4 +45,5 @@ __all__ = [
     "TU_DATASETS",
     "FIXED_SPLITS_DATASETS",
     "HETEROPHILIC_DATASETS",
+    "HypergraphDataset",
 ]

@@ -12,6 +12,7 @@ from topobenchmarkx.data.datasets import (
     PLANETOID_DATASETS,
     TU_DATASETS,
     USCountyDemosDataset,
+    HypergraphDataset,
 )
 from topobenchmarkx.data.loaders.base import AbstractLoader
 from topobenchmarkx.data.utils import (
@@ -150,8 +151,46 @@ class GraphLoader(AbstractLoader):
             )
 
         return dataset, data_dir
+s
+class HypergraphLoader(AbstractLoader):
+    r"""Loader for hypergraph datasets.
 
+    Parameters
+    ----------
+    parameters : DictConfig
+        Configuration parameters.
+    """
 
+    def __init__(self, parameters: DictConfig):
+        super().__init__(parameters)
+        self.parameters = parameters
+
+    def load(
+        self,
+    ) -> torch_geometric.data.Dataset:
+        r"""Load hypergraph dataset.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        torch_geometric.data.Dataset
+            torch_geometric.data.Dataset object containing the loaded data.
+        """
+        
+        root_data_dir = self.parameters["data_dir"]
+        if self.parameters.data_name in ["coathorship_cora"]:
+            data, data_dir = HypergraphDataset(
+                root=root_data_dir,
+                name=self.parameters["data_name"],
+                parameters=self.parameters,
+            )   
+            dataset = DataloadDataset([data], data_dir)     
+        
+        return dataset, data_dir
+    
 class CellComplexLoader(AbstractLoader):
     """Loader for cell complex datasets.
 
@@ -208,28 +247,3 @@ class SimplicialLoader(AbstractLoader):
         """
         return load_simplicial_dataset(self.parameters)
 
-
-class HypergraphLoader(AbstractLoader):
-    """Loader for hypergraph datasets.
-
-    Parameters
-    ----------
-    parameters : DictConfig
-        Configuration parameters.
-    """
-
-    def __init__(self, parameters: DictConfig):
-        super().__init__(parameters)
-        self.parameters = parameters
-
-    def load(
-        self,
-    ) -> torch_geometric.data.Dataset:
-        """Load hypergraph dataset.
-
-        Returns
-        -------
-        torch_geometric.data.Dataset
-            Dataset object containing the loaded data.
-        """
-        return load_hypergraph_pickle_dataset(self.parameters)

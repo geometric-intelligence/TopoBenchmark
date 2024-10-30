@@ -50,7 +50,7 @@ train: True
 test: True
 
 # simply provide checkpoint path to resume training
-ckpt_path: null
+ckpt_path: null #"/home/gbg141/TopoBenchmarkX/logs/train/multiruns/2024-09-20_19-55-03/39/checkpoints/epoch_028.ckpt"
 
 # seed for random number generators in pytorch, numpy and python.random
 seed: 42

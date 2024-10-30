@@ -21,7 +21,7 @@ from torch_geometric.utils import add_self_loops as add_self_loops_fn
 from torch_geometric.utils.num_nodes import maybe_num_nodes
 from torch_geometric.utils.sparse import set_sparse_value
 
-from topobenchmarkx.nn.modules import KAN
+from topobenchmarkx.nn.modules import KAN, EfficientKAN
 
 
 def gcn_norm(
@@ -164,6 +164,8 @@ class KANGCNConv(MessagePassing):
         Size of each output sample.
     kan_params : dict
         Parameters for the KAN layer.
+    kan_model : str, optional
+        KAN model to use (default: "original").
     improved : bool, optional
         If set to :obj:`True`, the layer computes :math:`mathbf{hat{A}}` as :math:`mathbf{A} + 2mathbf{I}`.
         (default: :obj:`False`).
@@ -191,6 +193,7 @@ class KANGCNConv(MessagePassing):
         in_channels: int,
         out_channels: int,
         kan_params: dict,
+        kan_model: str = "original",
         improved: bool = False,
         cached: bool = False,
         add_self_loops: bool | None = None,
@@ -221,12 +224,18 @@ class KANGCNConv(MessagePassing):
         self._cached_edge_index = None
         self._cached_adj_t = None
 
-        self.lin = KAN(
-            in_channels,
-            out_channels,
-            **kan_params,
-        )  # Linear(in_channels, out_channels, bias=False, weight_initializer='glorot')
-
+        if kan_model == "original":
+            self.lin = KAN(
+                in_channels,
+                out_channels,
+                **kan_params,
+            )  # Linear(in_channels, out_channels, bias=False, weight_initializer='glorot')
+        elif kan_model == "efficient":
+            self.lin = EfficientKAN(
+                in_channels,
+                out_channels,
+                **kan_params,
+            )
         self.reset_parameters()
 
     def reset_parameters(self):

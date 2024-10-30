@@ -1,43 +1,45 @@
 _target_: topobenchmarkx.model.TBXModel
 
-defaults:
-  - modules@kan_params: kan
-
-model_name: kan_cccn
-model_domain: cell
+model_name: topotune_onehasse
+model_domain: simplicial
+tune_gnn: GCN
 
 feature_encoder:
   _target_: topobenchmarkx.nn.encoders.${model.feature_encoder.encoder_name}
-  encoder_name: KANAllCellFeatureEncoder
+  encoder_name: AllCellFeatureEncoder
   in_channels: ${infer_in_channels:${dataset},${oc.select:transforms,null}} 
-  out_channels: 8
-  proj_dropout: 0.25
+  out_channels: 32
+  proj_dropout: 0.
   selected_dimensions:
     - 0
     - 1
-  kan_params: ${model.kan_params}
-  kan_model: "original"
-
-#   _target_: topobenchmarkx.nn.encoders.${model.feature_encoder.encoder_name}
-#   encoder_name: AllCellFeatureEncoder
-#   in_channels: ${infer_in_channels:${dataset},${oc.select:transforms,null}} 
-#   out_channels: 32
-#   proj_dropout: 0.
-#   selected_dimensions:
-#     - 0
-#     - 1
+    - 2
 
 backbone:
-  _target_: topobenchmarkx.nn.backbones.cell.KANCCCN
-  in_channels: ${model.feature_encoder.out_channels}
-  n_layers: 2
-  dropout: 0.0
-  kan_params: ${model.kan_params}
+  _target_: topobenchmarkx.nn.backbones.combinatorial.gccn_onehasse.TopoTune_OneHasse
+  GNN:
+    _target_: topobenchmarkx.nn.backbones.graph.${model.tune_gnn}
+    in_channels: ${model.feature_encoder.out_channels}
+    out_channels: ${model.feature_encoder.out_channels}
+    hidden_channels: ${model.feature_encoder.out_channels}
+    num_layers: 2
+    dropout: 0.0
+    norm: BatchNorm
+  routes:
+    - - [1, 1]
+      - adjacency
+    - - [0, 1]
+      - cbdry
+    - - [2, 1]
+      - bdry
+  layers: 2
+  use_edge_attr: false
+  activation: relu
 
 backbone_wrapper:
-  _target_: topobenchmarkx.nn.wrappers.CCCNWrapper
+  _target_: topobenchmarkx.nn.wrappers.combinatorial.TuneWrapper
   _partial_: true
-  wrapper_name: CCCNWrapper
+  wrapper_name: TuneWrapper
   out_channels: ${model.feature_encoder.out_channels}
   num_cell_dimensions: ${infere_num_cell_dimensions:${oc.select:model.feature_encoder.selected_dimensions,null},${model.feature_encoder.in_channels}}
 

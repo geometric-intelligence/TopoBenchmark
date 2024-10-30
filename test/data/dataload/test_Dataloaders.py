@@ -8,9 +8,11 @@ from topobenchmarkx.data.preprocessor import PreProcessor
 from topobenchmarkx.dataloader import TBXDataloader
 from topobenchmarkx.dataloader.utils import to_data_list
 
+from omegaconf import OmegaConf
+import os
 from topobenchmarkx.run import initialize_hydra
 
-rootutils.setup_root("./", indicator=".project-root", pythonpath=True)
+# rootutils.setup_root("./", indicator=".project-root", pythonpath=True)
 
 
 class TestCollateFunction:
@@ -18,10 +20,33 @@ class TestCollateFunction:
 
     def setup_method(self):
         """Setup the test."""
-        cfg = initialize_hydra()
-        graph_loader = hydra.utils.instantiate(cfg.dataset, _recursive_=False)
 
-        datasets, dataset_dir = graph_loader.loader.load()
+        # loader_config = {
+        #     "dataset":{
+        #         "data_domain": "graph",
+        #         "data_type": "TUDataset",
+        #         "data_name": "MUTAG",
+        #         "data_dir": "./data/MUTAG/",
+        #         }
+        # }
+        #loader_config = OmegaConf.create(loader_config) # initialize_hydra()
+       # Initialize the Hydra environment
+        # Get the current script's directory and construct a relative path
+        # config_dir =  "../../../configs/dataset/graph"
+        
+        # # Initialize the Hydra environment with the relative path
+        # with hydra.initialize(version_base="1.3", config_path=config_dir, job_name="run"):
+        #     cfg = hydra.compose(config_name="MUTAG")
+        # #assert cfg==1, f"{cfg}"
+
+        hydra.initialize(
+        version_base="1.3", config_path="../../../configs", job_name="run"
+        )
+        cfg = hydra.compose(config_name="run.yaml", overrides=["dataset=graph/NCI1"])
+
+        graph_loader = hydra.utils.instantiate(cfg.dataset.loader, _recursive_=False)
+
+        datasets, dataset_dir = graph_loader.load()
         preprocessor = PreProcessor(datasets, dataset_dir, None)
         dataset_train, dataset_val, dataset_test = (
             preprocessor.load_dataset_splits(cfg.dataset.split_params)
@@ -156,3 +181,9 @@ class TestCollateFunction:
                         assert torch.allclose(
                             batch_list[i][key], elems[i][key]
                         )
+
+
+if __name__ == "__main__":
+    t = TestCollateFunction()
+    t.setup_method()
+    t.test_lift_features()

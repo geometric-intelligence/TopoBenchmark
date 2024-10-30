@@ -1,29 +1,24 @@
 # Dataset loader config
 loader:
-  _target_: topobenchmarkx.data.loaders.GraphLoader
+  _target_: topobenchmarkx.data.loaders.HypergraphLoader
   parameters: 
-    data_domain: graph
-    data_type: TUDataset
-    data_name: MUTAG
+    data_domain: hypergraph
+    data_type: cocitation
+    data_name: cocitation_pubmed
     data_dir: ${paths.data_dir}/${dataset.loader.parameters.data_domain}/${dataset.loader.parameters.data_type}
 
 # Dataset parameters
 parameters:
-  num_features:
-    - 7 # initial node features
-    - 4 # initial edge features
-  num_classes: 2
+  num_features: 500
+  num_classes: 3
   task: classification
   loss_type: cross_entropy
   monitor_metric: accuracy
-  task_level: graph
-  # Lifting parameters
-  max_dim_if_lifted: 3 # This is the maximum dimension of the simplicial complex in the dataset
-  preserve_edge_attr_if_lifted: True
+  task_level: node
 
 #splits
 split_params:
-  learning_setting: inductive
+  learning_setting: transductive
   data_split_dir: ${paths.data_dir}/data_splits/${dataset.loader.parameters.data_name}
   data_seed: 0
   split_type: random #'k-fold' # either "k-fold" or "random" strategies
@@ -32,6 +27,6 @@ split_params:
 
 # Dataloader parameters
 dataloader_params:
-  batch_size: 10
-  num_workers: 0
+  batch_size: 1 # Fixed
+  num_workers: 1
   pin_memory: False

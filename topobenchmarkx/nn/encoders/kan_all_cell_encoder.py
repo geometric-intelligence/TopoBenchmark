@@ -4,7 +4,7 @@ import torch
 import torch_geometric
 
 from topobenchmarkx.nn.encoders.base import AbstractFeatureEncoder
-from topobenchmarkx.nn.modules import KAN
+from topobenchmarkx.nn.modules import KAN, EfficientKAN
 
 
 class KANAllCellFeatureEncoder(AbstractFeatureEncoder):
@@ -23,6 +23,8 @@ class KANAllCellFeatureEncoder(AbstractFeatureEncoder):
         Output dimensions for the features.
     selected_dimensions : list[int], optional
         List of indexes to apply the BaseEncoders to (default: None).
+    kan_model : str, optional
+        KAN model to use (default: "original").
     kan_params : dict, optional
         Additional keyword arguments for the BaseEncoder (default: None).
     **kwargs : dict, optional
@@ -34,6 +36,7 @@ class KANAllCellFeatureEncoder(AbstractFeatureEncoder):
         in_channels,
         out_channels,
         selected_dimensions=None,
+        kan_model="original",
         kan_params={},  # noqa: B006
         **kwargs,
     ):
@@ -55,6 +58,7 @@ class KANAllCellFeatureEncoder(AbstractFeatureEncoder):
                 KANBaseEncoder(
                     self.in_channels[i],
                     self.out_channels,
+                    kan_model=kan_model,
                     kan_params=kan_params,
                 ),
             )
@@ -104,6 +108,8 @@ class KANBaseEncoder(torch.nn.Module):
         Dimensions of output features.
     hidden_layers : list[int], optional
         List of hidden layer dimensions (default: None).
+    kan_model : torch.nn.Module, optional
+        KAN model to use (default: KAN).
     kan_params : dict, optional
         Additional keyword arguments for the KAN layer (default: {}).
     **kwargs : dict, optional
@@ -115,16 +121,25 @@ class KANBaseEncoder(torch.nn.Module):
         in_channels,
         out_channels,
         hidden_layers=None,
+        kan_model="original",
         kan_params={},  # noqa: B006
         **kwargs,
     ):
         super().__init__()
-        self.KAN = KAN(
-            in_channels=in_channels,
-            out_channels=out_channels,
-            hidden_layers=hidden_layers,
-            **kan_params,
-        )
+        if kan_model == "original":
+            self.KAN = KAN(
+                in_channels=in_channels,
+                out_channels=out_channels,
+                hidden_layers=hidden_layers,
+                **kan_params,
+            )
+        elif kan_model == "efficient":
+            self.KAN = EfficientKAN(
+                in_channels=in_channels,
+                out_channels=out_channels,
+                hidden_layers=hidden_layers,
+                **kan_params,
+            )
 
     # def __repr__(self):
     #    return f"{self.__class__.__name__}(in_channels={self.linear1.in_features}, out_channels={self.linear1.out_features})"

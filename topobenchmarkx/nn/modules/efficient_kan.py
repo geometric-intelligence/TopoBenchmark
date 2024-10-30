@@ -362,8 +362,12 @@ class EfficientKAN(torch.nn.Module):
 
     Parameters
     ----------
-    layers_hidden : list
-        List of hidden layer sizes.
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    hidden_layers : list[int], optional
+        List of hidden layer dimensions, by default None.
     grid_size : int, optional
         Number of grid points, by default 5.
     spline_order : int, optional
@@ -386,7 +390,9 @@ class EfficientKAN(torch.nn.Module):
 
     def __init__(
         self,
-        layers_hidden,
+        in_channels,
+        out_channels,
+        hidden_layers=None,
         grid_size=5,
         spline_order=3,
         scale_noise=0.1,
@@ -398,6 +404,10 @@ class EfficientKAN(torch.nn.Module):
         **kwargs,
     ):
         super().__init__()
+        if hidden_layers is None:
+            layers_hidden = [in_channels, out_channels]
+        else:
+            layers_hidden = [in_channels, *hidden_layers, out_channels]
         self.grid_size = grid_size
         self.spline_order = spline_order
 

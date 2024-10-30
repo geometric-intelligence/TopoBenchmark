@@ -3,7 +3,11 @@
 import torch.nn as nn
 import torch.nn.functional as F
 
-from topobenchmarkx.nn.modules import KAN, KANGCNConv
+from topobenchmarkx.nn.modules import (
+    KAN,
+    EfficientKAN,
+    KANGCNConv,
+)
 
 
 class KANCCCN(nn.Module):
@@ -17,6 +21,8 @@ class KANCCCN(nn.Module):
         Number of layers (default: 2).
     dropout : float, optional
         Dropout rate (default: 0).
+    kan_model : str, optional
+        KAN model to use (default: "original").
     kan_params : dict, optional
         Dictionary containing the parameters for the KAN layer (default: {}).
     last_act : bool, optional
@@ -28,6 +34,7 @@ class KANCCCN(nn.Module):
         in_channels,
         n_layers=2,
         dropout=0.0,
+        kan_model="original",
         kan_params={},  # noqa: B006
         last_act=False,
     ):
@@ -36,7 +43,14 @@ class KANCCCN(nn.Module):
         self.convs = nn.ModuleList()
         self.last_act = last_act
         for _ in range(n_layers):
-            self.convs.append(KANCW(in_channels, in_channels, kan_params))
+            self.convs.append(
+                KANCW(
+                    in_channels,
+                    in_channels,
+                    kan_model=kan_model,
+                    kan_params=kan_params,
+                )
+            )
 
     def forward(self, x, Ld, Lu):
         r"""Forward pass.
@@ -55,11 +69,11 @@ class KANCCCN(nn.Module):
         torch.Tensor
             Output tensor.
         """
-        for i, c in enumerate(self.convs):
+        for _, c in enumerate(self.convs):
             x = c(F.dropout(x, p=self.d, training=self.training), Lu, Ld)
-            if i == len(self.convs) and self.last_act is False:
-                break
-            x = x.relu()
+            # if i == len(self.convs) and self.last_act is False:
+            #     break
+            # x = x.relu()
         return x
 
 
@@ -72,22 +86,39 @@ class KANCW(nn.Module):
         Number of input channels.
     F_out : int
         Number of output channels.
+    kan_model : torch.nn.Module, optional
+        KAN model to use (default: KAN).
     kan_params : dict, optional
         Dictionary containing the parameters for the KAN layer (default: {}).
     """
 
-    def __init__(self, F_in, F_out, kan_params={}):  # noqa: B006
+    def __init__(self, F_in, F_out, kan_model=KAN, kan_params={}):  # noqa: B006
         super().__init__()
-        self.har = KAN(
+        if kan_model == "original":
+            self.har = KAN(
+                F_in,
+                F_out,
+                **kan_params,
+            )
+        elif kan_model == "efficient":
+            self.har = EfficientKAN(
+                F_in,
+                F_out,
+                **kan_params,
+            )
+        self.sol = KANGCNConv(
             F_in,
             F_out,
-            **kan_params,
-        )
-        self.sol = KANGCNConv(
-            F_in, F_out, kan_params=kan_params, add_self_loops=False
+            kan_params=kan_params,
+            kan_model=kan_model,
+            add_self_loops=False,
         )
         self.irr = KANGCNConv(
-            F_in, F_out, kan_params=kan_params, add_self_loops=False
+            F_in,
+            F_out,
+            kan_params=kan_params,
+            kan_model=kan_model,
+            add_self_loops=False,
         )
 
     def forward(self, xe, Lu, Ld):

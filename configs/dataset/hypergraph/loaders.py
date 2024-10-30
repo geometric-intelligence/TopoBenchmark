@@ -165,9 +165,7 @@ class HypergraphLoader(AbstractLoader):
         super().__init__(parameters)
         self.parameters = parameters
 
-    def load(
-        self,
-    ) -> torch_geometric.data.Dataset:
+    def load(self) -> torch_geometric.data.Dataset:
         r"""Load hypergraph dataset.
 
         Returns

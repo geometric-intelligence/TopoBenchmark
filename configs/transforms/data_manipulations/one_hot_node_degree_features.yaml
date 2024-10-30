@@ -2,7 +2,7 @@ _target_: topobenchmarkx.transforms.data_transform.DataTransform
 transform_name: "OneHotDegreeFeatures"
 transform_type: "data manipulation"
 
-degrees_fields: "node_degrees"
+degrees_fields: ${oc.select:dataset.parameters.degrees_fields,"node_degrees"}
 features_fields: "x"
 max_degree: ${dataset.parameters.max_node_degree}
 

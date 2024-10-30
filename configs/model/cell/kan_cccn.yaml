@@ -16,6 +16,7 @@ feature_encoder:
     - 0
     - 1
   kan_params: ${model.kan_params}
+  kan_model: "original"
 
 #   _target_: topobenchmarkx.nn.encoders.${model.feature_encoder.encoder_name}
 #   encoder_name: AllCellFeatureEncoder

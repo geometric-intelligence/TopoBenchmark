@@ -1,6 +1,7 @@
 defaults:
   - data_manipulations@equal_gaus_features: equal_gaus_features
   - data_manipulations@attention2graph: attention2graph
+  - liftings@_here_: ${get_required_lifting:graph,${model}}
 
 equal_gaus_features:
   num_features: 10

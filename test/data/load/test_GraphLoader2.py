@@ -1,6 +1,6 @@
 """Test the GraphLoader class."""
 
-from unittest.mock import MagicMock, patch
+#from unittest.mock import MagicMock, patch
 import torch
 import pytest
 from omegaconf import DictConfig, OmegaConf
@@ -15,6 +15,7 @@ class TestLoaders:
     
     def setup_method(self):
         """Setup the test."""
+        hydra.core.global_hydra.GlobalHydra.instance().clear()
         base_dir = os.path.abspath(__file__)
         # Go up four levels
         for _ in range(4):
@@ -34,8 +35,7 @@ class TestLoaders:
     def test_init(self):
         """Test the initialization of the GraphLoader class."""
 
-        for f in self.config_files:
-            print(f)
+        for f in self.config_files:    
             with hydra.initialize(version_base="1.3",
                 config_path=self.relative_config_dir,
                 job_name="run"
@@ -44,6 +44,7 @@ class TestLoaders:
                     overrides=[f"dataset=graph/{f}"], 
                     return_hydra_config=True
                 )
+                
 
             loader = GraphLoader(parameters.dataset.loader.parameters)
             loader.load()

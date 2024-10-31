@@ -128,7 +128,7 @@ def read_ndim_manifolds(path, dim, y_val="betti_numbers"):
         Dimension of the manifolds to load, required to make sanity checks.
     y_val : str, optional
         The triangulation information to use as label. Can be one of ['betti_numbers', 'torsion_coefficients',
-        'name', 'genus', 'orientable' (default: "betti_numbers").
+        'name', 'genus', 'orientable'] (default: "betti_numbers").
 
     Returns
     -------
@@ -178,7 +178,7 @@ def read_ndim_manifolds(path, dim, y_val="betti_numbers"):
 
         if y_val == "betti_numbers":
             y = torch.tensor(y_value, dtype=torch.long).squeeze()
-        if y_val == "genus":
+        elif y_val == "genus":
             y = torch.tensor([y_value], dtype=torch.long).squeeze()
         elif y_val == "torsion_coefficients":
             y = torch.tensor(
@@ -189,8 +189,10 @@ def read_ndim_manifolds(path, dim, y_val="betti_numbers"):
             y = torch.tensor(
                 [HOMEO_NAME_TO_IDX[y_value]], dtype=torch.long
             ).squeeze()
-        else:  # orientable
+        elif y_val == "orientable":
             y = torch.tensor([y_value], dtype=torch.bool).squeeze()
+        else:
+            raise ValueError(f"Invalid y_val: {y_val}")
 
         sc = SimplicialComplex()
 

@@ -35,8 +35,8 @@ class MantraDataset(InMemoryDataset):
     """
 
     URLS: ClassVar = {
-        "2_manifolds": "https://github.com/aidos-lab/mantra/releases/download/v0.0.5/2_manifolds.json.gz",
-        "3_manifolds": "https://github.com/aidos-lab/mantra/releases/download/v0.0.5/3_manifolds.json.gz",
+        "2_manifolds": "https://github.com/aidos-lab/mantra/releases/download/{version}/2_manifolds.json.gz",
+        "3_manifolds": "https://github.com/aidos-lab/mantra/releases/download/{version}/3_manifolds.json.gz",
     }
 
     FILE_FORMAT: ClassVar = {
@@ -55,6 +55,8 @@ class MantraDataset(InMemoryDataset):
         self.name = name
         self.parameters = parameters
         self.manifold_dim = parameters.manifold_dim
+        self.version = parameters.version
+        self.target_name = parameters.target_name
         super().__init__(
             root,
         )
@@ -87,7 +89,13 @@ class MantraDataset(InMemoryDataset):
         str
             Path to the raw directory.
         """
-        return osp.join(self.root, self.name, "raw")
+        return osp.join(
+            self.root,
+            self.name,
+            str(self.version),
+            str(self.manifold_dim),
+            "raw",
+        )
 
     @property
     def processed_dir(self) -> str:
@@ -99,9 +107,7 @@ class MantraDataset(InMemoryDataset):
             Path to the processed directory.
         """
         self.processed_root = osp.join(
-            self.root,
-            self.name,
-            "_".join([str(self.manifold_dim)]),
+            self.root, self.name, str(self.version), str(self.manifold_dim)
         )
         return osp.join(self.processed_root, "processed")
 
@@ -134,7 +140,9 @@ class MantraDataset(InMemoryDataset):
             FileNotFoundError: If the dataset URL is not found.
         """
         # Step 1: Download data from the source
-        self.url = self.URLS[f"{self.manifold_dim}_manifolds"]
+        self.url = self.URLS[f"{self.manifold_dim}_manifolds"].format(
+            version=self.version
+        )
         self.file_format = self.FILE_FORMAT[f"{self.manifold_dim}_manifolds"]
         dataset_name = f"{self.manifold_dim}_manifolds"
 
@@ -150,9 +158,6 @@ class MantraDataset(InMemoryDataset):
         filename = f"{dataset_name}.{self.file_format}"
         path = osp.join(folder, filename)
         extract_gz(path, folder)
-        print(path)
-        print(folder)
-        shutil.move(path, folder)
 
         # Delete zip file
         os.unlink(path)
@@ -176,9 +181,10 @@ class MantraDataset(InMemoryDataset):
             # TODO Fix this
             osp.join(self.raw_dir, self.raw_file_names[0]),
             self.manifold_dim,
+            self.target_name,
         )
 
-        data_list = [data]
+        data_list = data
         self.data, self.slices = self.collate(data_list)
         self._data_list = None  # Reset cache.
         fs.torch_save(

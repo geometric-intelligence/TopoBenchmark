@@ -21,24 +21,6 @@ class TestCollateFunction:
     def setup_method(self):
         """Setup the test."""
 
-        # loader_config = {
-        #     "dataset":{
-        #         "data_domain": "graph",
-        #         "data_type": "TUDataset",
-        #         "data_name": "MUTAG",
-        #         "data_dir": "./data/MUTAG/",
-        #         }
-        # }
-        #loader_config = OmegaConf.create(loader_config) # initialize_hydra()
-       # Initialize the Hydra environment
-        # Get the current script's directory and construct a relative path
-        # config_dir =  "../../../configs/dataset/graph"
-        
-        # # Initialize the Hydra environment with the relative path
-        # with hydra.initialize(version_base="1.3", config_path=config_dir, job_name="run"):
-        #     cfg = hydra.compose(config_name="MUTAG")
-        # #assert cfg==1, f"{cfg}"
-
         hydra.initialize(
         version_base="1.3", config_path="../../../configs", job_name="run"
         )

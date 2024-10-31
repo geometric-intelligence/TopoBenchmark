@@ -20,11 +20,14 @@ from .identity_gnn import (
     IdentitySAGE,
 )
 
+from .kan_gnn import KANGCN
+
 __all__ = [
     "IdentityGCN",
     "IdentityGIN",
     "IdentityGAT",
     "IdentitySAGE",
+    "KANGCN",
     "MLP",
     "GCN",
     "GraphSAGE",

@@ -50,7 +50,7 @@ class EfficientKANLinear(torch.nn.Module):
         scale_base=1.0,
         scale_spline=1.0,
         enable_standalone_scale_spline=True,
-        base_activation=torch.nn.SiLU,
+        base_activation="silu",
         grid_eps=0.02,
         grid_range=(-1, 1),
         **kwargs,
@@ -87,7 +87,13 @@ class EfficientKANLinear(torch.nn.Module):
         self.scale_base = scale_base
         self.scale_spline = scale_spline
         self.enable_standalone_scale_spline = enable_standalone_scale_spline
-        self.base_activation = base_activation()
+        
+        if base_activation == 'silu':
+            self.base_activation = torch.nn.SiLU()
+        elif base_activation == 'identity':
+            self.base_activation = torch.nn.Identity()
+        elif base_activation == 'zero':
+            self.base_activation = lambda x: x*0.
         self.grid_eps = grid_eps
 
         self.reset_parameters()
@@ -398,7 +404,7 @@ class EfficientKAN(torch.nn.Module):
         scale_noise=0.1,
         scale_base=1.0,
         scale_spline=1.0,
-        base_activation=torch.nn.SiLU,
+        base_activation="silu",
         grid_eps=0.02,
         grid_range=(-1, 1),
         **kwargs,

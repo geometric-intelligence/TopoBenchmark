@@ -5,7 +5,7 @@
 defaults:
   - _self_
   - dataset: graph/MUTAG
-  - model: cell/kan_cccn
+  - model: cell/kan_topotune
   - transforms: ${get_default_transform:${dataset},${model}} #no_transform
   - optimizer: default
   - loss: default

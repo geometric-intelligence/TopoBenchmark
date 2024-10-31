@@ -128,7 +128,7 @@ def gcn_norm(
 
 class KANGCNConv(MessagePassing):
     """
-    KAN version of the graph convolutional operator.
+    KAN version of the graph convolutional operator adapted from torch_geometric.nn.conv.GCNConv.
 
     From the "Semi-supervised Classification with Graph Convolutional Networks"
     <https://arxiv.org/abs/1609.02907> paper.
@@ -192,8 +192,8 @@ class KANGCNConv(MessagePassing):
         self,
         in_channels: int,
         out_channels: int,
-        kan_params: dict,
         kan_model: str = "original",
+        kan_params: dict = {},
         improved: bool = False,
         cached: bool = False,
         add_self_loops: bool | None = None,

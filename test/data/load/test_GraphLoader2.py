@@ -48,3 +48,5 @@ class TestLoaders:
 
             loader = GraphLoader(parameters.dataset.loader.parameters)
             loader.load()
+        
+        repr(loader)

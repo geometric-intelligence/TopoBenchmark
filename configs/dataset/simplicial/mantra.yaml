@@ -5,7 +5,6 @@ parameters:
   data_domain: simplicial
   data_type: topological 
   data_name: mantra
-  manifold_dim: 2
   data_dir: ${paths.data_dir}/${dataset.parameters.data_domain}/${dataset.parameters.data_type}/${dataset.parameters.data_name}
   data_split_dir: ${paths.data_dir}/data_splits/${dataset.parameters.data_name}
 

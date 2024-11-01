@@ -50,7 +50,7 @@ class TestConfigResolvers:
         assert out == "no_lifting"
 
         out = get_required_lifting("graph", "cell/can")
-        assert out == "liftings/graph2cell_default"
+        assert out == "graph2cell_default"
     
     def test_get_monitor_metric(self):
         """Test get_monitor_metric."""

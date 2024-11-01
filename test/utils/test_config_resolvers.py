@@ -66,9 +66,6 @@ class TestConfigResolvers:
         in_channels = infer_in_channels(self.dataset_config, self.cliq_lift_transform)
         assert in_channels == [7]
         
-        in_channels = infer_in_channels(self.dataset_config, self.cliq_lift_transform)
-        assert in_channels == [7]
-        
     def test_infer_num_cell_dimensions(self):
         """Test infer_num_cell_dimensions."""
         out = infere_num_cell_dimensions(None, [7, 7, 7])

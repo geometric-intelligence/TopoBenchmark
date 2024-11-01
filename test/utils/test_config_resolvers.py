@@ -4,6 +4,7 @@ import pytest
 from omegaconf import OmegaConf
 from topobenchmarkx.utils.config_resolvers import (
     infer_in_channels,
+    infere_num_cell_dimensions,
     get_default_metrics,
     get_default_transform,
     get_monitor_metric,
@@ -41,6 +42,14 @@ class TestConfigResolvers:
 
         out = get_default_transform("graph/ZINC", "cell/can")
         assert out == "dataset_defaults/ZINC"
+        
+    def get_required_lifting(self):
+        """Test get_default_lifting."""
+        out = get_default_transform("graph", "graph")
+        assert out == "no_lifting"
+
+        out = get_default_transform("graph", "cell")
+        assert out == "liftings/graph2cell_default"
     
     def test_get_monitor_metric(self):
         """Test get_monitor_metric."""
@@ -56,3 +65,25 @@ class TestConfigResolvers:
         """Test infer_in_channels."""
         in_channels = infer_in_channels(self.dataset_config, self.cliq_lift_transform)
         assert in_channels == [7]
+        
+        in_channels = infer_in_channels(self.dataset_config, self.cliq_lift_transform)
+        assert in_channels == [7]
+        
+    def test_infer_num_cell_dimensions(self):
+        """Test infer_num_cell_dimensions."""
+        out = infere_num_cell_dimensions(None, [7, 7, 7])
+        assert out == 3
+
+        out = infere_num_cell_dimensions([1, 2, 3], [7, 7])
+        assert out == 3
+        
+    def test_get_default_metrics(self):
+        """Test get_default_metrics."""
+        out = get_default_metrics("classification")
+        assert out == ["accuracy", "precision", "recall", "auroc"]
+
+        out = get_default_metrics("regression")
+        assert out == ["mse", "mae"]
+
+        with pytest.raises(ValueError, match="Invalid task") as e:
+            get_default_metrics("some_task")

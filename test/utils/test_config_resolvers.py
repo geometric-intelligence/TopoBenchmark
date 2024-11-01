@@ -45,10 +45,10 @@ class TestConfigResolvers:
         
     def test_get_required_lifting(self):
         """Test get_required_lifting."""
-        out = get_default_transform("graph", "graph")
+        out = get_default_transform("graph", "graph/gat")
         assert out == "no_lifting"
 
-        out = get_default_transform("graph", "cell")
+        out = get_default_transform("graph", "cell/can")
         assert out == "liftings/graph2cell_default"
     
     def test_get_monitor_metric(self):

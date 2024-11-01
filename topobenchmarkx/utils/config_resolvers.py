@@ -25,24 +25,19 @@ def get_default_transform(dataset, model):
     """
     data_domain, dataset = dataset.split("/")
     model_domain = model.split("/")[0]
-    if data_domain == "graph" and model_domain != "combinatorial":
-        # Check if there is a default transform for the dataset at ./configs/transforms/dataset_defaults/
-        # If not, use the default lifting transform for the dataset to be compatible with the model
-        datasets_with_defaults = [
-            f.split(".")[0]
-            for f in os.listdir("./configs/transforms/dataset_defaults/")
-        ]
-        if dataset in datasets_with_defaults:
-            return f"dataset_defaults/{dataset}"
-        else:
-            if data_domain == model_domain:
-                return "no_transform"
-            else:
-                return f"liftings/graph2{model_domain}_default"
+    # Check if there is a default transform for the dataset at ./configs/transforms/dataset_defaults/
+    # If not, use the default lifting transform for the dataset to be compatible with the model
+    datasets_with_defaults = [
+        f.split(".")[0]
+        for f in os.listdir("./configs/transforms/dataset_defaults/")
+    ]
+    if dataset in datasets_with_defaults:
+        return f"dataset_defaults/{dataset}"
     else:
-        raise ValueError(
-            f"Invalid combination of data_domain={data_domain} and model_domain={model_domain}"
-        )
+        if data_domain == model_domain:
+            return "no_transform"
+        else:
+            return f"liftings/{data_domain}2{model_domain}_default"
 
 
 def get_required_lifting(data_domain, model):

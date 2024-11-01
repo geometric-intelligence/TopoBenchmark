@@ -8,7 +8,8 @@ from topobenchmarkx.utils.config_resolvers import (
     get_default_metrics,
     get_default_transform,
     get_monitor_metric,
-    get_monitor_mode
+    get_monitor_mode,
+    get_required_lifting,
 )
 
 
@@ -45,10 +46,10 @@ class TestConfigResolvers:
         
     def test_get_required_lifting(self):
         """Test get_required_lifting."""
-        out = get_default_transform("graph", "graph/gat")
+        out = get_required_lifting("graph", "graph/gat")
         assert out == "no_lifting"
 
-        out = get_default_transform("graph", "cell/can")
+        out = get_required_lifting("graph", "cell/can")
         assert out == "liftings/graph2cell_default"
     
     def test_get_monitor_metric(self):

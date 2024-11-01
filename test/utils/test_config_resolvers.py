@@ -39,8 +39,8 @@ class TestConfigResolvers:
         out = get_default_transform("graph/MUTAG", "cell/can")
         assert out == "liftings/graph2cell_default"
 
-        with pytest.raises(ValueError, match="Invalid combination") as e:
-            get_default_transform("graph/MUTAG", "combinatorial/some")
+        out = get_default_transform("graph/ZINC", "cell/can")
+        assert out == "dataset_defaults/ZINC"
     
     def test_get_monitor_metric(self):
         """Test get_monitor_metric."""

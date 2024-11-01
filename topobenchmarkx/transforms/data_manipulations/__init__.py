@@ -1,41 +1,86 @@
-"""Data manipulations module."""
+"""Data manipulations module with automated exports."""
 
-from .calculate_simplicial_curvature import (
-    CalculateSimplicialCurvature,
-)
-from .equal_gaus_features import EqualGausFeatures
-from .identity_transform import IdentityTransform
-from .infere_knn_connectivity import InfereKNNConnectivity
-from .infere_radius_connectivity import InfereRadiusConnectivity
-from .keep_only_connected_component import KeepOnlyConnectedComponent
-from .keep_selected_data_fields import KeepSelectedDataFields
-from .node_degrees import NodeDegrees
-from .node_features_to_float import NodeFeaturesToFloat
-from .one_hot_degree_features import OneHotDegreeFeatures
+import inspect
+from importlib import util
+from pathlib import Path
+from typing import Any
 
-DATA_MANIPULATIONS = {
-    "Identity": IdentityTransform,
-    "InfereKNNConnectivity": InfereKNNConnectivity,
-    "InfereRadiusConnectivity": InfereRadiusConnectivity,
-    "NodeDegrees": NodeDegrees,
-    "OneHotDegreeFeatures": OneHotDegreeFeatures,
-    "EqualGausFeatures": EqualGausFeatures,
-    "NodeFeaturesToFloat": NodeFeaturesToFloat,
-    "CalculateSimplicialCurvature": CalculateSimplicialCurvature,
-    "KeepOnlyConnectedComponent": KeepOnlyConnectedComponent,
-    "KeepSelectedDataFields": KeepSelectedDataFields,
-}
 
-__all__ = [
-    "IdentityTransform",
-    "InfereKNNConnectivity",
-    "InfereRadiusConnectivity",
-    "EqualGausFeatures",
-    "NodeFeaturesToFloat",
-    "NodeDegrees",
-    "KeepOnlyConnectedComponent",
-    "CalculateSimplicialCurvature",
-    "OneHotDegreeFeatures",
-    "KeepSelectedDataFields",
-    "DATA_MANIPULATIONS",
-]
+class ModuleExportsManager:
+    """Manages automatic discovery and registration of data manipulation classes."""
+
+    @staticmethod
+    def is_manipulation_class(obj: Any) -> bool:
+        """Check if an object is a valid manipulation class.
+
+        Parameters
+        ----------
+        obj : Any
+            The object to check if it's a valid manipulation class.
+
+        Returns
+        -------
+        bool
+            True if the object is a valid manipulation class (non-private class
+            defined in __main__), False otherwise.
+        """
+        return (
+            inspect.isclass(obj)
+            and obj.__module__ == "__main__"
+            and not obj.__name__.startswith("_")
+        )
+
+    @classmethod
+    def discover_manipulations(cls, package_path: str) -> dict[str, type]:
+        """Dynamically discover all manipulation classes in the package.
+
+        Parameters
+        ----------
+        package_path : str
+            Path to the package's __init__.py file.
+
+        Returns
+        -------
+        dict[str, type]
+            Dictionary mapping class names to their corresponding class objects.
+        """
+        manipulations = {}
+
+        # Get the directory containing the manipulation modules
+        package_dir = Path(package_path).parent
+
+        # Iterate through all .py files in the directory
+        for file_path in package_dir.glob("*.py"):
+            if file_path.stem == "__init__":
+                continue
+
+            # Import the module
+            module_name = f"{Path(package_path).stem}.{file_path.stem}"
+            spec = util.spec_from_file_location(module_name, file_path)
+            if spec and spec.loader:
+                module = util.module_from_spec(spec)
+                spec.loader.exec_module(module)
+
+                # Find all manipulation classes in the module
+                for name, obj in inspect.getmembers(module):
+                    if (
+                        inspect.isclass(obj)
+                        and obj.__module__ == module.__name__
+                        and not name.startswith("_")
+                    ):
+                        manipulations[name] = obj  # noqa: PERF403
+
+        return manipulations
+
+
+# Create the exports manager
+manager = ModuleExportsManager()
+
+# Automatically discover and populate DATA_MANIPULATIONS
+DATA_MANIPULATIONS = manager.discover_manipulations(__file__)
+
+# Automatically generate __all__
+__all__ = [*DATA_MANIPULATIONS.keys(), "DATA_MANIPULATIONS"]
+
+# For backwards compatibility, also create individual imports
+locals().update(DATA_MANIPULATIONS)

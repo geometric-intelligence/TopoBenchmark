@@ -38,6 +38,7 @@ def get_complex_connectivity(complex, max_rank, signed=False):
             "down_laplacian",
             "up_laplacian",
             "adjacency",
+            "coadjacency",
             "hodge_laplacian",
         ]:
             try:

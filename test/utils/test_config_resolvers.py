@@ -43,8 +43,8 @@ class TestConfigResolvers:
         out = get_default_transform("graph/ZINC", "cell/can")
         assert out == "dataset_defaults/ZINC"
         
-    def get_required_lifting(self):
-        """Test get_default_lifting."""
+    def test_get_required_lifting(self):
+        """Test get_required_lifting."""
         out = get_default_transform("graph", "graph")
         assert out == "no_lifting"
 
@@ -55,11 +55,20 @@ class TestConfigResolvers:
         """Test get_monitor_metric."""
         out = get_monitor_metric("classification", "F1")
         assert out == "val/F1" 
+        
+        with pytest.raises(ValueError, match="Invalid task") as e:
+            get_monitor_metric("mix", "F1")
 
     def test_get_monitor_mode(self):
         """Test get_monitor_mode."""
         out = get_monitor_mode("regression")
         assert out == "min"
+        
+        out = get_monitor_mode("classification")
+        assert out == "max"
+        
+        with pytest.raises(ValueError, match="Invalid task") as e:
+            get_monitor_mode("mix")
 
     def test_infer_in_channels(self):
         """Test infer_in_channels."""

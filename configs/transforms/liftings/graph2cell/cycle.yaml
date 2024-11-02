@@ -4,3 +4,4 @@ transform_name: "CellCycleLifting"
 complex_dim: ${oc.select:dataset.parameters.max_dim_if_lifted,3}
 max_cell_length: 18
 preserve_edge_attr: ${oc.select:dataset.parameters.preserve_edge_attr_if_lifted,False}
+neighborhoods: ${oc.select:model.backbone.neighborhoods,['up_adjacency-0','2-up_adjacency-0','2-down_laplacian-2','2-down_adjacency-2','2-up_incidence-0','2-down_incidence-2']}

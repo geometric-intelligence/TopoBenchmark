@@ -11,7 +11,9 @@ import torch_geometric
 from topomodelx.utils.sparse import from_sparse
 
 
-def get_complex_connectivity(complex, max_rank, signed=False):
+def get_complex_connectivity(
+    complex, max_rank, neighborhoods=None, signed=False
+):
     """Get the connectivity matrices for the complex.
 
     Parameters
@@ -20,6 +22,8 @@ def get_complex_connectivity(complex, max_rank, signed=False):
         Cell complex.
     max_rank : int
         Maximum rank of the complex.
+    neighborhoods : list, optional
+        List of neighborhoods of interest.
     signed : bool, optional
         If True, returns signed connectivity matrices.
 
@@ -62,8 +66,165 @@ def get_complex_connectivity(complex, max_rank, signed=False):
                             n=practical_shape[rank_idx],
                         )
                     )
+    if neighborhoods is not None:
+        connectivity = select_neighborhoods_of_interest(
+            connectivity, neighborhoods
+        )
     connectivity["shape"] = practical_shape
     return connectivity
+
+
+def select_neighborhoods_of_interest(connectivity, neighborhoods):
+    """Select the neighborhoods of interest.
+
+    Parameters
+    ----------
+    connectivity : dict
+        Connectivity matrices.
+    neighborhoods : list
+        List of neighborhoods of interest.
+
+    Returns
+    -------
+    dict
+        Connectivity matrices of interest.
+    """
+
+    def generate_adjacency_from_laplacian(sparse_tensor):
+        """Generate an adjacency matrix from a Laplacian matrix.
+
+        Parameters
+        ----------
+        sparse_tensor : torch.sparse_coo_tensor
+            Sparse tensor representing the Laplacian matrix.
+
+        Returns
+        -------
+        torch.sparse_coo_tensor
+            Sparse tensor representing the adjacency matrix.
+        """
+        indices = sparse_tensor._indices()
+        values = sparse_tensor._values()
+
+        # Create a mask for non-diagonal elements
+        mask = indices[0] != indices[1]
+
+        # Filter indices and values based on the mask
+        new_indices = indices[:, mask]
+        new_values = values[mask]
+
+        # Turn values to 1s
+        new_values = new_values / new_values
+
+        # Construct a new sparse tensor
+        return torch.sparse_coo_tensor(
+            new_indices, new_values, sparse_tensor.size()
+        )
+
+    useful_connectivity = {}
+    for neighborhood in neighborhoods:
+        src_rank = int(neighborhood.split("-")[-1])
+        if len(neighborhood.split("-")) == 2:
+            r = 1
+            neighborhood_type = neighborhood.split("-")[0]
+            if "adjacency" in neighborhood_type:
+                useful_connectivity[neighborhood] = (
+                    connectivity[f"adjacency_{src_rank}"]
+                    if "up" in neighborhood_type
+                    else connectivity[f"coadjacency_{src_rank}"]
+                )
+            elif "laplacian" in neighborhood_type:
+                useful_connectivity[neighborhood] = connectivity[
+                    f"{neighborhood_type}_{src_rank}"
+                ]
+            elif "incidence" in neighborhood_type:
+                useful_connectivity[neighborhood] = (
+                    connectivity[f"incidence_{src_rank+1}"].T
+                    if "up" in neighborhood_type
+                    else connectivity[f"incidence_{src_rank}"]
+                )
+            else:
+                try:
+                    useful_connectivity[neighborhood] = connectivity[
+                        neighborhood
+                    ]
+                except KeyError:
+                    raise ValueError(f"Invalid neighborhood {neighborhood}")  # noqa: B904
+        else:
+            r = int(neighborhood.split("-")[0])
+            neighborhood_type = neighborhood.split("-")[1]
+            if (
+                "adjacency" in neighborhood_type
+                or "laplacian" in neighborhood_type
+            ):
+                direction, connectivity_type = neighborhood_type.split("_")
+                if direction == "up":
+                    matrix = torch.sparse.mm(
+                        connectivity[f"incidence_{src_rank+r}"],
+                        connectivity[f"incidence_{src_rank+r}"].T,
+                    )
+                    for idx in range(src_rank + r - 1, src_rank, -1):
+                        matrix = torch.sparse.mm(
+                            connectivity[f"incidence_{idx}"],
+                            torch.sparse.mm(
+                                matrix, connectivity[f"incidence_{idx}"].T
+                            ),
+                        )
+                    useful_connectivity[neighborhood] = (
+                        generate_adjacency_from_laplacian(matrix)
+                        if "adjacency" in neighborhood_type
+                        else matrix
+                    )
+                elif direction == "down":
+                    matrix = torch.sparse.mm(
+                        connectivity[f"incidence_{src_rank-r+1}"].T,
+                        connectivity[f"incidence_{src_rank-r+1}"],
+                    )
+                    for idx in range(src_rank - r + 2, src_rank + 1):
+                        matrix = torch.sparse.mm(
+                            connectivity[f"incidence_{idx}"].T,
+                            torch.sparse.mm(
+                                matrix, connectivity[f"incidence_{idx}"]
+                            ),
+                        )
+                    useful_connectivity[neighborhood] = (
+                        generate_adjacency_from_laplacian(matrix)
+                        if "adjacency" in neighborhood_type
+                        else matrix
+                    )
+            elif "incidence" in neighborhood_type:
+                direction, connectivity_type = neighborhood_type.split("_")
+                if direction == "up":
+                    matrix = connectivity[f"incidence_{src_rank+1}"]
+                    for idx in range(src_rank + 2, src_rank + r + 1):
+                        matrix = torch.sparse.mm(
+                            matrix, connectivity[f"incidence_{idx}"]
+                        )
+                    useful_connectivity[neighborhood] = (
+                        torch.sparse_coo_tensor(
+                            matrix.indices(),
+                            matrix.values() / matrix.values(),
+                            matrix.size(),
+                        ).T
+                    )
+                elif direction == "down":
+                    matrix = connectivity[f"incidence_{src_rank-r+1}"].T
+                    for idx in range(src_rank - r + 2, src_rank + 1):
+                        matrix = torch.sparse.mm(
+                            connectivity[f"incidence_{idx}"].T, matrix
+                        )
+                    useful_connectivity[neighborhood] = (
+                        torch.sparse_coo_tensor(
+                            matrix.indices(),
+                            matrix.values() / matrix.values(),
+                            matrix.size(),
+                        ).T
+                    )
+
+    for key in connectivity:
+        if "incidence" in key:
+            useful_connectivity[key] = connectivity[key]
+    return useful_connectivity
 
 
 def generate_zero_sparse_connectivity(m, n):

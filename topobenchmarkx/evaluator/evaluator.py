@@ -33,7 +33,7 @@ class TBXEvaluator(AbstractEvaluator):
             parameters = {"num_classes": kwargs["num_classes"]}
             parameters["task"] = "multiclass"
             metric_names = kwargs["metrics"]
-        if kwargs["num_classes"] == 1 and self.task == "classification":
+        elif kwargs["num_classes"] == 1 and self.task == "classification":
             parameters = {"num_classes": kwargs["num_classes"]}
             parameters["task"] = "binary"
             metric_names = kwargs["metrics"]

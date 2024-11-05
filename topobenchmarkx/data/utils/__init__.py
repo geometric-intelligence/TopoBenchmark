@@ -8,6 +8,7 @@ from .utils import (
     load_manual_graph,  # noqa: F401
     load_simplicial_dataset,  # noqa: F401
     make_hash,  # noqa: F401
+    select_neighborhoods_of_interest,  # noqa: F401
 )
 
 utils_functions = [
@@ -18,6 +19,7 @@ utils_functions = [
     "load_manual_graph",
     "make_hash",
     "ensure_serializable",
+    "select_neighborhoods_of_interest",
 ]
 
 from .split_utils import (  # noqa: E402

@@ -31,6 +31,19 @@ class MessagePassingHomophily(torch_geometric.transforms.BaseTransform):
         super().__init__()
         self.type = "calcualte_message_passing_homophily"
         self.num_steps = kwargs.get("num_steps", 3)
+        self.incidence_field = kwargs.get(
+            "incidence_field", "incidence_hyperedges"
+        )
+
+        assert (
+            self.incidence_field
+            in [
+                "incidence_hyperedges",
+                "incidence_0",
+                "incidence_1",
+                "incidence_2",
+            ]
+        ), f"Incidence field must be one of ['incidence_hyperedges', 'incidence_0', 'incidence_1', 'incidence_2'], but got {self.incidence_field}"
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}(type={self.type!r})"
@@ -49,7 +62,7 @@ class MessagePassingHomophily(torch_geometric.transforms.BaseTransform):
             The transformed data.
         """
 
-        H = data.incidence_hyperedges.to_dense()
+        H = data[f"{self.incidence_field}"].to_dense()
 
         unique_labels = torch.unique(data.y)
 

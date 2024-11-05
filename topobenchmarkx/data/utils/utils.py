@@ -159,34 +159,48 @@ def select_neighborhoods_of_interest(connectivity, neighborhoods):
             ):
                 direction, connectivity_type = neighborhood_type.split("_")
                 if direction == "up":
+                    # Multiply consecutive incidence matrices up to getting the desired rank
                     matrix = torch.sparse.mm(
-                        connectivity[f"incidence_{src_rank+r}"],
-                        connectivity[f"incidence_{src_rank+r}"].T,
+                        connectivity[f"incidence_{src_rank+1}"],
+                        connectivity[f"incidence_{src_rank+2}"],
                     )
-                    for idx in range(src_rank + r - 1, src_rank, -1):
+                    for idx in range(src_rank + 3, src_rank + r + 1):
                         matrix = torch.sparse.mm(
-                            connectivity[f"incidence_{idx}"],
-                            torch.sparse.mm(
-                                matrix, connectivity[f"incidence_{idx}"].T
-                            ),
+                            matrix, connectivity[f"incidence_{idx}"]
                         )
+                    # Multiply the resulting matrix by its transpose to get the laplacian matrix
+                    matrix = torch.sparse.mm(matrix, matrix.T)
+                    # Turn all values to 1s
+                    matrix = torch.sparse_coo_tensor(
+                        matrix.indices(),
+                        matrix.values() / matrix.values(),
+                        matrix.size(),
+                    )
+                    # Generate the adjacency matrix from the laplacian if needed
                     useful_connectivity[neighborhood] = (
                         generate_adjacency_from_laplacian(matrix)
                         if "adjacency" in neighborhood_type
                         else matrix
                     )
                 elif direction == "down":
+                    # Multiply consecutive incidence matrices up to getting the desired rank
                     matrix = torch.sparse.mm(
-                        connectivity[f"incidence_{src_rank-r+1}"].T,
                         connectivity[f"incidence_{src_rank-r+1}"],
+                        connectivity[f"incidence_{src_rank-r+2}"],
                     )
-                    for idx in range(src_rank - r + 2, src_rank + 1):
+                    for idx in range(src_rank - r + 3, src_rank + 1):
                         matrix = torch.sparse.mm(
-                            connectivity[f"incidence_{idx}"].T,
-                            torch.sparse.mm(
-                                matrix, connectivity[f"incidence_{idx}"]
-                            ),
+                            matrix, connectivity[f"incidence_{idx}"]
                         )
+                    # Multiply the resulting matrix by its transpose to get the laplacian matrix
+                    matrix = torch.sparse.mm(matrix.T, matrix)
+                    # Turn all values to 1s
+                    matrix = torch.sparse_coo_tensor(
+                        matrix.indices(),
+                        matrix.values() / matrix.values(),
+                        matrix.size(),
+                    )
+                    # Generate the adjacency matrix from the laplacian if needed
                     useful_connectivity[neighborhood] = (
                         generate_adjacency_from_laplacian(matrix)
                         if "adjacency" in neighborhood_type
@@ -195,11 +209,16 @@ def select_neighborhoods_of_interest(connectivity, neighborhoods):
             elif "incidence" in neighborhood_type:
                 direction, connectivity_type = neighborhood_type.split("_")
                 if direction == "up":
-                    matrix = connectivity[f"incidence_{src_rank+1}"]
-                    for idx in range(src_rank + 2, src_rank + r + 1):
+                    # Multiply consecutive incidence matrices up to getting the desired rank
+                    matrix = torch.sparse.mm(
+                        connectivity[f"incidence_{src_rank+1}"],
+                        connectivity[f"incidence_{src_rank+2}"],
+                    )
+                    for idx in range(src_rank + 3, src_rank + r + 1):
                         matrix = torch.sparse.mm(
                             matrix, connectivity[f"incidence_{idx}"]
                         )
+                    # Turn all values to 1s and transpose the matrix
                     useful_connectivity[neighborhood] = (
                         torch.sparse_coo_tensor(
                             matrix.indices(),
@@ -208,17 +227,22 @@ def select_neighborhoods_of_interest(connectivity, neighborhoods):
                         ).T
                     )
                 elif direction == "down":
-                    matrix = connectivity[f"incidence_{src_rank-r+1}"].T
-                    for idx in range(src_rank - r + 2, src_rank + 1):
+                    # Multiply consecutive incidence matrices up to getting the desired rank
+                    matrix = torch.sparse.mm(
+                        connectivity[f"incidence_{src_rank-r+1}"],
+                        connectivity[f"incidence_{src_rank-r+2}"],
+                    )
+                    for idx in range(src_rank - r + 3, src_rank + 1):
                         matrix = torch.sparse.mm(
-                            connectivity[f"incidence_{idx}"].T, matrix
+                            matrix, connectivity[f"incidence_{idx}"]
                         )
+                    # Turn all values to 1s
                     useful_connectivity[neighborhood] = (
                         torch.sparse_coo_tensor(
                             matrix.indices(),
                             matrix.values() / matrix.values(),
                             matrix.size(),
-                        ).T
+                        )
                     )
 
     for key in connectivity:

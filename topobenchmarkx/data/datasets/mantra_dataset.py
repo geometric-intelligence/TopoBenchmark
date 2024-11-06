@@ -3,7 +3,7 @@
 import os
 import os.path as osp
 from typing import ClassVar
-import shutil
+
 from omegaconf import DictConfig
 from torch_geometric.data import Data, InMemoryDataset, extract_gz
 from torch_geometric.io import fs

@@ -1,7 +1,8 @@
 """Configuration resolvers for the topobenchmarkx package."""
 
-import omegaconf
 import os
+
+import omegaconf
 
 
 def get_default_transform(dataset, model):

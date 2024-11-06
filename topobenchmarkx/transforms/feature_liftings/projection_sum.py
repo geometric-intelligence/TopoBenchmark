@@ -38,14 +38,14 @@ class ProjectionSum(torch_geometric.transforms.BaseTransform):
             [
                 key.split("_")[1]
                 for key in data
-                if ("boundary" in key and "-" not in key)
+                if ("incidence" in key and "-" not in key)
             ]
         )
         for elem in keys:
             if f"x_{elem}" not in data:
                 idx_to_project = 0 if elem == "hyperedges" else int(elem) - 1
                 data["x_" + elem] = torch.matmul(
-                    abs(data["boundary_" + elem].t()),
+                    abs(data["incidence_" + elem].t()),
                     data[f"x_{idx_to_project}"],
                 )
         return data

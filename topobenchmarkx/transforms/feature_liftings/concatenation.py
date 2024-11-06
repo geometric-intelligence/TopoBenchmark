@@ -38,7 +38,7 @@ class Concatenation(torch_geometric.transforms.BaseTransform):
         for elem in keys:
             if f"x_{elem}" not in data:
                 idx_to_project = 0 if elem == "hyperedges" else int(elem) - 1
-                incidence = data["boundary_" + elem]
+                incidence = data["incidence_" + elem]
                 _, n = incidence.shape
 
                 if n != 0:

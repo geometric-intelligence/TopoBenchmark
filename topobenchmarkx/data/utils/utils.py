@@ -11,6 +11,35 @@ import torch_geometric
 from topomodelx.utils.sparse import from_sparse
 
 
+def get_routes_from_neighborhoods(neighborhoods):
+    """Get the routes from the neighborhoods.
+
+    Combination of src_rank, dst_rank. ex: [[0, 0], [1, 0], [1, 1], [1, 1], [2, 1]].
+
+    Parameters
+    ----------
+    neighborhoods : list
+        List of neighborhoods of interest.
+
+    Returns
+    -------
+    list
+        List of routes.
+    """
+    routes = []
+    for neighborhood in neighborhoods:
+        split = neighborhood.split("-")
+        src_rank = int(split[-1])
+        r = int(split[0]) if len(split) == 3 else 1
+        route = (
+            [src_rank, src_rank - r]
+            if "down" in neighborhood
+            else [src_rank, src_rank + r]
+        )
+        routes.append(route)
+    return routes
+
+
 def get_complex_connectivity(
     complex, max_rank, neighborhoods=None, signed=False
 ):
@@ -144,6 +173,8 @@ def select_neighborhoods_of_interest(connectivity, neighborhoods):
                         if "up" in neighborhood_type
                         else connectivity[f"incidence_{src_rank}"]
                     )
+                else:
+                    raise ValueError(f"Invalid neighborhood {neighborhood}")
             elif len(neighborhood.split("-")) == 3:
                 r = int(neighborhood.split("-")[0])
                 neighborhood_type = neighborhood.split("-")[1]
@@ -243,10 +274,8 @@ def select_neighborhoods_of_interest(connectivity, neighborhoods):
         except:  # noqa: E722
             raise ValueError(f"Invalid neighborhood {neighborhood}")  # noqa: B904
     for key in connectivity:
-        if "incidence" in key:
-            useful_connectivity["boundary_" + key.split("_")[-1]] = (
-                connectivity[key]
-            )
+        if "incidence" in key and "-" not in key:
+            useful_connectivity[key] = connectivity[key]
     return useful_connectivity
 
 

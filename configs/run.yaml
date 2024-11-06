@@ -5,8 +5,8 @@
 defaults:
   - _self_
   - dataset: graph/MUTAG
-  - model: hypergraph/unignn2
-  - transforms:  ${get_default_transform:${dataset},${model}} #no_transform
+  - model: cell/topotune
+  - transforms: ${get_default_transform:${dataset},${model}} #no_transform
   - optimizer: default
   - loss: default
   - evaluator: default

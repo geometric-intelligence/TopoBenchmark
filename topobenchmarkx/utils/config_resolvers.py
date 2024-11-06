@@ -233,7 +233,7 @@ def infer_in_channels(dataset, transforms):
                 )
 
     # Case when there is no lifting
-    elif there_is_complex_lifting == False:
+    elif not there_is_complex_lifting:
         # Check if dataset and model are from the same domain and data_domain is higher-order
         if (
             dataset.loader.parameters.model_domain

@@ -153,7 +153,7 @@ def test_topotune_onehasse():
             "module": TopoTune_OneHasse,
             "init": {
                 "GNN": gnn,
-                "routes": neighborhoods,
+                "neighborhoods": neighborhoods,
                 "layers": 2,
                 "use_edge_attr": False,
                 "activation": "relu"

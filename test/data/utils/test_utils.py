@@ -1,6 +1,8 @@
 """Unit tests for data utils."""
 
+import omegaconf
 import pytest
+import torch_geometric
 import torch
 from topobenchmarkx.data.utils import *
 import toponetx as tnx
@@ -33,6 +35,38 @@ class TestDataUtils:
         
         with pytest.raises(ValueError) as e:
             select_neighborhoods_of_interest(connectivity, ['invalid_neighborhood'])
+            
+    def test_generate_zero_sparse_connectivity(self):
+        """Test generate_zero_sparse_connectivity."""
+        out = generate_zero_sparse_connectivity(10, 10)
+        assert out.shape == (10, 10)
+        assert torch.sum(out) == 0
+        
+    def test_load_cell_complex_dataset(self):
+        """Test load_cell_complex_dataset."""
+        with pytest.raises(NotImplementedError) as e:
+            load_cell_complex_dataset({})
+            
+    def test_load_simplicial_dataset(self):
+        """Test load_simplicial_dataset."""
+        with pytest.raises(NotImplementedError) as e:
+            load_simplicial_dataset({})
+            
+    def test_load_manual_graph(self):
+        """Test load_manual_graph."""
+        out = load_manual_graph()
+        assert isinstance(out, torch_geometric.data.Data)
+        
+    def test_make_hash(self):
+        """Test make_hash."""
+        out = make_hash('test')
+        assert isinstance(out, int)
+        
+    def test_ensure_serializable(self):
+        """Test ensure_serializable."""
+        objects = ['test', 1, 1.0, [1, 2, 3], {'a': 1, 'b': 2}, set([1, 2, 3]), omegaconf.dictconfig.DictConfig({'a': 1, 'b': 2}), torch_geometric.data.Data()]
+        for obj in objects:
+            out = ensure_serializable(obj)
         
 
     

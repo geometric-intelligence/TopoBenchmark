@@ -7,13 +7,14 @@ loader:
     data_dir: ${paths.data_dir}/${dataset.loader.parameters.data_domain}/${dataset.loader.parameters.data_type}
     manifold_dim: 2
     version: "v0.0.5"
-    target_name: "betti_numbers"
+    task_variable: "genus" # Options: ['name', 'genus', 'orientable'] To use 'torsion_coefficients', 'betti_numbers' fix multilabel multiclass issue
+    model_domain: ${model.model_domain}
 
 # Data definition
 parameters:
-  num_features: 1
-  num_classes: 3
-
+  # In the case of higher-order datasets we have multiple feature dimentions 
+  num_features: [1,1,1]
+  num_classes: 8 # Num classes depents on the task_variable
 
   # Dataset parameters
   task: classification
@@ -21,12 +22,6 @@ parameters:
   monitor_metric: accuracy
   task_level: graph 
   data_seed: 0
-
-  # Dataloader parameters
-  batch_size: 128 # Needs to be divisible by the number of devices (e.g., if in a distributed setup)
-  # train_val_test_split: [55_000, 5_000, 10_000]
-  num_workers: 0
-  pin_memory: False
 
 #splits
 split_params:
@@ -36,3 +31,10 @@ split_params:
   split_type: random #'k-fold' # either "k-fold" or "random" strategies
   k: 10 # for "k-fold" Cross-Validation
   train_prop: 0.5 # for "random" strategy splitting
+
+# Dataloader parameters
+dataloader_params:
+  batch_size: 5
+  num_workers: 0
+  pin_memory: False
+  persistent_workers: False

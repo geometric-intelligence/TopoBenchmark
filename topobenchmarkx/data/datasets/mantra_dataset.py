@@ -3,7 +3,7 @@
 import os
 import os.path as osp
 from typing import ClassVar
-
+import shutil
 from omegaconf import DictConfig
 from torch_geometric.data import Data, InMemoryDataset, extract_gz
 from torch_geometric.io import fs
@@ -51,11 +51,14 @@ class MantraDataset(InMemoryDataset):
         name: str,
         parameters: DictConfig,
     ) -> None:
-        self.name = name
         self.parameters = parameters
         self.manifold_dim = parameters.manifold_dim
         self.version = parameters.version
-        self.target_name = parameters.target_name
+        self.task_variable = parameters.task_variable
+        self.name = "_".join(
+            [name, str(self.version), f"manifold_dim_{self.manifold_dim}"]
+        )
+
         super().__init__(
             root,
         )
@@ -91,8 +94,6 @@ class MantraDataset(InMemoryDataset):
         return osp.join(
             self.root,
             self.name,
-            str(self.version),
-            str(self.manifold_dim),
             "raw",
         )
 
@@ -106,7 +107,9 @@ class MantraDataset(InMemoryDataset):
             Path to the processed directory.
         """
         self.processed_root = osp.join(
-            self.root, self.name, str(self.version), str(self.manifold_dim)
+            self.root,
+            self.name,
+            self.task_variable,
         )
         return osp.join(self.processed_root, "processed")
 
@@ -161,7 +164,11 @@ class MantraDataset(InMemoryDataset):
         # Delete zip file
         os.unlink(path)
 
+        # # Move files from osp.join(folder, name_download) to folder
+        # for file in os.listdir(osp.join(folder, self.name)):
+        #     shutil.move(osp.join(folder, self.name, file), folder)
         # # Delete osp.join(folder, self.name) dir
+        # shutil.rmtree(osp.join(folder, self.name))
 
     def process(self) -> None:
         r"""Handle the data for the dataset.
@@ -175,7 +182,7 @@ class MantraDataset(InMemoryDataset):
             # TODO Fix this
             osp.join(self.raw_dir, self.raw_file_names[0]),
             self.manifold_dim,
-            self.target_name,
+            self.task_variable,
         )
 
         data_list = data

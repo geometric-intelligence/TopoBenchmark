@@ -77,7 +77,10 @@ class TBXEvaluator(AbstractEvaluator):
         ValueError
             If the task is not valid.
         """
-        preds = model_out["logits"].cpu()
+        try:
+            preds = model_out["logits"].cpu()
+        except KeyError:
+            pass
         target = model_out["labels"].cpu()
 
         if self.task == "regression":

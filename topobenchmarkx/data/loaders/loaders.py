@@ -262,5 +262,11 @@ class SimplicialLoader(AbstractLoader):
             )
             # Redefine dir for chosen manifold dimension
             data_dir = dataset.processed_root
+            # Check if y.shape > 1
+            if dataset[0].y.shape[0] > 1:
+                for data in dataset:
+                    data.y = data.y.unsqueeze(0)
+
             return dataset, data_dir
+
         return load_simplicial_dataset(self.parameters)

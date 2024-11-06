@@ -1,6 +1,7 @@
 """Configuration resolvers for the topobenchmarkx package."""
 
 import os
+import omegaconf
 
 
 def get_default_transform(dataset, model):
@@ -230,11 +231,36 @@ def infer_in_channels(dataset, transforms):
                     transforms[lifting].complex_dim
                     - len(dataset.parameters.num_features)
                 )
-    else:
-        if isinstance(dataset.parameters.num_features, int):
+
+    # Case when there is no lifting
+    elif there_is_complex_lifting == False:
+        # Check if dataset and model are from the same domain and data_domain is higher-order
+        if (
+            dataset.loader.parameters.model_domain
+            == dataset.loader.parameters.data_domain
+            and dataset.loader.parameters.data_domain
+            in ["simplicial", "cell", "combinatorial", "hypergraph"]
+        ):
+            if isinstance(
+                dataset.parameters.num_features,
+                omegaconf.listconfig.ListConfig,
+            ):
+                return list(dataset.parameters.num_features)
+            else:
+                raise ValueError(
+                    "The dataset and model are from the same domain but the data_domain is not higher-order."
+                )
+
+        elif isinstance(dataset.parameters.num_features, int):
             return [dataset.parameters.num_features]
+
         else:
             return [dataset.parameters.num_features[0]]
+
+    else:
+        raise ValueError(
+            "There is a problem with the complex lifting. Please check the configuration file."
+        )
 
 
 def infere_num_cell_dimensions(selected_dimensions, in_channels):

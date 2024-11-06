@@ -190,7 +190,7 @@ def read_ndim_manifolds(path, dim, y_val="betti_numbers"):
                 [HOMEO_NAME_TO_IDX[y_value]], dtype=torch.long
             ).squeeze()
         elif y_val == "orientable":
-            y = torch.tensor([y_value], dtype=torch.bool).squeeze()
+            y = torch.tensor([y_value], dtype=torch.long).squeeze()
         else:
             raise ValueError(f"Invalid y_val: {y_val}")
 
@@ -343,8 +343,10 @@ def load_hypergraph_pickle_dataset(data_dir, data_name):
 
     Parameters
     ----------
-    cfg : DictConfig
-        Configuration parameters.
+    data_dir : str
+        Data directory.
+    data_name : str
+        Name of the dataset.
 
     Returns
     -------

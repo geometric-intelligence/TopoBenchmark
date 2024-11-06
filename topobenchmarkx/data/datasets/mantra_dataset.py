@@ -2,7 +2,6 @@
 
 import os
 import os.path as osp
-import shutil
 from typing import ClassVar
 
 from omegaconf import DictConfig
@@ -162,12 +161,7 @@ class MantraDataset(InMemoryDataset):
         # Delete zip file
         os.unlink(path)
 
-        # Move files from osp.join(folder, name_download) to folder
-        for file in os.listdir(osp.join(folder, self.name)):
-            shutil.move(osp.join(folder, self.name, file), folder)
-
         # # Delete osp.join(folder, self.name) dir
-        shutil.rmtree(osp.join(folder, self.name))
 
     def process(self) -> None:
         r"""Handle the data for the dataset.

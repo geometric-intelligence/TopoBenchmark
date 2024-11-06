@@ -34,7 +34,13 @@ class Concatenation(torch_geometric.transforms.BaseTransform):
         torch_geometric.data.Data | dict
             The lifted data.
         """
-        keys = sorted([key.split("_")[1] for key in data if "boundary" in key])
+        keys = sorted(
+            [
+                key.split("_")[1]
+                for key in data
+                if "incidence" in key and "-" not in key
+            ]
+        )
         for elem in keys:
             if f"x_{elem}" not in data:
                 idx_to_project = 0 if elem == "hyperedges" else int(elem) - 1

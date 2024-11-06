@@ -12,8 +12,8 @@ feature_encoder:
 
 backbone:
   _target_: topomodelx.nn.hypergraph.unigcn.UniGCN
-  in_channels: ${data.num_features}
-  hidden_channels: 128
+  in_channels: ${model.feature_encoder.out_channels}
+  hidden_channels: ${model.feature_encoder.out_channels}
   n_layers: 1
 
 backbone_wrapper:

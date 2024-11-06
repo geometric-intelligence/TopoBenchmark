@@ -4,20 +4,24 @@ from .utils import (
     ensure_serializable,  # noqa: F401
     generate_zero_sparse_connectivity,  # noqa: F401
     get_complex_connectivity,  # noqa: F401
+    get_routes_from_neighborhoods,  # noqa: F401
     load_cell_complex_dataset,  # noqa: F401
     load_manual_graph,  # noqa: F401
     load_simplicial_dataset,  # noqa: F401
     make_hash,  # noqa: F401
+    select_neighborhoods_of_interest,  # noqa: F401
 )
 
 utils_functions = [
     "get_complex_connectivity",
+    "get_routes_from_neighborhoods",
     "generate_zero_sparse_connectivity",
     "load_cell_complex_dataset",
     "load_simplicial_dataset",
     "load_manual_graph",
     "make_hash",
     "ensure_serializable",
+    "select_neighborhoods_of_interest",
 ]
 
 from .split_utils import (  # noqa: E402

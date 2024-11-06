@@ -4,8 +4,9 @@ import copy
 
 import torch
 import torch.nn.functional as F
-from omegaconf import OmegaConf
 from torch_geometric.data import Data
+
+from topobenchmarkx.data.utils import get_routes_from_neighborhoods
 
 
 class TopoTune(torch.nn.Module):
@@ -17,8 +18,8 @@ class TopoTune(torch.nn.Module):
     ----------
     GNN : torch.nn.Module, a class not an object
         The GNN class to use. ex: GAT, GCN.
-    routes : list of tuples
-        The routes to use. Combination of src_rank, dst_rank. ex: [[0, 0], [1, 0], [1, 1], [1, 1], [2, 1]].
+    neighborhoods : list of lists
+        The neighborhoods of interest.
     layers : int
         The number of layers to use. Each layer contains one GNN.
     use_edge_attr : bool
@@ -30,21 +31,19 @@ class TopoTune(torch.nn.Module):
     def __init__(
         self,
         GNN,
-        routes,
+        neighborhoods,
         layers,
         use_edge_attr,
         activation,
     ):
         super().__init__()
-        routes = OmegaConf.to_object(routes)
-        self.routes = [[int(elem[0][0]), int(elem[0][1])] for elem in routes]
-        self.neighborhoods = [elem[1] for elem in routes]
+        self.routes = get_routes_from_neighborhoods(neighborhoods)
+        self.neighborhoods = neighborhoods
         self.layers = layers
         self.use_edge_attr = use_edge_attr
         self.max_rank = max([max(route) for route in self.routes])
         self.graph_routes = torch.nn.ModuleList()
         self.GNN = [i for i in GNN.named_modules()]
-        self.final_readout = "sum"
         self.activation = activation
 
         # Instantiate GNN layers
@@ -72,14 +71,14 @@ class TopoTune(torch.nn.Module):
             The neighborhood cache.
         """
         nbhd_cache = {}
-        for _, route in enumerate(self.routes):
+        for neighborhood, route in zip(
+            self.neighborhoods, self.routes, strict=False
+        ):
             src_rank, dst_rank = route
             if src_rank != dst_rank and (src_rank, dst_rank) not in nbhd_cache:
                 n_dst_nodes = getattr(params, f"x_{dst_rank}").shape[0]
-                if src_rank == dst_rank + 1:
-                    boundary = getattr(
-                        params, f"incidence_{src_rank}"
-                    ).coalesce()
+                if src_rank > dst_rank:
+                    boundary = getattr(params, neighborhood).coalesce()
                     nbhd_cache[(src_rank, dst_rank)] = (
                         interrank_boundary_index(
                             getattr(params, f"x_{src_rank}"),
@@ -87,20 +86,14 @@ class TopoTune(torch.nn.Module):
                             n_dst_nodes,
                         )
                     )
-                elif src_rank == dst_rank - 1:
-                    coboundary = getattr(
-                        params, f"incidence_{dst_rank}"
-                    ).T.coalesce()
+                elif src_rank < dst_rank:
+                    coboundary = getattr(params, neighborhood).coalesce()
                     nbhd_cache[(src_rank, dst_rank)] = (
                         interrank_boundary_index(
                             getattr(params, f"x_{src_rank}"),
                             coboundary.indices(),
                             n_dst_nodes,
                         )
-                    )
-                else:
-                    raise NotImplementedError(
-                        "Only 1-hop dimensional boundaries are implemented."
                     )
         return nbhd_cache
 
@@ -123,11 +116,9 @@ class TopoTune(torch.nn.Module):
         """
         batch_route = Data(
             x=getattr(params, f"x_{src_rank}"),
-            edge_index=getattr(params, f"{nbhd}_{src_rank}").indices(),
-            edge_weight=getattr(params, f"{nbhd}_{src_rank}")
-            .values()
-            .squeeze(),
-            edge_attr=getattr(params, f"{nbhd}_{src_rank}").values().squeeze(),
+            edge_index=getattr(params, nbhd).indices(),
+            edge_weight=getattr(params, nbhd).values().squeeze(),
+            edge_attr=getattr(params, nbhd).values().squeeze(),
             requires_grad=True,
         )
 
@@ -285,29 +276,6 @@ class TopoTune(torch.nn.Module):
         }
         return membership
 
-    def readout(self, x):
-        """Readout function for the model.
-
-        Parameters
-        ----------
-        x : torch.tensor
-            The input data.
-
-        Returns
-        -------
-        torch.tensor
-            The output of the model.
-        """
-        if self.final_readout == "mean":
-            x = x.mean(0)
-        elif self.final_readout == "sum":
-            x = x.sum(0)
-        else:
-            raise NotImplementedError(
-                f"Readout method {self.final_readout} not implemented"
-            )
-        return x
-
     def forward(self, batch):
         """Forward pass of the model.
 
@@ -419,7 +387,7 @@ def interrank_boundary_index(x_src, boundary_index, n_dst_nodes):
 
 
 def get_activation(nonlinearity, return_module=False):
-    """From CWN.
+    """Activation resolver from CWN.
 
     Parameters
     ----------

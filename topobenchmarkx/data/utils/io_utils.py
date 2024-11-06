@@ -181,7 +181,7 @@ def read_ndim_manifolds(path, dim, y_val="betti_numbers"):
         if y_val == "betti_numbers":
             y = torch.tensor(y_value, dtype=torch.long).unsqueeze(dim=0)
         elif y_val == "genus":
-            y = torch.tensor([y_value], dtype=torch.long).squeeze()
+            y = torch.tensor([y_value], dtype=torch.float).squeeze()
         elif y_val == "torsion_coefficients":
             y = torch.tensor(
                 [TORSION_COEF_NAME_TO_IDX[coef] for coef in y_value],
@@ -189,10 +189,10 @@ def read_ndim_manifolds(path, dim, y_val="betti_numbers"):
             ).unsqueeze(dim=0)
         elif y_val == "name":
             y = torch.tensor(
-                [HOMEO_NAME_TO_IDX[y_value]], dtype=torch.long
-            ).squeeze()
+                [HOMEO_NAME_TO_IDX[y_value]], dtype=torch.float
+            ).unsqueeze(0)
         elif y_val == "orientable":
-            y = torch.tensor([y_value], dtype=torch.long).squeeze()
+            y = torch.tensor([y_value], dtype=torch.float).squeeze()
         else:
             raise ValueError(f"Invalid y_val: {y_val}")
 

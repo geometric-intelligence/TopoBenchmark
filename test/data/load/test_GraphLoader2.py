@@ -27,7 +27,7 @@ class TestLoaders:
 
 
         # Exclude files 
-        exclude_datasets = ["manual_dataset.yaml"]
+        exclude_datasets = [] # "manual_dataset.yaml"
 
         self.config_files = [f for f in self.config_files if f not in exclude_datasets]
         self.relative_config_dir =  "../../../configs"

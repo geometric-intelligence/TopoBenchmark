@@ -5,7 +5,6 @@ import hashlib
 import networkx as nx
 import numpy as np
 import omegaconf
-import toponetx.datasets.graph as graph
 import torch
 import torch_geometric
 from topomodelx.utils.sparse import from_sparse

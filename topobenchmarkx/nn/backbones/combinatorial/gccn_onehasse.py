@@ -134,15 +134,11 @@ class TopoTune_OneHasse(torch.nn.Module):
                     )
 
                 edge_indices.append(
-                    getattr(params, f"down_laplacian_{src_rank}")
-                    .indices()
-                    .to(device)
+                    getattr(params, neighborhood).indices().to(device)
                     + adjustment
                 )
                 edge_attrs.append(
-                    getattr(params, f"down_laplacian_{src_rank}")
-                    .values()
-                    .squeeze()
+                    getattr(params, neighborhood).values().squeeze()
                 )
 
             elif "down_incidence" in neighborhood:
@@ -158,14 +154,14 @@ class TopoTune_OneHasse(torch.nn.Module):
                     )
 
                 edge_indices.append(
-                    getattr(params, f"incidence_{src_rank}")
+                    getattr(params, neighborhood)
                     .coalesce()
                     .indices()
                     .to(device)
                     + adjustment
                 )
                 edge_attrs.append(
-                    getattr(params, f"incidence_{src_rank}").values().squeeze()
+                    getattr(params, neighborhood).values().squeeze()
                 )
 
             elif "up_incidence" in neighborhood:
@@ -180,7 +176,7 @@ class TopoTune_OneHasse(torch.nn.Module):
                         f"Unsupported src_rank for 'up_incidence' neighborhood: {src_rank}"
                     )
                 coincidence_indices = (
-                    getattr(params, f"incidence_{src_rank + 1}")
+                    getattr(params, neighborhood)
                     .T.coalesce()
                     .indices()
                     .to(device)
@@ -189,7 +185,7 @@ class TopoTune_OneHasse(torch.nn.Module):
 
                 edge_indices.append(coincidence_indices)
                 # edge_attrs.append(
-                #     getattr(params, f"incidence_{src_rank}")
+                #     getattr(params, neighborhood)
                 #     .T.coalesce()
                 #     .values()
                 #     .squeeze()

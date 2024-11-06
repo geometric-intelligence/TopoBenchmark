@@ -167,7 +167,7 @@ def test_topotune_onehasse_methods():
     """Test individual methods of the TopoTune_OneHasse module."""
     batch = create_mock_complex_batch()
     gnn = MockGNN(16, 32, 16)
-    neighborhoods = OmegaConf.create("up_adjacency-0", "down_incidence-1")#[[[0, 0], "adjacency"], [[1, 0], "boundary"]])
+    neighborhoods = OmegaConf.create(["up_adjacency-0", "down_incidence-1"])#[[[0, 0], "adjacency"], [[1, 0], "boundary"]])
     topotune = TopoTune_OneHasse(GNN=gnn, neighborhoods=neighborhoods, layers=2, use_edge_attr=False, activation="relu")
 
     # Test generate_membership_vectors

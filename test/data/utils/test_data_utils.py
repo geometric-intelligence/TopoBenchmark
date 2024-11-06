@@ -7,7 +7,6 @@ import torch
 from topobenchmarkx.data.utils import *
 import toponetx as tnx
 from toponetx.classes import CellComplex
-from topobenchmarkx.data.utils import get_complex_connectivity, select_neighborhoods_of_interest
 
 class TestDataUtils:
     """Test data utils functions."""
@@ -19,19 +18,20 @@ class TestDataUtils:
         self.complex.add_cell([3, 4, 5],rank=2)
         self.complex.add_cell([5, 6, 7],rank=2)
         self.neighborhoods1 = ['up_adjacency-0','2-up_adjacency-0','2-down_laplacian-2','2-down_adjacency-2','2-up_incidence-0','2-down_incidence-2']
-        self.neighborhoods2 = ['incidence_0', 'down_laplacian_0', 'up_laplacian_0', 'adjacency_0', 'hodge_laplacian_1']
+        self.neighborhoods2 = ['down_incidence-1', 'up_laplacian-0', 'down_laplacian-1', 'up_adjacency-0', 'hodge_laplacian-1']
         
         
     def test_get_complex_connectivity(self):
         """Test get_complex_connectivity."""
         out = get_complex_connectivity(self.complex, 2, neighborhoods=self.neighborhoods2)
-        assert ['incidence_0', 'down_laplacian_0', 'up_laplacian_0', 'adjacency_0'] in out.keys()
+        assert 'up_laplacian-0' in out.keys()
         
     def test_select_neighborhoods_of_interest(self):
         """Test select_neighborhoods_of_interest."""
         connectivity = get_complex_connectivity(self.complex, 2)
         out = select_neighborhoods_of_interest(connectivity, self.neighborhoods1)
-        assert out == ['up_adjacency-0','2-up_adjacency-0','2-down_laplacian-2','2-down_adjacency-2','2-up_incidence-0','2-down_incidence-2']
+        assert '2-down_laplacian-2' in out.keys()
+        assert 'incidence_1' in out.keys()
         
         with pytest.raises(ValueError) as e:
             select_neighborhoods_of_interest(connectivity, ['invalid_neighborhood'])

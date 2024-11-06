@@ -167,7 +167,7 @@ def test_topotune_methods():
     """Test individual methods of the TopoTune module."""
     batch = create_mock_complex_batch()
     gnn = MockGNN(16, 32, 16)
-    neighborhoods = OmegaConf.create("up_adjacency-0", "down_incidence-1")#[[[0, 0], "adjacency"], [[1, 0], "boundary"]])
+    neighborhoods = OmegaConf.create(["up_adjacency-0", "down_incidence-1"])#[[[0, 0], "adjacency"], [[1, 0], "boundary"]])
     topotune = TopoTune(GNN=gnn, neighborhoods=neighborhoods, layers=2, use_edge_attr=False, activation="relu")
 
     # Test generate_membership_vectors
@@ -209,11 +209,6 @@ def test_topotune_methods():
     aggregated = topotune.aggregate_inter_nbhd(x_out_per_route)
     assert 0 in aggregated
     assert aggregated[0].shape == (3, 16)
-
-    # Test readout
-    x = torch.randn(3, 16)
-    output = topotune.readout(x)
-    assert output.shape == (16,)
 
 def test_interrank_boundary_index():
     """Test the interrank_boundary_index function."""

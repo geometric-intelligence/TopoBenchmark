@@ -198,30 +198,30 @@ class HypergraphLoader(AbstractLoader):
         return dataset, data_dir
 
 
-class CellComplexLoader(AbstractLoader):
-    """Loader for cell complex datasets.
+# class CellComplexLoader(AbstractLoader):
+#     """Loader for cell complex datasets.
 
-    Parameters
-    ----------
-    parameters : DictConfig
-        Configuration parameters.
-    """
+#     Parameters
+#     ----------
+#     parameters : DictConfig
+#         Configuration parameters.
+#     """
 
-    def __init__(self, parameters: DictConfig):
-        super().__init__(parameters)
-        self.parameters = parameters
+#     def __init__(self, parameters: DictConfig):
+#         super().__init__(parameters)
+#         self.parameters = parameters
 
-    def load(
-        self,
-    ) -> torch_geometric.data.Dataset:
-        """Load cell complex dataset.
+#     def load(
+#         self,
+#     ) -> torch_geometric.data.Dataset:
+#         """Load cell complex dataset.
 
-        Returns
-        -------
-        torch_geometric.data.Dataset
-            Dataset object containing the loaded data.
-        """
-        return load_cell_complex_dataset(self.parameters)
+#         Returns
+#         -------
+#         torch_geometric.data.Dataset
+#             Dataset object containing the loaded data.
+#         """
+#         return load_cell_complex_dataset(self.parameters)
 
 
 class SimplicialLoader(AbstractLoader):

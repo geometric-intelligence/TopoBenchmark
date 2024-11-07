@@ -1,7 +1,7 @@
 """Init file for load module."""
 
 from .loaders import (
-    CellComplexLoader,
+    # CellComplexLoader,
     GraphLoader,
     HypergraphLoader,
     SimplicialLoader,
@@ -11,5 +11,5 @@ __all__ = [
     "GraphLoader",
     "HypergraphLoader",
     "SimplicialLoader",
-    "CellComplexLoader",
+    # "CellComplexLoader",
 ]

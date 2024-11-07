@@ -17,7 +17,7 @@ from topobenchmarkx.data.datasets import (
 )
 from topobenchmarkx.data.loaders.base import AbstractLoader
 from topobenchmarkx.data.utils import (
-    load_cell_complex_dataset,
+    # load_cell_complex_dataset,
     load_manual_graph,
     load_simplicial_dataset,
 )

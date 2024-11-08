@@ -25,13 +25,10 @@ backbone:
     num_layers: 2
     dropout: 0.0
     norm: BatchNorm
-  routes:
-    - - [1, 1]
-      - adjacency
-    - - [0, 1]
-      - cbdry
-    - - [2, 1]
-      - bdry
+  neighborhoods:
+    - up_adjacency-1
+    - up_incidence-0
+    - down_incidence-2
   layers: 2
   use_edge_attr: false
   activation: relu

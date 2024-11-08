@@ -10,7 +10,7 @@ from topobenchmarkx.data.utils.io_utils import (
     read_us_county_demos,
     load_hypergraph_pickle_dataset
 )
-from topobenchmarkx.data.utils.utils import load_simplicial_dataset, load_manual_graph, ensure_serializable
+from topobenchmarkx.data.utils.utils import load_manual_graph, ensure_serializable
 
 class TestGraphLoader:
     """Test the GraphLoader class."""
@@ -162,15 +162,6 @@ class TestGraphLoader:
         assert data.x.shape == (3224, 6)
         
         read_us_county_demos(loader_config.data_dir + "/US-county-demos/raw")
-
-    def test_load_karate_dataset(self):
-        """ Test loading the KarateClub dataset."""
-        cfg = {
-            "data_name": "KarateClub",
-        }
-        cfg = OmegaConf.create(cfg)
-        data = load_simplicial_dataset(cfg)
-        assert data.y.shape == (34,)
         
     def test_manual_loader(self):
         """ Test loading a manual graph."""

@@ -42,7 +42,7 @@ class Graph2CellLifting(GraphLifting):
             The lifted topology.
         """
         lifted_topology = get_complex_connectivity(
-            cell_complex, self.complex_dim
+            cell_complex, self.complex_dim, neighborhoods=self.neighborhoods
         )
         lifted_topology["x_0"] = torch.stack(
             list(cell_complex.get_cell_attributes("features", 0).values())

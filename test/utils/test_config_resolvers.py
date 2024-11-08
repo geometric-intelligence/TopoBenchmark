@@ -90,6 +90,10 @@ class TestConfigResolvers:
         in_channels = infer_in_channels(cfg.dataset, cfg.transforms)
         assert in_channels == [7,7,7]
         
+        cfg = hydra.compose(config_name="run.yaml", overrides=["model=simplicial/topotune", "dataset=graph/MUTAG", "dataset.parameters.preserve_edge_attr_if_lifted=False", "transforms.graph2simplicial_lifting.feature_lifting=Concatenation"], return_hydra_config=True)
+        in_channels = infer_in_channels(cfg.dataset, cfg.transforms)
+        assert in_channels == [7,14,42]
+        
         cfg = hydra.compose(config_name="run.yaml", overrides=["model=simplicial/topotune", "dataset=graph/MUTAG", "transforms.graph2simplicial_lifting.feature_lifting=Concatenation"], return_hydra_config=True)
         in_channels = infer_in_channels(cfg.dataset, cfg.transforms)
         assert in_channels == [7,4,4]

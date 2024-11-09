@@ -1,3 +1,4 @@
+"""Configuration file for pytest."""
 import networkx as nx
 import pytest
 import torch
@@ -12,13 +13,76 @@ from topobenchmarkx.transforms.liftings.graph2cell import (
 
 @pytest.fixture
 def mocker_fixture(mocker):
-    """Return pytest mocker. It is used when one want to use mocker in setup_method"""
+    """Return pytest mocker, used when one want to use mocker in setup_method.
+    
+    Parameters
+    ----------
+    mocker : pytest_mock.plugin.MockerFixture
+        A pytest mocker.
+        
+    Returns
+    -------
+    pytest_mock.plugin.MockerFixture
+        A pytest mocker.
+    """
     return mocker
 
 
 @pytest.fixture
+def simple_graph_0():
+    """Create a manual graph for testing purposes.
+    
+    Returns
+    -------
+    torch_geometric.data.Data
+        A simple graph data object.
+    """
+    # Define the vertices (just 8 vertices)
+    vertices = [i for i in range(8)]
+    y = [0, 1, 1, 1, 0, 0, 0, 0]
+    # Define the edges
+    edges = [
+        [0, 1],
+        [0, 2],
+        [0, 4],
+        [2, 3],
+        [5, 2],
+        [5, 6],
+        [6, 3],
+        [2, 7],
+    ]
+
+    # Create a graph
+    G = nx.Graph()
+
+    # Add vertices
+    G.add_nodes_from(vertices)
+
+    # Add edges
+    G.add_edges_from(edges)
+    G.to_undirected()
+    edge_list = torch.Tensor(list(G.edges())).T.long()
+
+    # Generate feature from 0 to 9
+    x = torch.tensor([1, 5, 10, 50, 100, 500, 1000, 5000]).unsqueeze(1).float()
+
+    data = torch_geometric.data.Data(
+        x=x,
+        edge_index=edge_list,
+        num_nodes=len(vertices),
+        y=torch.tensor(y),
+    )
+    return data
+
+@pytest.fixture
 def simple_graph_1():
-    """Create a manual graph for testing purposes."""
+    """Create a manual graph for testing purposes.
+    
+    Returns
+    -------
+    torch_geometric.data.Data
+        A simple graph data object.
+    """
     # Define the vertices (just 8 vertices)
     vertices = [i for i in range(8)]
     y = [0, 1, 1, 1, 0, 0, 0, 0]
@@ -72,6 +136,18 @@ def simple_graph_1():
 
 @pytest.fixture
 def sg1_clique_lifted(simple_graph_1):
+    """Return a simple graph with a clique lifting.
+    
+    Parameters
+    ----------
+    simple_graph_1 : torch_geometric.data.Data
+        A simple graph data object.
+    
+    Returns
+    -------
+    torch_geometric.data.Data
+        A simple graph data object with a clique lifting.
+    """
     lifting_signed = SimplicialCliqueLifting(
                 complex_dim=3, signed=True
             )
@@ -81,6 +157,18 @@ def sg1_clique_lifted(simple_graph_1):
 
 @pytest.fixture
 def sg1_cell_lifted(simple_graph_1):
+    """Return a simple graph with a cell lifting.
+    
+    Parameters
+    ----------
+    simple_graph_1 : torch_geometric.data.Data
+        A simple graph data object.
+        
+    Returns
+    -------
+    torch_geometric.data.Data
+        A simple graph data object with a cell lifting.
+    """
     lifting = CellCycleLifting()
     data = lifting(simple_graph_1)
     data.batch_0 = "null"
@@ -89,7 +177,13 @@ def sg1_cell_lifted(simple_graph_1):
 
 @pytest.fixture
 def simple_graph_2():
-    """Create a manual graph for testing purposes."""
+    """Create a manual graph for testing purposes.
+    
+    Returns
+    -------
+    torch_geometric.data.Data
+        A simple graph data object.
+    """
     # Define the vertices (just 9 vertices)
     vertices = [i for i in range(9)]
     y = [0, 1, 1, 1, 0, 0, 0, 0, 0]
@@ -149,7 +243,21 @@ def simple_graph_2():
 
 @pytest.fixture
 def random_graph_input():
-    """Create a random graph for testing purposes."""
+    """Create a random graph for testing purposes.
+    
+    Returns
+    -------
+    torch.Tensor
+        A tensor with the input features.
+    torch.Tensor
+        A tensor with the input features for the edges.
+    torch.Tensor
+        A tensor with the input features for the faces.
+    torch.Tensor
+        A tensor with the edge index for the edges.
+    torch.Tensor
+        A tensor with the edge index for the faces.
+    """
     num_nodes = 8
     d_feat = 12
     x = torch.randn(num_nodes, 12)

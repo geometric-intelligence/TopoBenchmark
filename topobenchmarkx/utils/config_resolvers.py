@@ -19,17 +19,25 @@ def get_default_transform(dataset, model):
         Default transform.
     """
     data_domain, dataset = dataset.split("/")
-    model_domain = model.split("/")[0]
+    model_domain, model = model.split("/")
     # Check if there is a default transform for the dataset at ./configs/transforms/dataset_defaults/
     # If not, use the default lifting transform for the dataset to be compatible with the model
     base_dir = os.path.dirname(
         os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     )
-    configs_dir = os.path.join(
+    model_configs_dir = os.path.join(
+        base_dir, "configs", "transforms", "model_defaults"
+    )
+    dataset_configs_dir = os.path.join(
         base_dir, "configs", "transforms", "dataset_defaults"
     )
-    datasets_with_defaults = [f.split(".")[0] for f in os.listdir(configs_dir)]
-    if dataset in datasets_with_defaults:
+    model_defaults = [f.split(".")[0] for f in os.listdir(model_configs_dir)]
+    datasets_with_defaults = [
+        f.split(".")[0] for f in os.listdir(dataset_configs_dir)
+    ]
+    if model in model_defaults:
+        return f"model_defaults/{model}"
+    elif dataset in datasets_with_defaults:
         return f"dataset_defaults/{dataset}"
     else:
         if data_domain == model_domain:

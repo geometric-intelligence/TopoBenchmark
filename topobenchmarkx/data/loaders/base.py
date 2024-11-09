@@ -1,5 +1,6 @@
 """Abstract Loader class."""
 
+from pathlib import Path
 from abc import ABC, abstractmethod
 
 import torch_geometric
@@ -16,13 +17,14 @@ class AbstractLoader(ABC):
     """
 
     def __init__(self, parameters: DictConfig):
-        self.cfg = parameters
+        self.parameters = parameters
+        self.root_data_dir = Path(parameters["data_dir"])
 
     def __repr__(self) -> str:
-        return f"{self.__class__.__name__}(parameters={self.cfg})"
+        return f"{self.__class__.__name__}(parameters={self.parameters})"
 
     @abstractmethod
-    def load(self) -> torch_geometric.data.Data:
+    def load_dataset(self) -> torch_geometric.data.Data:
         """Load data into Data.
 
         Raises
@@ -30,4 +32,9 @@ class AbstractLoader(ABC):
         NotImplementedError
             If the method is not implemented.
         """
+        raise NotImplementedError
+
+    @abstractmethod
+    def get_data_dir(self) -> Path:
+        """Get the data directory."""
         raise NotImplementedError

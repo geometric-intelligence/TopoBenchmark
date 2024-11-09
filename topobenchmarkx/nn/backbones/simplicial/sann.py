@@ -10,33 +10,43 @@ class SANN(torch.nn.Module):
 
     Parameters
     ----------
-    dim_1 : int
-        Dimension of the input feature vector for 0-simplices (unused).
-    dim_2 : int
+    in_channels : int
         Dimension of the hidden layers.
-    dim_3 : int
+    hidden_channels : int
         Dimension of the output layer.
     """
 
-    def __init__(self, dim_1, dim_2, dim_3):
+    def __init__(self, in_channels, hidden_channels):
         super().__init__()
 
         # Set of simplices layers
         self.layers_0 = torch.nn.ModuleList(
             [
-                SANNLayer([dim_2] * 3, [dim_3] * 3, update_func="lrelu")
+                SANNLayer(
+                    [in_channels] * 3,
+                    [hidden_channels] * 3,
+                    update_func="lrelu",
+                )
                 for i in range(3)
             ]
         )
         self.layers_1 = torch.nn.ModuleList(
             [
-                SANNLayer([dim_3] * 3, [dim_3] * 3, update_func="lrelu")
+                SANNLayer(
+                    [hidden_channels] * 3,
+                    [hidden_channels] * 3,
+                    update_func="lrelu",
+                )
                 for i in range(3)
             ]
         )
         self.layers_2 = torch.nn.ModuleList(
             [
-                SANNLayer([dim_3] * 3, [dim_3] * 3, update_func="lrelu")
+                SANNLayer(
+                    [hidden_channels] * 3,
+                    [hidden_channels] * 3,
+                    update_func="lrelu",
+                )
                 for i in range(3)
             ]
         )

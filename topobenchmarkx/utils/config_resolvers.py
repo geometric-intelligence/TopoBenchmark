@@ -150,6 +150,12 @@ def infer_in_channels(dataset, transforms):
             "graph2cell_lifting",
             "graph2simplicial_lifting",
             "graph2combinatorial_lifting",
+            "graph2hypergraph_lifting",
+            "pointcloud2graph_lifting",
+            "pointcloud2simplicial_lifting",
+            "pointcloud2combinatorial_lifting",
+            "pointcloud2hypergraph_lifting",
+            "pointcloud2cell_lifting",
         ]
         for t in complex_transforms:
             if t in transforms:
@@ -185,40 +191,31 @@ def infer_in_channels(dataset, transforms):
         feature_lifting = check_for_type_feature_lifting(transforms, lifting)
 
         if isinstance(dataset.parameters.num_features, int):
-            if feature_lifting == "ProjectionSum":
-                return [dataset.parameters.num_features] * transforms[
-                    lifting
-                ].complex_dim
-
-            elif feature_lifting == "concatenation":
+            # Case when the dataset has no edge attributes
+            if feature_lifting == "Concatenation":
                 return_value = [dataset.parameters.num_features]
                 for i in range(2, transforms[lifting].complex_dim + 1):
-                    return_value += [int(dataset.parameters.num_features * i)]
+                    return_value += [int(return_value[-1]) * i]
 
                 return return_value
 
             else:
+                # ProjectionSum feature lifting by default
                 return [dataset.parameters.num_features] * transforms[
                     lifting
                 ].complex_dim
         else:
             # Case when the dataset has edge attributes
             if not transforms[lifting].preserve_edge_attr:
-                if feature_lifting == "ProjectionSum":
-                    return [dataset.parameters.num_features[0]] * transforms[
-                        lifting
-                    ].complex_dim
-
-                elif feature_lifting == "Concatenation":
-                    return_value = [dataset.parameters.num_features]
+                if feature_lifting == "Concatenation":
+                    return_value = [dataset.parameters.num_features[0]]
                     for i in range(2, transforms[lifting].complex_dim + 1):
-                        return_value += [
-                            int(dataset.parameters.num_features * i)
-                        ]
+                        return_value += [int(return_value[-1]) * i]
 
                     return return_value
 
                 else:
+                    # ProjectionSum feature lifting by default
                     return [dataset.parameters.num_features[0]] * transforms[
                         lifting
                     ].complex_dim

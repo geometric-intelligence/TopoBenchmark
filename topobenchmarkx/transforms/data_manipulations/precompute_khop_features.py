@@ -27,7 +27,7 @@ class PrecomputeKHopFeatures(torch_geometric.transforms.BaseTransform):
     ) -> None:
         super().__init__()
         self.type = "precompute_khop_features"
-        self.complex_dim = complex_dim
+        self.complex_dim = complex_dim - 1
         self.max_hop = max_hop
 
     def __repr__(self) -> str:
@@ -126,7 +126,7 @@ class PrecomputeKHopFeatures(torch_geometric.transforms.BaseTransform):
 
         # Set the information for the 0-hop embeddings
         for i in range(K + 1):
-            x_all[f"x{i}_0"] = data[f"x_{i}"].size()
+            x_all[f"x{i}_0"] = data[f"x_{i}"]
 
         # For each hop t=1,...,T
         for t in range(1, T + 1):

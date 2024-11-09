@@ -3,4 +3,6 @@ transform_type: 'lifting'
 transform_name: "CellCycleLifting"
 complex_dim: ${oc.select:dataset.parameters.max_dim_if_lifted,3}
 max_cell_length: 18
+feature_lifting: ProjectionSum
 preserve_edge_attr: ${oc.select:dataset.parameters.preserve_edge_attr_if_lifted,False}
+neighborhoods: ${oc.select:model.backbone.neighborhoods,null}

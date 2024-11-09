@@ -5,22 +5,19 @@ model_domain: simplicial
 
 feature_encoder:
   _target_: topobenchmarkx.nn.encoders.${model.feature_encoder.encoder_name}
-  encoder_name: AllCellFeatureEncoder
+  encoder_name: SANNFeatureEncoder
   in_channels: ${infer_in_channels:${dataset},${oc.select:transforms,null}} 
   out_channels: 64
   proj_dropout: 0.0
   selected_dimensions:
     - 0
     - 1
+  feature_lifting: Duplicate
 
 backbone:
   _target_: topobenchmarkx.nn.backbones.simplicial.sann.SANN
   in_channels: ${model.backbone.hidden_channels}
   hidden_channels: ${model.feature_encoder.out_channels}
-  n_filters: 2
-  n_layers: 1
-  order_harmonic: 1
-  epsilon_harmonic: 1e-1
 
 backbone_wrapper:
   _target_: topobenchmarkx.nn.wrappers.SANNWrapper

@@ -7,7 +7,7 @@ from torch_geometric.nn.norm import GraphNorm
 from topobenchmarkx.nn.encoders.base import AbstractFeatureEncoder
 
 
-class SANNCellEncoder(AbstractFeatureEncoder):
+class SANNFeatureEncoder(AbstractFeatureEncoder):
     r"""Encoder class to apply SimpleEncoder.
 
     The SimpleEncoder is applied to the features of each cell

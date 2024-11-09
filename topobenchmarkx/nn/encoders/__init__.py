@@ -2,7 +2,7 @@
 
 from .all_cell_encoder import AllCellFeatureEncoder
 from .base import AbstractFeatureEncoder
-from .sann_encoder import SANNCellEncoder
+from .sann_encoder import SANNFeatureEncoder
 
 # ... import other encoders classes here
 # For example:
@@ -12,7 +12,7 @@ from .sann_encoder import SANNCellEncoder
 __all__ = [
     "AbstractFeatureEncoder",
     "AllCellFeatureEncoder",
-    "SANNCellEncoder",
+    "SANNFeatureEncoder",
     # "OtherEncoder1",
     # "OtherEncoder2",
     # ... add other readout classes here

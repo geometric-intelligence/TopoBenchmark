@@ -23,22 +23,19 @@ class SANNReadout(AbstractZeroCellReadOut):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        hidden_dimensions_1 = kwargs["hidden_dim"]
-        hidden_dimensions_2 = kwargs["hidden_dim_2"]
+        hidden_dim = kwargs["hidden_dim"]
         out_channels = kwargs["out_channels"]
         pooling_type = kwargs["pooling_type"]
 
         self.linear = torch.nn.Sequential(
-            torch.nn.Linear(3 * 3 * hidden_dimensions_1, hidden_dimensions_2),
+            torch.nn.Linear(3 * 3 * hidden_dim, hidden_dim),
             torch.nn.LeakyReLU(),
-            torch.nn.Linear(hidden_dimensions_2, hidden_dimensions_2),
+            torch.nn.Linear(hidden_dim, hidden_dim),
             torch.nn.LeakyReLU(),
-            torch.nn.Linear(hidden_dimensions_2, hidden_dimensions_2),
+            torch.nn.Linear(hidden_dim, hidden_dim),
             torch.nn.LeakyReLU(),
-            torch.nn.Linear(hidden_dimensions_2, out_channels),
-            #         torch.nn.Softmax(dim=0),
-        )  # nn.Softmax(dim=0) for multi-class
-
+            torch.nn.Linear(hidden_dim, out_channels),
+        )
         assert pooling_type in ["max", "sum", "mean"], "Invalid pooling_type"
         self.pooling_type = pooling_type
 
@@ -62,9 +59,7 @@ class SANNReadout(AbstractZeroCellReadOut):
         model_out = self.forward(model_out, batch)
         model_out["logits"] = self.compute_logits(
             model_out["x_all"], batch["batch_0"]
-        )
-        model_out["logits"] = torch.max(model_out["logits"], dim=1)[0]
-        # Add a logit for the complement of the input
+        ).squeeze()
         return model_out
 
     def compute_logits(self, x: torch.Tensor, batch: torch.Tensor):
@@ -102,12 +97,16 @@ class SANNReadout(AbstractZeroCellReadOut):
             Dictionary containing the updated model output.
         """
 
+        hop_tensor_names = [k for k in model_out if k.startswith("x_")]
+        max_dim = len(hop_tensor_names)
+        max_hop = len(model_out[hop_tensor_names[0]])
+
         x_all = []
-        # Source
-        for i in range(3):
-            # Target
+        # For i-cells
+        for i in range(max_dim):
+            # For j-hops
             x_i_all = []
-            for j in range(3):
+            for j in range(max_hop):
                 # (dim_i_j, batch_size)
                 # print(i, j)
                 # print(model_out[f'x_{i}'][j].shape)
@@ -122,11 +121,19 @@ class SANNReadout(AbstractZeroCellReadOut):
                 # print('Batch Max node: ', batch[f'batch_{i}'].max())
                 # print('Output scatter shape: ', x_i_j_batched.shape)
                 x_i_all.append(x_i_j_batched)
+
             # (dim_i_0 + dim_i_1 + dim_i_2, batch_size)
-            x_i_all_cat = torch.cat(x_i_all, 1)
-            # assert x_i_all_cat.shape[0] == 32, f"Expected 32, got {x_i_all_cat.shape}"
+
+            x_i_all_cat = torch.cat(x_i_all, dim=1)
+
             x_all.append(x_i_all_cat)
 
-        x_all_cat = torch.cat(x_all, 1)
+        # TODO: Is this fix valid ?
+        lengths = set([x_i_all.shape[0] for x_i_all in x_all])
+        if len(lengths) > 1:
+            x_all[-1] = torch.nn.functional.pad(
+                x_all[-1], (0, 0, 0, max(lengths) - x_all[-1].shape[0])
+            )
+        x_all_cat = torch.cat(x_all, dim=1)
         model_out["x_all"] = x_all_cat
         return model_out

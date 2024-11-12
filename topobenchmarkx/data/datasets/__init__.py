@@ -3,7 +3,7 @@
 import inspect
 from importlib import util
 from pathlib import Path
-from typing import Any, Dict, List, Type
+from typing import ClassVar, any, dict, list, type
 
 from torch_geometric.data import InMemoryDataset
 
@@ -12,13 +12,13 @@ class DatasetManager:
     """Manages automatic discovery and registration of dataset classes."""
 
     # Static dataset definitions
-    PLANETOID_DATASETS: List[str] = [
+    PLANETOID_DATASETS: ClassVar[list[str]] = [
         "Cora",
         "citeseer",
         "PubMed",
     ]
 
-    TU_DATASETS: List[str] = [
+    TU_DATASETS: ClassVar[list[str]] = [
         "MUTAG",
         "ENZYMES",
         "PROTEINS",
@@ -30,9 +30,9 @@ class DatasetManager:
         "NCI109",
     ]
 
-    FIXED_SPLITS_DATASETS: List[str] = ["ZINC", "AQSOL"]
+    FIXED_SPLITS_DATASETS: ClassVar[list[str]] = ["ZINC", "AQSOL"]
 
-    HETEROPHILIC_DATASETS: List[str] = [
+    HETEROPHILIC_DATASETS: ClassVar[list[str]] = [
         "amazon_ratings",
         "questions",
         "minesweeper",
@@ -41,7 +41,7 @@ class DatasetManager:
     ]
 
     @staticmethod
-    def is_dataset_class(obj: Any) -> bool:
+    def is_dataset_class(obj: any) -> bool:
         """Check if an object is a valid dataset class.
 
         Parameters
@@ -65,7 +65,7 @@ class DatasetManager:
     @classmethod
     def discover_datasets(
         cls, package_path: str
-    ) -> Dict[str, Type[InMemoryDataset]]:
+    ) -> dict[str, type[InMemoryDataset]]:
         """Dynamically discover all dataset classes in the package.
 
         Parameters
@@ -109,7 +109,7 @@ class DatasetManager:
         return datasets
 
     @classmethod
-    def get_pyg_datasets(cls) -> List[str]:
+    def get_pyg_datasets(cls) -> list[str]:
         """Get combined list of all PyG datasets.
 
         Returns

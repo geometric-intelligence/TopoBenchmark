@@ -74,7 +74,7 @@ class ModuleExportsManager:
                         and issubclass(obj, Graph2CellLifting)
                         and obj != Graph2CellLifting
                     ):
-                        liftings[name] = obj  # noqa: PERF403
+                        liftings[name] = obj
 
         return liftings
 

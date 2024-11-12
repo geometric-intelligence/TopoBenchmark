@@ -68,7 +68,7 @@ class ModuleExportsManager:
                         and obj.__module__ == module.__name__
                         and not name.startswith("_")
                     ):
-                        manipulations[name] = obj  # noqa: PERF403
+                        manipulations[name] = obj
 
         return manipulations
 

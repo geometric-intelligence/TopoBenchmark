@@ -1,4 +1,4 @@
-"""Loaders for PLANETOID datasets."""
+"""Loaders for TU datasets."""
 
 import os
 from pathlib import Path
@@ -6,13 +6,13 @@ from typing import ClassVar
 
 from omegaconf import DictConfig
 from torch_geometric.data import Dataset
-from torch_geometric.datasets import Planetoid
+from torch_geometric.datasets import TUDataset
 
 from topobenchmarkx.data.loaders.base import AbstractLoader
 
 
-class PlanetoidDatasetLoader(AbstractLoader):
-    """Load PLANETOID datasets.
+class TUDatasetLoader(AbstractLoader):
+    """Load TU datasets.
 
     Parameters
     ----------
@@ -20,11 +20,21 @@ class PlanetoidDatasetLoader(AbstractLoader):
         Configuration parameters containing:
             - data_dir: Root directory for data
             - data_name: Name of the dataset
-            - data_type: Type of the dataset (e.g., "cocitation")
+            - data_type: Type of the dataset (e.g., "graph_classification")
     """
 
-    VALID_DATASETS: ClassVar[set[str]] = {"Cora", "citeseer", "PubMed"}
-    VALID_TYPES: ClassVar[set[str]] = {"cocitation"}
+    VALID_DATASETS: ClassVar[set[str]] = {
+        "MUTAG",
+        "ENZYMES",
+        "PROTEINS",
+        "COLLAB",
+        "IMDB-BINARY",
+        "IMDB-MULTI",
+        "REDDIT-BINARY",
+        "NCI1",
+        "NCI109",
+    }
+    VALID_TYPES: ClassVar[set[str]] = {"TUDataset"}
 
     def __init__(self, parameters: DictConfig) -> None:
         super().__init__(parameters)
@@ -45,12 +55,12 @@ class PlanetoidDatasetLoader(AbstractLoader):
             )
 
     def load_dataset(self) -> Dataset:
-        """Load Planetoid dataset.
+        """Load TU dataset.
 
         Returns
         -------
         Dataset
-            The loaded Planetoid dataset.
+            The loaded TU dataset.
 
         Raises
         ------
@@ -58,9 +68,10 @@ class PlanetoidDatasetLoader(AbstractLoader):
             If dataset loading fails.
         """
 
-        dataset = Planetoid(
+        dataset = TUDataset(
             root=str(self.root_data_dir),
             name=self.parameters.data_name,
+            use_node_attr=False,
         )
         return dataset
 

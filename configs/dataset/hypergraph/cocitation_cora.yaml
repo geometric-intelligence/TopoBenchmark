@@ -1,6 +1,7 @@
 # Dataset loader config
 loader:
-  _target_: topobenchmarkx.data.loaders.HypergraphLoader
+  _target_: topobenchmarkx.data.loaders.loader.DatasetFetcher
+  data_source: CitationHypergraphDatasetLoader
   parameters: 
     data_domain: hypergraph
     data_type: cocitation

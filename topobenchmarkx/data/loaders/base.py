@@ -1,7 +1,7 @@
 """Abstract Loader class."""
 
-from pathlib import Path
 from abc import ABC, abstractmethod
+from pathlib import Path
 
 import torch_geometric
 from omegaconf import DictConfig

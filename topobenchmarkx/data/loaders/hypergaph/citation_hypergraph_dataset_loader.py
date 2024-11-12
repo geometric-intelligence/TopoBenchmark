@@ -1,18 +1,17 @@
-"""Loaders for PLANETOID datasets."""
+"""Loaders for Citation Hypergraph dataset."""
 
 import os
 from pathlib import Path
 from typing import ClassVar
 
 from omegaconf import DictConfig
-from torch_geometric.data import Dataset
-from torch_geometric.datasets import Planetoid
 
+from topobenchmarkx.data.datasets import CitationHypergraphDataset
 from topobenchmarkx.data.loaders.base import AbstractLoader
 
 
-class PlanetoidDatasetLoader(AbstractLoader):
-    """Load PLANETOID datasets.
+class CitationHypergraphDatasetLoader(AbstractLoader):
+    """Load Citation Hypergraph dataset with configurable parameters.
 
     Parameters
     ----------
@@ -20,11 +19,17 @@ class PlanetoidDatasetLoader(AbstractLoader):
         Configuration parameters containing:
             - data_dir: Root directory for data
             - data_name: Name of the dataset
-            - data_type: Type of the dataset (e.g., "cocitation")
+            - other relevant parameters
     """
 
-    VALID_DATASETS: ClassVar[set[str]] = {"Cora", "citeseer", "PubMed"}
-    VALID_TYPES: ClassVar[set[str]] = {"cocitation"}
+    VALID_DATASETS: ClassVar[set] = {
+        "cocitation_cora",
+        "cocitation_citeseer",
+        "coauthorship_cora",
+        "coauthorship_dblp",
+        "cocitation_pubmed",
+    }
+    VALID_TYPES: ClassVar[set] = {"coauthorship"}
 
     def __init__(self, parameters: DictConfig) -> None:
         super().__init__(parameters)
@@ -38,19 +43,13 @@ class PlanetoidDatasetLoader(AbstractLoader):
                 f"Must be one of: {', '.join(sorted(self.VALID_DATASETS))}"
             )
 
-        if self.parameters.data_type not in self.VALID_TYPES:
-            raise ValueError(
-                f"Data type '{self.parameters.data_type}' not supported. "
-                f"Must be one of: {', '.join(sorted(self.VALID_TYPES))}"
-            )
-
-    def load_dataset(self) -> Dataset:
-        """Load Planetoid dataset.
+    def load_dataset(self) -> CitationHypergraphDataset:
+        """Load the Citation Hypergraph dataset.
 
         Returns
         -------
-        Dataset
-            The loaded Planetoid dataset.
+        CitationHypergraphDataset
+            The loaded Citation Hypergraph dataset with the appropriate `data_dir`.
 
         Raises
         ------
@@ -58,11 +57,23 @@ class PlanetoidDatasetLoader(AbstractLoader):
             If dataset loading fails.
         """
 
-        dataset = Planetoid(
+        dataset = self._initialize_dataset()
+        self.data_dir = self.get_data_dir()
+        return dataset
+
+    def _initialize_dataset(self) -> CitationHypergraphDataset:
+        """Initialize the Citation Hypergraph dataset.
+
+        Returns
+        -------
+        CitationHypergraphDataset
+            The initialized dataset instance.
+        """
+        return CitationHypergraphDataset(
             root=str(self.root_data_dir),
             name=self.parameters.data_name,
+            parameters=self.parameters,
         )
-        return dataset
 
     def get_data_dir(self) -> Path:
         """Get the data directory.

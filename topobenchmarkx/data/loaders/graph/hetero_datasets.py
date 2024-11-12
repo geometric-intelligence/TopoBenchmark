@@ -1,4 +1,4 @@
-"""Loaders for PLANETOID datasets."""
+"""Loaders for Heterophilous Graph datasets."""
 
 import os
 from pathlib import Path
@@ -6,13 +6,13 @@ from typing import ClassVar
 
 from omegaconf import DictConfig
 from torch_geometric.data import Dataset
-from torch_geometric.datasets import Planetoid
+from torch_geometric.datasets import HeterophilousGraphDataset
 
 from topobenchmarkx.data.loaders.base import AbstractLoader
 
 
-class PlanetoidDatasetLoader(AbstractLoader):
-    """Load PLANETOID datasets.
+class HeterophilousGraphDatasetLoader(AbstractLoader):
+    """Load Heterophilous Graph datasets.
 
     Parameters
     ----------
@@ -20,11 +20,17 @@ class PlanetoidDatasetLoader(AbstractLoader):
         Configuration parameters containing:
             - data_dir: Root directory for data
             - data_name: Name of the dataset
-            - data_type: Type of the dataset (e.g., "cocitation")
+            - data_type: Type of the dataset (e.g., "heterophilous")
     """
 
-    VALID_DATASETS: ClassVar[set[str]] = {"Cora", "citeseer", "PubMed"}
-    VALID_TYPES: ClassVar[set[str]] = {"cocitation"}
+    VALID_DATASETS: ClassVar[set[str]] = {
+        "amazon_ratings",
+        "questions",
+        "minesweeper",
+        "roman_empire",
+        "tolokers",
+    }
+    VALID_TYPES: ClassVar[set[str]] = {"heterophilic"}
 
     def __init__(self, parameters: DictConfig) -> None:
         super().__init__(parameters)
@@ -45,12 +51,12 @@ class PlanetoidDatasetLoader(AbstractLoader):
             )
 
     def load_dataset(self) -> Dataset:
-        """Load Planetoid dataset.
+        """Load Heterophilous Graph dataset.
 
         Returns
         -------
         Dataset
-            The loaded Planetoid dataset.
+            The loaded Heterophilous Graph dataset.
 
         Raises
         ------
@@ -58,7 +64,7 @@ class PlanetoidDatasetLoader(AbstractLoader):
             If dataset loading fails.
         """
 
-        dataset = Planetoid(
+        dataset = HeterophilousGraphDataset(
             root=str(self.root_data_dir),
             name=self.parameters.data_name,
         )

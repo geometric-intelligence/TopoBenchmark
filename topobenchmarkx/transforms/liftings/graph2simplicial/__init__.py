@@ -74,7 +74,7 @@ class ModuleExportsManager:
                         and issubclass(obj, Graph2SimplicialLifting)
                         and obj != Graph2SimplicialLifting
                     ):
-                        liftings[name] = obj  # noqa: PERF403
+                        liftings[name] = obj
 
         return liftings
 

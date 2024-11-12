@@ -74,7 +74,7 @@ class ModuleExportsManager:
                         and issubclass(obj, Graph2HypergraphLifting)
                         and obj != Graph2HypergraphLifting
                     ):
-                        liftings[name] = obj  # noqa: PERF403
+                        liftings[name] = obj
 
         return liftings
 

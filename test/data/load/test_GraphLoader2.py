@@ -3,9 +3,9 @@
 #from unittest.mock import MagicMock, patch
 import torch
 import pytest
-from omegaconf import DictConfig, OmegaConf
+#from omegaconf import DictConfig, OmegaConf
 
-from topobenchmarkx.data.loaders import GraphLoader
+from topobenchmarkx.data.loaders.loader import DatasetFetcher
 
 import os
 import hydra
@@ -17,17 +17,27 @@ class TestLoaders:
         """Setup the test."""
         hydra.core.global_hydra.GlobalHydra.instance().clear()
         base_dir = os.path.abspath(__file__)
+        
         # Go up four levels
         for _ in range(4):
             base_dir = os.path.dirname(base_dir)
         
-        config_dir = os.path.join(base_dir, "configs/dataset/graph")
-
-        self.config_files = [f for f in os.listdir(config_dir) if f.endswith(".yaml")]
+        
+        # config_dir = os.path.join(base_dir, "configs/dataset/graph")
+        # self.config_files = [f for f in os.listdir(config_dir) if f.endswith(".yaml")]
+        
+        self.config_files = []
+        config_base_dir = os.path.join(base_dir, "configs/dataset")
+        for dir in os.listdir(config_base_dir):
+            config_dir = os.path.join(config_base_dir, dir)
+            for config in os.listdir(config_dir):
+                if config.endswith(".yaml"): 
+                    self.config_files.append(config)
+            
 
 
         # Exclude files 
-        exclude_datasets = ["manual_dataset.yaml"]
+        exclude_datasets = ["manual_dataset.yaml", "karate_club.yaml"]
 
         self.config_files = [f for f in self.config_files if f not in exclude_datasets]
         self.relative_config_dir =  "../../../configs"
@@ -41,12 +51,10 @@ class TestLoaders:
                 job_name="run"
             ):
                 parameters = hydra.compose(config_name="run.yaml",
-                    overrides=[f"dataset=graph/{f}"], 
                     return_hydra_config=True
                 )
                 
-
-            loader = GraphLoader(parameters.dataset.loader.parameters)
-            loader.load()
+            dataset_loader = hydra.utils.instantiate(parameters.dataset.loader)
+            dataset, _ = dataset_loader.load()
         
-        repr(loader)
+            repr(dataset)

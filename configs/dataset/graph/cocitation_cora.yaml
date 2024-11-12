@@ -1,7 +1,7 @@
 # Dataset loader config
 loader:
-  _target_: topobenchmarkx.data.loaders.loader2.DataLoader
-  data_source: planetoid_datasets
+  _target_: topobenchmarkx.data.loaders.loader.DatasetFetcher
+  data_source: PlanetoidDatasetLoader
   parameters: 
     data_domain: graph
     data_type: cocitation

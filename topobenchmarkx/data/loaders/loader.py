@@ -1,14 +1,15 @@
 """Data loaders."""
 
-import os
+# import os
 
-import numpy as np
+# import numpy as np
 import torch_geometric
-from omegaconf import DictConfig
+
+# from omegaconf import DictConfig
 from topobenchmarkx.data.loaders import LOADERS
 
 
-class DataLoader:
+class DatasetFetcher:
     """Loader for graph datasets.
 
     Parameters

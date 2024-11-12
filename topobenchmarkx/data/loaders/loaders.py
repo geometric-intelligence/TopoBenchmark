@@ -13,6 +13,7 @@ from topobenchmarkx.data.datasets import (
     TU_DATASETS,
     CitationHypergraphDataset,
     USCountyDemosDataset,
+    H36MDataset,
 )
 from topobenchmarkx.data.loaders.base import AbstractLoader
 from topobenchmarkx.data.utils import (
@@ -138,6 +139,15 @@ class GraphLoader(AbstractLoader):
                 parameters=self.parameters,
             )
             # Need to redefine data_dir for the (year, task_variable) pair chosen
+            data_dir = dataset.processed_root
+
+        elif self.parameters.data_name in ["H36MDataset"]:
+            dataset = H36MDataset(
+                root=root_data_dir,
+                name=self.parameters["data_name"],
+                parameters=self.parameters,
+            )
+
             data_dir = dataset.processed_root
 
         elif self.parameters.data_name in ["manual"]:

@@ -3,7 +3,7 @@
 import inspect
 from importlib import util
 from pathlib import Path
-from typing import ClassVar, any, dict, list, type
+from typing import ClassVar, Any, dict, list, type
 
 from torch_geometric.data import InMemoryDataset
 
@@ -41,7 +41,7 @@ class DatasetManager:
     ]
 
     @staticmethod
-    def is_dataset_class(obj: any) -> bool:
+    def is_dataset_class(obj: Any) -> bool:
         """Check if an object is a valid dataset class.
 
         Parameters

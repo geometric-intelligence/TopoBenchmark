@@ -1,0 +1,4 @@
+_target_: topobenchmarkx.transforms.data_transform.DataTransform
+transform_name: "GroupCombinatorialHomophily"
+transform_type: "data manipulation"
+top_k: 10

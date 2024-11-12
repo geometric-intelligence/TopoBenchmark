@@ -35,7 +35,11 @@ class Concatenation(torch_geometric.transforms.BaseTransform):
             The lifted data.
         """
         keys = sorted(
-            [key.split("_")[1] for key in data if "incidence" in key]
+            [
+                key.split("_")[1]
+                for key in data
+                if "incidence" in key and "-" not in key
+            ]
         )
         for elem in keys:
             if f"x_{elem}" not in data:
@@ -54,7 +58,8 @@ class Concatenation(torch_geometric.transforms.BaseTransform):
                     idxs = torch.stack(idxs_list, dim=0)
                     values = data[f"x_{idx_to_project}"][idxs].view(n, -1)
                 else:
-                    values = torch.tensor([])
+                    m = data[f"x_{int(elem)-1}"].shape[1] * (int(elem) + 1)
+                    values = torch.zeros([0, m])
 
                 data["x_" + elem] = values
         return data

@@ -1,7 +1,5 @@
 """Data loaders."""
 
-# import os
-
 # import numpy as np
 import torch_geometric
 

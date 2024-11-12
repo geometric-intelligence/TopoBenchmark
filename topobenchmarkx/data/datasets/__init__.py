@@ -3,7 +3,7 @@
 import inspect
 from importlib import util
 from pathlib import Path
-from typing import ClassVar, Any, dict, list, type
+from typing import Any, ClassVar
 
 from torch_geometric.data import InMemoryDataset
 

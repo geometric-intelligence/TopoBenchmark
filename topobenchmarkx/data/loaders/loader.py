@@ -25,7 +25,8 @@ class DatasetFetcher:
 
     def __init__(self, data_source, **kwargs):
         super().__init__()
-        self.loader = LOADERS[data_source](kwargs["parameters"])
+        self.parameters = kwargs["parameters"]
+        self.loader = LOADERS[data_source](self.parameters)
 
     def __repr__(self) -> str:
         """Return a string representation of the GraphLoader object.

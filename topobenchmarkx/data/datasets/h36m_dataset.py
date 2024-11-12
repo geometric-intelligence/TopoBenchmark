@@ -1,12 +1,12 @@
 """Dataset class for Human3.6M dataset (http://vision.imar.ro/human3.6m/description.php)."""
 
 import json
-import numpy as np
 import os
 import os.path as osp
 import shutil
 from typing import ClassVar
 
+import numpy as np
 import torch
 from omegaconf import DictConfig
 from torch_geometric.data import Data, InMemoryDataset, extract_zip
@@ -181,7 +181,7 @@ class H36MDataset(InMemoryDataset):
         # scp H36MDataset.zip abby@bongo.ece.ucsb.edu:/home/abby/code/TopoBenchmark/topobenchmarkx/data/H36MDataset/raw
 
         # Step 2: extract file
-        step2_already_done = True
+        step2_already_done = False
         folder = self.raw_dir
         if not step2_already_done:
             filename = f"{self.name}.{self.file_format}"
@@ -192,7 +192,7 @@ class H36MDataset(InMemoryDataset):
 
         # Step 3: move the extracted files to the folder with corresponding name
         # Move files from osp.join(folder, name_download) to folder
-        step3_already_done = True
+        step3_already_done = False
         if not step3_already_done:
             for subject_dir in os.listdir(
                 osp.join(folder, "h36m")

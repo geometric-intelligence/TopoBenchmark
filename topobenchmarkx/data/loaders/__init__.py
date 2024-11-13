@@ -1,7 +1,7 @@
 """Init file for load module."""
 
-from .graph import GRAPH_LOADERS, GRAPH_LOADERS_list
-from .hypergraph import HYPERGRAPH_LOADERS, HYPERGRAPH_LOADERS_list
+from .graph import *
+from .hypergraph import *
 from .base import AbstractLoader
 
 __all__ = [

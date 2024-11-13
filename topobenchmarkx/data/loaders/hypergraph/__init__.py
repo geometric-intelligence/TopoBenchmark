@@ -88,9 +88,9 @@ HYPERGRAPH_LOADERS_list = list(HYPERGRAPH_LOADERS.keys())
 __all__ = [
     # Loader collections
     "HYPERGRAPH_LOADERS",
-    "HYPERGRAPH_LOADERS_list"
+    "HYPERGRAPH_LOADERS_list",
     # Individual loader classes
-    * HYPERGRAPH_LOADERS.keys(),
+    *HYPERGRAPH_LOADERS.keys(),
 ]
 
 # For backwards compatibility, create individual imports

@@ -69,9 +69,9 @@ class HypergraphLoaderManager:
                 for name, obj in inspect.getmembers(module):
                     if (
                         cls.is_loader_class(obj)
-                        and obj.__module__ == module.__name__  # noqa: PERF403
+                        and obj.__module__ == module.__name__
                     ):
-                        loaders[name] = obj
+                        loaders[name] = obj  # noqa: PERF403
 
         return loaders
 

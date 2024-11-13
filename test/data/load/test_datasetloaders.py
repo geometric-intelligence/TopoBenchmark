@@ -39,8 +39,8 @@ class TestLoaders:
         exclude_datasets = {"manual_dataset.yaml", "karate_club.yaml",
                             # Below the datasets that have some default transforms with we manually overriten with no_transform,
                             # due to lack of default transform for domain2domain
-                            "REDDIT-BINARY.yaml", "AQSOL.yaml", "IMDB-BINARY.yaml",
-                            "IMDB-MULTI.yaml", "PROTEINS.yaml", "ZINC.yaml"}
+                            "REDDIT-BINARY.yaml", "IMDB-MULTI.yaml", "IMDB-BINARY.yaml", "ZINC.yaml"
+                            }
 
         
         for dir_path in config_base_dir.iterdir():
@@ -75,7 +75,7 @@ class TestLoaders:
             print('Current config file: ', config_file)
             parameters = hydra.compose(
                 config_name="run.yaml",
-                overrides=[f"dataset={data_domain}/{config_file}", "transforms=no_transform"], 
+                overrides=[f"dataset={data_domain}/{config_file}"], 
                 return_hydra_config=True
                 
             )
@@ -89,8 +89,12 @@ class TestLoaders:
             dataset, _ = self._load_dataset(data_domain, config_file)
             
             # Test dataset size and dimensions
-            assert dataset.data.x.size(0) > 0, "Empty node features"
-            assert dataset.data.y.size(0) > 0, "Empty labels"
+            if hasattr(dataset, "data"):
+                assert dataset.data.x.size(0) > 0, "Empty node features"
+                assert dataset.data.y.size(0) > 0, "Empty labels"
+            else: 
+                assert dataset[0].x.size(0) > 0, "Empty node features"
+                assert dataset[0].y.size(0) > 0, "Empty labels"
             
             # Test node feature dimensions
             if hasattr(dataset, 'num_node_features'):

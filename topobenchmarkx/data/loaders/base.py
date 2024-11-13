@@ -1,5 +1,6 @@
 """Abstract Loader class."""
 
+import os
 from abc import ABC, abstractmethod
 from pathlib import Path
 
@@ -23,6 +24,16 @@ class AbstractLoader(ABC):
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}(parameters={self.parameters})"
 
+    def get_data_dir(self) -> Path:
+        """Get the data directory.
+
+        Returns
+        -------
+        Path
+            The path to the dataset directory.
+        """
+        return os.path.join(self.root_data_dir, self.parameters.data_name)
+
     @abstractmethod
     def load_dataset(self) -> torch_geometric.data.Data:
         """Load data into Data.
@@ -34,7 +45,15 @@ class AbstractLoader(ABC):
         """
         raise NotImplementedError
 
-    @abstractmethod
-    def get_data_dir(self) -> Path:
-        """Get the data directory."""
-        raise NotImplementedError
+    def load(self) -> tuple[torch_geometric.data.Data, str]:
+        """Load data.
+
+        Returns
+        -------
+        tuple[torch_geometric.data.Data, str]
+            Tuple containing the loaded data and the data directory.
+        """
+        dataset = self.load_dataset()
+        data_dir = self.get_data_dir()
+
+        return dataset, data_dir

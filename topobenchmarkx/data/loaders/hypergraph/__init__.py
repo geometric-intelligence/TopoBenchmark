@@ -71,7 +71,7 @@ class HypergraphLoaderManager:
                         cls.is_loader_class(obj)
                         and obj.__module__ == module.__name__
                     ):
-                        loaders[name] = obj  # noqa: PERF403
+                        loaders[name] = obj
 
         return loaders
 

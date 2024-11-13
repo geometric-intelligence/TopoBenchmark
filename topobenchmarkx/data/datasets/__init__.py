@@ -104,7 +104,7 @@ class DatasetManager:
                         and issubclass(obj, InMemoryDataset)
                         and obj != InMemoryDataset
                     ):
-                        datasets[name] = obj
+                        datasets[name] = obj  # noqa: PERF403
 
         return datasets
 

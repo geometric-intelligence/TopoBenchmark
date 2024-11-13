@@ -76,7 +76,7 @@ class ModuleExportsManager:
                         and obj.__module__ == module.__name__
                         and not name.startswith("_")
                     ):
-                        liftings[name] = obj
+                        liftings[name] = obj  # noqa: PERF403
 
         # Add special cases if provided
         if special_cases:

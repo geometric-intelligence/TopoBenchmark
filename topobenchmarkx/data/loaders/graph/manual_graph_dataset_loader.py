@@ -23,13 +23,9 @@ class ManualGraphDatasetLoader(AbstractLoader):
 
     def __init__(self, parameters: DictConfig) -> None:
         super().__init__(parameters)
-        self._validate_parameters()
-
-    def _validate_parameters(self) -> None:
-        """Validate input parameters."""
-        # You can add any specific validation logic for manual graphs if needed
-        if not self.parameters.data_name:
-            raise ValueError("The 'data_name' parameter must be provided.")
+        assert (
+            self.parameters.data_dir
+        ), "The 'data_dir' parameter must be provided."
 
     def load_dataset(self) -> Any:
         """Load the manual graph dataset.

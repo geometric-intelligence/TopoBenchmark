@@ -1,8 +1,6 @@
 """Loaders for US County Demos dataset."""
 
-import os
 from pathlib import Path
-from typing import ClassVar
 
 from omegaconf import DictConfig
 
@@ -23,20 +21,8 @@ class USCountyDemosDatasetLoader(AbstractLoader):
             - task_variable: Task variable for the dataset
     """
 
-    VALID_DATASETS: ClassVar[set] = {"US-county-demos"}
-    VALID_TYPES: ClassVar[set] = {"USCountyDemosDataset"}
-
     def __init__(self, parameters: DictConfig) -> None:
         super().__init__(parameters)
-        self._validate_parameters()
-
-    def _validate_parameters(self) -> None:
-        """Validate the input parameters."""
-        if self.parameters.data_name not in self.VALID_DATASETS:
-            raise ValueError(
-                f"Dataset '{self.parameters.data_name}' not supported. "
-                f"Must be one of: {', '.join(sorted(self.VALID_DATASETS))}"
-            )
 
     def load_dataset(self) -> USCountyDemosDataset:
         """Load the US County Demos dataset.
@@ -84,13 +70,3 @@ class USCountyDemosDatasetLoader(AbstractLoader):
             The redefined data directory path.
         """
         return dataset.processed_root
-
-    def get_data_dir(self) -> Path:
-        """Get the data directory.
-
-        Returns
-        -------
-        Path
-            The path to the dataset directory.
-        """
-        return os.path.join(self.root_data_dir, self.parameters.data_name)

@@ -1,9 +1,5 @@
 """Loaders for Citation Hypergraph dataset."""
 
-import os
-from pathlib import Path
-from typing import ClassVar
-
 from omegaconf import DictConfig
 
 from topobenchmarkx.data.datasets import CitationHypergraphDataset
@@ -22,26 +18,8 @@ class CitationHypergraphDatasetLoader(AbstractLoader):
             - other relevant parameters
     """
 
-    VALID_DATASETS: ClassVar[set] = {
-        "cocitation_cora",
-        "cocitation_citeseer",
-        "coauthorship_cora",
-        "coauthorship_dblp",
-        "cocitation_pubmed",
-    }
-    VALID_TYPES: ClassVar[set] = {"coauthorship"}
-
     def __init__(self, parameters: DictConfig) -> None:
         super().__init__(parameters)
-        self._validate_parameters()
-
-    def _validate_parameters(self) -> None:
-        """Validate the input parameters."""
-        if self.parameters.data_name not in self.VALID_DATASETS:
-            raise ValueError(
-                f"Dataset '{self.parameters.data_name}' not supported. "
-                f"Must be one of: {', '.join(sorted(self.VALID_DATASETS))}"
-            )
 
     def load_dataset(self) -> CitationHypergraphDataset:
         """Load the Citation Hypergraph dataset.
@@ -74,13 +52,3 @@ class CitationHypergraphDatasetLoader(AbstractLoader):
             name=self.parameters.data_name,
             parameters=self.parameters,
         )
-
-    def get_data_dir(self) -> Path:
-        """Get the data directory.
-
-        Returns
-        -------
-        Path
-            The path to the dataset directory.
-        """
-        return os.path.join(self.root_data_dir, self.parameters.data_name)

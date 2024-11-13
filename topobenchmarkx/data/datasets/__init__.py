@@ -40,28 +40,6 @@ class DatasetManager:
         "tolokers",
     ]
 
-    @staticmethod
-    def is_dataset_class(obj: Any) -> bool:
-        """Check if an object is a valid dataset class.
-
-        Parameters
-        ----------
-        obj : Any
-            The object to check if it's a valid dataset class.
-
-        Returns
-        -------
-        bool
-            True if the object is a valid dataset class (non-private class
-            inheriting from InMemoryDataset), False otherwise.
-        """
-        return (
-            inspect.isclass(obj)
-            and not obj.__name__.startswith("_")
-            and issubclass(obj, InMemoryDataset)
-            and obj != InMemoryDataset
-        )
-
     @classmethod
     def discover_datasets(
         cls, package_path: str

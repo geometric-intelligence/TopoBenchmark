@@ -39,7 +39,7 @@ class TestLoaders:
         exclude_datasets = {"karate_club.yaml",
                             # Below the datasets that have some default transforms with we manually overriten with no_transform,
                             # due to lack of default transform for domain2domain
-                            "REDDIT-BINARY.yaml", "IMDB-MULTI.yaml", "IMDB-BINARY.yaml", "ZINC.yaml"
+                            "REDDIT-BINARY.yaml", "IMDB-MULTI.yaml", "IMDB-BINARY.yaml", #"ZINC.yaml"
                             }
 
         
@@ -80,6 +80,7 @@ class TestLoaders:
                 
             )
             dataset_loader = hydra.utils.instantiate(parameters.dataset.loader)
+            print(repr(dataset_loader))
             return dataset_loader.load()
 
     def test_dataset_loading_states(self):

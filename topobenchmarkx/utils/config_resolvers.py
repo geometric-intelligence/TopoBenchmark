@@ -287,3 +287,21 @@ def get_default_metrics(task):
         return ["mse", "mae"]
     else:
         raise ValueError(f"Invalid task {task}")
+
+
+def get_list_element(list, index):
+    r"""Get element of a list.
+
+    Parameters
+    ----------
+    list : list
+        List of elements.
+    index : int
+        Index of the element to get.
+
+    Returns
+    -------
+    any
+        Element of the list.
+    """
+    return list[index]

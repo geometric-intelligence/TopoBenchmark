@@ -82,12 +82,14 @@ manager = GraphLoaderManager()
 # Automatically discover and populate loaders
 GRAPH_LOADERS = manager.discover_loaders(__file__)
 
+GRAPH_LOADERS_list = list(GRAPH_LOADERS.keys())
 # Automatically generate __all__
 __all__ = [
     # Loader collections
     "GRAPH_LOADERS",
+    "GRAPH_LOADERS_list",
     # Individual loader classes
-    *GRAPH_LOADERS.keys(),
+    *GRAPH_LOADERS_list,
 ]
 
 # For backwards compatibility, create individual imports

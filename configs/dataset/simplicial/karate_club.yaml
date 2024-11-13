@@ -1,4 +1,4 @@
-_target_: topobenchmarkx.data.loaders.SimplicialLoader
+_target_: topobenchmarkx.data.loaders.${dataset.loader.parameters.data_domain}.SimplicialLoader
 
 # Data definition
 parameters:

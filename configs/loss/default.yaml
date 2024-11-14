@@ -1,3 +1,5 @@
 _target_: topobenchmarkx.loss.TBXLoss
-task: ${dataset.parameters.task}
-loss_type: ${dataset.parameters.loss_type}
+dataset_loss:
+  task: ${dataset.parameters.task}
+  loss_type: ${dataset.parameters.loss_type}
+model_loss: ${oc.select:model.backbone.loss,null}

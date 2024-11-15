@@ -1,6 +1,5 @@
 """Dataset class for Human3.6M dataset (http://vision.imar.ro/human3.6m/description.php)."""
 
-import json
 import numpy as np
 import os
 import os.path as osp
@@ -11,10 +10,6 @@ import torch
 from omegaconf import DictConfig
 from torch_geometric.data import Data, InMemoryDataset, extract_zip
 from torch_geometric.io import fs
-
-from topobenchmarkx.data.utils import (
-    download_file_from_drive,
-)
 
 
 class H36MDataset(InMemoryDataset):
@@ -218,8 +213,10 @@ class H36MDataset(InMemoryDataset):
         A lot of this is using functions copied from the siMLPe paper.
         """
         # Step 1: extract the data
-        h36m_files = self.load_raw_motion_matrices()
-        # print(h36m_files)
+        h36m_raw_xyz_motion_matrices = self.load_raw_xyz_motion_matrices()
+        motion_inputs, motion_targets = self.process_input_target_pairs(
+            h36m_raw_xyz_motion_matrices
+        )
 
         # Step 2: define connections
         # this implementation is kinda sketchy but we ignore...
@@ -232,9 +229,12 @@ class H36MDataset(InMemoryDataset):
 
         # Step 3: turn them into torch_geometric.data Data objects
         motions = []
-        for motion_matrix in h36m_files:
-            # motion_matrix.shape = [1064, 22, 3]
-            #       time, joints, channels
+        for input_motion_matrix, target_motion_matrix in zip(
+            motion_inputs, motion_targets
+        ):
+            # input_motion_matrix.shape =  [50, 22, 3]
+            # target_motion_matrix.shape = [10, 22, 3]
+            #       time, joints*channels
 
             # need to flatten so we have: large(time), med(joints), small(channels)
             # so if there are 3 times and 4 joints and 2 channels (ignore the brackets)
@@ -259,30 +259,61 @@ class H36MDataset(InMemoryDataset):
             # just read this in order!
 
             # Step 1: Flatten motion_matrix; node for each time, joint, channel combo.
-            flat_motion_nodes = torch.reshape(motion_matrix, (-1,))
+            flat_input = torch.reshape(
+                input_motion_matrix, (-1,)
+            )  # shape 50*22*3 = 3300
+            flat_target = torch.reshape(
+                target_motion_matrix, (-1,)
+            )  # shape 10*22*3 = 660
 
             # Step 2: Create superset of all possible edge indices.
+            n_times_i, n_joints, n_channels = input_motion_matrix.shape
+
             # Edges according to skeleton bones.
             # TODO Do we want self-loops?
-            t, j, c = motion_matrix.shape
-            small_bones = [(n1 * c, n2 * c) for (n1, n2) in edges]
-            all_channel_bones = [
-                (n1 + cc, n2 + cc)
-                for (n1, n2) in small_bones
-                for cc in range(c)
-            ]
-            all_channel_all_time_bones = [
-                (n1 + tt * (j * c), n2 + tt * (j * c))
-                for (n1, n2) in all_channel_bones
-                for tt in range(t)
-            ]
+            # t, j, c = motion_matrix.shape
+            # small_bones = [(n1 * c, n2 * c) for (n1, n2) in edges]
+            # all_channel_bones = [
+            #     (n1 + cc, n2 + cc)
+            #     for (n1, n2) in small_bones
+            #     for cc in range(c)
+            # ]
+            all_channel_all_time_bones = []
+            #     (n1 + tt * (j * c), n2 + tt * (j * c))
+            #     for (n1, n2) in all_channel_bones
+            #     for tt in range(t)
+            # ]
 
             # print("SMOL:", small_bones)
             # print("ALLC", all_channel_bones)
             # print("AJLKDJKFA", all_channel_all_time_bones)
             # break
+            def compute_flat_index(t, j, c, n_joints=4, n_channels=2):
+                return t * n_joints * n_channels + j * n_channels + c
+
             # TODO Edges according to time.
             time_edges = []
+            for c in range(n_channels):
+                for j in range(n_joints):
+                    for t1 in range(n_times_i):
+                        for t2 in range(n_times_i):
+                            edge = (
+                                compute_flat_index(
+                                    t1,
+                                    j,
+                                    c,
+                                    n_joints=n_joints,
+                                    n_channels=n_channels,
+                                ),
+                                compute_flat_index(
+                                    t2,
+                                    j,
+                                    c,
+                                    n_joints=n_joints,
+                                    n_channels=n_channels,
+                                ),
+                            )
+                            time_edges.append(edge)
 
             # TODO Edges according to channel.
             channel_edges = []
@@ -299,8 +330,9 @@ class H36MDataset(InMemoryDataset):
 
             # Step 3: Create graph Data objects.
             motion_graph = Data(
-                x=motion_matrix,
-                edge_index=all_channel_all_time_bones,
+                x=flat_input,
+                y=flat_target,
+                edge_index=time_edges,
             )
             motions.append(motion_graph)
 
@@ -314,42 +346,30 @@ class H36MDataset(InMemoryDataset):
             self.processed_paths[0],
         )
 
-    # def __len__(self):
-    #     # if self._file_length is not None:
-    #     #     return self._file_length
-    #     return len(self._h36m_files)
-
-    def load_raw_motion_matrices(self, train=True):
+    def load_raw_xyz_motion_matrices(self):
         r"""Load raw motion data.
 
         This method loads the Human3.6M dataset.
 
         A lot of this is using functions copied from the siMLPe paper.
 
-        Parameters
-        ----------
-        train : bool
-            Probably to delete. Don't understand where train goes.
-
         Returns
         -------
-        np.array
+        torch.tensor
             Raw motion matrices from files TODO WHAT IS THIS.
         """
         # Get train / test split
-        if train:
-            subj_names = ["S1", "S6", "S7", "S8", "S9"]
-        else:
-            subj_names = ["S5"]
+        # if train:
+        #     subj_names = ["S1", "S6", "S7", "S8", "S9"]
+        # else:
+        #     subj_names = ["S5"]
+        subj_names = ["S1", "S5", "S6", "S7", "S8", "S9"]
 
         file_list = []
         for subj in subj_names:
             for filename in os.listdir(self.raw_dir):
                 if filename.startswith(subj):
                     file_list.append(osp.join(self.raw_dir, filename))
-
-        # print(self.raw_dir)
-        # print("******", file_list)
 
         raw_motion_matrices = []
         for path in file_list:
@@ -377,71 +397,69 @@ class H36MDataset(InMemoryDataset):
 
         return raw_motion_matrices
 
+    def process_input_target_pairs(
+        self,
+        raw_xyz_motion_matrices,
+        sample_rate=2,
+        input_length=50,
+        target_length=10,
+    ):
+        r"""Create input-target pairs from raw motion matrices.
+
+        Parameters
+        ----------
+        raw_xyz_motion_matrices : list[torch.tensor]
+            GA.
+        sample_rate : int
+            Sample rate to reduce temporal resolution.
+        input_length : int
+            Desired length of input to neural network.
+        target_length : int
+            Desired length of label for neural network.
+
+        Returns
+        -------
+        X : list[torch.tensor]
+            List of motion matrix inputs of shape (input_length, n_joints, n_channels).
+        Y : list[torch.tensor]
+            List of motion matrix labels of shape (target_length, n_joints, n_channels).
+        """
+
         # TODO deal with this processing step later; might change the reshape / edges
 
-        # def _collect_all(self):
-        # Keep align with HisRep dataloader
-        self.h36m_seqs = []
-        self.data_idx = []
+        X = []
+        Y = []
+
         idx = 0
-        for h36m_motion_poses in h36m_files:
-            N = len(h36m_motion_poses)
-            if (
-                N
-                < 10  # self.h36m_motion_target_length
-                + 50  # self.h36m_motion_input_length
-            ):
+        for h36m_motion_poses in raw_xyz_motion_matrices:
+            n_frames = h36m_motion_poses.shape[0]
+            frame_span_of_sample = (input_length + target_length) * sample_rate
+
+            # motion doesn't have enough frames
+            if n_frames < frame_span_of_sample:
                 continue
 
-            sample_rate = 2
-            sampled_index = np.arange(0, N, sample_rate)
-            h36m_motion_poses = h36m_motion_poses[sampled_index]
+            for valid_start_frame in range(
+                0, n_frames - frame_span_of_sample, sample_rate
+            ):
+                frame_indexes = np.arange(
+                    valid_start_frame,
+                    valid_start_frame + frame_span_of_sample,
+                    sample_rate,
+                )
 
-            T = h36m_motion_poses.shape[0]
-            h36m_motion_poses = h36m_motion_poses.reshape(T, -1)
-            print(h36m_motion_poses.shape)
-            self.h36m_seqs.append(h36m_motion_poses)
-            valid_frames = np.arange(
-                0,
-                T
-                - 50  # self.h36m_motion_input_length
-                - 10  # self.h36m_motion_target_length
-                + 1,
-                1,  # self.shift_step,
-            )
+                motion = h36m_motion_poses[frame_indexes]
 
-            self.data_idx.extend(
-                zip([idx] * len(valid_frames), valid_frames.tolist())
-            )
-            idx += 1
+                motion_input = (motion[:input_length] / 1000).float()  # meter
+                motion_target = (motion[input_length:] / 1000).float()  # meter
 
-        return h36m_files
+                X.append(motion_input)
+                Y.append(motion_target)
+                idx += 1
+                if idx == 150:
+                    return X, Y
 
-    # def __getitem__(self, index):
-    #     idx, start_frame = self.data_idx[index]
-    #     frame_indexes = np.arange(
-    #         start_frame,
-    #         start_frame
-    #         + self.h36m_motion_input_length
-    #         + self.h36m_motion_target_length,
-    #     )
-    #     motion = self.h36m_seqs[idx][frame_indexes]
-    #     if self.data_aug:
-    #         if torch.rand(1)[0] > 0.5:
-    #             idx = [i for i in range(motion.size(0) - 1, -1, -1)]
-    #             idx = torch.LongTensor(idx)
-    #             motion = motion[idx]
-
-    #     h36m_motion_input = (
-    #         motion[: self.h36m_motion_input_length] / 1000
-    #     )  # meter
-    #     h36m_motion_target = (
-    #         motion[self.h36m_motion_input_length :] / 1000
-    #     )  # meter
-
-    #     h36m_motion_input = h36m_motion_input.float()
-    #     h36m_motion_target = h36m_motion_target.float()
-    #     return h36m_motion_input, h36m_motion_target
+        return X, Y
 
 
 ########################
@@ -453,9 +471,7 @@ class H36MSkeleton:
     r"""Dataset class for Human3.6M Skeleton."""
 
     def __init__(self):
-        """
-        H36M skeleton with 22 joints.
-        """
+        r"""H36M skeleton with 22 joints."""
         self.NUM_JOINTS = 22
 
         self.bone_list = self.generate_bone_list()

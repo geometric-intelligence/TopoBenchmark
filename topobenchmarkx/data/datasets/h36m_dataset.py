@@ -100,8 +100,6 @@ class H36MDataset(InMemoryDataset):
         else:
             self.data = data_cls.from_dict(data)
 
-        print(self.data)
-
         assert isinstance(self._data, Data)
 
     def __repr__(self) -> str:

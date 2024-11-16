@@ -153,8 +153,8 @@ class NeighborCellsLoader(CellLoader):
 
         super().__init__(
             data=data,
-            node_sampler=neighbor_sampler,
-            input_nodes=input_nodes,
+            cell_sampler=neighbor_sampler,
+            input_cells=input_nodes,
             input_time=input_time,
             transform=transform,
             transform_sampler_output=transform_sampler_output,

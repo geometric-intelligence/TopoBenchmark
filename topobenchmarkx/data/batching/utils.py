@@ -196,6 +196,7 @@ def filter_data(data: Data, cells: Tensor, rank: int) -> Data:
     '''
     out = copy.copy(data)
     out = reduce_neighborhoods(out, cells, rank=rank)
+    out.n_id = cells
     return out
 
 def get_sampled_neighborhood(data, rank=0, is_hypergraph=False):

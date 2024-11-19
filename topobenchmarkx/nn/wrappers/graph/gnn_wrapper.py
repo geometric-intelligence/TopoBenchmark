@@ -23,7 +23,12 @@ class GNNWrapper(AbstractWrapper):
         dict
             Dictionary containing the updated model output.
         """
-        x_0 = self.backbone(batch.x_0, batch.edge_index)
+
+        x_0 = self.backbone(
+            batch.x_0,
+            batch.edge_index,
+            batch.get("edge_weight", None),
+        )
 
         model_out = {"labels": batch.y, "batch_0": batch.batch_0}
         model_out["x_0"] = x_0

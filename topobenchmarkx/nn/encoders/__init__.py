@@ -2,7 +2,7 @@
 
 from .all_cell_encoder import AllCellFeatureEncoder
 from .base import AbstractFeatureEncoder
-from .dgm import DGMStructureFeatureEncoder
+from .dgm_encoder import DGMStructureFeatureEncoder
 
 # ... import other encoders classes here
 # For example:

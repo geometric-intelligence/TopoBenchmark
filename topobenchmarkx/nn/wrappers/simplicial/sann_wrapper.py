@@ -39,23 +39,28 @@ class SANNWrapper(AbstractWrapper):
         dict
             Dictionary containing the model output.
         """
-        # Maximum dimension is a 2-simplex
-        max_simplex_dim = 2
+        hop_data_names = [
+            k
+            for k in batch.keys()
+            if k.startswith("x") and len(k.split("_")[0]) == 2
+        ]
+        max_simplex_dim = max(
+            [int(k.split("_")[0][1]) for k in hop_data_names]
+        )
+        max_hop_dim = max([int(k.split("_")[1][0]) for k in hop_data_names])
+
         # Prepare the input data for the backbone
         # by aggregating the data in a dictionary
         # (source_simplex_dim, (target_simplex_dim, torch.Tensor with embeddings))
-        x_all = dict()
-        for i in range(max_simplex_dim + 1):
-            # (target_simplex_dim, torch.Tensor with embeddings)
-            x_tmp = dict()
-            for j in range(max_simplex_dim + 1):
-                x_tmp[j] = batch[f"x{i}_{j}"]
-            x_all[i] = x_tmp
+        x_all = tuple(
+            tuple(batch[f"x{i}_{j}"] for j in range(max_hop_dim + 1))
+            for i in range(max_simplex_dim + 1)
+        )
 
         x_out = self.backbone(x_all)
 
         model_out = {
-            "labels": batch.y.type(torch.float32),
+            "labels": batch.y.type(torch.long),
             "batch_0": batch.batch_0,
             "batch_1": batch.batch_1,
             "batch_2": batch.batch_2,

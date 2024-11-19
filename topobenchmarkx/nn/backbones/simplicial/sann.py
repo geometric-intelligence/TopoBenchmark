@@ -10,76 +10,77 @@ class SANN(torch.nn.Module):
 
     Parameters
     ----------
-    dim_1 : int
-        Dimension of the input feature vector for 0-simplices (unused).
-    dim_2 : int
+    in_channels : tuple of int or int
         Dimension of the hidden layers.
-    dim_3 : int
+    hidden_channels : int
         Dimension of the output layer.
+    update_func : str
+        Update function.
+    complex_dim : int
+        Dimension of the complex.
+    hop_num : int
+        Number of hops.
+    n_layers : int
+        Number of layers.
     """
 
-    def __init__(self, dim_1, dim_2, dim_3):
+    def __init__(
+        self,
+        in_channels,
+        hidden_channels,
+        update_func=None,
+        complex_dim=3,
+        hop_num=2,
+        n_layers=2,
+    ):
         super().__init__()
+        self.complex_dim = complex_dim
+        self.hop_num = hop_num
+
+        assert n_layers >= 1
+
+        if isinstance(in_channels, int):  # If only one value is passed
+            in_channels = [in_channels] * self.complex_dim
+
+        self.layers = torch.nn.ModuleList()
 
         # Set of simplices layers
         self.layers_0 = torch.nn.ModuleList(
-            [
-                SANNLayer([dim_2] * 3, [dim_3] * 3, update_func="lrelu")
-                for i in range(3)
-            ]
+            SANNLayer(
+                [in_channels[i] for i in range(complex_dim)],
+                [hidden_channels] * complex_dim,
+                update_func=update_func,
+            )
+            for i in range(complex_dim)
         )
-        self.layers_1 = torch.nn.ModuleList(
-            [
-                SANNLayer([dim_3] * 3, [dim_3] * 3, update_func="lrelu")
-                for i in range(3)
-            ]
-        )
-        self.layers_2 = torch.nn.ModuleList(
-            [
-                SANNLayer([dim_3] * 3, [dim_3] * 3, update_func="lrelu")
-                for i in range(3)
-            ]
-        )
+        self.layers.append(self.layers_0)
 
-        # All layers for all simplices
-        self.layers = torch.nn.ModuleList(
-            [self.layers_0, self.layers_1, self.layers_2]
-        )
-
-        # # Simplices of dimension 0.
-        # self.g0_0 = nn.Sequential(nn.Linear(dim_1,dim_2),L_relu,nn.Linear(dim_2,dim_3),L_relu,nn.Linear(dim_3,dim_3),L_relu,nn.Linear(dim_3,dim_3),L_relu)
-        # self.g0_1 = nn.Sequential(nn.Linear(6,dim_2),L_relu,nn.Linear(dim_2,dim_3),L_relu,nn.Linear(dim_3,dim_3),L_relu,nn.Linear(dim_3,dim_3),L_relu)
-        # self.g0_2 = nn.Sequential(nn.Linear(18,dim_2),L_relu,nn.Linear(dim_2,dim_3),L_relu,nn.Linear(dim_3,dim_3),L_relu,nn.Linear(dim_3,dim_3),L_relu)
-
-        # # Simplices of dimension 1.
-        # self.g1_0 = nn.Sequential(nn.Linear(dim_1,dim_2),L_relu,nn.Linear(dim_2,dim_3),L_relu,nn.Linear(dim_3,dim_3),L_relu,nn.Linear(dim_3,dim_3),L_relu)
-        # self.g1_1 = nn.Sequential(nn.Linear(12,dim_2),L_relu,nn.Linear(dim_2,dim_3),L_relu,nn.Linear(dim_3,dim_3),L_relu,nn.Linear(dim_3,dim_3),L_relu)
-        # self.g1_2 = nn.Sequential(nn.Linear(39,dim_2),L_relu,nn.Linear(dim_2,dim_3),L_relu,nn.Linear(dim_3,dim_3),L_relu,nn.Linear(dim_3,dim_3),L_relu)
-
-        # # Simplices of dimension 2.
-        # self.g2_0 = nn.Sequential(nn.Linear(dim_1,dim_2),L_relu,nn.Linear(dim_2,dim_3),L_relu,nn.Linear(dim_3,dim_3),L_relu,nn.Linear(dim_3,dim_3),L_relu)
-        # self.g2_1 = nn.Sequential(nn.Linear(9,dim_2),L_relu,nn.Linear(dim_2,dim_3),L_relu,nn.Linear(dim_3,dim_3),L_relu,nn.Linear(dim_3,dim_3),L_relu)
-        # self.g2_2 = nn.Sequential(nn.Linear(30,dim_2),L_relu,nn.Linear(dim_2,dim_3),L_relu,nn.Linear(dim_3,dim_3),L_relu,nn.Linear(dim_3,dim_3),L_relu)
-
-        # #Decoder.
-        # self.D = nn.Sequential(nn.Linear(3*3*dim_3,d8),L_relu,nn.Linear(d8,d8),L_relu,nn.Linear(d8,d8),L_relu,nn.Linear(d8,n_c),sig) #nn.Softmax(dim=0) for multi-class
-        # self.dropout = nn.Dropout(0.00)
+        # From layer 1 to n_layers
+        for i in range(1, n_layers):
+            self.layers.append(
+                torch.nn.ModuleList(
+                    SANNLayer(
+                        [hidden_channels] * complex_dim,
+                        [hidden_channels] * complex_dim,
+                        update_func="lrelu",
+                    )
+                    for i in range(complex_dim)
+                )
+            )
 
     def forward(self, x):
         r"""Forward pass of the model.
 
         Parameters
         ----------
-        x : Dict[Int, Dict[Int, torch.Tensor]]
-            Dictionary containing the input tensors for each simplex.
+        x : tuple(tuple(torch.Tensor))
+            Tuple of tuple containing the input tensors for each simplex.
 
         Returns
         -------
-        torch.Tensor
-            Output tensor.
+        tuple(tuple(torch.Tensor))
+            Tuple of tuples of final hidden state tensors.
         """
-
-        x_emb = dict()
 
         # The follwing line will mean the same as:
         # # For each k: 0 to k (k=0,1,2)
@@ -89,17 +90,19 @@ class SANN(torch.nn.Module):
         # # For each k: 2 to k (k=0,1,2)
         # x_2_tup = tuple(self.in_linear_2[i](x[2][i]) for i in range(3))
 
-        x_emb = {i: tuple([x[i][j] for j in range(3)]) for i in range(3)}
-
         # For each layer in the network
         for layer in self.layers:
+            # Temporary list
+            x_i = list()
+
             # For each i-simplex (i=0,1,2) to all other k-simplices
             for i in range(3):
                 # Goes from i-simplex to all other simplices k<=i
-                x_i_to_0, x_i_to_1, x_i_to_2 = layer[i](x_emb[i])
+                x_i_to_t = layer[i](x[i])
                 # Update the i-th simplex to all other simplices embeddings
-                x_emb[i] = (x_i_to_0, x_i_to_1, x_i_to_2)
-        return x_emb
+                x_i.append(tuple(x_i_to_t))
+            x = tuple(x_i)
+        return x
 
 
 class SANNLayer(torch.nn.Module):

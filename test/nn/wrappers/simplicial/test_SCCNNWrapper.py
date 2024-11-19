@@ -1,10 +1,11 @@
-"""Unit tests for simplicial model wrappers"""
+"""Unit tests for simplicial model wrappers."""
 
 import torch
 from torch_geometric.utils import get_laplacian
 from ...._utils.nn_module_auto_test import NNModuleAutoTest
 from ...._utils.flow_mocker import FlowMocker
 from topobenchmarkx.nn.backbones.simplicial import SCCNNCustom
+from topobenchmarkx.nn.backbones.simplicial import SANN
 from topomodelx.nn.simplicial.san import SAN
 from topomodelx.nn.simplicial.scn2 import SCN2
 from topomodelx.nn.simplicial.sccn import SCCN
@@ -12,19 +13,22 @@ from topobenchmarkx.nn.wrappers import (
     SCCNWrapper,
     SCCNNWrapper,
     SANWrapper,
-    SCNWrapper
+    SCNWrapper,
+    SANNWrapper
 )
 
 class TestSimplicialWrappers:
-    """Test simplicial model wrappers."""
+    r"""Test simplicial model wrappers.
 
+        Test all simplicial wrappers.
+    """
     def test_SCCNNWrapper(self, sg1_clique_lifted):
         """Test SCCNNWrapper.
         
         Parameters
         ----------
         sg1_clique_lifted : torch_geometric.data.Data
-            A fixture of simple graph 1 lifted with SimlicialCliqueLifting
+            A fixture of simple graph 1 lifted with SimlicialCliqueLifting.
         """
         data = sg1_clique_lifted
         out_dim = 4
@@ -48,7 +52,7 @@ class TestSimplicialWrappers:
         Parameters
         ----------
         sg1_clique_lifted : torch_geometric.data.Data
-            A fixture of simple graph 1 lifted with SimlicialCliqueLifting 
+            A fixture of simple graph 1 lifted with SimlicialCliqueLifting.
         """
         data = sg1_clique_lifted
         out_dim = data.x_0.shape[1]
@@ -70,7 +74,7 @@ class TestSimplicialWrappers:
         Parameters
         ----------
         sg1_clique_lifted : torch_geometric.data.Data
-            A fixture of simple graph 1 lifted with SimlicialCliqueLifting 
+            A fixture of simple graph 1 lifted with SimlicialCliqueLifting.
         """
         data = sg1_clique_lifted
         out_dim = data.x_0.shape[1]
@@ -91,7 +95,7 @@ class TestSimplicialWrappers:
         Parameters
         ----------
         sg1_clique_lifted : torch_geometric.data.Data
-            A fixture of simple graph 1 lifted with SimlicialCliqueLifting 
+            A fixture of simple graph 1 lifted with SimlicialCliqueLifting.
         """
         data = sg1_clique_lifted
         out_dim = data.x_0.shape[1]
@@ -106,4 +110,31 @@ class TestSimplicialWrappers:
         # Assert keys in output
         for key in ["labels", "batch_0", "x_0", "x_1", "x_2"]:
             assert key in out
+
+    def test_SANNWrapper(self, sg1_clique_lifted_precompute_k_hop):
+        """Test SANNWarpper.
+        
+        Parameters
+        ----------
+        sg1_clique_lifted_precompute_k_hop : torch_geometric.data.Data
+            A fixture of simple graph 1 lifted with SimlicialCliqueLifting and precomputed k-hop neighbourhood embedding.
+        """
+        data = sg1_clique_lifted_precompute_k_hop
+        in_channels = data.x0_0.shape[1]
+        out_channels = data.x_0.shape[1]
+        
+        wrapper = SANNWrapper(
+            SANN(
+                in_channels=in_channels,
+                hidden_channels=out_channels
+            ), 
+            out_channels=out_channels, 
+            num_cell_dimensions=3
+        )
+
+        out = wrapper(data)
+
+        for key in ["labels", "batch_0", "x_0", "x_1", "x_2"]:
+            assert key in out
+
 

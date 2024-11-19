@@ -19,17 +19,25 @@ def get_default_transform(dataset, model):
         Default transform.
     """
     data_domain, dataset = dataset.split("/")
-    model_domain = model.split("/")[0]
+    model_domain, model = model.split("/")
     # Check if there is a default transform for the dataset at ./configs/transforms/dataset_defaults/
     # If not, use the default lifting transform for the dataset to be compatible with the model
     base_dir = os.path.dirname(
         os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     )
-    configs_dir = os.path.join(
+    model_configs_dir = os.path.join(
+        base_dir, "configs", "transforms", "model_defaults"
+    )
+    dataset_configs_dir = os.path.join(
         base_dir, "configs", "transforms", "dataset_defaults"
     )
-    datasets_with_defaults = [f.split(".")[0] for f in os.listdir(configs_dir)]
-    if dataset in datasets_with_defaults:
+    model_defaults = [f.split(".")[0] for f in os.listdir(model_configs_dir)]
+    datasets_with_defaults = [
+        f.split(".")[0] for f in os.listdir(dataset_configs_dir)
+    ]
+    if model in model_defaults:
+        return f"model_defaults/{model}"
+    elif dataset in datasets_with_defaults:
         return f"dataset_defaults/{dataset}"
     else:
         if data_domain == model_domain:
@@ -150,6 +158,12 @@ def infer_in_channels(dataset, transforms):
             "graph2cell_lifting",
             "graph2simplicial_lifting",
             "graph2combinatorial_lifting",
+            "graph2hypergraph_lifting",
+            "pointcloud2graph_lifting",
+            "pointcloud2simplicial_lifting",
+            "pointcloud2combinatorial_lifting",
+            "pointcloud2hypergraph_lifting",
+            "pointcloud2cell_lifting",
         ]
         for t in complex_transforms:
             if t in transforms:
@@ -185,40 +199,31 @@ def infer_in_channels(dataset, transforms):
         feature_lifting = check_for_type_feature_lifting(transforms, lifting)
 
         if isinstance(dataset.parameters.num_features, int):
-            if feature_lifting == "ProjectionSum":
-                return [dataset.parameters.num_features] * transforms[
-                    lifting
-                ].complex_dim
-
-            elif feature_lifting == "concatenation":
+            # Case when the dataset has no edge attributes
+            if feature_lifting == "Concatenation":
                 return_value = [dataset.parameters.num_features]
                 for i in range(2, transforms[lifting].complex_dim + 1):
-                    return_value += [int(dataset.parameters.num_features * i)]
+                    return_value += [int(return_value[-1]) * i]
 
                 return return_value
 
             else:
+                # ProjectionSum feature lifting by default
                 return [dataset.parameters.num_features] * transforms[
                     lifting
                 ].complex_dim
         else:
             # Case when the dataset has edge attributes
             if not transforms[lifting].preserve_edge_attr:
-                if feature_lifting == "ProjectionSum":
-                    return [dataset.parameters.num_features[0]] * transforms[
-                        lifting
-                    ].complex_dim
-
-                elif feature_lifting == "Concatenation":
-                    return_value = [dataset.parameters.num_features]
+                if feature_lifting == "Concatenation":
+                    return_value = [dataset.parameters.num_features[0]]
                     for i in range(2, transforms[lifting].complex_dim + 1):
-                        return_value += [
-                            int(dataset.parameters.num_features * i)
-                        ]
+                        return_value += [int(return_value[-1]) * i]
 
                     return return_value
 
                 else:
+                    # ProjectionSum feature lifting by default
                     return [dataset.parameters.num_features[0]] * transforms[
                         lifting
                     ].complex_dim
@@ -282,3 +287,21 @@ def get_default_metrics(task):
         return ["mse", "mae"]
     else:
         raise ValueError(f"Invalid task {task}")
+
+
+def get_list_element(list, index):
+    r"""Get element of a list.
+
+    Parameters
+    ----------
+    list : list
+        List of elements.
+    index : int
+        Index of the element to get.
+
+    Returns
+    -------
+    any
+        Element of the list.
+    """
+    return list[index]

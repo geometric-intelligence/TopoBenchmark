@@ -38,25 +38,33 @@ class Duplicate(torch_geometric.transforms.BaseTransform):
         """
 
         keys = sorted(
-            [key.split("_")[1] for key in data if "incidence" in key]
+            [
+                key.split("_")[1]
+                for key in data
+                if "incidence" in key and "-" not in key
+            ]
         )
 
         for elem in keys:
             if f"x_{elem}" not in data:
                 first_dim = data[f"incidence_{elem}"].size()[1]
                 data["x_" + elem] = data["x"] if "x" in data else data["x_0"]
-                if "all_ones" in self.parameters:
-                    data["x_" + elem] = torch.ones(
-                        (first_dim, data["x_" + elem].size()[1])
-                    )
-                elif "all_zeros" in self.parameters:
+                # if "all_ones" in self.parameters:
+                #     data["x_" + elem] = torch.ones(
+                #         (first_dim, data["x_" + elem].size()[1])
+                #     )
+                if "all_zeros" in self.parameters:
                     data["x_" + elem] = torch.zeros_like(data["x_" + elem])
                 elif "absolute_value" in self.parameters:
                     data["x_" + elem] = torch.abs(data["x_" + elem])
                 else:
-                    raise Exception(
-                        "Invalid parameter for the Duplicate transform."
+                    # By default "all_ones" is used
+                    data["x_" + elem] = torch.ones(
+                        (first_dim, data["x_" + elem].size()[1])
                     )
+                    # raise Exception(
+                    #     "Invalid parameter for the Duplicate transform."
+                    # )
         return data
 
     def forward(self, data: torch_geometric.data.Data):

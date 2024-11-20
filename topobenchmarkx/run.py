@@ -32,6 +32,7 @@ from topobenchmarkx.utils.config_resolvers import (
     get_required_lifting,
     infer_in_channels,
     infere_num_cell_dimensions,
+    infer_in_sann_khop_feature_dim,
 )
 
 rootutils.setup_root(__file__, indicator=".project-root", pythonpath=True)
@@ -79,6 +80,11 @@ OmegaConf.register_new_resolver(
 )
 OmegaConf.register_new_resolver(
     "parameter_multiplication", lambda x, y: int(int(x) * int(y)), replace=True
+)
+OmegaConf.register_new_resolver(
+    "infer_in_sann_khop_feature_dim",
+    infer_in_sann_khop_feature_dim,
+    replace=True,
 )
 
 

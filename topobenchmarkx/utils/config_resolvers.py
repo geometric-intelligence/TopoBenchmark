@@ -1,6 +1,7 @@
 """Configuration resolvers for the topobenchmarkx package."""
 
 import os
+import numpy as np
 
 
 def get_default_transform(dataset, model):
@@ -305,3 +306,60 @@ def get_list_element(list, index):
         Element of the list.
     """
     return list[index]
+
+
+def infer_in_sann_khop_feature_dim(model, transforms):
+    r"""Infer the dimension of the feature vector in the SANN k-hop model.
+
+    Parameters
+    ----------
+    model : torch_geometric.data.Dataset
+        Dataset.
+    transforms : DictConfig
+        Configuration  Parameters for the transforms.
+
+    Returns
+    -------
+    int :
+        Dimension of the feature vector in the SANN k-hop model.
+    """
+
+    def compute_recursive_sequence(initial_values, time_steps):
+        """Compute the sequence D_k^(t) based on the given recursive formula.
+
+        D_k^(t) = 2 * D_k^(t-1) + D_(k-1)^(t-1) + D_(k+1)^(t-1)
+
+        Parameters
+        ----------
+        initial_values : np.ndarray
+            1D array of initial values for D_k^(0), where k = 0, 1, ..., N-1.
+        time_steps : int
+            Number of time steps to compute the sequence.
+
+        Returns
+        -------
+        np.ndarray
+            2D array where each row corresponds to D_k^(t) for a specific time step.
+        """
+        # Initialize the result array
+        N = len(initial_values)
+        results = np.zeros((time_steps + 1, N))
+        results[0] = initial_values  # Set the initial values
+
+        # Iterate over time steps
+        for t in range(1, time_steps + 1):
+            for k in range(N):
+                # Use modular arithmetic to handle boundary conditions (e.g., cyclic boundaries)
+                D_k = 2 * results[t - 1][k] if k > 0 else results[t - 1][k]
+                D_k_minus_1 = results[t - 1][k - 1] if k - 1 >= 0 else 0
+                D_k_plus_1 = results[t - 1][k + 1] if k + 1 < N else 0
+
+                results[t][k] = D_k + D_k_minus_1 + D_k_plus_1
+
+        return results
+
+    initial_values = model.feature_encoder.dataset_in_channels
+    time_steps = transforms.precompute_khop_features.max_hop
+    result = compute_recursive_sequence(initial_values, time_steps)
+
+    return result

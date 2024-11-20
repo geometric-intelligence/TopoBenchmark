@@ -1,5 +1,9 @@
 _target_: topobenchmarkx.transforms.data_transform.DataTransform
 transform_name: "PrecomputeKHopFeatures"
 transform_type: "data manipulation"
-max_hop: 2
+max_hop: 3
 complex_dim: ${oc.select:dataset.parameters.max_dim_if_lifted,3}
+in_features: ${infer_in_sann_khop_feature_dim:${dataset},${max_hop}} 
+
+
+# change of the transfroms: ${new function that looks at dataset.dim (list [3,5,1])} --> list of dim

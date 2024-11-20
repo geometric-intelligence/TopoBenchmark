@@ -308,15 +308,15 @@ def get_list_element(list, index):
     return list[index]
 
 
-def infer_in_sann_khop_feature_dim(model, transforms):
+def infer_in_khop_feature_dim(dataset_in_channels, max_hop):
     r"""Infer the dimension of the feature vector in the SANN k-hop model.
 
     Parameters
     ----------
-    model : torch_geometric.data.Dataset
-        Dataset.
-    transforms : DictConfig
-        Configuration  Parameters for the transforms.
+    dataset_in_channels : np.ndarray
+        1D array of input channels for the dataset.
+    max_hop : int
+        Maximum hop distance.
 
     Returns
     -------
@@ -358,8 +358,6 @@ def infer_in_sann_khop_feature_dim(model, transforms):
 
         return results
 
-    initial_values = model.feature_encoder.dataset_in_channels
-    time_steps = transforms.precompute_khop_features.max_hop
-    result = compute_recursive_sequence(initial_values, time_steps)
+    result = compute_recursive_sequence(dataset_in_channels, max_hop)
 
-    return result
+    return result.astype(np.int32).tolist()

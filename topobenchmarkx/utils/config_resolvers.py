@@ -1,6 +1,7 @@
 """Configuration resolvers for the topobenchmarkx package."""
 
 import os
+
 import numpy as np
 
 

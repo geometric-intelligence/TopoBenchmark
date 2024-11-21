@@ -33,6 +33,7 @@ from topobenchmarkx.utils.config_resolvers import (
     infer_in_channels,
     infer_in_khop_feature_dim,
     infere_num_cell_dimensions,
+    set_preserve_edge_attr,
 )
 
 rootutils.setup_root(__file__, indicator=".project-root", pythonpath=True)
@@ -84,6 +85,11 @@ OmegaConf.register_new_resolver(
 OmegaConf.register_new_resolver(
     "infer_in_khop_feature_dim",
     infer_in_khop_feature_dim,
+    replace=True,
+)
+OmegaConf.register_new_resolver(
+    "set_preserve_edge_attr",
+    set_preserve_edge_attr,
     replace=True,
 )
 

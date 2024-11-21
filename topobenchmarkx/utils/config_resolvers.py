@@ -363,3 +363,24 @@ def infer_in_khop_feature_dim(dataset_in_channels, max_hop):
     )
 
     return result.astype(np.int32).tolist()
+
+
+def set_preserve_edge_attr(model_name, default=True):
+    r"""Set the preserve_edge_attr parameter of datasets depending on the model.
+
+    Parameters
+    ----------
+    model_name : str
+        Model name.
+    default : bool, optional
+        Default value for the parameter. Defaults to True.
+
+    Returns
+    -------
+    bool
+        Default if the model can preserve edge attributes, False otherwise.
+    """
+    if model_name == "sann":
+        return False
+    else:
+        return default

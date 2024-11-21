@@ -358,6 +358,8 @@ def infer_in_khop_feature_dim(dataset_in_channels, max_hop):
 
         return results
 
-    result = compute_recursive_sequence(dataset_in_channels, max_hop)
+    result = np.transpose(
+        compute_recursive_sequence(dataset_in_channels, max_hop)
+    )
 
     return result.astype(np.int32).tolist()

@@ -13,17 +13,17 @@ class GraphMLPLoss(AbstractLoss):
     ----------
     r_adj_power : int, optional
         Power of the adjacency matrix (default: 2).
-    alpha : float, optional
-        Alpha parameter (default: 1).
     tau : float, optional
         Temperature parameter (default: 1).
+    loss_weight : float, optional
+        Loss weight (default: 0.5).
     """
 
-    def __init__(self, r_adj_power=2, alpha=0.5, tau=1.0):
+    def __init__(self, r_adj_power=2, tau=1.0, loss_weight=0.5):
         super().__init__()
         self.r_adj_power = r_adj_power
-        self.alpha = alpha
         self.tau = tau
+        self.loss_weight = loss_weight
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}(r_adj_power={self.r_adj_power}, alpha={self.alpha}, tau={self.tau})"
@@ -90,7 +90,7 @@ class GraphMLPLoss(AbstractLoss):
         if x_dis is None:  # Validation and test
             return torch.tensor(0.0)
         adj_label = self.get_power_adj(batch.edge_index)
-        graph_mlp_loss = self.alpha * self.graph_mlp_contrast_loss(
+        graph_mlp_loss = self.loss_weight * self.graph_mlp_contrast_loss(
             x_dis, adj_label
         )
         return graph_mlp_loss

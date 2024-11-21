@@ -4,7 +4,7 @@ import torch
 import torch_geometric
 
 from topobenchmarkx.loss.base import AbstractLoss
-from topobenchmarkx.loss.custom_losses import DatasetLoss
+from topobenchmarkx.loss.dataset import DatasetLoss
 
 
 class TBXLoss(AbstractLoss):
@@ -14,18 +14,19 @@ class TBXLoss(AbstractLoss):
     ----------
     dataset_loss : dict
         Dictionary containing the dataset loss information.
-    model_loss : AbstractLoss, optional
-        Custom model loss to be used.
+    modules_losses : AbstractLoss, optional
+        Custom modules' losses to be used.
     """
 
-    def __init__(self, dataset_loss, model_loss=None):
+    def __init__(self, dataset_loss, modules_losses=()):
         super().__init__()
         self.losses = []
         # Dataset loss
         self.losses.append(DatasetLoss(dataset_loss))
-        # Model loss
-        if model_loss is not None:
-            self.losses.append(model_loss)
+        # Model losses
+        self.losses.extend(
+            [loss for loss in modules_losses.values() if loss is not None]
+        )
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}(task={self.task}, loss_type={self.loss_type})"

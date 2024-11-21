@@ -17,10 +17,10 @@ backbone:
   order: 2
   dropout: 0.0
   loss:
-    _target_: topobenchmarkx.loss.custom_losses.GraphMLPLoss
+    _target_: topobenchmarkx.loss.model.GraphMLPLoss
     r_adj_power: 2
-    alpha: 1.
     tau: 1.
+    loss_weight: 0.5
 
 backbone_wrapper:
   _target_: topobenchmarkx.nn.wrappers.GraphMLPWrapper

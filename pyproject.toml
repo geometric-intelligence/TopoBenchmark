@@ -26,7 +26,6 @@ dependencies = [
     "tqdm",
     "numpy",
     "scipy",
-    "torch_geometric",
     "torch",
     "torch-sparse",
     "torch-scatter",

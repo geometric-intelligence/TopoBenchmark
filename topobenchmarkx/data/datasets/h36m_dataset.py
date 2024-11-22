@@ -159,6 +159,7 @@ class H36MDataset(InMemoryDataset):
         Raises:
             FileNotFoundError: If the dataset URL is not found.
         """
+        print("DOWNLOADING")
         # Step 1: download data from the source
         # self.url = self.URLS[self.name]
         self.file_format = self.FILE_FORMAT[self.name]
@@ -175,7 +176,7 @@ class H36MDataset(InMemoryDataset):
         #       As per siMPLE paper (https://github.com/dulucas/siMLPe/tree/c92c537e833443aa55554e4f7956838746550187)
         #   2) Rename to be H36MDataset.zip
         #   3) Manually plop the zip in the right folder.
-        #       scp H36MDataset.zip [your path]/TopoBenchmark/topobenchmarkx/data/datasets/graph/motion/H36MDataset/raw
+        #       scp H36MDataset.zip [your path]/TopoBenchmark/datasets/graph/motion/H36MDataset/raw
 
         folder = self.raw_dir
         compressed_data_filename = f"{self.name}.{self.file_format}"
@@ -286,13 +287,6 @@ class H36MDataset(InMemoryDataset):
             #     for tt in range(t)
             # ]
 
-            # print("SMOL:", small_bones)
-            # print("ALLC", all_channel_bones)
-            # print("AJLKDJKFA", all_channel_all_time_bones)
-            # break
-            def compute_flat_index(t, j, c, n_joints=4, n_channels=2):
-                return t * n_joints * n_channels + j * n_channels + c
-
             # TODO Edges according to time.
             time_edges = []
             for c in range(n_channels):
@@ -300,20 +294,8 @@ class H36MDataset(InMemoryDataset):
                     for t1 in range(n_times_i):
                         for t2 in range(n_times_i):
                             edge = [
-                                compute_flat_index(
-                                    t1,
-                                    j,
-                                    c,
-                                    n_joints=n_joints,
-                                    n_channels=n_channels,
-                                ),
-                                compute_flat_index(
-                                    t2,
-                                    j,
-                                    c,
-                                    n_joints=n_joints,
-                                    n_channels=n_channels,
-                                ),
+                                skl.compute_flat_index(t1, j, c),
+                                skl.compute_flat_index(t2, j, c),
                             ]
                             time_edges.append(edge)
 
@@ -477,9 +459,31 @@ class H36MSkeleton:
     def __init__(self):
         r"""H36M skeleton with 22 joints."""
         self.NUM_JOINTS = 22
+        self.NUM_CHANNELS = 3
 
         self.bone_list = self.generate_bone_list()
         self.bone_adj_mat = self.generate_bone_adj_mat()
+
+    def compute_flat_index(self, t, j, c):
+        r"""Compute flat index.
+
+        Parameters
+        ----------
+        t : int
+            GA.
+        j : int
+            GA.
+        c : int
+            GA.
+
+        Returns
+        -------
+        int
+            Flat index.
+        """
+        return (
+            t * self.NUM_JOINTS * self.NUM_CHANNELS + j * self.NUM_CHANNELS + c
+        )
 
     def generate_bone_list(self):
         r"""Generate bones in H36M skeleton with 22 joints.

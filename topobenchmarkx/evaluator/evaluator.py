@@ -33,7 +33,6 @@ class TBXEvaluator(AbstractEvaluator):
             parameters = {"num_classes": kwargs["num_classes"]}
             parameters["task"] = "multiclass"
             metric_names = kwargs["metrics"]
-
         elif self.task == "multilabel classification":
             parameters = {"num_classes": kwargs["num_classes"]}
             parameters["task"] = "multilabel"
@@ -44,7 +43,7 @@ class TBXEvaluator(AbstractEvaluator):
             metric_names = kwargs["metrics"]
 
         else:
-            raise ValueError(f"Invalid task {kwargs['task']}")
+            raise ValueError(f"Invalid task {self.task}")
 
         metrics = {}
         for name in metric_names:

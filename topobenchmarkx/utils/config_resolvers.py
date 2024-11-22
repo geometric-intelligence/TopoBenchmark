@@ -2,6 +2,8 @@
 
 import os
 
+import numpy as np
+
 
 def get_default_transform(dataset, model):
     r"""Get default transform for a given data domain and model.
@@ -19,17 +21,25 @@ def get_default_transform(dataset, model):
         Default transform.
     """
     data_domain, dataset = dataset.split("/")
-    model_domain = model.split("/")[0]
+    model_domain, model = model.split("/")
     # Check if there is a default transform for the dataset at ./configs/transforms/dataset_defaults/
     # If not, use the default lifting transform for the dataset to be compatible with the model
     base_dir = os.path.dirname(
         os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     )
-    configs_dir = os.path.join(
+    model_configs_dir = os.path.join(
+        base_dir, "configs", "transforms", "model_defaults"
+    )
+    dataset_configs_dir = os.path.join(
         base_dir, "configs", "transforms", "dataset_defaults"
     )
-    datasets_with_defaults = [f.split(".")[0] for f in os.listdir(configs_dir)]
-    if dataset in datasets_with_defaults:
+    model_defaults = [f.split(".")[0] for f in os.listdir(model_configs_dir)]
+    datasets_with_defaults = [
+        f.split(".")[0] for f in os.listdir(dataset_configs_dir)
+    ]
+    if model in model_defaults:
+        return f"model_defaults/{model}"
+    elif dataset in datasets_with_defaults:
         return f"dataset_defaults/{dataset}"
     else:
         if data_domain == model_domain:
@@ -279,3 +289,99 @@ def get_default_metrics(task):
         return ["mse", "mae"]
     else:
         raise ValueError(f"Invalid task {task}")
+
+
+def get_list_element(list, index):
+    r"""Get element of a list.
+
+    Parameters
+    ----------
+    list : list
+        List of elements.
+    index : int
+        Index of the element to get.
+
+    Returns
+    -------
+    any
+        Element of the list.
+    """
+    return list[index]
+
+
+def infer_in_khop_feature_dim(dataset_in_channels, max_hop):
+    r"""Infer the dimension of the feature vector in the SANN k-hop model.
+
+    Parameters
+    ----------
+    dataset_in_channels : np.ndarray
+        1D array of input channels for the dataset.
+    max_hop : int
+        Maximum hop distance.
+
+    Returns
+    -------
+    int :
+        Dimension of the feature vector in the SANN k-hop model.
+    """
+
+    def compute_recursive_sequence(initial_values, time_steps):
+        """Compute the sequence D_k^(t) based on the given recursive formula.
+
+        D_k^(t) = 2 * D_k^(t-1) + D_(k-1)^(t-1) + D_(k+1)^(t-1)
+
+        Parameters
+        ----------
+        initial_values : np.ndarray
+            1D array of initial values for D_k^(0), where k = 0, 1, ..., N-1.
+        time_steps : int
+            Number of time steps to compute the sequence.
+
+        Returns
+        -------
+        np.ndarray
+            2D array where each row corresponds to D_k^(t) for a specific time step.
+        """
+        # Initialize the result array
+        N = len(initial_values)
+        results = np.zeros((time_steps + 1, N))
+        results[0] = initial_values  # Set the initial values
+
+        # Iterate over time steps
+        for t in range(1, time_steps + 1):
+            for k in range(N):
+                # Use modular arithmetic to handle boundary conditions (e.g., cyclic boundaries)
+                D_k = 2 * results[t - 1][k] if k > 0 else results[t - 1][k]
+                D_k_minus_1 = results[t - 1][k - 1] if k - 1 >= 0 else 0
+                D_k_plus_1 = results[t - 1][k + 1] if k + 1 < N else 0
+
+                results[t][k] = D_k + D_k_minus_1 + D_k_plus_1
+
+        return results
+
+    result = np.transpose(
+        compute_recursive_sequence(dataset_in_channels, max_hop)
+    )
+
+    return result.astype(np.int32).tolist()
+
+
+def set_preserve_edge_attr(model_name, default=True):
+    r"""Set the preserve_edge_attr parameter of datasets depending on the model.
+
+    Parameters
+    ----------
+    model_name : str
+        Model name.
+    default : bool, optional
+        Default value for the parameter. Defaults to True.
+
+    Returns
+    -------
+    bool
+        Default if the model can preserve edge attributes, False otherwise.
+    """
+    if model_name == "sann":
+        return False
+    else:
+        return default

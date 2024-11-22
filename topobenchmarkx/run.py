@@ -26,11 +26,14 @@ from topobenchmarkx.utils import (
 from topobenchmarkx.utils.config_resolvers import (
     get_default_metrics,
     get_default_transform,
+    get_list_element,
     get_monitor_metric,
     get_monitor_mode,
     get_required_lifting,
     infer_in_channels,
+    infer_in_khop_feature_dim,
     infere_num_cell_dimensions,
+    set_preserve_edge_attr,
 )
 
 rootutils.setup_root(__file__, indicator=".project-root", pythonpath=True)
@@ -59,6 +62,9 @@ OmegaConf.register_new_resolver(
     "get_default_transform", get_default_transform, replace=True
 )
 OmegaConf.register_new_resolver(
+    "get_list_element", get_list_element, replace=True
+)
+OmegaConf.register_new_resolver(
     "get_required_lifting", get_required_lifting, replace=True
 )
 OmegaConf.register_new_resolver(
@@ -75,6 +81,16 @@ OmegaConf.register_new_resolver(
 )
 OmegaConf.register_new_resolver(
     "parameter_multiplication", lambda x, y: int(int(x) * int(y)), replace=True
+)
+OmegaConf.register_new_resolver(
+    "infer_in_khop_feature_dim",
+    infer_in_khop_feature_dim,
+    replace=True,
+)
+OmegaConf.register_new_resolver(
+    "set_preserve_edge_attr",
+    set_preserve_edge_attr,
+    replace=True,
 )
 
 

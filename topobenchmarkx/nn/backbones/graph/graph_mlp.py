@@ -26,9 +26,9 @@ class GraphMLP(nn.Module):
         self, in_channels, hidden_channels, order=1, dropout=0.0, **kwargs
     ):
         super().__init__()
-        self.nhid = hidden_channels
+        self.out_channels = hidden_channels
         self.order = order
-        self.mlp = Mlp(in_channels, self.nhid, dropout)
+        self.mlp = Mlp(in_channels, self.out_channels, dropout)
 
     def forward(self, x):
         """Forward pass.

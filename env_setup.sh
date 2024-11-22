@@ -1,6 +1,5 @@
 #!/bin/bash -l
 pip install --upgrade pip
-pip install -e '.[all]'
 
 # Note that not all combinations of torch and CUDA are available
 # See https://github.com/pyg-team/pyg-lib to check the configuration that works for you
@@ -10,6 +9,6 @@ CUDA="cu118"    # if available, select the CUDA version suitable for your system
 pip install torch==${TORCH} --extra-index-url https://download.pytorch.org/whl/${CUDA}
 pip install pyg-lib torch-scatter torch-sparse torch-cluster -f https://data.pyg.org/whl/torch-${TORCH}+${CUDA}.html
 
-#pytest
+pip install -e '.[all]'
 
 pre-commit install

@@ -295,7 +295,7 @@ class H36MDataset(InMemoryDataset):
                 for j in range(n_joints):
                     for t1 in range(n_times_i):
                         for t2 in range(n_times_i):
-                            edge = (
+                            edge = [
                                 compute_flat_index(
                                     t1,
                                     j,
@@ -310,7 +310,7 @@ class H36MDataset(InMemoryDataset):
                                     n_joints=n_joints,
                                     n_channels=n_channels,
                                 ),
-                            )
+                            ]
                             time_edges.append(edge)
 
             # TODO Edges according to channel.
@@ -328,9 +328,11 @@ class H36MDataset(InMemoryDataset):
 
             # Step 3: Create graph Data objects.
             motion_graph = Data(
-                x=flat_input,
-                y=flat_target,
-                edge_index=time_edges,
+                x=flat_input.unsqueeze(1),
+                y=flat_target,  # .unsqueeze(1),
+                edge_index=torch.tensor(
+                    time_edges
+                ).T,  # need to make this into a tensor of size 2x num edges!
             )
             motions.append(motion_graph)
 

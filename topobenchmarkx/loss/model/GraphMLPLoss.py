@@ -26,7 +26,7 @@ class GraphMLPLoss(AbstractLoss):
         self.loss_weight = loss_weight
 
     def __repr__(self) -> str:
-        return f"{self.__class__.__name__}(r_adj_power={self.r_adj_power}, alpha={self.alpha}, tau={self.tau})"
+        return f"{self.__class__.__name__}(r_adj_power={self.r_adj_power}, tau={self.tau}, loss_weight={self.loss_weight})"
 
     def get_power_adj(self, edge_index):
         r"""Get the power of the adjacency matrix.

@@ -8,7 +8,7 @@ from topobenchmarkx.nn.wrappers.cell import (
     CWNWrapper,
 )
 from topobenchmarkx.nn.wrappers.combinatorial import TuneWrapper
-from topobenchmarkx.nn.wrappers.graph import GNNWrapper
+from topobenchmarkx.nn.wrappers.graph import GNNWrapper, GraphMLPWrapper
 from topobenchmarkx.nn.wrappers.hypergraph import HypergraphWrapper
 from topobenchmarkx.nn.wrappers.simplicial import (
     SANWrapper,
@@ -26,6 +26,7 @@ from topobenchmarkx.nn.wrappers.simplicial import (
 # Export all wrappers
 __all__ = [
     "AbstractWrapper",
+    "GraphMLPWrapper",
     "GNNWrapper",
     "HypergraphWrapper",
     "SANWrapper",

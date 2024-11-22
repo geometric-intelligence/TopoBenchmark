@@ -170,25 +170,29 @@ class H36MDataset(InMemoryDataset):
         # )
 
         # Step 1 isn't working because it is downloading html with the Antivirus Scan Warning instead.
-        # Instead manually plop the zip in the right folder.
-        # scp H36MDataset.zip abby@bongo.ece.ucsb.edu:/home/abby/code/TopoBenchmark/topobenchmarkx/data/H36MDataset/raw
+        # Instead:
+        #   1) Dowload preprocessed data from here: https://drive.google.com/file/d/15OAOUrva1S-C_BV8UgPORcwmWG2ul4Rk/view
+        #       As per siMPLE paper (https://github.com/dulucas/siMLPe/tree/c92c537e833443aa55554e4f7956838746550187)
+        #   2) Rename to be H36MDataset.zip
+        #   3) Manually plop the zip in the right folder.
+        #       scp H36MDataset.zip [your path]/TopoBenchmark/topobenchmarkx/data/datasets/graph/motion/H36MDataset/raw
 
-        # Step 2: extract file
-        step2_already_done = True
         folder = self.raw_dir
-        if not step2_already_done:
-            filename = f"{self.name}.{self.file_format}"
-            path = osp.join(folder, filename)
-            print(path)
-            extract_zip(path, folder)
-            os.unlink(path)  # Delete zip file
+        compressed_data_filename = f"{self.name}.{self.file_format}"
+        compressed_data_path = osp.join(folder, compressed_data_filename)
 
-        # Step 3: move the extracted files to the folder with corresponding name
-        # Move files from osp.join(folder, name_download) to folder
-        step3_already_done = True
-        if not step3_already_done:
+        if os.path.isfile(compressed_data_path):
+            # Step 2: extract file
+            print("Extracting data zip...")
+            extract_zip(compressed_data_path, folder)
+            os.unlink(compressed_data_path)  # Delete zip file
+
+            # Step 3: move the extracted files to the folder with corresponding name
+            # Move files from osp.join(folder, name_download) to folder
             for subject_dir in os.listdir(
-                osp.join(folder, "h36m")
+                osp.join(
+                    folder, "h36m"
+                )  # hard coded here because this is the name in the google drive folder
             ):  # self.name)):
                 for file in os.listdir(osp.join(folder, "h36m", subject_dir)):
                     if file.endswith("ipynb"):

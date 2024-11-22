@@ -18,7 +18,7 @@ class TBXLoss(AbstractLoss):
         Custom modules' losses to be used.
     """
 
-    def __init__(self, dataset_loss, modules_losses=()):
+    def __init__(self, dataset_loss, modules_losses={}):  # noqa: B006
         super().__init__()
         self.losses = []
         # Dataset loss

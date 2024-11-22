@@ -37,6 +37,8 @@ class TestLoaders:
         config_files = []
         config_base_dir = base_dir / "configs/dataset"
         exclude_datasets = {"karate_club.yaml",
+                            # Below the datasets that takes quite some time to load and process
+                            "mantra_name.yaml", "mantra_orintation.yaml",
                             # Below the datasets that have some default transforms with we manually overriten with no_transform,
                             # due to lack of default transform for domain2domain
                             "REDDIT-BINARY.yaml", "IMDB-MULTI.yaml", "IMDB-BINARY.yaml", #"ZINC.yaml"

@@ -24,6 +24,7 @@ class AbstractWrapper(ABC, torch.nn.Module):
         self.backbone = backbone
         out_channels = kwargs["out_channels"]
         self.dimensions = range(kwargs["num_cell_dimensions"])
+        self.residual_connections = kwargs.get("residual_connections", True)
 
         for i in self.dimensions:
             setattr(
@@ -33,7 +34,7 @@ class AbstractWrapper(ABC, torch.nn.Module):
             )
 
     def __repr__(self):
-        return f"{self.__class__.__name__}(backbone={self.backbone}, out_channels={self.backbone.out_channels}, dimensions={self.dimensions})"
+        return f"{self.__class__.__name__}(backbone={self.backbone}, out_channels={self.backbone.out_channels}, dimensions={self.dimensions}, residual_connections={self.residual_connections})"
 
     def __call__(self, batch):
         r"""Forward pass for the model.
@@ -51,7 +52,11 @@ class AbstractWrapper(ABC, torch.nn.Module):
             Dictionary containing the model output.
         """
         model_out = self.forward(batch)
-        model_out = self.residual_connection(model_out=model_out, batch=batch)
+        model_out = (
+            self.residual_connection(model_out=model_out, batch=batch)
+            if self.residual_connections
+            else model_out
+        )
         return model_out
 
     def residual_connection(self, model_out, batch):

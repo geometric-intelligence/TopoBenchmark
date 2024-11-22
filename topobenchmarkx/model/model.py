@@ -106,10 +106,10 @@ class TBXModel(LightningModule):
             Dictionary containing the model output and the loss.
         """
         # Feature Encoder
-        batch = self.feature_encoder(batch)
+        model_out = self.feature_encoder(batch)
 
         # Domain model
-        model_out = self.forward(batch)
+        model_out = self.forward(model_out)
 
         # Readout
         if self.readout is not None:

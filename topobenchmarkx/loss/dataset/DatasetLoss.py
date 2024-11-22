@@ -4,29 +4,30 @@ import torch
 import torch_geometric
 
 from topobenchmarkx.loss.base import AbstractLoss
-from topobenchmarkx.loss.dataset import DatasetLoss
 
 
-class TBXLoss(AbstractLoss):
+class DatasetLoss(AbstractLoss):
     r"""Defines the default model loss for the given task.
 
     Parameters
     ----------
     dataset_loss : dict
         Dictionary containing the dataset loss information.
-    modules_losses : AbstractLoss, optional
-        Custom modules' losses to be used.
     """
 
-    def __init__(self, dataset_loss, modules_losses={}):  # noqa: B006
+    def __init__(self, dataset_loss):
         super().__init__()
-        self.losses = []
+        self.task = dataset_loss["task"]
+        self.loss_type = dataset_loss["loss_type"]
         # Dataset loss
-        self.losses.append(DatasetLoss(dataset_loss))
-        # Model losses
-        self.losses.extend(
-            [loss for loss in modules_losses.values() if loss is not None]
-        )
+        if self.task == "classification" and self.loss_type == "cross_entropy":
+            self.criterion = torch.nn.CrossEntropyLoss()
+        elif self.task == "regression" and self.loss_type == "mse":
+            self.criterion = torch.nn.MSELoss()
+        elif self.task == "regression" and self.loss_type == "mae":
+            self.criterion = torch.nn.L1Loss()
+        else:
+            raise Exception("Loss is not defined")
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}(task={self.task}, loss_type={self.loss_type})"
@@ -46,8 +47,12 @@ class TBXLoss(AbstractLoss):
         dict
             Dictionary containing the model output with the loss.
         """
-        losses = [loss(model_out, batch) for loss in self.losses]
+        logits = model_out["logits"]
+        target = model_out["labels"]
 
-        model_out["loss"] = torch.stack(losses).sum()
+        if self.task == "regression":
+            target = target.unsqueeze(1)
 
-        return model_out
+        dataset_loss = self.criterion(logits, target)
+
+        return dataset_loss

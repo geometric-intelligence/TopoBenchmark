@@ -10,6 +10,7 @@ import torch
 from omegaconf import DictConfig
 from torch_geometric.data import Data, InMemoryDataset, extract_zip
 from torch_geometric.io import fs
+from tqdm import tqdm
 
 
 class H36MDataset(InMemoryDataset):
@@ -159,7 +160,7 @@ class H36MDataset(InMemoryDataset):
         Raises:
             FileNotFoundError: If the dataset URL is not found.
         """
-        print("DOWNLOADING")
+        print("Downloading...")
         # Step 1: download data from the source
         # self.url = self.URLS[self.name]
         self.file_format = self.FILE_FORMAT[self.name]
@@ -229,12 +230,30 @@ class H36MDataset(InMemoryDataset):
 
         # print(adj_mat)
         # print(edges)
+        n_times_i, n_joints, n_channels = (
+            50,
+            22,
+            3,
+        )  # hard-coded but should be the same for all!
+
+        time_edges = []
+        for c in range(n_channels):
+            for j in range(n_joints):
+                for t1 in range(n_times_i):
+                    for t2 in range(n_times_i):
+                        edge = [
+                            skl.compute_flat_index(t1, j, c),
+                            skl.compute_flat_index(t2, j, c),
+                        ]
+                        time_edges.append(edge)
+        time_edges = torch.tensor(time_edges).T
 
         # Step 3: turn them into torch_geometric.data Data objects
+        print("Converting to graph objects...")
         motions = []
-        for input_motion_matrix, target_motion_matrix in zip(
-            motion_inputs, motion_targets
-        ):
+        for i in tqdm(range(len(motion_inputs))):
+            input_motion_matrix = motion_inputs[i]
+            target_motion_matrix = motion_targets[i]
             # input_motion_matrix.shape =  [50, 22, 3]
             # target_motion_matrix.shape = [10, 22, 3]
             #       time, joints*channels
@@ -270,7 +289,6 @@ class H36MDataset(InMemoryDataset):
             )  # shape 10*22*3 = 660
 
             # Step 2: Create superset of all possible edge indices.
-            n_times_i, n_joints, n_channels = input_motion_matrix.shape
 
             # Edges according to skeleton bones.
             # TODO Do we want self-loops?
@@ -288,16 +306,6 @@ class H36MDataset(InMemoryDataset):
             # ]
 
             # TODO Edges according to time.
-            time_edges = []
-            for c in range(n_channels):
-                for j in range(n_joints):
-                    for t1 in range(n_times_i):
-                        for t2 in range(n_times_i):
-                            edge = [
-                                skl.compute_flat_index(t1, j, c),
-                                skl.compute_flat_index(t2, j, c),
-                            ]
-                            time_edges.append(edge)
 
             # TODO Edges according to channel.
             channel_edges = []
@@ -305,32 +313,34 @@ class H36MDataset(InMemoryDataset):
             # TODO Edges last.
             space_channel_edges = []
 
-            edge_index = [
-                all_channel_all_time_bones
-                + time_edges
-                + channel_edges
-                + space_channel_edges
-            ]
+            # edge_index = [
+            #     all_channel_all_time_bones
+            #     + time_edges
+            #     + channel_edges
+            #     + space_channel_edges
+            # ]
 
             # Step 3: Create graph Data objects.
             motion_graph = Data(
                 x=flat_input.unsqueeze(1),
                 y=flat_target,  # .unsqueeze(1),
-                edge_index=torch.tensor(
-                    time_edges
-                ).T,  # need to make this into a tensor of size 2x num edges!
+                edge_index=time_edges,
             )
             motions.append(motion_graph)
 
         # Step 4: collate the graphs (using InMemoryDataset)
+        print("Collating...")
         self.data, self.slices = self.collate(motions)
         self._data_list = None  # Reset cache.
+        print("Done.")
 
         # Step 5: save processed data
+        print("Saving...")
         fs.torch_save(
             (self._data.to_dict(), self.slices, {}, self._data.__class__),
             self.processed_paths[0],
         )
+        print("Done.")
 
     def load_raw_xyz_motion_matrices(self):
         r"""Load raw motion data.
@@ -386,7 +396,7 @@ class H36MDataset(InMemoryDataset):
     def process_input_target_pairs(
         self,
         raw_xyz_motion_matrices,
-        sample_rate=2,
+        sample_rate=4,
         input_length=50,
         target_length=10,
     ):
@@ -416,7 +426,7 @@ class H36MDataset(InMemoryDataset):
         X = []
         Y = []
 
-        idx = 0
+        # idx = 0
         for h36m_motion_poses in raw_xyz_motion_matrices:
             n_frames = h36m_motion_poses.shape[0]
             frame_span_of_sample = (input_length + target_length) * sample_rate
@@ -441,9 +451,9 @@ class H36MDataset(InMemoryDataset):
 
                 X.append(motion_input)
                 Y.append(motion_target)
-                idx += 1
-                if idx == 150:
-                    return X, Y
+                # idx += 1
+                # if idx == 150:
+                #     return X, Y
 
         return X, Y
 
@@ -465,21 +475,21 @@ class H36MSkeleton:
         self.bone_adj_mat = self.generate_bone_adj_mat()
 
     def compute_flat_index(self, t, j, c):
-        r"""Compute flat index.
+        r"""Compute flat index for motion matrix of shape (T,J,C).
 
         Parameters
         ----------
         t : int
-            GA.
+            Time index in 3d matrix.
         j : int
-            GA.
+            Joint index in 3d matrix.
         c : int
-            GA.
+            Channel index in 3d matrix.
 
         Returns
         -------
         int
-            Flat index.
+            Flat index in T*J*C vector.
         """
         return (
             t * self.NUM_JOINTS * self.NUM_CHANNELS + j * self.NUM_CHANNELS + c

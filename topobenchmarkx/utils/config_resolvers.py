@@ -2,6 +2,8 @@
 
 import os
 
+import omegaconf
+
 
 def get_default_transform(dataset, model):
     r"""Get default transform for a given data domain and model.
@@ -17,20 +19,18 @@ def get_default_transform(dataset, model):
     -------
     str
         Default transform.
-
-    Raises
-    ------
-    ValueError
-        If the combination of data_domain and model is invalid.
     """
     data_domain, dataset = dataset.split("/")
     model_domain = model.split("/")[0]
     # Check if there is a default transform for the dataset at ./configs/transforms/dataset_defaults/
     # If not, use the default lifting transform for the dataset to be compatible with the model
-    datasets_with_defaults = [
-        f.split(".")[0]
-        for f in os.listdir("./configs/transforms/dataset_defaults/")
-    ]
+    base_dir = os.path.dirname(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    )
+    configs_dir = os.path.join(
+        base_dir, "configs", "transforms", "dataset_defaults"
+    )
+    datasets_with_defaults = [f.split(".")[0] for f in os.listdir(configs_dir)]
     if dataset in datasets_with_defaults:
         return f"dataset_defaults/{dataset}"
     else:
@@ -54,22 +54,13 @@ def get_required_lifting(data_domain, model):
     -------
     str
         Required transform.
-
-    Raises
-    ------
-    ValueError
-        If the combination of data_domain and model is invalid.
     """
     data_domain = data_domain
     model_domain = model.split("/")[0]
     if data_domain == model_domain:
         return "no_lifting"
-    elif data_domain == "graph" and model_domain != "combinatorial":
-        return f"graph2{model_domain}_default"
     else:
-        raise ValueError(
-            f"Invalid combination of data_domain={data_domain} and model_domain={model_domain}"
-        )
+        return f"{data_domain}2{model_domain}_default"
 
 
 def get_monitor_metric(task, metric):
@@ -161,6 +152,12 @@ def infer_in_channels(dataset, transforms):
             "graph2cell_lifting",
             "graph2simplicial_lifting",
             "graph2combinatorial_lifting",
+            "graph2hypergraph_lifting",
+            "pointcloud2graph_lifting",
+            "pointcloud2simplicial_lifting",
+            "pointcloud2combinatorial_lifting",
+            "pointcloud2hypergraph_lifting",
+            "pointcloud2cell_lifting",
         ]
         for t in complex_transforms:
             if t in transforms:
@@ -196,40 +193,31 @@ def infer_in_channels(dataset, transforms):
         feature_lifting = check_for_type_feature_lifting(transforms, lifting)
 
         if isinstance(dataset.parameters.num_features, int):
-            if feature_lifting == "ProjectionSum":
-                return [dataset.parameters.num_features] * transforms[
-                    lifting
-                ].complex_dim
-
-            elif feature_lifting == "concatenation":
+            # Case when the dataset has no edge attributes
+            if feature_lifting == "Concatenation":
                 return_value = [dataset.parameters.num_features]
                 for i in range(2, transforms[lifting].complex_dim + 1):
-                    return_value += [int(dataset.parameters.num_features * i)]
+                    return_value += [int(return_value[-1]) * i]
 
                 return return_value
 
             else:
+                # ProjectionSum feature lifting by default
                 return [dataset.parameters.num_features] * transforms[
                     lifting
                 ].complex_dim
         else:
             # Case when the dataset has edge attributes
             if not transforms[lifting].preserve_edge_attr:
-                if feature_lifting == "ProjectionSum":
-                    return [dataset.parameters.num_features[0]] * transforms[
-                        lifting
-                    ].complex_dim
-
-                elif feature_lifting == "Concatenation":
-                    return_value = [dataset.parameters.num_features]
+                if feature_lifting == "Concatenation":
+                    return_value = [dataset.parameters.num_features[0]]
                     for i in range(2, transforms[lifting].complex_dim + 1):
-                        return_value += [
-                            int(dataset.parameters.num_features * i)
-                        ]
+                        return_value += [int(return_value[-1]) * i]
 
                     return return_value
 
                 else:
+                    # ProjectionSum feature lifting by default
                     return [dataset.parameters.num_features[0]] * transforms[
                         lifting
                     ].complex_dim
@@ -241,11 +229,37 @@ def infer_in_channels(dataset, transforms):
                     transforms[lifting].complex_dim
                     - len(dataset.parameters.num_features)
                 )
-    else:
-        if isinstance(dataset.parameters.num_features, int):
+
+    # Case when there is no lifting
+    elif not there_is_complex_lifting:
+        # Check if dataset and model are from the same domain and data_domain is higher-order
+
+        if (
+            dataset.loader.parameters.get("model_domain", "graph")
+            == dataset.loader.parameters.data_domain
+            and dataset.loader.parameters.data_domain
+            in ["simplicial", "cell", "combinatorial", "hypergraph"]
+        ):
+            if isinstance(
+                dataset.parameters.num_features,
+                omegaconf.listconfig.ListConfig,
+            ):
+                return list(dataset.parameters.num_features)
+            else:
+                raise ValueError(
+                    "The dataset and model are from the same domain but the data_domain is not higher-order."
+                )
+
+        elif isinstance(dataset.parameters.num_features, int):
             return [dataset.parameters.num_features]
+
         else:
             return [dataset.parameters.num_features[0]]
+
+    else:
+        raise ValueError(
+            "There is a problem with the complex lifting. Please check the configuration file."
+        )
 
 
 def infere_num_cell_dimensions(selected_dimensions, in_channels):

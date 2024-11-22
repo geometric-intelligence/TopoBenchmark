@@ -234,7 +234,16 @@ We list the liftings used in `TopoBenchmark` to transform datasets. Here, a _lif
 | ConcatenationLifting | Concatenate r-cell features to obtain r+1-cell features.                   | Simplicial        |
 
 </details>
+
+## Data Transformations
+
+| Transform | Description | Reference |
+| --- | --- | --- |
+| Message Passing Homophily | Higher-order homophily measure for hypergraphs | [Source](https://arxiv.org/abs/2310.07684) |
+| Group Homophily | Higher-order homophily measure for hypergraphs that considers groups of predefined sizes  | [Source](https://arxiv.org/abs/2103.11818) |
+
 ## :books: Datasets
+
 
 | Dataset | Task | Description | Reference |
 | --- | --- | --- | --- |
@@ -254,6 +263,9 @@ We list the liftings used in `TopoBenchmark` to transform datasets. Here, a _lif
 | Tolokers | Classification | Heterophilic dataset. | [Source](https://arxiv.org/pdf/2302.11640) |
 | US-county-demos | Regression | In turn each node attribute is used as the target label. | [Source](https://arxiv.org/pdf/2002.08274) |
 | ZINC | Regression | Graph-level regression. | [Source](https://pubs.acs.org/doi/10.1021/ci3001277) |
+
+
+
 
 ## :hammer_and_wrench: Development
 

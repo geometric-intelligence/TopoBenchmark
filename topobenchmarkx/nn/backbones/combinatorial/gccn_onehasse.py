@@ -4,8 +4,9 @@ import copy
 
 import torch
 import torch.nn.functional as F
-from omegaconf import OmegaConf
 from torch_geometric.data import Data
+
+from topobenchmarkx.data.utils import get_routes_from_neighborhoods
 
 
 class TopoTune_OneHasse(torch.nn.Module):
@@ -19,8 +20,8 @@ class TopoTune_OneHasse(torch.nn.Module):
     ----------
     GNN : torch.nn.Module, a class not an object
         The GNN class to use. ex: GAT, GCN.
-    routes : list of tuples
-        The routes to use. Combination of src_rank, dst_rank. ex: [[0, 0], [1, 0], [1, 1], [1, 1], [2, 1]].
+    neighborhoods : list of lists
+        The neighborhoods of interest.
     layers : int
         The number of layers to use. Each layer contains one GNN.
     use_edge_attr : bool
@@ -32,22 +33,20 @@ class TopoTune_OneHasse(torch.nn.Module):
     def __init__(
         self,
         GNN,
-        routes,
+        neighborhoods,
         layers,
         use_edge_attr,
         activation,
     ):
         super().__init__()
-        routes = OmegaConf.to_object(routes)
-        self.routes = [[int(elem[0][0]), int(elem[0][1])] for elem in routes]
-        self.neighborhoods = [elem[1] for elem in routes]
+        self.routes = get_routes_from_neighborhoods(neighborhoods)
+        self.neighborhoods = neighborhoods
 
         self.layers = layers
         self.use_edge_attr = use_edge_attr
         self.max_rank = 2
         self.graph_routes = torch.nn.ModuleList()
         self.GNN = [i for i in GNN.named_modules()]
-        self.final_readout = "sum"
         self.activation = activation
 
         # Instantiate GNN layers
@@ -91,7 +90,10 @@ class TopoTune_OneHasse(torch.nn.Module):
         ):
             src_rank, dst_rank = route
 
-            if neighborhood == "up_laplacian" or neighborhood == "adjacency":
+            if (
+                "up_laplacian" in neighborhood
+                or "up_adjacency" in neighborhood
+            ):
                 if src_rank == 0:  # node-to-edge
                     adjustment = torch.tensor([[0], [0]]).to(device)
                 elif src_rank == 1:  # edge-to-face
@@ -104,18 +106,17 @@ class TopoTune_OneHasse(torch.nn.Module):
                     )
 
                 edge_indices.append(
-                    getattr(params, f"{neighborhood}_{src_rank}")
-                    .indices()
-                    .to(device)
+                    getattr(params, neighborhood).indices().to(device)
                     + adjustment
                 )
                 edge_attrs.append(
-                    getattr(params, f"{neighborhood}_{src_rank}")
-                    .values()
-                    .squeeze()
+                    getattr(params, neighborhood).values().squeeze()
                 )
 
-            elif neighborhood == "down_laplacian":
+            elif (
+                "down_laplacian" in neighborhood
+                or "down_adjacency" in neighborhood
+            ):
                 if src_rank == 1:  # edge-to-node
                     adjustment = torch.tensor(
                         [[max_node_id], [max_node_id]]
@@ -133,18 +134,14 @@ class TopoTune_OneHasse(torch.nn.Module):
                     )
 
                 edge_indices.append(
-                    getattr(params, f"down_laplacian_{src_rank}")
-                    .indices()
-                    .to(device)
+                    getattr(params, neighborhood).indices().to(device)
                     + adjustment
                 )
                 edge_attrs.append(
-                    getattr(params, f"down_laplacian_{src_rank}")
-                    .values()
-                    .squeeze()
+                    getattr(params, neighborhood).values().squeeze()
                 )
 
-            elif neighborhood == "boundary" or neighborhood == "bdry":
+            elif "down_incidence" in neighborhood:
                 if src_rank == 1:  # edge-to-face
                     adjustment = torch.tensor([[0], [max_node_id]]).to(device)
                 elif src_rank == 2:  # face-to-edge
@@ -153,21 +150,21 @@ class TopoTune_OneHasse(torch.nn.Module):
                     ).to(device)
                 else:
                     raise ValueError(
-                        f"Unsupported src_rank for 'boundary' neighborhood: {src_rank}"
+                        f"Unsupported src_rank for 'down_incidence' neighborhood: {src_rank}"
                     )
 
                 edge_indices.append(
-                    getattr(params, f"incidence_{src_rank}")
+                    getattr(params, neighborhood)
                     .coalesce()
                     .indices()
                     .to(device)
                     + adjustment
                 )
                 edge_attrs.append(
-                    getattr(params, f"incidence_{src_rank}").values().squeeze()
+                    getattr(params, neighborhood).values().squeeze()
                 )
 
-            elif neighborhood == "coboundary" or neighborhood == "cobdry":
+            elif "up_incidence" in neighborhood:
                 if src_rank == 0:  # node-to-edge
                     adjustment = torch.tensor([[max_node_id], [0]]).to(device)
                 elif src_rank == 1:  # edge-to-face
@@ -176,10 +173,10 @@ class TopoTune_OneHasse(torch.nn.Module):
                     ).to(device)
                 else:
                     raise ValueError(
-                        f"Unsupported src_rank for 'cbdry' neighborhood: {src_rank}"
+                        f"Unsupported src_rank for 'up_incidence' neighborhood: {src_rank}"
                     )
                 coincidence_indices = (
-                    getattr(params, f"incidence_{src_rank + 1}")
+                    getattr(params, neighborhood)
                     .T.coalesce()
                     .indices()
                     .to(device)
@@ -188,7 +185,7 @@ class TopoTune_OneHasse(torch.nn.Module):
 
                 edge_indices.append(coincidence_indices)
                 # edge_attrs.append(
-                #     getattr(params, f"incidence_{src_rank}")
+                #     getattr(params, neighborhood)
                 #     .T.coalesce()
                 #     .values()
                 #     .squeeze()
@@ -340,7 +337,7 @@ class TopoTune_OneHasse(torch.nn.Module):
 
 
 def get_activation(nonlinearity, return_module=False):
-    """From CWN.
+    """Activation resolver from CWN.
 
     Parameters
     ----------

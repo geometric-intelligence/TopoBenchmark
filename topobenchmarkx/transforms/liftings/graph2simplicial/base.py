@@ -43,7 +43,10 @@ class Graph2SimplicialLifting(GraphLifting):
             The lifted topology.
         """
         lifted_topology = get_complex_connectivity(
-            simplicial_complex, self.complex_dim, signed=self.signed
+            simplicial_complex,
+            self.complex_dim,
+            neighborhoods=self.neighborhoods,
+            signed=self.signed,
         )
         lifted_topology["x_0"] = torch.stack(
             list(

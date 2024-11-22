@@ -128,7 +128,7 @@ def read_ndim_manifolds(path, dim, y_val="betti_numbers"):
         Dimension of the manifolds to load, required to make sanity checks.
     y_val : str, optional
         The triangulation information to use as label. Can be one of ['betti_numbers', 'torsion_coefficients',
-        'name', 'genus', 'orientable'] (default: "betti_numbers").
+        'name', 'genus', 'orientable'] (default: "orientable").
 
     Returns
     -------
@@ -147,6 +147,8 @@ def read_ndim_manifolds(path, dim, y_val="betti_numbers"):
         ]
     elif dim == 3:
         assert y_val in ["betti_numbers", "torsion_coefficients", "name"]
+    else:
+        raise ValueError("Invalid dimension. Only 2 and 3 are supported.")
 
     TORSION_COEF_NAMES = ["", "Z_2"]
     HOMEO_NAMES = [
@@ -177,20 +179,20 @@ def read_ndim_manifolds(path, dim, y_val="betti_numbers"):
         y_value = manifold[y_val]
 
         if y_val == "betti_numbers":
-            y = torch.tensor(y_value, dtype=torch.long).squeeze()
+            y = torch.tensor(y_value, dtype=torch.long).unsqueeze(dim=0)
         elif y_val == "genus":
             y = torch.tensor([y_value], dtype=torch.long).squeeze()
         elif y_val == "torsion_coefficients":
             y = torch.tensor(
                 [TORSION_COEF_NAME_TO_IDX[coef] for coef in y_value],
-                dtype=torch.float,
-            ).squeeze()
+                dtype=torch.long,
+            ).unsqueeze(dim=0)
         elif y_val == "name":
             y = torch.tensor(
                 [HOMEO_NAME_TO_IDX[y_value]], dtype=torch.long
-            ).squeeze()
+            ).unsqueeze(0)
         elif y_val == "orientable":
-            y = torch.tensor([y_value], dtype=torch.bool).squeeze()
+            y = torch.tensor([y_value], dtype=torch.long).squeeze()
         else:
             raise ValueError(f"Invalid y_val: {y_val}")
 
@@ -338,21 +340,22 @@ def read_us_county_demos(path, year=2012, y_col="Election"):
     return data
 
 
-def load_hypergraph_pickle_dataset(cfg):
+def load_hypergraph_pickle_dataset(data_dir, data_name):
     """Load hypergraph datasets from pickle files.
 
     Parameters
     ----------
-    cfg : DictConfig
-        Configuration parameters.
+    data_dir : str
+        Data directory.
+    data_name : str
+        Name of the dataset.
 
     Returns
     -------
     torch_geometric.data.Data
         Hypergraph dataset.
     """
-    data_dir = cfg["data_dir"]
-    print(f"Loading {cfg['data_domain']} dataset name: {cfg['data_name']}")
+    data_dir = osp.join(data_dir, data_name)
 
     # Load node features:
 

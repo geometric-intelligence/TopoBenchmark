@@ -1,29 +1,32 @@
-_target_: topobenchmarkx.data.loaders.HypergraphLoader
+# Dataset loader config
+loader:
+  _target_: topobenchmarkx.data.loaders.CitationHypergraphDatasetLoader
+  parameters: 
+    data_domain: hypergraph
+    data_type: coauthorship
+    data_name: coauthorship_cora
+    data_dir: ${paths.data_dir}/${dataset.loader.parameters.data_domain}/${dataset.loader.parameters.data_type}
 
-defaults:
-  - transforms: ${get_default_transform:hypergraph,${model}}
-
-# Data definition
+# Dataset parameters
 parameters:
-  data_domain: hypergraph
-  data_type: coauthorship
-  data_name: Cora
-  data_dir: ${paths.data_dir}/${dataset.parameters.data_domain}/${dataset.parameters.data_type}/${dataset.parameters.data_name}
-  data_split_dir: ${paths.data_dir}/data_splits/${dataset.parameters.data_name}
-
-  # Dataset parameters
   num_features: 1433
   num_classes: 7
   task: classification
   loss_type: cross_entropy
   monitor_metric: accuracy
   task_level: node
-  data_seed: 0
-  split_type: random #'k-fold' # either k-fold or test
-  k: 10 # for k-Fold Cross-Validation
 
-  # Dataloader parameters
+#splits
+split_params:
+  learning_setting: transductive
+  data_split_dir: ${paths.data_dir}/data_splits/${dataset.loader.parameters.data_name}
+  data_seed: 0
+  split_type: random #'k-fold' # either "k-fold" or "random" strategies
+  k: 10 # for "k-fold" Cross-Validation
+  train_prop: 0.5 # for "random" strategy splitting
+
+# Dataloader parameters
+dataloader_params:
   batch_size: 1 # Fixed
-  # train_val_test_split: [55_000, 5_000, 10_000]
-  num_workers: 0
+  num_workers: 1
   pin_memory: False

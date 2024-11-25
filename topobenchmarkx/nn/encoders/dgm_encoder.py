@@ -5,7 +5,7 @@ import torch_geometric
 from topobenchmarkx.nn.encoders.all_cell_encoder import BaseEncoder
 from topobenchmarkx.nn.encoders.base import AbstractFeatureEncoder
 
-from .kdgm import DGM_d  # . AlphaDGM
+from .kdgm import DGM_d
 
 
 class DGMStructureFeatureEncoder(AbstractFeatureEncoder):
@@ -42,6 +42,7 @@ class DGMStructureFeatureEncoder(AbstractFeatureEncoder):
 
         self.in_channels = in_channels
         self.out_channels = out_channels
+
         self.dimensions = (
             selected_dimensions
             if (
@@ -64,7 +65,6 @@ class DGMStructureFeatureEncoder(AbstractFeatureEncoder):
             setattr(
                 self,
                 f"encoder_{i}",
-                # AlphaDGM(base_enc=base_enc, embed_f=embed_f),
                 DGM_d(base_enc=base_enc, embed_f=embed_f),
             )
 

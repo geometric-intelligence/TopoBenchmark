@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Any, ClassVar, Dict
 
 
-class LoaderManager:
+class LoadManager:
     """Manages automatic discovery and registration of loss classes."""
 
     @staticmethod
@@ -85,7 +85,7 @@ class LoaderManager:
 
 
 # Dynamically create the loss manager and discover losses
-manager = LoaderManager()
+manager = LoadManager()
 LOSSES = manager.discover_losses(__file__)
 LOSSES_list = list(LOSSES.keys())
 

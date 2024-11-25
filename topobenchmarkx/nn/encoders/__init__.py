@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Any, ClassVar, Dict
 
 
-class EncoderManager:
+class LoadManager:
     """Manages automatic discovery and registration of encoder classes."""
 
     @staticmethod
@@ -85,7 +85,7 @@ class EncoderManager:
 
 
 # Dynamically create the encoder manager and discover encoders
-manager = EncoderManager()
+manager = LoadManager()
 FEATURE_ENCODERS = manager.discover_encoders(__file__)
 FEATURE_ENCODERS_list = list(FEATURE_ENCODERS.keys())
 

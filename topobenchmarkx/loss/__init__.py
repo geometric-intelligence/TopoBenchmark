@@ -39,7 +39,7 @@ class LoaderManager:
             return False
 
     @classmethod
-    def discover_encoders(cls, package_path: str) -> Dict[str, type]:
+    def discover_losses(cls, package_path: str) -> Dict[str, type]:
         """Dynamically discover all loss classes in the package.
 
         Parameters
@@ -86,7 +86,7 @@ class LoaderManager:
 
 # Dynamically create the loss manager and discover losses
 manager = LoaderManager()
-LOSSES = manager.discover_encoders(__file__)
+LOSSES = manager.discover_losses(__file__)
 LOSSES_list = list(LOSSES.keys())
 
 # Combine manual and discovered losses
@@ -101,20 +101,3 @@ __all__ = [
 
 # Update locals for direct import
 locals().update(all_encoders)
-
-
-# from .base import AbstractLoss
-# from .loss import TBXLoss
-
-# # ... import other readout classes here
-# # For example:
-# # from topobenchmarkx.loss.other_loss_1 import OtherLoss1
-# # from topobenchmarkx.loss.other_loss_2 import OtherLoss2
-
-# __all__ = [
-#     "AbstractLoss",
-#     "TBXLoss",
-#     # "OtherLoss1",
-#     # "OtherLoss2",
-#     # ... add other loss classes here
-# ]

@@ -2,6 +2,7 @@
 
 import torch
 import torch.nn.functional
+from torch.nn import ParameterList
 from torch.nn.parameter import Parameter
 
 
@@ -30,7 +31,7 @@ class SANN(torch.nn.Module):
         hidden_channels,
         update_func=None,
         complex_dim=3,
-        hop_num=2,
+        hop_num=3,
         n_layers=2,
     ):
         super().__init__()
@@ -40,16 +41,17 @@ class SANN(torch.nn.Module):
         assert n_layers >= 1
 
         if isinstance(in_channels, int):  # If only one value is passed
-            in_channels = [in_channels] * self.complex_dim
+            in_channels = [in_channels] * self.hop_num
 
         self.layers = torch.nn.ModuleList()
 
         # Set of simplices layers
         self.layers_0 = torch.nn.ModuleList(
             SANNLayer(
-                [in_channels[i] for i in range(complex_dim)],
-                [hidden_channels] * complex_dim,
+                [in_channels[i] for i in range(hop_num)],
+                [hidden_channels] * hop_num,
                 update_func=update_func,
+                hop_num=hop_num,
             )
             for i in range(complex_dim)
         )
@@ -60,9 +62,10 @@ class SANN(torch.nn.Module):
             self.layers.append(
                 torch.nn.ModuleList(
                     SANNLayer(
-                        [hidden_channels] * complex_dim,
-                        [hidden_channels] * complex_dim,
-                        update_func="lrelu",
+                        [hidden_channels] * hop_num,
+                        [hidden_channels] * hop_num,
+                        update_func=update_func,
+                        hop_num=hop_num,
                     )
                     for i in range(complex_dim)
                 )
@@ -114,6 +117,8 @@ class SANNLayer(torch.nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
+    hop_num : int
+        Number of hop representations to consider.
     aggr_norm : bool
         Whether to perform aggregation normalization.
     update_func : str
@@ -131,21 +136,22 @@ class SANNLayer(torch.nn.Module):
         self,
         in_channels,
         out_channels,
+        hop_num,
         aggr_norm: bool = False,
         update_func=None,
         initialization: str = "xavier_normal",
     ) -> None:
         super().__init__()
 
-        in_channels_0, in_channels_1, in_channels_2 = in_channels
-        out_channels_0, out_channels_1, out_channels_2 = out_channels
+        assert hop_num == len(
+            in_channels
+        ), "Number of hops must be equal to the number of input channels."
+        assert hop_num == len(
+            out_channels
+        ), "Number of hops must be equal to the number of output channels."
 
-        self.in_channels_0 = in_channels_0
-        self.in_channels_1 = in_channels_1
-        self.in_channels_2 = in_channels_2
-        self.out_channels_0 = out_channels_0
-        self.out_channels_1 = out_channels_1
-        self.out_channels_2 = out_channels_2
+        self.in_channels = in_channels
+        self.out_channels = out_channels
 
         self.aggr_norm = aggr_norm
         self.update_func = update_func
@@ -153,29 +159,27 @@ class SANNLayer(torch.nn.Module):
 
         assert initialization in ["xavier_uniform", "xavier_normal"]
 
-        self.weight_0 = Parameter(
-            torch.Tensor(
-                self.in_channels_0,
-                self.out_channels_0,
-            )
+        self.weights = ParameterList(
+            [
+                Parameter(
+                    torch.Tensor(
+                        self.in_channels[i],
+                        self.out_channels[i],
+                    )
+                )
+                for i in range(hop_num)
+            ]
         )
-
-        self.weight_1 = Parameter(
-            torch.Tensor(
-                self.in_channels_1,
-                self.out_channels_1,
-            )
+        self.biases = ParameterList(
+            [
+                Parameter(
+                    torch.Tensor(
+                        self.out_channels[i],
+                    )
+                )
+                for i in range(hop_num)
+            ]
         )
-        self.weight_2 = Parameter(
-            torch.Tensor(
-                self.in_channels_2,
-                self.out_channels_2,
-            )
-        )
-
-        self.biases_0 = Parameter(torch.Tensor(self.out_channels_0))
-        self.biases_1 = Parameter(torch.Tensor(self.out_channels_1))
-        self.biases_2 = Parameter(torch.Tensor(self.out_channels_2))
 
         self.reset_parameters()
 
@@ -188,21 +192,13 @@ class SANNLayer(torch.nn.Module):
             Gain for the weight initialization.
         """
         if self.initialization == "xavier_uniform":
-            torch.nn.init.xavier_uniform_(self.weight_0, gain=gain)
-            torch.nn.init.xavier_uniform_(self.weight_1, gain=gain)
-            torch.nn.init.xavier_uniform_(self.weight_2, gain=gain)
-
-            torch.nn.init.zeros_(self.biases_0)
-            torch.nn.init.zeros_(self.biases_1)
-            torch.nn.init.zeros_(self.biases_2)
+            for i in range(len(self.weights)):
+                torch.nn.init.xavier_uniform_(self.weights[i], gain=gain)
+                torch.nn.init.zeros_(self.biases[i])
         elif self.initialization == "xavier_normal":
-            torch.nn.init.xavier_normal_(self.weight_0, gain=gain)
-            torch.nn.init.xavier_normal_(self.weight_1, gain=gain)
-            torch.nn.init.xavier_normal_(self.weight_2, gain=gain)
-
-            torch.nn.init.zeros_(self.biases_0)
-            torch.nn.init.zeros_(self.biases_1)
-            torch.nn.init.zeros_(self.biases_2)
+            for i in range(len(self.weights)):
+                torch.nn.init.xavier_normal_(self.weights[i], gain=gain)
+                torch.nn.init.zeros_(self.biases[i])
         else:
             raise RuntimeError(
                 "Initialization method not recognized. "
@@ -248,14 +244,13 @@ class SANNLayer(torch.nn.Module):
             Output tensors for each 2-cell.
         """
         # Extract all cells to all cells
-        x_0 = x_all[0]
-        x_1 = x_all[1]
-        x_2 = x_all[2]
+        t = len(x_all)
+        x_k_t = {i: x_all[i] for i in range(t)}
 
-        # k-simplex to k-simplex
-        x_k_to_0 = torch.mm(x_0, self.weight_0)
-        x_k_to_1 = torch.mm(x_1, self.weight_1)
-        x_k_to_2 = torch.mm(x_2, self.weight_2)
+        y_k_t = {
+            i: torch.mm(x_k_t[i], self.weights[i]) + self.biases[i]
+            for i in range(t)
+        }
 
         # TODO Check aggregation as list of ys
         # Need to check that this einsums are correct
@@ -263,10 +258,7 @@ class SANNLayer(torch.nn.Module):
         # y_1 = torch.einsum("nik,iok->no", x_1_all, self.weight_1)
         # y_2 = torch.einsum("nik,iok->no", x_2_all, self.weight_2)
 
-        y_0 = x_k_to_0 + self.biases_0
-        y_1 = x_k_to_1 + self.biases_1
-        y_2 = x_k_to_2 + self.biases_2
-
         if self.update_func is None:
-            return y_0, y_1, y_2
-        return self.update(y_0), self.update(y_1), self.update(y_2)
+            return tuple(y_k_t.values())
+
+        return tuple([self.update(y_t) for y_t in y_k_t.values()])

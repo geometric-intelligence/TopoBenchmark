@@ -40,8 +40,13 @@ class SANNFeatureEncoder(AbstractFeatureEncoder):
     ):
         super().__init__()
 
+        assert (
+            len(selected_hops) == len(in_channels[0])
+        ), "Number of hops must be equal to the number of provided input channels for each dimension."
+
         self.in_channels = in_channels
         self.out_channels = out_channels
+
         self.dimensions = (
             selected_dimensions
             if (

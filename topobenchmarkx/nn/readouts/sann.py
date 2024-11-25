@@ -14,8 +14,9 @@ class SANNReadout(AbstractZeroCellReadOut):
     ----------
     **kwargs : dict
         Additional keyword arguments. It should contain the following keys:
+        - complex_dim (int): Dimension of the simplicial complex.
+        - max_hop (int): Maximum hop neighbourhood to consider.
         - hidden_dim_1 (int):  Dimension of the embeddings.
-        - hidden_dim_2 (int): Dimension of the hidden layers.
         - out_channels (int): Number of classes.
         - pooling_type (str): Type of pooling operationg
     """
@@ -23,12 +24,16 @@ class SANNReadout(AbstractZeroCellReadOut):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
+        complex_dim = kwargs["complex_dim"]
+        max_hop = kwargs["max_hop"]
         hidden_dim = kwargs["hidden_dim"]
         out_channels = kwargs["out_channels"]
         pooling_type = kwargs["pooling_type"]
 
         self.linear = torch.nn.Sequential(
-            torch.nn.Linear(3 * 3 * hidden_dim, hidden_dim),
+            torch.nn.Linear(
+                complex_dim * (max_hop + 1) * hidden_dim, hidden_dim
+            ),
             torch.nn.LeakyReLU(),
             torch.nn.Linear(hidden_dim, hidden_dim),
             torch.nn.LeakyReLU(),

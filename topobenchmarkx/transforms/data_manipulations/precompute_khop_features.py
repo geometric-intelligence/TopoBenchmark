@@ -27,7 +27,7 @@ class PrecomputeKHopFeatures(torch_geometric.transforms.BaseTransform):
     ) -> None:
         super().__init__()
         self.type = "precompute_khop_features"
-        self.complex_dim = complex_dim - 1
+        self.complex_dim = complex_dim
         self.max_hop = max_hop
 
     def __repr__(self) -> str:
@@ -47,12 +47,12 @@ class PrecomputeKHopFeatures(torch_geometric.transforms.BaseTransform):
             The transformed data.
         """
         T = self.max_hop
-        K = self.complex_dim  # TODO Check where to get this degree from
-        B = [torch.abs(data[f"incidence_{i+1}"]) for i in range(K + 1)]
-        UP = [torch.mm(B[i], B[i].T) for i in range(K + 1)]
-        DOWN = [torch.mm(B[i].T, B[i]) for i in range(K + 1)]
-        Bs = [B[i].to_dense() for i in range(K + 1)]
-        Bc = [B[i].T.to_dense() for i in range(K + 1)]
+        K = self.complex_dim
+        B = [torch.abs(data[f"incidence_{i+1}"]) for i in range(K)]
+        UP = [torch.mm(B[i], B[i].T) for i in range(K)]
+        DOWN = [torch.mm(B[i].T, B[i]) for i in range(K)]
+        Bs = [B[i].to_dense() for i in range(K)]
+        Bc = [B[i].T.to_dense() for i in range(K)]
 
         Bs_new = Bc  # [torch.ones_like(Bs[0])] * len(Bs)
         Bc_new = Bs  # [torch.ones_like(Bc[0])] * len(Bc)
@@ -72,15 +72,13 @@ class PrecomputeKHopFeatures(torch_geometric.transforms.BaseTransform):
         # Create a dictionary that stores the i-simplices, the
         # j-th hop features matrix
         x_all = {
-            f"x{i}_{j}": torch.ones(1)
-            for i in range(K + 1)
-            for j in range(T + 1)
+            f"x{i}_{j}": torch.ones(1) for i in range(K) for j in range(T + 1)
         }
 
         # TODO Sometimes te normalizations results in 0
         # for non-connected simplices which blows up
         # Compute normalization matrices D_k
-        for i in range(K + 1):
+        for i in range(K):
             LS = torch.mm(UP[i], x_is[i]).flatten()
             D_i = LS  # - torch.diag(torch.abs(UP[i].to_dense())).flatten()
             # Check no zeroes that blow up the division
@@ -106,7 +104,7 @@ class PrecomputeKHopFeatures(torch_geometric.transforms.BaseTransform):
                     torch.mm(D_i_i_minus_1, Bc[i - 1]), D_i_minus_1_i
                 )
 
-            if i < K:
+            if i < (K - 1):
                 D_i_i_plus_1 = torch.mm(Bs[i], x_is[i + 1]).flatten()
                 D_i_i_plus_1 = torch.diagflat(
                     torch.div(1, torch.sqrt(D_i_i_plus_1 + 1))
@@ -125,13 +123,13 @@ class PrecomputeKHopFeatures(torch_geometric.transforms.BaseTransform):
             UP[i] = torch.mm(torch.mm(D_i, UP[i]), D_i)
 
         # Set the information for the 0-hop embeddings
-        for i in range(K + 1):
+        for i in range(K):
             x_all[f"x{i}_0"] = data[f"x_{i}"]
 
         # For each hop t=1,...,T
         for t in range(1, T + 1):
             # For each k-simplex, k=0,...,K
-            for k in range(K + 1):
+            for k in range(K):
                 # Set everything to `None` as
                 # some representations are not available
                 Y_U_1 = None
@@ -143,7 +141,7 @@ class PrecomputeKHopFeatures(torch_geometric.transforms.BaseTransform):
                 # The highest order simplex does not have a higher order adjacency
                 Y_U_1 = torch.mm(UP[k], x_all[f"x{k}_{t-1}"])
                 adjacencies_embedding.append(Y_U_1)
-                if k < K:
+                if k < (K - 1):
                     Y_C_1 = torch.mm(Bc_new[k], x_all[f"x{k+1}_{t-1}"])
 
                     adjacencies_embedding.append(Y_C_1)

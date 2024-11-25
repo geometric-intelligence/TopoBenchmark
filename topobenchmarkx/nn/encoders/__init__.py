@@ -89,10 +89,6 @@ manager = EncoderManager()
 FEATURE_ENCODERS = manager.discover_encoders(__file__)
 FEATURE_ENCODERS_list = list(FEATURE_ENCODERS.keys())
 
-# Manual imports to ensure compatibility
-from .base import AbstractFeatureEncoder
-from .all_cell_encoder import AllCellFeatureEncoder
-from .dgm_encoder import DGMStructureFeatureEncoder
 
 # Combine manual and discovered encoders
 all_encoders = {**FEATURE_ENCODERS}

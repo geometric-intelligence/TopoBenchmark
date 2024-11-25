@@ -15,14 +15,14 @@ from .run import initialize_hydra
 
 __all__ = [
     "data",
+    "dataloader",
     "evaluator",
+    "initialize_hydra",
     "loss",
+    "model",
     "nn",
     "transforms",
     "utils",
-    "dataloader",
-    "model",
-    "initialize_hydra",
 ]
 
 

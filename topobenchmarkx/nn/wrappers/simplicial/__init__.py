@@ -8,7 +8,7 @@ from .scn_wrapper import SCNWrapper
 # Export all wrappers
 __all__ = [
     "SANWrapper",
-    "SCNWrapper",
     "SCCNNWrapper",
     "SCCNWrapper",
+    "SCNWrapper",
 ]

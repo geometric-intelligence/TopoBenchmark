@@ -6,7 +6,7 @@ import torch_geometric
 
 from topobenchmarkx.nn.encoders.all_cell_encoder import BaseEncoder
 from topobenchmarkx.nn.encoders.base import AbstractFeatureEncoder
-from topobenchmarkx.nn.encoders.dgm import AlphaDGM, DGM_d
+from .kdgm import DGM_d  # . AlphaDGM
 
 
 class DGMStructureFeatureEncoder(AbstractFeatureEncoder):

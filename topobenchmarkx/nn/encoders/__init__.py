@@ -1,3 +1,112 @@
+"""Init file for encoder module with automated encoder discovery."""
+
+import importlib
+import inspect
+import os
+import sys
+from pathlib import Path
+from typing import Any, ClassVar, Dict
+
+
+class EncoderManager:
+    """Manages automatic discovery and registration of encoder classes."""
+
+    @staticmethod
+    def is_encoder_class(obj: Any) -> bool:
+        """Check if an object is a valid encoder class.
+
+        Parameters
+        ----------
+        obj : Any
+            The object to check if it's a valid encoder class.
+
+        Returns
+        -------
+        bool
+            True if the object is a valid encoder class (non-private class
+            with 'FeatureEncoder' in name), False otherwise.
+        """
+        try:
+            from .base import AbstractFeatureEncoder
+
+            return (
+                inspect.isclass(obj)
+                and not obj.__name__.startswith("_")
+                and issubclass(obj, AbstractFeatureEncoder)
+                and obj is not AbstractFeatureEncoder
+            )
+        except ImportError:
+            return False
+
+    @classmethod
+    def discover_encoders(cls, package_path: str) -> Dict[str, type]:
+        """Dynamically discover all encoder classes in the package.
+
+        Parameters
+        ----------
+        package_path : str
+            Path to the package's __init__.py file.
+
+        Returns
+        -------
+        Dict[str, Type]
+            Dictionary mapping encoder class names to their corresponding class objects.
+        """
+        encoders = {}
+        package_dir = Path(package_path).parent
+
+        # Add parent directory to sys.path to ensure imports work
+        parent_dir = str(package_dir.parent)
+        if parent_dir not in sys.path:
+            sys.path.insert(0, parent_dir)
+
+        # Iterate through all .py files in the directory
+        for file_path in package_dir.glob("*.py"):
+            if file_path.stem == "__init__":
+                continue
+
+            try:
+                # Use importlib to safely import the module
+                module_name = f"{package_dir.stem}.{file_path.stem}"
+                module = importlib.import_module(module_name)
+
+                # Find all encoder classes in the module
+                for name, obj in inspect.getmembers(module):
+                    if (
+                        cls.is_encoder_class(obj)
+                        and obj.__module__ == module.__name__
+                    ):
+                        encoders[name] = obj
+
+            except ImportError as e:
+                print(f"Could not import module {module_name}: {e}")
+
+        return encoders
+
+
+# Dynamically create the encoder manager and discover encoders
+manager = EncoderManager()
+FEATURE_ENCODERS = manager.discover_encoders(__file__)
+FEATURE_ENCODERS_list = list(FEATURE_ENCODERS.keys())
+
+# Manual imports to ensure compatibility
+from .base import AbstractFeatureEncoder
+from .all_cell_encoder import AllCellFeatureEncoder
+from .dgm_encoder import DGMStructureFeatureEncoder
+
+# Combine manual and discovered encoders
+all_encoders = {**FEATURE_ENCODERS}
+
+# Generate __all__
+__all__ = [
+    "FEATURE_ENCODERS",
+    "FEATURE_ENCODERS_list",
+    *list(all_encoders.keys()),
+]
+
+# Update locals for direct import
+locals().update(all_encoders)
+
 # """This module implements the encoders for the neural networks."""
 
 # from .all_cell_encoder import AllCellFeatureEncoder
@@ -17,90 +126,98 @@
 #     # "OtherEncoder2",
 #     # ... add other readout classes here
 # ]
+# """Init file for encoder module with automated encoder discovery."""
+# import inspect
+# from importlib import util
+# from pathlib import Path
+# from typing import Any, ClassVar
 
-"""Data encoders module with automated exports."""
+# class EncoderManager:
+#     """Manages automatic discovery and registration of encoder classes."""
+#     # Base class that all encoders should inherit from
+#     BASE_ENCODER_CLASS: ClassVar[type] = AbstractFeatureEncoder
 
-import inspect
-from importlib import util
-from pathlib import Path
-from typing import Any
+#     @staticmethod
+#     def is_encoder_class(obj: Any) -> bool:
+#         """Check if an object is a valid encoder class.
 
+#         Parameters
+#         ----------
+#         obj : Any
+#             The object to check if it's a valid encoder class.
 
-class ModuleExportsManager:
-    """Manages automatic discovery and registration of data encoder classes."""
+#         Returns
+#         -------
+#         bool
+#             True if the object is a valid encoder class (non-private class
+#             with 'FeatureEncoder' in name), False otherwise.
+#         """
+#         return (
+#             inspect.isclass(obj)
+#             and not obj.__name__.startswith("_")
+#             and issubclass(obj, AbstractFeatureEncoder)
+#             and obj is not AbstractFeatureEncoder
+#         )
 
-    @staticmethod
-    def is_encoder_class(obj: Any) -> bool:
-        """Check if an object is a valid encoder class.
+#     @classmethod
+#     def discover_encoders(cls, package_path: str) -> dict[str, type[Any]]:
+#         """Dynamically discover all encoder classes in the package.
 
-        Parameters
-        ----------
-        obj : Any
-            The object to check if it's a valid encoder class.
+#         Parameters
+#         ----------
+#         package_path : str
+#             Path to the package's __init__.py file.
 
-        Returns
-        -------
-        bool
-            True if the object is a valid encoder class (non-private class
-            defined in __main__), False otherwise.
-        """
-        return (
-            inspect.isclass(obj)
-            and obj.__module__ == "__main__"
-            and not obj.__name__.startswith("_")
-        )
+#         Returns
+#         -------
+#         Dict[str, Type[Any]]
+#             Dictionary mapping encoder class names to their corresponding class objects.
+#         """
+#         encoders = {}
+#         # Get the directory containing the encoder modules
+#         package_dir = Path(package_path).parent
 
-    @classmethod
-    def discover_encoders(cls, package_path: str) -> dict[str, type]:
-        """Dynamically discover all encoder classes in the package.
+#         # Iterate through all .py files in the directory
+#         for file_path in package_dir.glob("*.py"):
+#             if file_path.stem == "__init__":
+#                 continue
 
-        Parameters
-        ----------
-        package_path : str
-            Path to the package's __init__.py file.
+#             # Import the module
+#             module_name = f"{Path(package_path).stem}.{file_path.stem}"
+#             spec = util.spec_from_file_location(module_name, file_path)
+#             if spec and spec.loader:
+#                 module = util.module_from_spec(spec)
+#                 spec.loader.exec_module(module)
 
-        Returns
-        -------
-        dict[str, type]
-            Dictionary mapping class names to their corresponding class objects.
-        """
-        encoders = {}
+#                 # Find all encoder classes in the module
+#                 for name, obj in inspect.getmembers(module):
+#                     if (
+#                         cls.is_encoder_class(obj)
+#                         and obj.__module__ == module.__name__
+#                     ):
+#                         encoders[name] = obj
 
-        # Get the directory containing the encoder modules
-        package_dir = Path(package_path).parent
+#         return encoders
 
-        # Iterate through all .py files in the directory
-        for file_path in package_dir.glob("*.py"):
-            if file_path.stem == "__init__":
-                continue
+# # Create the encoder manager
+# manager = EncoderManager()
 
-            # Import the module
-            module_name = f"{Path(package_path).stem}.{file_path.stem}"
-            spec = util.spec_from_file_location(module_name, file_path)
-            if spec and spec.loader:
-                module = util.module_from_spec(spec)
-                spec.loader.exec_module(module)
+# # Automatically discover and populate encoders
+# FEATURE_ENCODERS = manager.discover_encoders(__file__)
+# FEATURE_ENCODERS_list = list(FEATURE_ENCODERS.keys())
 
-                # Find all encoder classes in the module
-                for name, obj in inspect.getmembers(module):
-                    if (
-                        inspect.isclass(obj)
-                        and obj.__module__ == module.__name__
-                        and not name.startswith("_")
-                    ):
-                        encoders[name] = obj  # noqa: PERF403
+# # Automatically generate __all__
+# __all__ = [
+#     # Encoder collections
+#     "FEATURE_ENCODERS",
+#     "FEATURE_ENCODERS_list",
+#     # Individual encoder classes
+#     *list(FEATURE_ENCODERS.keys()),
+#     # Original encoder classes from manual import
+#     # "AbstractFeatureEncoder",
+#     # "AllCellFeatureEncoder",
+#     # "DGMStructureFeatureEncoder",
+# ]
 
-        return encoders
-
-
-# Create the exports manager
-manager = ModuleExportsManager()
-
-# Automatically discover and populate DATA_encoderS
-ENCODERS = manager.discover_encoders(__file__)
-
-# Automatically generate __all__
-__all__ = [*ENCODERS.keys(), "ENCODERS"]
-
-# For backwards compatibility, also create individual imports
-locals().update(ENCODERS)
+# # For backwards compatibility, create individual imports
+# locals().update(**FEATURE_ENCODERS)

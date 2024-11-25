@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "TopoBenchmark"
 dynamic = ["version"]
 authors = [
-    {name = "PyT-Team Authors", email = "tlscabinet@gmail.com"}
+    {name = "Topological Intelligence Team Authors", email = "tlscabinet@gmail.com"}
 ]
 readme = "README.md"
 description = "Topological Deep Learning"

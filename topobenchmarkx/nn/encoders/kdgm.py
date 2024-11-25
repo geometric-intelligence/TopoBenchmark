@@ -85,7 +85,7 @@ class DGM_d(nn.Module):
     def __init__(
         self, base_enc, embed_f, k=5, distance="euclidean", sparse=True
     ):
-        super(DGM_d, self).__init__()
+        super().__init__()
 
         self.sparse = sparse
         self.temperature = nn.Parameter(

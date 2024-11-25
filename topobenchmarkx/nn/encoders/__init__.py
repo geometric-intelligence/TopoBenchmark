@@ -2,10 +2,9 @@
 
 import importlib
 import inspect
-import os
 import sys
 from pathlib import Path
-from typing import Any, ClassVar, Dict
+from typing import Any
 
 
 class LoadManager:
@@ -39,7 +38,7 @@ class LoadManager:
             return False
 
     @classmethod
-    def discover_encoders(cls, package_path: str) -> Dict[str, type]:
+    def discover_encoders(cls, package_path: str) -> dict[str, type]:
         """Dynamically discover all encoder classes in the package.
 
         Parameters
@@ -76,7 +75,7 @@ class LoadManager:
                         cls.is_encoder_class(obj)
                         and obj.__module__ == module.__name__
                     ):
-                        encoders[name] = obj
+                        encoders[name] = obj  # noqa: PERF403
 
             except ImportError as e:
                 print(f"Could not import module {module_name}: {e}")

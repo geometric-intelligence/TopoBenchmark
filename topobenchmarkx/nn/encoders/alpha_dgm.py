@@ -23,7 +23,7 @@ class AlphaDGM(nn.Module):
     def __init__(
         self, base_enc: nn.Module, embed_f: nn.Module, gamma=10, std=0
     ):
-        super(AlphaDGM, self).__init__()
+        super().__init__()
         self.ln = LayerNorm(gamma)
         self.std = std
         self.base_enc = base_enc

@@ -42,8 +42,9 @@ class DGMLoss(AbstractLoss):
         dict
             Dictionary containing the model output with the loss.
         """
+        batch_keys = batch.keys()
         logprobs_keys = sorted(
-            [key for key in batch.keys() if "logprobs_" in key]
+            [key for key in batch_keys if "logprobs_" in key]
         )
 
         # Filter out the logprobs based on the model phase (Training, test)

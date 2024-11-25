@@ -1,11 +1,10 @@
 """Encoder class to apply BaseEncoder."""
 
-import torch
-import torch.nn as nn
 import torch_geometric
 
 from topobenchmarkx.nn.encoders.all_cell_encoder import BaseEncoder
 from topobenchmarkx.nn.encoders.base import AbstractFeatureEncoder
+
 from .kdgm import DGM_d  # . AlphaDGM
 
 
@@ -100,6 +99,6 @@ class DGMStructureFeatureEncoder(AbstractFeatureEncoder):
                 )
                 data[f"x_{i}"] = x_
                 data[f"x_aux_{i}"] = x_aux
-                data[f"edges_index"] = edges_dgm
+                data["edges_index"] = edges_dgm
                 data[f"logprobs_{i}"] = logprobs
         return data

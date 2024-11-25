@@ -105,6 +105,9 @@ class TBXModel(LightningModule):
         dict
             Dictionary containing the model output and the loss.
         """
+        # Allow batch object to know the phase of the training
+        batch["model_state"] = self.state_str
+
         # Feature Encoder
         model_out = self.feature_encoder(batch)
 

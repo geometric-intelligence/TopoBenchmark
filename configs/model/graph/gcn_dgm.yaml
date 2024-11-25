@@ -11,9 +11,7 @@ feature_encoder:
   proj_dropout: 0.0
   loss:
     _target_: topobenchmarkx.loss.model.DGMLoss
-    # r_adj_power: 2
-    # tau: 1.
-    # loss_weight: 0.5
+    loss_weight: 10
 
 backbone:
   _target_: torch_geometric.nn.models.GCN

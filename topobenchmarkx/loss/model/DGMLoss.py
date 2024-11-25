@@ -9,6 +9,8 @@ from topobenchmarkx.loss.base import AbstractLoss
 class DGMLoss(AbstractLoss):
     r"""DGM loss function.
 
+    Original implementation https://github.com/lcosmo/DGM_pytorch/blob/main/DGMlib/model_dDGM_old.py
+
     Parameters
     ----------
     loss_weight : float, optional
@@ -18,6 +20,7 @@ class DGMLoss(AbstractLoss):
     def __init__(self, loss_weight=0.5):
         super().__init__()
         self.loss_weight = loss_weight
+        self.avg_accuracy = None
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}()"
@@ -39,12 +42,35 @@ class DGMLoss(AbstractLoss):
         dict
             Dictionary containing the model output with the loss.
         """
-        x_dis = model_out["x_dis"]
-        # if x_dis is None:  # Validation and test
-        #     return torch.tensor(0.0)
+        logprobs_keys = sorted(
+            [key for key in batch.keys() if "logprobs_" in key]
+        )
 
-        # adj_label = self.get_power_adj(batch.edge_index)
-        # graph_mlp_loss = self.loss_weight * self.graph_mlp_contrast_loss(
-        #    x_dis, adj_label
-        # )
-        return graph_mlp_loss
+        # Filter out the logprobs based on the model phase (Training, test)
+        logprobs = []
+        for key in logprobs_keys:
+            # Get the correct mask
+            if batch.model_state == "Training":
+                mask = batch.train_mask
+            elif batch.model_state == "Validation":
+                mask = batch.val_mask
+            elif batch.model_state == "Test":
+                mask = batch.test_mask
+            logprobs.append(batch[key][mask])
+        logprobs = torch.stack(logprobs)
+
+        corr_pred = (
+            (model_out["logits"].argmax(-1) == model_out["labels"])
+            .float()
+            .detach()
+        )
+        if (
+            self.avg_accuracy is None
+            or self.avg_accuracy.shape[-1] != corr_pred.shape[-1]
+        ):
+            self.avg_accuracy = torch.ones_like(corr_pred) * 0.5
+
+        point_w = self.avg_accuracy - corr_pred
+        loss = (point_w * logprobs.exp().mean(-1)).mean()
+
+        return self.loss_weight * loss

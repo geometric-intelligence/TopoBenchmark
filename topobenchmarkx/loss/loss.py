@@ -4,6 +4,7 @@ import torch
 import torch_geometric
 
 from topobenchmarkx.loss.base import AbstractLoss
+from topobenchmarkx.loss.dataset import DatasetLoss
 
 
 class TBXLoss(AbstractLoss):
@@ -11,26 +12,21 @@ class TBXLoss(AbstractLoss):
 
     Parameters
     ----------
-    task : str
-        Task type, either "classification" or "regression".
-    loss_type : str, optional
-        Loss type, either "cross_entropy", "mse", or "mae" (default: None).
+    dataset_loss : dict
+        Dictionary containing the dataset loss information.
+    modules_losses : AbstractLoss, optional
+        Custom modules' losses to be used.
     """
 
-    def __init__(self, task, loss_type=None):
+    def __init__(self, dataset_loss, modules_losses={}):  # noqa: B006
         super().__init__()
-        self.task = task
-        if task == "classification" and loss_type == "cross_entropy":
-            self.criterion = torch.nn.CrossEntropyLoss()
-        elif task == "regression" and loss_type == "mse":
-            self.criterion = torch.nn.MSELoss()
-
-        elif task == "regression" and loss_type == "mae":
-            self.criterion = torch.nn.L1Loss()
-
-        else:
-            raise Exception("Loss is not defined")
-        self.loss_type = loss_type
+        self.losses = []
+        # Dataset loss
+        self.losses.append(DatasetLoss(dataset_loss))
+        # Model losses
+        self.losses.extend(
+            [loss for loss in modules_losses.values() if loss is not None]
+        )
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}(task={self.task}, loss_type={self.loss_type})"
@@ -50,12 +46,8 @@ class TBXLoss(AbstractLoss):
         dict
             Dictionary containing the model output with the loss.
         """
-        logits = model_out["logits"]
-        target = model_out["labels"]
+        losses = [loss(model_out, batch) for loss in self.losses]
 
-        if self.task == "regression":
-            target = target.unsqueeze(1)
-
-        model_out["loss"] = self.criterion(logits, target)
+        model_out["loss"] = torch.stack(losses).sum()
 
         return model_out

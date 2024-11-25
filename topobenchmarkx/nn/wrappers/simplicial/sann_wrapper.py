@@ -40,9 +40,7 @@ class SANNWrapper(AbstractWrapper):
             Dictionary containing the model output.
         """
         hop_data_names = [
-            k
-            for k in batch.keys()
-            if k.startswith("x") and len(k.split("_")[0]) == 2
+            k for k in batch if k.startswith("x") and len(k.split("_")[0]) == 2
         ]
         max_simplex_dim = max(
             [int(k.split("_")[0][1]) for k in hop_data_names]
@@ -60,7 +58,7 @@ class SANNWrapper(AbstractWrapper):
         x_out = self.backbone(x_all)
 
         model_out = {
-            "labels": batch.y.type(torch.float32),
+            "labels": batch.y.type(torch.long),
             "batch_0": batch.batch_0,
             "batch_1": batch.batch_1,
             "batch_2": batch.batch_2,

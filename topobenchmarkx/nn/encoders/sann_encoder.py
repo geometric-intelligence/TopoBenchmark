@@ -49,16 +49,12 @@ class SANNFeatureEncoder(AbstractFeatureEncoder):
 
         self.dimensions = (
             selected_dimensions
-            if (
-                selected_dimensions is not None
-            )  # and len(selected_dimensions) <= len(self.in_channels))
+            if (selected_dimensions is not None)
             else range(len(self.in_channels))
         )
         self.hops = (
             selected_hops
-            if (
-                selected_hops is not None
-            )  # and len(selected_dimensions) <= len(self.in_channels))
+            if (selected_hops is not None)
             else range(len(self.in_channels[0]))
         )
         for i in self.dimensions:
@@ -98,11 +94,8 @@ class SANNFeatureEncoder(AbstractFeatureEncoder):
             batch = getattr(data, f"batch_{i}")
             if last_size == -1:
                 last_size = batch.max()
-            # assert batch.max() == last_size
+
             for j in self.hops:
-                # x_0_0 == x_0
-                # x_0_1 = (dim(x_0)[0],  dim(x_0][1] * 2 + 2)
-                # x_3 = x_0_1 (n, f)
                 data[f"x{i}_{j}"] = getattr(self, f"encoder_{i}_{j}")(
                     data[f"x{i}_{j}"], batch
                 )

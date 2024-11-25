@@ -17,7 +17,7 @@ from .base import AbstractEvaluator  # noqa: E402
 from .evaluator import TBXEvaluator  # noqa: E402
 
 __all__ = [
+    "METRICS",
     "AbstractEvaluator",
     "TBXEvaluator",
-    "METRICS",
 ]

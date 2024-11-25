@@ -4,9 +4,9 @@ import test
 import topobenchmarkx
 
 __all__ = [
-    "topobenchmarkx",
     "configs",
     "test",
+    "topobenchmarkx",
 ]
 
 __version__ = "0.0.1"

@@ -12,10 +12,10 @@ from .liftings import (
 
 __all__ = [
     "AbstractLifting",
+    "CellComplexLifting",
+    "CombinatorialLifting",
     "GraphLifting",
+    "HypergraphLifting",
     "PointCloudLifting",
     "SimplicialLifting",
-    "CellComplexLifting",
-    "HypergraphLifting",
-    "CombinatorialLifting",
 ]

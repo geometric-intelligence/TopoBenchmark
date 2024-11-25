@@ -8,8 +8,8 @@ from .cwn_wrapper import CWNWrapper
 __all__ = [
     "CANWrapper",
     "CCCNWrapper",
-    "CWNWrapper",
     "CCXNWrapper",
+    "CWNWrapper",
     # "OtherWrapper1",
     # "OtherWrapper2",
     # ... add other readout classes here

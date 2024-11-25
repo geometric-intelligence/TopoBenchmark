@@ -18,13 +18,13 @@ from topobenchmarkx.utils.utils import (
 )
 
 __all__ = [
+    "RankedLogger",
+    "enforce_tags",
+    "extras",
+    "get_metric_value",
     "instantiate_callbacks",
     "instantiate_loggers",
     "log_hyperparameters",
-    "RankedLogger",
-    "enforce_tags",
     "print_config_tree",
-    "extras",
-    "get_metric_value",
     "task_wrapper",
 ]

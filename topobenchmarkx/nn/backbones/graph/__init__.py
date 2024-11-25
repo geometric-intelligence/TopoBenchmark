@@ -13,6 +13,7 @@ from torch_geometric.nn.models import (
     Node2Vec,
 )
 
+from .graph_mlp import GraphMLP
 from .identity_gnn import (
     IdentityGAT,
     IdentityGCN,
@@ -25,6 +26,7 @@ __all__ = [
     "IdentityGIN",
     "IdentityGAT",
     "IdentitySAGE",
+    "GraphMLP",
     "MLP",
     "GCN",
     "GraphSAGE",

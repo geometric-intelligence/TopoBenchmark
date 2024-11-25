@@ -3,21 +3,24 @@
 import torch
 
 from topobenchmarkx.transforms.liftings.graph2simplicial import (
-    SimplicialCliqueLifting,
+    SimplicialCliqueLifting
 )
-
+from topobenchmarkx.transforms.converters import Data2NxGraph, Complex2Dict
+from topobenchmarkx.transforms.liftings.base import LiftingTransform
 
 class TestSimplicialCliqueLifting:
     """Test the SimplicialCliqueLifting class."""
 
     def setup_method(self):
         # Initialise the SimplicialCliqueLifting class
-        self.lifting_signed = SimplicialCliqueLifting(
-            complex_dim=3, signed=True
-        )
-        self.lifting_unsigned = SimplicialCliqueLifting(
-            complex_dim=3, signed=False
-        )
+        data2graph = Data2NxGraph()
+        simplicial2dict_signed = Complex2Dict(signed=True)
+        simplicial2dict_unsigned = Complex2Dict(signed=False)
+
+        lifting_map = SimplicialCliqueLifting(complex_dim=3)
+
+        self.lifting_signed = LiftingTransform(data2graph, simplicial2dict_signed, lifting_map)
+        self.lifting_unsigned  = LiftingTransform(data2graph, simplicial2dict_unsigned, lifting_map)
 
     def test_lift_topology(self, simple_graph_1):
         """Test the lift_topology method."""

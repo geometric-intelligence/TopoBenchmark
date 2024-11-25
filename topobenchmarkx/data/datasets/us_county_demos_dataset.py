@@ -141,13 +141,16 @@ class USCountyDemosDataset(InMemoryDataset):
             dataset_name=self.name,
             file_format=self.file_format,
         )
-        # Extract zip file
+
+        # Step 2: extract zip file
         folder = self.raw_dir
         filename = f"{self.name}.{self.file_format}"
         path = osp.join(folder, filename)
         extract_zip(path, folder)
         # Delete zip file
         os.unlink(path)
+
+        # Step 3: organize files
         # Move files from osp.join(folder, name_download) to folder
         for file in os.listdir(osp.join(folder, self.name)):
             shutil.move(osp.join(folder, self.name, file), folder)
@@ -161,12 +164,17 @@ class USCountyDemosDataset(InMemoryDataset):
         processing transformations if specified, and saves the processed data
         to the appropriate location.
         """
+        # Step 1: extract the data
         data = read_us_county_demos(
             self.raw_dir, self.year, self.task_variable
         )
         data_list = [data]
+
+        # Step 2: collate the graphs
         self.data, self.slices = self.collate(data_list)
         self._data_list = None  # Reset cache.
+
+        # Step 3: save processed data
         fs.torch_save(
             (self._data.to_dict(), self.slices, {}, self._data.__class__),
             self.processed_paths[0],

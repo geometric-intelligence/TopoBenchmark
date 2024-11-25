@@ -31,7 +31,7 @@ class HypergraphLoaderManager:
         return (
             inspect.isclass(obj)
             and not obj.__name__.startswith("_")
-            and "HypergraphDatasetLoader" in obj.__name__
+            and "DatasetLoader" in obj.__name__
         )
 
     @classmethod

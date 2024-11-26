@@ -1,16 +1,15 @@
 """Dataset class for Human3.6M dataset (http://vision.imar.ro/human3.6m/description.php)."""
 
-import numpy as np
 import os
 import os.path as osp
 import shutil
 from typing import ClassVar
 
+import numpy as np
 import torch
 from omegaconf import DictConfig
 from torch_geometric.data import Data, InMemoryDataset, extract_zip
 from torch_geometric.io import fs
-from tqdm import tqdm
 
 
 class H36MDataset(InMemoryDataset):
@@ -229,7 +228,7 @@ class H36MDataset(InMemoryDataset):
         motions = []
         print(len(motion_inputs))
         print(len(motion_targets))
-        for i in tqdm(range(len(motion_inputs))):
+        for i in range(len(motion_inputs)):
             input_motion_matrix = motion_inputs[i]
             target_motion_matrix = motion_targets[i]
             # input_motion_matrix.shape =  [50, 22, 3]

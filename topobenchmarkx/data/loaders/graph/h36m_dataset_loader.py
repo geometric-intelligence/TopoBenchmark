@@ -1,6 +1,4 @@
-"""Loaders for H3.6M dataset."""
-
-from pathlib import Path
+"""Loader for Human3.6M dataset."""
 
 from omegaconf import DictConfig
 
@@ -9,16 +7,16 @@ from topobenchmarkx.data.loaders.base import AbstractLoader
 
 
 class H36MDatasetLoader(AbstractLoader):
-    """Load H3.6M dataset with configurable year and task variable.
+    """Load Human3.6M dataset.
 
     Parameters
     ----------
     parameters : DictConfig
         Configuration parameters containing:
-            - data_dir: Root directory for data
-            - data_name: Name of the dataset
-            - year: Year of the dataset (if applicable)
-            - task_variable: Task variable for the dataset
+            - data_domain: Domain of data, 'graph'.
+            - data_type: Type of data, 'motion'.
+            - data_name: Name of the dataset, 'H36MDataset'.
+            - data_dir: Root directory for the data.
     """
 
     def __init__(self, parameters: DictConfig) -> None:
@@ -30,43 +28,21 @@ class H36MDatasetLoader(AbstractLoader):
         Returns
         -------
         H36MDataset
-            The loaded H3.6M dataset with the appropriate `data_dir`.
+            The loaded H3.6M dataset.
 
         Raises
         ------
         RuntimeError
             If dataset loading fails.
         """
-
-        dataset = self._initialize_dataset()
-        self.data_dir = self._redefine_data_dir(dataset)
-        return dataset
-
-    def _initialize_dataset(self) -> H36MDataset:
-        """Initialize the H3.6M dataset.
-
-        Returns
-        -------
-        H36MDataset
-            The initialized dataset instance.
-        """
-        return H36MDataset(
+        # This is where I sketchily add whether or not to force reloading!
+        # I can't find out how to do this in the abstract dataloader class
+        # as none of the other ones seem to have this functionality.
+        force_reload = True
+        dataset = H36MDataset(
             root=str(self.root_data_dir),
             name=self.parameters.data_name,
             parameters=self.parameters,
+            force_reload=force_reload,
         )
-
-    def _redefine_data_dir(self, dataset: H36MDataset) -> Path:
-        """Redefine the data directory based on the chosen (year, task_variable) pair.
-
-        Parameters
-        ----------
-        dataset : H36MDataset
-            The dataset instance.
-
-        Returns
-        -------
-        Path
-            The redefined data directory path.
-        """
-        return dataset.processed_root
+        return dataset

@@ -24,6 +24,8 @@ class H36MDataset(InMemoryDataset):
         Name of the dataset.
     parameters : DictConfig
         Configuration parameters for the dataset.
+    force_reload : bool
+        Whether to re-process the dataset. Default is False.
 
     Attributes
     ----------
@@ -50,44 +52,18 @@ class H36MDataset(InMemoryDataset):
         root: str,
         name: str,
         parameters: DictConfig,
+        force_reload: bool = False,
     ) -> None:
         self.name = name
         self.parameters = parameters
-        self.used_joint_indexes = np.array(
-            [
-                2,
-                3,
-                4,
-                5,
-                7,
-                8,
-                9,
-                10,
-                12,
-                13,
-                14,
-                15,
-                17,
-                18,
-                19,
-                21,
-                22,
-                25,
-                26,
-                27,
-                29,
-                30,
-            ]
-        ).astype(np.int64)
 
         super().__init__(
             root,
-            force_reload=True,
+            force_reload=force_reload,
         )
 
         out = fs.torch_load(self.processed_paths[0])
-        # print(out)
-        # print(len(out))
+
         assert len(out) == 3 or len(out) == 4
 
         if len(out) == 3:  # Backward compatibility.
@@ -160,15 +136,13 @@ class H36MDataset(InMemoryDataset):
         Raises:
             FileNotFoundError: If the dataset URL is not found.
         """
-        print("Downloading...")
         # Step 1: download data from the source
         # self.url = self.URLS[self.name]
-        self.file_format = self.FILE_FORMAT[self.name]
         # download_file_from_drive(
         #     file_link=self.url,
         #     path_to_save=self.raw_dir,
         #     dataset_name=self.name,
-        #     file_format=self.file_format,
+        #     file_format=self.FILE_FORMAT[self.name],
         # )
 
         # Step 1 isn't working because it is downloading html with the Antivirus Scan Warning instead.
@@ -180,12 +154,12 @@ class H36MDataset(InMemoryDataset):
         #       scp H36MDataset.zip [your path]/TopoBenchmark/datasets/graph/motion/H36MDataset/raw
 
         folder = self.raw_dir
-        compressed_data_filename = f"{self.name}.{self.file_format}"
+        compressed_data_filename = f"{self.name}.{self.FILE_FORMAT[self.name]}"
         compressed_data_path = osp.join(folder, compressed_data_filename)
 
         if os.path.isfile(compressed_data_path):
             # Step 2: extract file
-            print("Extracting data zip...")
+            print("Zip file exists. Extracting data zip...")
             extract_zip(compressed_data_path, folder)
             os.unlink(compressed_data_path)  # Delete zip file
 
@@ -194,8 +168,8 @@ class H36MDataset(InMemoryDataset):
             for subject_dir in os.listdir(
                 osp.join(
                     folder, "h36m"
-                )  # hard coded here because this is the name in the google drive folder
-            ):  # self.name)):
+                )  # hard coded here because this is the name in the google drive folder; should be self.name
+            ):
                 for file in os.listdir(osp.join(folder, "h36m", subject_dir)):
                     if file.endswith("ipynb"):
                         continue
@@ -206,16 +180,22 @@ class H36MDataset(InMemoryDataset):
 
             # Delete osp.join(folder, self.name) dir
             shutil.rmtree(osp.join(folder, "h36m"))
+            print("Done. Zip file removed.")
+        else:
+            print("Data already extracted. Skipping extraction.")
 
     def process(self) -> None:
         r"""Handle the data for the dataset.
 
         This method loads the Human3.6M dataset,
-        loads it into basic graph form,
-        and saves this preprocessed data.
+        loads it into basic graph form, and saves this preprocessed data.
+
+        Will not run if self.force_reload is False and files exist.
 
         A lot of this is using functions copied from the siMLPe paper.
         """
+        print("Loading and processing data...")
+
         # Step 1: extract the data
         h36m_raw_xyz_motion_matrices = self.load_raw_xyz_motion_matrices()
         motion_inputs, motion_targets = self.process_input_target_pairs(
@@ -230,15 +210,11 @@ class H36MDataset(InMemoryDataset):
 
         # print(adj_mat)
         # print(edges)
-        n_times_i, n_joints, n_channels = (
-            50,
-            22,
-            3,
-        )  # hard-coded but should be the same for all!
+        n_times_i = 50  # hard-coded but should be the same for all!
 
         time_edges = []
-        for c in range(n_channels):
-            for j in range(n_joints):
+        for c in range(skl.NUM_CHANNELS):
+            for j in range(skl.NUM_JOINTS):
                 for t1 in range(n_times_i):
                     for t2 in range(n_times_i):
                         edge = [
@@ -251,6 +227,8 @@ class H36MDataset(InMemoryDataset):
         # Step 3: turn them into torch_geometric.data Data objects
         print("Converting to graph objects...")
         motions = []
+        print(len(motion_inputs))
+        print(len(motion_targets))
         for i in tqdm(range(len(motion_inputs))):
             input_motion_matrix = motion_inputs[i]
             target_motion_matrix = motion_targets[i]
@@ -335,12 +313,20 @@ class H36MDataset(InMemoryDataset):
         print("Done.")
 
         # Step 5: save processed data
-        print("Saving...")
-        fs.torch_save(
-            (self._data.to_dict(), self.slices, {}, self._data.__class__),
-            self.processed_paths[0],
-        )
-        print("Done.")
+        print(self.process_paths)
+        save_processed_data = False
+        if save_processed_data:
+            print("Saving... (might take a hot sec)")
+            fs.torch_save(
+                (self._data.to_dict(), self.slices, {}, self._data.__class__),
+                self.process_paths[0],
+            )
+            print("Done.")
+        else:
+            print("Skipping saving for time...")
+            print("Usually saves to", self.processed_paths[0])
+
+        print("Done processing.")
 
     def load_raw_xyz_motion_matrices(self):
         r"""Load raw motion data.
@@ -387,7 +373,7 @@ class H36MDataset(InMemoryDataset):
             ).reshape(T, 32, 3, 3)
 
             xyz_info = rotmat2xyz_torch(pose_info)
-            xyz_info = xyz_info[:, self.used_joint_indexes, :]
+            xyz_info = xyz_info[:, H36MSkeleton.USED_JOINT_INDICES, :]
 
             raw_motion_matrices.append(xyz_info)
 
@@ -396,7 +382,7 @@ class H36MDataset(InMemoryDataset):
     def process_input_target_pairs(
         self,
         raw_xyz_motion_matrices,
-        sample_rate=4,
+        sample_rate=16,
         input_length=50,
         target_length=10,
     ):
@@ -464,12 +450,47 @@ class H36MDataset(InMemoryDataset):
 
 
 class H36MSkeleton:
-    r"""Dataset class for Human3.6M Skeleton."""
+    r"""Dataset class for Human3.6M Skeleton.
+
+    Attributes
+    ----------
+    NUM_JOINTS (int): Number of joints in skeleton.
+    NUM_CHANNELS (int): Number of channels per joint.
+    USED_JOINT_INDICES (np.array[np.int64]): Numpy array containing relevant joint indices.
+    """
+
+    NUM_JOINTS: ClassVar = 22
+    NUM_CHANNELS: ClassVar = 3
+
+    USED_JOINT_INDICES: ClassVar = np.array(
+        [
+            2,
+            3,
+            4,
+            5,
+            7,
+            8,
+            9,
+            10,
+            12,
+            13,
+            14,
+            15,
+            17,
+            18,
+            19,
+            21,
+            22,
+            25,
+            26,
+            27,
+            29,
+            30,
+        ]
+    ).astype(np.int64)
 
     def __init__(self):
         r"""H36M skeleton with 22 joints."""
-        self.NUM_JOINTS = 22
-        self.NUM_CHANNELS = 3
 
         self.bone_list = self.generate_bone_list()
         self.bone_adj_mat = self.generate_bone_adj_mat()

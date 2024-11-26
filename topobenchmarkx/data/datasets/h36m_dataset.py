@@ -314,7 +314,7 @@ class H36MDataset(InMemoryDataset):
         print("Saving... (might take a hot sec)")
         fs.torch_save(
             (self._data.to_dict(), self.slices, {}, self._data.__class__),
-            self.process_paths[0],
+            self.processed_paths[0],
         )
         print("Done.")
 

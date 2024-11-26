@@ -311,17 +311,12 @@ class H36MDataset(InMemoryDataset):
         print("Done.")
 
         # Step 5: save processed data
-        save_processed_data = False
-        if save_processed_data:
-            print("Saving... (might take a hot sec)")
-            fs.torch_save(
-                (self._data.to_dict(), self.slices, {}, self._data.__class__),
-                self.process_paths[0],
-            )
-            print("Done.")
-        else:
-            print("Skipping saving for time...")
-            print("Usually saves to", self.processed_paths[0])
+        print("Saving... (might take a hot sec)")
+        fs.torch_save(
+            (self._data.to_dict(), self.slices, {}, self._data.__class__),
+            self.process_paths[0],
+        )
+        print("Done.")
 
         print("Done processing.")
 

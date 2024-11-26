@@ -9,7 +9,7 @@ loader:
 
 # Dataset parameters
 parameters:
- num_features: 1 # one feature per node #number of nodes??
+ num_features: 1 # one feature per node
  num_classes: 1 # number of output features per node
  task: regression
  loss_type: mse

@@ -226,8 +226,7 @@ class H36MDataset(InMemoryDataset):
         # Step 3: turn them into torch_geometric.data Data objects
         print("Converting to graph objects...")
         motions = []
-        print(len(motion_inputs))
-        print(len(motion_targets))
+
         for i in range(len(motion_inputs)):
             input_motion_matrix = motion_inputs[i]
             target_motion_matrix = motion_targets[i]
@@ -312,7 +311,6 @@ class H36MDataset(InMemoryDataset):
         print("Done.")
 
         # Step 5: save processed data
-        print(self.process_paths)
         save_processed_data = False
         if save_processed_data:
             print("Saving... (might take a hot sec)")
@@ -381,9 +379,9 @@ class H36MDataset(InMemoryDataset):
     def process_input_target_pairs(
         self,
         raw_xyz_motion_matrices,
-        sample_rate=16,
+        sample_rate=2,
         input_length=50,
-        target_length=10,
+        target_length=50,
     ):
         r"""Create input-target pairs from raw motion matrices.
 
@@ -392,11 +390,11 @@ class H36MDataset(InMemoryDataset):
         raw_xyz_motion_matrices : list[torch.tensor]
             GA.
         sample_rate : int
-            Sample rate to reduce temporal resolution.
+            Sample rate to reduce temporal resolution; should be 2 to get 25 frames per second.
         input_length : int
-            Desired length of input to neural network.
+            Desired length of input to neural network; should be 50 to get 2 seconds of input.
         target_length : int
-            Desired length of label for neural network.
+            Desired length of label for neural network; should be 25 to get 1 second of output.
 
         Returns
         -------

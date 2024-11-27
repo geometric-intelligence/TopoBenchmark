@@ -142,7 +142,7 @@ class GraphLoader(AbstractLoader):
 
         elif self.parameters.data_name in ["manual"]:
             data = load_manual_graph()
-            dataset = DataloadDataset([data], data_dir)
+            dataset = DataloadDataset([data])
 
         else:
             raise NotImplementedError(

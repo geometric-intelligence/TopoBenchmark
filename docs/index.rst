@@ -241,7 +241,7 @@ To learn more about `TopoBenchmark`, we invite you to read the paper:
 
 .. code-block:: BibTeX
 
-    @misc{topobenchmarkx2024,
+    @misc{topobenchmark2024,
             title={TopoBenchmark},
             author={PyT-Team},
             year={2024},

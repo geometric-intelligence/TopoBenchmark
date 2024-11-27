@@ -1,7 +1,7 @@
 🌐 TopoBenchmark (TB) 🍩
 ==========================
 
-.. figure:: https://github.com/geometric-intelligence/TopoBenchmark/raw/main/resources/logo.jpeg
+.. figure:: https://github.com/geometric-intelligence/TopoBenchmark/raw/main/resources/logo.jpg
    :alt: topobenchmark
    :class: with-shadow
    :width: 1000px

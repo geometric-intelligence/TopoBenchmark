@@ -255,7 +255,7 @@ If you find `TopoBenchmark` useful, we would appreciate if you cite us!
 🦾 Getting Started
 ------------------
 
-Check out our `tutorials <https://github.com/pyt-team/TopoBenchmark/tree/main/tutorials>`_ to get started!
+Check out our `tutorials <https://github.com/geometric-intelligence/TopoBenchmark/tree/main/tutorials>`_ to get started!
 
 
 .. toctree::

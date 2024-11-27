@@ -45,5 +45,4 @@ class H36MDatasetLoader(AbstractLoader):
             parameters=self.parameters,
             force_reload=force_reload,
         )
-        # self.data_dir = dataset.processed_root
         return dataset

@@ -178,6 +178,7 @@ def reduce_neighborhoods(batch, node, rank=0, remove_self_loops=True):
     if hasattr(batch, 'y'):
         batch.y = batch.y[cells_ids[rank]]
     
+    batch.cells_ids = cells_ids
     return batch
 
 def filter_data(data: Data, cells: Tensor, rank: int) -> Data:
@@ -199,7 +200,7 @@ def filter_data(data: Data, cells: Tensor, rank: int) -> Data:
     out.n_id = cells
     return out
 
-def get_sampled_neighborhood(data, rank=0, is_hypergraph=False):
+def get_sampled_neighborhood(data, rank=0, n_hops=1, is_hypergraph=False):
     ''' This function updates the edge_index attribute of torch_geometric.data.Data. 
     
     The function finds cells, of the specified rank, that are either upper or lower neighbors.
@@ -210,6 +211,8 @@ def get_sampled_neighborhood(data, rank=0, is_hypergraph=False):
         The input data.
     rank: int
         The rank of the cells that you want to batch over.
+    n_hops: int
+        Two cells are considered neighbors if they are connected by n hops in the upper or lower neighborhoods.
     is_hypergraph: bool
         Whether the data represents an hypergraph.
         
@@ -229,11 +232,12 @@ def get_sampled_neighborhood(data, rank=0, is_hypergraph=False):
         if rank == 1:
             I = data.incidence_hyperedges
             A = torch.sparse.mm(I,I.T) # lower adj matrix
-            edges = A.indices()
         else:
             I = data.incidence_hyperedges
             A = torch.sparse.mm(I.T,I)
-            edges = A.indices() 
+        for _ in range(n_hops-1):
+            A = torch.sparse.mm(A,A)
+        edges = A.indices()
     else:
         # get number of incidences
         max_rank = len([key for key in data.keys() if "incidence" in key])-1
@@ -241,12 +245,16 @@ def get_sampled_neighborhood(data, rank=0, is_hypergraph=False):
             raise ValueError(f"Rank {rank} is greater than the maximum rank {max_rank} in the data.")
         
         # This considers the upper adjacencies
+        n_cells = data[f"x_{rank}"].shape[0]
+        A_sum = torch.sparse_coo_tensor([[],[]], [], (n_cells, n_cells))
         if rank == max_rank:
             edges = torch.empty((2, 0), dtype=torch.long)
         else:
             I = data[f"incidence_{rank+1}"]
             A = torch.sparse.mm(I,I.T)
-            edges = A.indices()
+            for _ in range(n_hops-1):
+                A = torch.sparse.mm(A,A)
+            A_sum += A
             
         # This is for selecting the whole upper cells
         # for i in range(rank+1, max_rank):
@@ -258,7 +266,9 @@ def get_sampled_neighborhood(data, rank=0, is_hypergraph=False):
         if rank != 0:    
             I = data[f"incidence_{rank}"]
             A = torch.sparse.mm(I.T,I)
-            edges = torch.cat((edges, A.indices()), dim=1)
+            for _ in range(n_hops-1):
+                A = torch.sparse.mm(A,A)
+            A_sum += A
         
         # This is for selecting cells if they share any node
         # for i in range(rank-1, 0, -1):
@@ -266,7 +276,7 @@ def get_sampled_neighborhood(data, rank=0, is_hypergraph=False):
         #     Q = torch.sparse.mm(P.T,P)
         #     edges = torch.cat((edges, Q.indices()), dim=1)
             
-    edges = torch.unique(edges, dim=1)
+    edges = A_sum.coalesce().indices()
     # Remove self edges
     mask = edges[0, :] != edges[1, :]
     edges = edges[:, mask]

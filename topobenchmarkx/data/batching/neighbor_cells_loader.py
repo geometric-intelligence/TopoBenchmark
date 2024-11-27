@@ -130,12 +130,12 @@ class NeighborCellsLoader(CellLoader):
                              "while 'time_attr' is not set.")
         
         is_hypergraph = hasattr(data, 'incidence_hyperedges')
-        data = get_sampled_neighborhood(data, rank, is_hypergraph)
+        n_hops = len(num_neighbors)
+        data = get_sampled_neighborhood(data, rank, n_hops, is_hypergraph)
         self.rank = rank
-        
-        if len(num_neighbors) > 1:
-            raise NotImplementedError("NeighborCellsLoader only supports one-hop neighborhood selection.")
-        
+        if self.rank != 0:
+            # When rank is different than 0 get_sampled_neighborhood connects cells that are up to n_hops away, meaning that the NeighborhoodSampler needs to consider only one hop. 
+            num_neighbors = [num_neighbors[0]]
         if neighbor_sampler is None:
             neighbor_sampler = NeighborSampler(
                 data,

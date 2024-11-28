@@ -40,7 +40,9 @@ class SANNWrapper(AbstractWrapper):
             Dictionary containing the model output.
         """
         hop_data_names = [
-            k for k in batch if k.startswith("x") and len(k.split("_")[0]) == 2
+            k
+            for k, v in batch
+            if k.startswith("x") and len(k.split("_")[0]) == 2
         ]
         max_simplex_dim = max(
             [int(k.split("_")[0][1]) for k in hop_data_names]

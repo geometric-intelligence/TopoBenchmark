@@ -33,6 +33,8 @@ class H36MDataset(OnDiskDataset):
     FILE_FORMAT (dict): Dictionary containing the file formats for the dataset.
     RAW_FILE_NAMES (dict): Dictionary containing the raw file names for the dataset.
     SUBJ_NAMES (list[str]): List of subjects to consider.
+    VAL_SUBJ (str): Default subject for validation.
+    TEST_SUBJ (str): Default subject for test.
     N_FRAMES (int): How many frames long to make each input and output.
     """
 
@@ -50,6 +52,8 @@ class H36MDataset(OnDiskDataset):
     RAW_FILE_NAMES: ClassVar = {}
 
     SUBJ_NAMES: ClassVar = ["S1", "S5", "S6", "S7", "S8", "S9"]
+    VAL_SUBJ: ClassVar = "S11"
+    TEST_SUBJ: ClassVar = "S5"
     N_FRAMES: ClassVar = 50
 
     def __init__(
@@ -86,6 +90,50 @@ class H36MDataset(OnDiskDataset):
         super().__init__(
             root,
         )
+
+        self.split_idx = self.generate_default_split_idx()
+
+    def generate_default_split_idx(self):
+        """Return the default split index for H3.6M Dataset.
+
+        Returns
+        -------
+        dict:
+            Dictionary containing the train, validation and test indices with keys "train", "valid", and "test".
+        """
+        print("Generating split index...")
+
+        # Get all filenames and indices from database
+        self.cursor.execute("SELECT idx, file_name FROM data")
+        rows = self.cursor.fetchall()
+
+        # Initialize empty lists for each split
+        train_idx = []
+        val_idx = []
+        test_idx = []
+
+        # Iterate through rows and assign to splits based on subject
+        for idx, filename in rows:
+            # Extract subject name from filename (e.g. "S8" from "S8_graph_12229.pt")
+            subject = filename.split("_")[0]
+
+            if subject == self.TEST_SUBJ:
+                test_idx.append(idx)
+            elif subject == self.VAL_SUBJ:
+                val_idx.append(idx)
+            elif subject in self.SUBJ_NAMES:
+                train_idx.append(idx)
+            else:
+                print(f"AAAAAAAAAAAA unknown subject {filename}")
+
+        # Convert to numpy arrays
+        split_idx = {
+            "train": np.array(train_idx),
+            "valid": np.array(val_idx),
+            "test": np.array(test_idx),
+        }
+
+        return split_idx
 
     def __len__(self) -> int:
         """Return the number of graphs in the dataset.

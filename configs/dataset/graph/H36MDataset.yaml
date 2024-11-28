@@ -19,13 +19,10 @@ parameters:
 # Splits configuration
 split_params:
  learning_setting: inductive
- data_split_dir: ${paths.data_dir}/data_splits/${dataset.loader.parameters.data_name}
- data_seed: 0
- split_type: random
- train_prop: 0.5
+ split_type: fixed
 
 # Dataloader parameters
 dataloader_params:
- batch_size: 1       # Fixed
- num_workers: 0
+ batch_size: 256 #1       # Fixed
+ num_workers: 127
  pin_memory: False

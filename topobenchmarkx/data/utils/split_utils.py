@@ -156,6 +156,7 @@ def random_splitting(labels, parameters, global_data_seed=42):
     # Load the split
     split_path = os.path.join(split_dir, f"{fold}.npz")
     split_idx = np.load(split_path)
+    print("HI", split_idx)
 
     # Check that all nodes/graph have been assigned to some split
     assert (
@@ -302,6 +303,7 @@ def load_inductive_splits(dataset, parameters):
         # Get total number of rows from SQLite database
         dataset.cursor.execute("SELECT COUNT(*) FROM data")
         total_rows = dataset.cursor.fetchone()[0]
+        # I don't think the labels matter, but rather how many pairs there are...
         labels = np.arange(total_rows)
     else:
         labels = np.array(
@@ -310,6 +312,7 @@ def load_inductive_splits(dataset, parameters):
 
     if parameters.split_type == "random":
         split_idx = random_splitting(labels, parameters)
+        print(split_idx)
 
     elif parameters.split_type == "k-fold":
         split_idx = k_fold_split(labels, parameters)

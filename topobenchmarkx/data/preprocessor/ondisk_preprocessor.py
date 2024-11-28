@@ -2,11 +2,12 @@
 
 import json
 import os
+import sqlite3
 
 import hydra
 import torch
 import torch_geometric
-from torch_geometric.io import fs
+from torch_geometric.data import Data, OnDiskDataset
 
 from topobenchmarkx.data.utils import (
     ensure_serializable,
@@ -18,7 +19,7 @@ from topobenchmarkx.dataloader import DataloadDataset
 from topobenchmarkx.transforms.data_transform import DataTransform
 
 
-class PreProcessor(torch_geometric.data.InMemoryDataset):
+class OnDiskPreProcessor(OnDiskDataset):
     """Preprocessor for datasets.
 
     Parameters
@@ -34,13 +35,7 @@ class PreProcessor(torch_geometric.data.InMemoryDataset):
     """
 
     def __init__(self, dataset, data_dir, transforms_config=None, **kwargs):
-        if isinstance(dataset, torch_geometric.data.Dataset):
-            data_list = [dataset.get(idx) for idx in range(len(dataset))]
-        elif isinstance(dataset, torch.utils.data.Dataset):
-            data_list = [dataset[idx] for idx in range(len(dataset))]
-        elif isinstance(dataset, torch_geometric.data.Data):
-            data_list = [dataset]
-        self.data_list = data_list
+        # Not sure if it is working for transforms yet.
         if transforms_config is not None:
             self.transforms_applied = True
             pre_transform = self.instantiate_pre_transform(
@@ -50,21 +45,84 @@ class PreProcessor(torch_geometric.data.InMemoryDataset):
                 self.processed_data_dir, None, pre_transform, **kwargs
             )
             self.save_transform_parameters()
-            self.load(self.processed_paths[0])
         else:
             self.transforms_applied = False
-            super().__init__(data_dir, None, None, **kwargs)
-            self.load(data_dir + "/processed/data.pt")
 
-        self.data_list = [self.get(idx) for idx in range(len(self))]
-        # Some datasets have fixed splits, and those are stored as split_idx during loading
-        # We need to store this information to be able to reproduce the splits afterwards
+        super().__init__(data_dir, None, None, **kwargs)
+
+        # Initialize database connection
+        os.makedirs(self.processed_dir, exist_ok=True)
+        self.db_path = os.path.join(self.processed_dir, "metadata.db")
+        self.connection = sqlite3.connect(self.db_path)
+        self.cursor = self.connection.cursor()
+
+        # Create table if it doesn't exist
+        self.cursor.execute("""
+            CREATE TABLE IF NOT EXISTS data (
+                idx INTEGER PRIMARY KEY,
+                file_name TEXT NOT NULL,
+                size INTEGER NOT NULL
+            )
+        """)
+        self.connection.commit()
+
+        # Some datasets have fixed splits
         if hasattr(dataset, "split_idx"):
             self.split_idx = dataset.split_idx
 
+    def __len__(self) -> int:
+        """Return the number of graphs in the dataset.
+
+        Returns
+        -------
+        int
+            Number of graphs in the dataset.
+        """
+        self.cursor.execute("SELECT COUNT(*) FROM data")
+        return self.cursor.fetchone()[0]
+
+    def get(self, idx: int) -> Data:
+        """Load a single graph from disk. Copied from H36MDataset.
+
+        Parameters
+        ----------
+        idx : int
+            Index of the graph to load.
+
+        Returns
+        -------
+        Data
+            The loaded graph.
+        """
+        self.cursor.execute("SELECT file_name FROM data WHERE idx = ?", (idx,))
+        result = self.cursor.fetchone()
+
+        if result is None:
+            raise IndexError(f"No data found for index {idx}")
+
+        filename = result[0]
+        filepath = os.path.join(self.processed_dir, filename)
+
+        return torch.load(filepath, weights_only=False)
+
+    def __getitem__(self, idx: int) -> Data:
+        """Load a single graph from disk so that split_utils doesn't need changing.
+
+        Parameters
+        ----------
+        idx : int
+            Index of the graph to load.
+
+        Returns
+        -------
+        Data
+            The loaded graph.
+        """
+        return self.get(idx)
+
     @property
     def processed_dir(self) -> str:
-        """Return the path to the processed directory.
+        """Return the path to the processed directory. Copied from PreProcessor.
 
         Returns
         -------
@@ -76,21 +134,42 @@ class PreProcessor(torch_geometric.data.InMemoryDataset):
         else:
             return os.path.join(self.root, "processed")
 
-    @property
-    def processed_file_names(self) -> str:
-        """Return the name of the processed file.
+    def process(self) -> None:
+        """Method that applies transformation to the data.
 
-        Returns
-        -------
-        str
-            Name of the processed file.
+        TBH no idea if this works.
         """
-        return "data.pt"
+        if self.pre_transform is not None:
+            print("Applying transform to data...")
+            # Process each graph and save to new location
+            for idx in range(len(self)):
+                # Load original graph
+                data = self.get(idx)
+
+                # Apply transform
+                transformed_data = self.pre_transform(data)
+
+                # Save transformed graph
+                filename = f"transformed_data_{idx}.pt"
+                filepath = os.path.join(self.processed_dir, filename)
+                torch.save(transformed_data, filepath)
+
+                # Add to database
+                size = os.path.getsize(filepath)
+                self.cursor.execute(
+                    "INSERT OR REPLACE INTO data(idx, file_name, size) VALUES (?, ?, ?)",
+                    (idx, filename, size),
+                )
+
+            # Commit database changes
+            self.connection.commit()
+
+        print("Done processing.")
 
     def instantiate_pre_transform(
         self, data_dir, transforms_config
     ) -> torch_geometric.transforms.Compose:
-        """Instantiate the pre-transforms.
+        """Instantiate the pre-transforms. Copied from PreProcessor.
 
         Parameters
         ----------
@@ -120,7 +199,7 @@ class PreProcessor(torch_geometric.data.InMemoryDataset):
     def set_processed_data_dir(
         self, pre_transforms_dict, data_dir, transforms_config
     ) -> None:
-        """Set the processed data directory.
+        """Set the processed data directory. Copied from PreProcessor.
 
         Parameters
         ----------
@@ -131,7 +210,6 @@ class PreProcessor(torch_geometric.data.InMemoryDataset):
         transforms_config : DictConfig
             Configuration parameters for the transforms.
         """
-        # Use self.transform_parameters to define unique save/load path for each transform parameters
         repo_name = "_".join(list(transforms_config.keys()))
         transforms_parameters = {
             transform_name: transform.parameters
@@ -144,8 +222,7 @@ class PreProcessor(torch_geometric.data.InMemoryDataset):
         )
 
     def save_transform_parameters(self) -> None:
-        """Save the transform parameters."""
-        # Check if root/params_dict.json exists, if not, save it
+        """Save the transform parameters. Copied from PreProcessor."""
         path_transform_parameters = os.path.join(
             self.processed_data_dir, "path_transform_parameters_dict.json"
         )
@@ -153,7 +230,6 @@ class PreProcessor(torch_geometric.data.InMemoryDataset):
             with open(path_transform_parameters, "w") as f:
                 json.dump(self.transforms_parameters, f, indent=4)
         else:
-            # If path_transform_parameters exists, check if the transform_parameters are the same
             with open(path_transform_parameters) as f:
                 saved_transform_parameters = json.load(f)
 
@@ -166,49 +242,14 @@ class PreProcessor(torch_geometric.data.InMemoryDataset):
                 f"Transform parameters are the same, using existing data_dir: {self.processed_data_dir}"
             )
 
-    def process(self) -> None:
-        """Method that processes the data."""
-        self.data_list = (
-            [self.pre_transform(d) for d in self.data_list]
-            if self.pre_transform is not None
-            else self.data_list
-        )
-
-        self._data, self.slices = self.collate(self.data_list)
-        self._data_list = None  # Reset cache.
-
-        assert isinstance(self._data, torch_geometric.data.Data)
-        self.save(self.data_list, self.processed_paths[0])
-
-    def load(self, path: str) -> None:
-        r"""Load the dataset from the file path `path`.
-
-        Parameters
-        ----------
-        path : str
-            The path to the processed data.
-        """
-        out = fs.torch_load(path)
-        assert isinstance(out, tuple)
-        assert len(out) >= 2 and len(out) <= 4
-        if len(out) == 2:  # Backward compatibility (1).
-            data, self.slices = out
-        elif len(out) == 3:  # Backward compatibility (2).
-            data, self.slices, data_cls = out
-        else:  # TU Datasets store additional element (__class__) in the processed file
-            data, self.slices, sizes, data_cls = out
-
-        if not isinstance(data, dict):  # Backward compatibility.
-            self.data = data
-        else:
-            self.data = data_cls.from_dict(data)
-
     def load_dataset_splits(
         self, split_params
     ) -> tuple[
         DataloadDataset, DataloadDataset | None, DataloadDataset | None
     ]:
-        """Load the dataset splits.
+        """Load the dataset splits. Copied from PreProcessor.
+
+        Will need to change DataloadDataset to be OnDisk in future.
 
         Parameters
         ----------
@@ -232,3 +273,8 @@ class PreProcessor(torch_geometric.data.InMemoryDataset):
                 f"Invalid '{split_params.learning_setting}' learning setting.\
                 Please define either 'inductive' or 'transductive'."
             )
+
+    def __del__(self):
+        """Close database connection when object is deleted."""
+        if hasattr(self, "connection"):
+            self.connection.close()

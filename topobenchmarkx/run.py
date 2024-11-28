@@ -12,7 +12,7 @@ from lightning import Callback, LightningModule, Trainer
 from lightning.pytorch.loggers import Logger
 from omegaconf import DictConfig, OmegaConf
 
-from topobenchmarkx.data.preprocessor import PreProcessor
+from topobenchmarkx.data.preprocessor import PreProcessor, OnDiskPreProcessor
 from topobenchmarkx.dataloader import TBXDataloader
 from topobenchmarkx.utils import (
     RankedLogger,
@@ -134,13 +134,23 @@ def run(cfg: DictConfig) -> tuple[dict[str, Any], dict[str, Any]]:
     # Preprocess dataset and load the splits
     log.info("Instantiating preprocessor...")
     transform_config = cfg.get("transforms", None)
-    preprocessor = PreProcessor(dataset, dataset_dir, transform_config)
+
+    if cfg.dataset.loader.parameters.data_name == "H36MDataset":
+        preprocessor = OnDiskPreProcessor(
+            dataset, dataset_dir, transform_config
+        )
+    else:
+        preprocessor = PreProcessor(dataset, dataset_dir, transform_config)
+
+    # TODO: Make load_dataset_splits use OnDiskDataset
+    print("Splitting dataset into train/val/test...")
     dataset_train, dataset_val, dataset_test = (
         preprocessor.load_dataset_splits(cfg.dataset.split_params)
     )
     # Prepare datamodule
     log.info("Instantiating datamodule...")
     if cfg.dataset.parameters.task_level in ["node", "graph"]:
+        # TODO: Make TBXDataloader use OnDiskDatasets
         datamodule = TBXDataloader(
             dataset_train=dataset_train,
             dataset_val=dataset_val,

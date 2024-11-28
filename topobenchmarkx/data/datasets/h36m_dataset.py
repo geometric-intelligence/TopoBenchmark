@@ -11,7 +11,6 @@ from omegaconf import DictConfig
 import sqlite3
 from torch_geometric.data import Data, OnDiskDataset, extract_zip
 from torch_geometric.io import fs
-from tqdm import tqdm
 
 
 class H36MDataset(OnDiskDataset):
@@ -50,7 +49,7 @@ class H36MDataset(OnDiskDataset):
 
     RAW_FILE_NAMES: ClassVar = {}
 
-    SUBJ_NAMES: ClassVar = ["S1", "S5"]  # , "S6", "S7", "S8", "S9"]
+    SUBJ_NAMES: ClassVar = ["S1", "S5", "S6", "S7", "S8", "S9"]
     N_FRAMES: ClassVar = 50
 
     def __init__(
@@ -67,7 +66,6 @@ class H36MDataset(OnDiskDataset):
         db_root = osp.join(root, name)
         proc_db = osp.join(db_root, "processed")
 
-        print(proc_db)
         os.makedirs(proc_db, exist_ok=True)
 
         # Initialize SQLite connection and cursor
@@ -88,34 +86,6 @@ class H36MDataset(OnDiskDataset):
         super().__init__(
             root,
         )
-
-        # Load and combine all subject files
-
-        # all_data = []
-        # for subj_name in self.SUBJ_NAMES:
-        #     path_parts = self.processed_paths[0].split(".")
-        #     subj_path = "".join([path_parts[0], subj_name, ".", path_parts[1]])
-
-        #     out = fs.torch_load(subj_path)#self.processed_paths[0])
-
-        #     assert len(out) == 3 or len(out) == 4
-
-        #     if len(out) == 3:  # Backward compatibility.
-        #         data, _, _ = out
-        #         data_cls = Data
-        #     else:
-        #         data, _, _, data_cls = out
-
-        #     # Backward compatibility.
-        #     subj_data = data if not isinstance(data, dict) \
-        #                     else data_cls.from_dict(data)
-
-        #     all_data.append(subj_data)
-
-        # self.data, self.slices = self.collate(all_data)
-        # self._data_list = None
-
-        # assert isinstance(self._data, Data)
 
     def __len__(self) -> int:
         """Return the number of graphs in the dataset.
@@ -179,29 +149,11 @@ class H36MDataset(OnDiskDataset):
         list[str]
             List of all processed file names.
         """
-        # if not os.path.exists(self.processed_dir):
-        #     return []
-        # return []#os.listdir(self.processed_dir)
         return [
             filename
             for filename in os.listdir(self.processed_dir)
-            if filename.endswith("1.pt")
+            if filename.endswith(".pt")
         ]
-
-    # def get(self, idx: int) -> Data:
-    #     """Load a single graph from disk.
-
-    #     Parameters
-    #     ----------
-    #     idx : int
-    #         Index of the graph to load.
-
-    #     Returns
-    #     -------
-    #     Data
-    #         The loaded graph.
-    #     """
-    #     return torch.load(os.path.join(self.processed_dir, self.processed_file_names[idx]))
 
     def get(self, idx: int) -> Data:
         """Load a single graph from disk using the database.
@@ -226,7 +178,7 @@ class H36MDataset(OnDiskDataset):
         filename = result[0]
         filepath = os.path.join(self.processed_dir, filename)
 
-        return torch.load(filepath)
+        return torch.load(filepath, weights_only=False)
 
     def download(self) -> None:
         r"""Download the dataset from a URL and saves it to the raw directory.
@@ -307,7 +259,7 @@ class H36MDataset(OnDiskDataset):
                 subj_name
             )
             motion_inputs, motion_targets = self.process_input_target_pairs(
-                h36m_raw_xyz_motion_matrices, debug=True
+                h36m_raw_xyz_motion_matrices, debug=False
             )
 
             # Step 2: define connections and transform into graphs
@@ -317,14 +269,16 @@ class H36MDataset(OnDiskDataset):
 
             # Step 3: save each graph individually
             print(f"\tSaving {subj_name} graphs...")
-            for idx, data in tqdm(enumerate(motions)):
+            for idx, data in enumerate(motions):
                 torch.save(
                     data,
                     os.path.join(
                         self.processed_dir, f"{subj_name}_graph_{idx}.pt"
                     ),
                 )
+            print(f"\tDone with {subj_name}.")
 
+            # OLD ATTEMPT:
             # # Step 4: collate the graphs (using InMemoryDataset)
             # print(f"\tCollating {subj_name}...")
             # self.data, self.slices = self.collate(motions)
@@ -337,9 +291,8 @@ class H36MDataset(OnDiskDataset):
             #     (self._data.to_dict(), self.slices, {}, self._data.__class__),
             #     self.get_processed_path_for_subj(subj_name),
             # )
-            print(f"\tDone with {subj_name}.")
 
-        # DO database stuff?
+        # Step 4: Create database.
         print("Creating database...")
         self._create_database()
 

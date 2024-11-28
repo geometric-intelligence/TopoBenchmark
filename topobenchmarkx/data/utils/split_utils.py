@@ -296,9 +296,17 @@ def load_inductive_splits(dataset, parameters):
     assert (
         len(dataset) > 1
     ), "Datasets should have more than one graph in an inductive setting."
-    labels = np.array(
-        [data.y.squeeze(0).numpy() for data in dataset.data_list]
-    )
+
+    # Handle OnDiskDataset case
+    if hasattr(dataset, "cursor"):
+        # Get total number of rows from SQLite database
+        dataset.cursor.execute("SELECT COUNT(*) FROM data")
+        total_rows = dataset.cursor.fetchone()[0]
+        labels = np.arange(total_rows)
+    else:
+        labels = np.array(
+            [data.y.squeeze(0).numpy() for data in dataset.data_list]
+        )
 
     if parameters.split_type == "random":
         split_idx = random_splitting(labels, parameters)

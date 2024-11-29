@@ -19,7 +19,7 @@ class SANN(torch.nn.Module):
         Update function.
     complex_dim : int
         Dimension of the complex.
-    hop_num : int
+    max_hop : int
         Number of hops.
     n_layers : int
         Number of layers.
@@ -31,27 +31,27 @@ class SANN(torch.nn.Module):
         hidden_channels,
         update_func=None,
         complex_dim=3,
-        hop_num=3,
+        max_hop=3,
         n_layers=2,
     ):
         super().__init__()
         self.complex_dim = complex_dim
-        self.hop_num = hop_num
+        self.max_hop = max_hop
 
         assert n_layers >= 1
 
         if isinstance(in_channels, int):  # If only one value is passed
-            in_channels = [in_channels] * self.hop_num
+            in_channels = [in_channels] * self.max_hop
 
         self.layers = torch.nn.ModuleList()
 
         # Set of simplices layers
         self.layers_0 = torch.nn.ModuleList(
             SANNLayer(
-                [in_channels[i] for i in range(hop_num)],
-                [hidden_channels] * hop_num,
+                [in_channels[i] for i in range(max_hop)],
+                [hidden_channels] * max_hop,
                 update_func=update_func,
-                hop_num=hop_num,
+                max_hop=max_hop,
             )
             for i in range(complex_dim)
         )
@@ -62,10 +62,10 @@ class SANN(torch.nn.Module):
             self.layers.append(
                 torch.nn.ModuleList(
                     SANNLayer(
-                        [hidden_channels] * hop_num,
-                        [hidden_channels] * hop_num,
+                        [hidden_channels] * max_hop,
+                        [hidden_channels] * max_hop,
                         update_func=update_func,
-                        hop_num=hop_num,
+                        max_hop=max_hop,
                     )
                     for i in range(complex_dim)
                 )
@@ -99,7 +99,7 @@ class SANN(torch.nn.Module):
             x_i = list()
 
             # For each i-simplex (i=0,1,2) to all other k-simplices
-            for i in range(3):
+            for i in range(self.complex_dim):
                 # Goes from i-simplex to all other simplices k<=i
                 x_i_to_t = layer[i](x[i])
                 # Update the i-th simplex to all other simplices embeddings
@@ -117,7 +117,7 @@ class SANNLayer(torch.nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    hop_num : int
+    max_hop : int
         Number of hop representations to consider.
     aggr_norm : bool
         Whether to perform aggregation normalization.
@@ -136,20 +136,21 @@ class SANNLayer(torch.nn.Module):
         self,
         in_channels,
         out_channels,
-        hop_num,
+        max_hop,
         aggr_norm: bool = False,
         update_func=None,
         initialization: str = "xavier_normal",
     ) -> None:
         super().__init__()
 
-        assert hop_num == len(
+        assert max_hop == len(
             in_channels
         ), "Number of hops must be equal to the number of input channels."
-        assert hop_num == len(
+        assert max_hop == len(
             out_channels
         ), "Number of hops must be equal to the number of output channels."
 
+        self.max_hop = max_hop
         self.in_channels = in_channels
         self.out_channels = out_channels
 
@@ -167,7 +168,7 @@ class SANNLayer(torch.nn.Module):
                         self.out_channels[i],
                     )
                 )
-                for i in range(hop_num)
+                for i in range(max_hop)
             ]
         )
         self.biases = ParameterList(
@@ -177,7 +178,7 @@ class SANNLayer(torch.nn.Module):
                         self.out_channels[i],
                     )
                 )
-                for i in range(hop_num)
+                for i in range(max_hop)
             ]
         )
 
@@ -244,12 +245,11 @@ class SANNLayer(torch.nn.Module):
             Output tensors for each 2-cell.
         """
         # Extract all cells to all cells
-        t = len(x_all)
-        x_k_t = {i: x_all[i] for i in range(t)}
+        x_k_t = {i: x_all[i] for i in range(self.max_hop)}
 
         y_k_t = {
             i: torch.mm(x_k_t[i], self.weights[i]) + self.biases[i]
-            for i in range(t)
+            for i in range(self.max_hop)
         }
 
         # TODO Check aggregation as list of ys

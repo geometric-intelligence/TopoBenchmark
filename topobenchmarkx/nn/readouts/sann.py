@@ -24,15 +24,15 @@ class SANNReadout(AbstractZeroCellReadOut):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        complex_dim = kwargs["complex_dim"]
-        max_hop = kwargs["max_hop"]
+        self.complex_dim = kwargs["complex_dim"]
+        self.max_hop = kwargs["max_hop"]
         hidden_dim = kwargs["hidden_dim"]
         out_channels = kwargs["out_channels"]
         pooling_type = kwargs["pooling_type"]
 
         self.linear = torch.nn.Sequential(
             torch.nn.Linear(
-                complex_dim * (max_hop + 1) * hidden_dim, hidden_dim
+                self.complex_dim * self.max_hop * hidden_dim, hidden_dim
             ),
             torch.nn.LeakyReLU(),
             torch.nn.Linear(hidden_dim, hidden_dim),
@@ -102,9 +102,8 @@ class SANNReadout(AbstractZeroCellReadOut):
             Dictionary containing the updated model output.
         """
 
-        hop_tensor_names = [k for k in model_out if k.startswith("x_")]
-        max_dim = len(hop_tensor_names)
-        max_hop = len(model_out[hop_tensor_names[0]])
+        max_dim = self.complex_dim
+        max_hop = self.max_hop
 
         x_all = []
         # For i-cells

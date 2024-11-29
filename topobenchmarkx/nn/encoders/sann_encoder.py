@@ -23,7 +23,7 @@ class SANNFeatureEncoder(AbstractFeatureEncoder):
         Dropout for the BaseEncoders (default: 0).
     selected_dimensions : list[int], optional
         List of indexes to apply the BaseEncoders to (default: None).
-    selected_hops : list[int], optional
+    max_hop : list[int], optional
         List of indexes to apply the BaseEncoders to in terms of hops (default: None).
     **kwargs : dict, optional
         Additional keyword arguments.
@@ -35,14 +35,10 @@ class SANNFeatureEncoder(AbstractFeatureEncoder):
         out_channels,
         proj_dropout=0,
         selected_dimensions=None,
-        selected_hops=None,
+        max_hop=3,
         **kwargs,
     ):
         super().__init__()
-
-        assert (
-            len(selected_hops) == len(in_channels[0])
-        ), "Number of hops must be equal to the number of provided input channels for each dimension."
 
         self.in_channels = in_channels
         self.out_channels = out_channels
@@ -52,13 +48,9 @@ class SANNFeatureEncoder(AbstractFeatureEncoder):
             if (selected_dimensions is not None)
             else range(len(self.in_channels))
         )
-        self.hops = (
-            selected_hops
-            if (selected_hops is not None)
-            else range(len(self.in_channels[0]))
-        )
+        self.hops = max_hop
         for i in self.dimensions:
-            for j in self.hops:
+            for j in range(self.hops):
                 setattr(
                     self,
                     f"encoder_{i}_{j}",
@@ -95,7 +87,7 @@ class SANNFeatureEncoder(AbstractFeatureEncoder):
             if last_size == -1:
                 last_size = batch.max()
 
-            for j in self.hops:
+            for j in range(self.hops):
                 data[f"x{i}_{j}"] = getattr(self, f"encoder_{i}_{j}")(
                     data[f"x{i}_{j}"], batch
                 )

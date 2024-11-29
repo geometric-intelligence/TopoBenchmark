@@ -28,7 +28,7 @@ class PrecomputeKHopFeatures(torch_geometric.transforms.BaseTransform):
         super().__init__()
         self.type = "precompute_khop_features"
         self.complex_dim = complex_dim
-        self.max_hop = max_hop
+        self.max_hop = max_hop - 1
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}(type={self.type!r}, max_hop={self.max_hop})"

@@ -1,0 +1,20 @@
+_target_: topobenchmarkx.transforms.data_transform.DataTransform
+transform_name: "DifferentGausFeaturesSANN"
+transform_type: "data manipulation"
+
+mean: 0
+std: 0.1
+num_features: ${dataset.parameters.num_features}
+dimensions: 3
+in_channels: 
+- - 3
+  - 3
+  - 3
+- - 3
+  - 3
+  - 3
+- - 3
+  - 3
+  - 3
+max_hop: 2
+

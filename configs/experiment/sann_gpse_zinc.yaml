@@ -16,4 +16,7 @@ model:
     n_layers: 4
 dataset:
   dataloader_params:
-    batch_size: 64
+    batch_size: 32
+  split_params:
+    split_type: random
+    train_prop: 0.5

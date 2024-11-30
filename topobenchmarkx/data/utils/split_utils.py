@@ -299,10 +299,10 @@ def load_inductive_splits(dataset, parameters):
     ), "Datasets should have more than one graph in an inductive setting."
 
     # Handle OnDiskDataset case
-    if hasattr(dataset, "cursor"):
+    if hasattr(dataset, "dataset"):
         # Get total number of rows from SQLite database
-        dataset.cursor.execute("SELECT COUNT(*) FROM data")
-        total_rows = dataset.cursor.fetchone()[0]
+        # dataset.cursor.execute("SELECT COUNT(*) FROM data")
+        total_rows = len(dataset)
         # I don't think the labels matter, but rather how many pairs there are...
         labels = np.arange(total_rows)
     else:

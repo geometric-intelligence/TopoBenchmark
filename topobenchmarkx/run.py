@@ -12,8 +12,8 @@ from lightning import Callback, LightningModule, Trainer
 from lightning.pytorch.loggers import Logger
 from omegaconf import DictConfig, OmegaConf
 
-from topobenchmarkx.data.preprocessor import PreProcessor, OnDiskPreProcessor
-from topobenchmarkx.dataloader import TBXDataloader
+from topobenchmarkx.data.preprocessor import OnDiskPreProcessor, PreProcessor
+from topobenchmarkx.dataloader import OnDiskTBXDataloader, TBXDataloader
 from topobenchmarkx.utils import (
     RankedLogger,
     extras,
@@ -139,26 +139,67 @@ def run(cfg: DictConfig) -> tuple[dict[str, Any], dict[str, Any]]:
         preprocessor = OnDiskPreProcessor(
             dataset, dataset_dir, transform_config
         )
+
+        keep_things_on_disk = False
+        if keep_things_on_disk:  # SLOOOOW
+            # TODO: Make load_dataset_splits use OnDiskDataset
+            # TODO: currently not really using preprocessor ... alas
+            print(
+                "ON DISK PREPROCESSOR.\nSplitting dataset into train/val/test..."
+            )
+            train_indices, val_indices, test_indices = (
+                preprocessor.load_dataset_split_indices(
+                    cfg.dataset.split_params
+                )
+            )
+            # Prepare datamodule
+            log.info("Instantiating datamodule...")
+            if cfg.dataset.parameters.task_level in ["node", "graph"]:
+                # TODO: Make TBXDataloader use OnDiskDatasets
+                datamodule = OnDiskTBXDataloader(
+                    dataset=dataset,
+                    train_indices=train_indices,
+                    val_indices=val_indices,
+                    test_indices=test_indices,
+                    **cfg.dataset.get("dataloader_params", {}),
+                )
+            else:
+                raise ValueError("Invalid task_level")
+        else:
+            print("Splitting dataset into train/val/test... In memory...")
+            dataset_train, dataset_val, dataset_test = (
+                preprocessor.load_dataset_splits(cfg.dataset.split_params)
+            )
+            # Prepare datamodule
+            log.info("Instantiating datamodule...")
+            if cfg.dataset.parameters.task_level in ["node", "graph"]:
+                datamodule = TBXDataloader(
+                    dataset_train=dataset_train,
+                    dataset_val=dataset_val,
+                    dataset_test=dataset_test,
+                    **cfg.dataset.get("dataloader_params", {}),
+                )
+            else:
+                raise ValueError("Invalid task_level")
+
     else:
         preprocessor = PreProcessor(dataset, dataset_dir, transform_config)
 
-    # TODO: Make load_dataset_splits use OnDiskDataset
-    print("Splitting dataset into train/val/test...")
-    dataset_train, dataset_val, dataset_test = (
-        preprocessor.load_dataset_splits(cfg.dataset.split_params)
-    )
-    # Prepare datamodule
-    log.info("Instantiating datamodule...")
-    if cfg.dataset.parameters.task_level in ["node", "graph"]:
-        # TODO: Make TBXDataloader use OnDiskDatasets
-        datamodule = TBXDataloader(
-            dataset_train=dataset_train,
-            dataset_val=dataset_val,
-            dataset_test=dataset_test,
-            **cfg.dataset.get("dataloader_params", {}),
+        print("Splitting dataset into train/val/test...")
+        dataset_train, dataset_val, dataset_test = (
+            preprocessor.load_dataset_splits(cfg.dataset.split_params)
         )
-    else:
-        raise ValueError("Invalid task_level")
+        # Prepare datamodule
+        log.info("Instantiating datamodule...")
+        if cfg.dataset.parameters.task_level in ["node", "graph"]:
+            datamodule = TBXDataloader(
+                dataset_train=dataset_train,
+                dataset_val=dataset_val,
+                dataset_test=dataset_test,
+                **cfg.dataset.get("dataloader_params", {}),
+            )
+        else:
+            raise ValueError("Invalid task_level")
 
     # Model for us is Network + logic: inputs backbone, readout, losses
     log.info(f"Instantiating model <{cfg.model._target_}>")

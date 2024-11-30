@@ -2,9 +2,9 @@
 
 import json
 import os
-import sqlite3
 
 import hydra
+import numpy as np
 import torch
 import torch_geometric
 from torch_geometric.data import Data, OnDiskDataset
@@ -24,8 +24,8 @@ class OnDiskPreProcessor(OnDiskDataset):
 
     Parameters
     ----------
-    dataset : list
-        List of data objects.
+    dataset : OnDiskDataset
+        Dataset.
     data_dir : str
         Path to the directory containing the data.
     transforms_config : DictConfig, optional
@@ -35,6 +35,8 @@ class OnDiskPreProcessor(OnDiskDataset):
     """
 
     def __init__(self, dataset, data_dir, transforms_config=None, **kwargs):
+        self.dataset = dataset
+
         # Not sure if it is working for transforms yet.
         if transforms_config is not None:
             self.transforms_applied = True
@@ -50,22 +52,6 @@ class OnDiskPreProcessor(OnDiskDataset):
 
         super().__init__(data_dir, None, None, **kwargs)
 
-        # Initialize database connection
-        os.makedirs(self.processed_dir, exist_ok=True)
-        self.db_path = os.path.join(self.processed_dir, "metadata.db")
-        self.connection = sqlite3.connect(self.db_path)
-        self.cursor = self.connection.cursor()
-
-        # Create table if it doesn't exist
-        self.cursor.execute("""
-            CREATE TABLE IF NOT EXISTS data (
-                idx INTEGER PRIMARY KEY,
-                file_name TEXT NOT NULL,
-                size INTEGER NOT NULL
-            )
-        """)
-        self.connection.commit()
-
         # Some datasets have fixed splits
         if hasattr(dataset, "split_idx"):
             self.split_idx = dataset.split_idx
@@ -78,8 +64,7 @@ class OnDiskPreProcessor(OnDiskDataset):
         int
             Number of graphs in the dataset.
         """
-        self.cursor.execute("SELECT COUNT(*) FROM data")
-        return self.cursor.fetchone()[0]
+        return len(self.dataset)
 
     def get(self, idx: int) -> Data:
         """Load a single graph from disk. Copied from H36MDataset.
@@ -94,16 +79,7 @@ class OnDiskPreProcessor(OnDiskDataset):
         Data
             The loaded graph.
         """
-        self.cursor.execute("SELECT file_name FROM data WHERE idx = ?", (idx,))
-        result = self.cursor.fetchone()
-
-        if result is None:
-            raise IndexError(f"No data found for index {idx}")
-
-        filename = result[0]
-        filepath = os.path.join(self.processed_dir, filename)
-
-        return torch.load(filepath, weights_only=False)
+        return self.dataset.get(idx)
 
     def __getitem__(self, idx: int) -> Data:
         """Load a single graph from disk so that split_utils doesn't need changing.
@@ -141,28 +117,29 @@ class OnDiskPreProcessor(OnDiskDataset):
         """
         if self.pre_transform is not None:
             print("Applying transform to data...")
-            # Process each graph and save to new location
-            for idx in range(len(self)):
-                # Load original graph
-                data = self.get(idx)
+            print("NOT IMPLEMENTED YET")
+            # # Process each graph and save to new location
+            # for idx in range(len(self)):
+            #     # Load original graph
+            #     data = self.get(idx)
 
-                # Apply transform
-                transformed_data = self.pre_transform(data)
+            #     # Apply transform
+            #     transformed_data = self.pre_transform(data)
 
-                # Save transformed graph
-                filename = f"transformed_data_{idx}.pt"
-                filepath = os.path.join(self.processed_dir, filename)
-                torch.save(transformed_data, filepath)
+            #     # Save transformed graph
+            #     filename = f"transformed_data_{idx}.pt"
+            #     filepath = os.path.join(self.processed_dir, filename)
+            #     torch.save(transformed_data, filepath)
 
-                # Add to database
-                size = os.path.getsize(filepath)
-                self.cursor.execute(
-                    "INSERT OR REPLACE INTO data(idx, file_name, size) VALUES (?, ?, ?)",
-                    (idx, filename, size),
-                )
+            #     # Add to database
+            #     size = os.path.getsize(filepath)
+            #     self.cursor.execute(
+            #         "INSERT OR REPLACE INTO data(idx, file_name, size) VALUES (?, ?, ?)",
+            #         (idx, filename, size),
+            #     )
 
-            # Commit database changes
-            self.connection.commit()
+            # # Commit database changes
+            # self.connection.commit()
 
         print("Done processing.")
 
@@ -247,9 +224,7 @@ class OnDiskPreProcessor(OnDiskDataset):
     ) -> tuple[
         DataloadDataset, DataloadDataset | None, DataloadDataset | None
     ]:
-        """Load the dataset splits. Copied from PreProcessor.
-
-        Will need to change DataloadDataset to be OnDisk in future.
+        """Load the dataset splits InMemory. Copied from PreProcessor.
 
         Parameters
         ----------
@@ -273,6 +248,41 @@ class OnDiskPreProcessor(OnDiskDataset):
                 f"Invalid '{split_params.learning_setting}' learning setting.\
                 Please define either 'inductive' or 'transductive'."
             )
+
+    def load_dataset_split_indices(
+        self, split_params
+    ) -> tuple[np.ndarray, np.ndarray | None, np.ndarray | None]:
+        """Load the dataset splits. So things can happen OnDisk.
+
+        Parameters
+        ----------
+        split_params : dict
+            Parameters for loading the dataset splits.
+
+        Returns
+        -------
+        tuple
+            A tuple containing the train, validation, and test split indices.
+        """
+        print(split_params)
+        if split_params.get("learning_setting") != "inductive":
+            raise NotImplementedError(
+                "Non-inductive splits are not yet implemented for OnDiskDatasets."
+            )
+
+        if split_params.split_type != "fixed" or not hasattr(
+            self, "split_idx"
+        ):
+            raise NotImplementedError(
+                f"split_type {split_params.split_type} not valid. Only 'fixed' is implemented.\
+            If 'fixed' is chosen, the dataset should have the attribute split_idx"
+            )
+
+        return (
+            self.split_idx["train"],
+            self.split_idx.get("valid", None),
+            self.split_idx.get("test", None),
+        )
 
     def __del__(self):
         """Close database connection when object is deleted."""

@@ -16,6 +16,7 @@ defaults:
   - paths: default
   - extras: default
   - hydra: default
+  # - trainer.max_epochs=500
 
   # experiment configs allow for version control of specific hyperparameters
   # e.g. best hyperparameters for given model and datamodule

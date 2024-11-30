@@ -3,14 +3,13 @@
 import os
 import os.path as osp
 import shutil
+import sqlite3
 from typing import ClassVar
 
 import numpy as np
 import torch
 from omegaconf import DictConfig
-import sqlite3
 from torch_geometric.data import Data, OnDiskDataset, extract_zip
-from torch_geometric.io import fs
 
 
 class H36MDataset(OnDiskDataset):
@@ -92,6 +91,9 @@ class H36MDataset(OnDiskDataset):
         )
 
         self.split_idx = self.generate_default_split_idx()
+        self.train_idx = set(self.split_idx["train"])
+        self.val_idx = set(self.split_idx["valid"])
+        self.test_idx = set(self.split_idx["test"])
 
     def generate_default_split_idx(self):
         """Return the default split index for H3.6M Dataset.
@@ -144,9 +146,7 @@ class H36MDataset(OnDiskDataset):
             The number of graphs in the dataset.
         """
         self.cursor.execute("SELECT COUNT(*) FROM data")
-        len = self.cursor.fetchone()[0]
-        print("ASDFJKDSJLFLASDJFKL", len)
-        return len
+        return self.cursor.fetchone()[0]
 
     def __repr__(self) -> str:
         return f"{self.name}(self.root={self.root}, self.name={self.name}, self.force_reload={self.force_reload})"
@@ -216,9 +216,49 @@ class H36MDataset(OnDiskDataset):
         Data
             The loaded graph.
         """
+        # print("MAKING IT HERE>!>>!>!>!>")
+        # print(idx)
+
+        # self.cursor.execute("SELECT idx FROM data ORDER BY idx LIMIT 5")
+        # indices = self.cursor.fetchall()
+        # print("First 5 indices in database:", indices)
+
         # Query the database to get the filename for this index
         self.cursor.execute("SELECT file_name FROM data WHERE idx = ?", (idx,))
         result = self.cursor.fetchone()
+        # print(result)
+
+        # # Debug the query directly
+        # self.cursor.execute("SELECT COUNT(*) FROM data WHERE idx = ?", (idx,))
+        # count = self.cursor.fetchone()
+        # print(f"Number of records with idx {idx}:", count[0])
+
+        # # Show actual data for first few rows
+        # self.cursor.execute("SELECT * FROM data LIMIT 5")
+        # rows = self.cursor.fetchall()
+        # print("First 5 complete rows:", rows)
+
+        # # Check if there's a type mismatch
+        # print("Type of idx parameter:", type(idx))
+        # self.cursor.execute("SELECT typeof(idx) FROM data LIMIT 1")
+        # idx_type = self.cursor.fetchone()
+        # print("Database idx type:", idx_type)
+
+        # # Try different query formats
+        # self.cursor.execute("SELECT * FROM data WHERE idx = ? LIMIT 1", (int(idx),))
+        # result1 = self.cursor.fetchone()
+        # print("Query with cast to int:", result1)
+
+        # self.cursor.execute("SELECT * FROM data WHERE idx = ? LIMIT 1", (str(idx),))
+        # result2 = self.cursor.fetchone()
+        # print("Query with cast to str:", result2)
+
+        # if result is None:
+        #     # More debug info
+        #     self.cursor.execute("SELECT MIN(idx), MAX(idx) FROM data")
+        #     min_max = self.cursor.fetchone()
+        #     print(f"Database index range: {min_max}")
+        #     raise IndexError(f"No data found for index {idx}")
 
         if result is None:
             raise IndexError(f"No data found for index {idx}")
@@ -226,7 +266,23 @@ class H36MDataset(OnDiskDataset):
         filename = result[0]
         filepath = os.path.join(self.processed_dir, filename)
 
-        return torch.load(filepath, weights_only=False)
+        data = torch.load(filepath, weights_only=False)
+        if idx in self.train_idx:
+            data.train_mask = torch.Tensor([1]).long()
+            data.val_mask = torch.Tensor([0]).long()
+            data.test_mask = torch.Tensor([0]).long()
+
+        if idx in self.val_idx:
+            data.train_mask = torch.Tensor([0]).long()
+            data.val_mask = torch.Tensor([1]).long()
+            data.test_mask = torch.Tensor([0]).long()
+
+        if idx in self.test_idx:
+            data.train_mask = torch.Tensor([0]).long()
+            data.val_mask = torch.Tensor([0]).long()
+            data.test_mask = torch.Tensor([1]).long()
+
+        return data
 
     def download(self) -> None:
         r"""Download the dataset from a URL and saves it to the raw directory.
@@ -318,6 +374,7 @@ class H36MDataset(OnDiskDataset):
             # Step 3: save each graph individually
             print(f"\tSaving {subj_name} graphs...")
             for idx, data in enumerate(motions):
+                # Step 3b: save data to file
                 torch.save(
                     data,
                     os.path.join(

@@ -366,9 +366,9 @@ class AddGPSEInformation(torch_geometric.transforms.BaseTransform):
         """
 
         # if self.copy_initial:
-        data.x0_0 = data.x_0
-        data.x1_0 = data.x_1
-        data.x2_0 = data.x_2
+        data.x0_0 = data.x_0.float()
+        data.x1_0 = data.x_1.float()
+        data.x2_0 = data.x_2.float()
 
         # self.neighborhoods = ['up_incidence-1', 'up_incidence-0', '0-up_incidence-0' '0-up_incidence-1', '0-up_incidence-2']
         self.routes = get_routes_from_neighborhoods(self.neighborhoods)

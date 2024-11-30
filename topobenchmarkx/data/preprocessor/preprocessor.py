@@ -173,7 +173,7 @@ class PreProcessor(torch_geometric.data.InMemoryDataset):
             if self.pre_transform is not None
             else self.data_list
         )
-
+        self.data_list = [d for d in self.data_list if d is not None]
         self._data, self.slices = self.collate(self.data_list)
         self._data_list = None  # Reset cache.
 

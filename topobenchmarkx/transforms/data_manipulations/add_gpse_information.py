@@ -41,7 +41,7 @@ class AddGPSEInformation(torch_geometric.transforms.BaseTransform):
             dim_in=cfg.dim_in, dim_out=self.parameters["dim_out"]
         )
         model_state_dict = torch.load(
-            f"data/{self.parameters.pretrain_model}/0/ckpt/zinc_gpse.pt",
+            f"data/pretrained_models/gpse_{self.parameters['pretrain_model'].lower()}.pt",
             map_location=torch.device("cpu"),
         )
 
@@ -66,7 +66,7 @@ class AddGPSEInformation(torch_geometric.transforms.BaseTransform):
         # TODO Fix this configuration parameters
         params = dotdict(
             {
-                "cfg_file": f"configs/extra/{self.parameters.pretrain_model.lower()}_gpse_pretrain.yaml",
+                "cfg_file": f"configs/extras/{self.parameters['pretrain_model'].lower()}_gpse_pretrain.yaml",
                 "opts": [],
             }
         )
@@ -280,6 +280,7 @@ class AddGPSEInformation(torch_geometric.transforms.BaseTransform):
         """
         nbhd = self.neighborhoods[route_index]
         batch_route = self.intrarank_expand(data, src_rank, nbhd)
+
         if batch_route.x.shape[0] < 2:
             return None
         else:

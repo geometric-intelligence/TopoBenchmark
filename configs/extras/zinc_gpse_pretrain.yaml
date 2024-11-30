@@ -22,7 +22,7 @@ dataset:
 graph_norm:
   enable: true
   name: GraphNorm
-  eps: 1e-5
+  eps: 0.00001
 virtual_node: true
 posenc_ElstaticPE:
   enable: true

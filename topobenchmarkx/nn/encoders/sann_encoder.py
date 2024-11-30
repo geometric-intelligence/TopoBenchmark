@@ -25,6 +25,8 @@ class SANNFeatureEncoder(AbstractFeatureEncoder):
         List of indexes to apply the BaseEncoders to (default: None).
     max_hop : list[int], optional
         List of indexes to apply the BaseEncoders to in terms of hops (default: None).
+    batch_norm : bool, optional
+        Wether to apply batch normalizaiton when encoding (default: False).
     **kwargs : dict, optional
         Additional keyword arguments.
     """
@@ -36,6 +38,7 @@ class SANNFeatureEncoder(AbstractFeatureEncoder):
         proj_dropout=0,
         selected_dimensions=None,
         max_hop=3,
+        batch_norm=False,
         **kwargs,
     ):
         super().__init__()
@@ -58,6 +61,7 @@ class SANNFeatureEncoder(AbstractFeatureEncoder):
                         self.in_channels[i][j],
                         self.out_channels,
                         dropout=proj_dropout,
+                        batch_norm=batch_norm,
                     ),
                 )
 
@@ -105,15 +109,24 @@ class SimpleEncoder(torch.nn.Module):
         Dimensions of output features.
     dropout : float, optional
         Percentage of channels to discard between the two linear layers (default: 0).
+    batch_norm : bool, optional
+        Wether to perform batch normalization (default: False).
     """
 
-    def __init__(self, in_channels, out_channels, dropout=0):
+    def __init__(self, in_channels, out_channels, dropout=0, batch_norm=False):
         super().__init__()
+        self.batch_norm = batch_norm
         self.linear1 = torch.nn.Linear(in_channels, out_channels)
         # self.linear2 = torch.nn.Linear(out_channels, out_channels)
         self.relu = torch.nn.ReLU()
-        self.BN = GraphNorm(out_channels)
-        # self.dropout = torch.nn.Dropout(dropout)
+        self.BN = (
+            torch.nn.BatchNorm1d(out_channels)
+            if batch_norm
+            else torch.nn.Identity()
+        )
+        self.dropout = (
+            torch.nn.Dropout(dropout) if dropout > 0 else torch.nn.Identity()
+        )
 
     def __repr__(self):
         return f"{self.__class__.__name__}(in_channels={self.linear1.in_features}, out_channels={self.linear1.out_features})"
@@ -137,5 +150,7 @@ class SimpleEncoder(torch.nn.Module):
         """
 
         x = self.linear1(x)
-        # x = self.BN(x, batch=batch) if batch.shape[0] > 0 else self.BN(x)
+        if self.batch_norm:
+            x = self.BN(x, batch=batch) if batch.shape[0] > 0 else self.BN(x)
+        x = self.dropout(x)
         return x

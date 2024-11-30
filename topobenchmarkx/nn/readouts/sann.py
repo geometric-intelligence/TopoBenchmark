@@ -64,7 +64,7 @@ class SANNReadout(AbstractZeroCellReadOut):
         model_out = self.forward(model_out, batch)
         model_out["logits"] = self.compute_logits(
             model_out["x_all"], batch["batch_0"]
-        ).squeeze()
+        )
         return model_out
 
     def compute_logits(self, x: torch.Tensor, batch: torch.Tensor):

@@ -72,7 +72,9 @@ class PrecomputeKHopFeatures(torch_geometric.transforms.BaseTransform):
         # Create a dictionary that stores the i-simplices, the
         # j-th hop features matrix
         x_all = {
-            f"x{i}_{j}": torch.ones(1) for i in range(K) for j in range(T + 1)
+            f"x{i}_{j}": torch.ones(1).float()
+            for i in range(K)
+            for j in range(T + 1)
         }
 
         # TODO Sometimes te normalizations results in 0
@@ -124,7 +126,7 @@ class PrecomputeKHopFeatures(torch_geometric.transforms.BaseTransform):
 
         # Set the information for the 0-hop embeddings
         for i in range(K):
-            x_all[f"x{i}_0"] = data[f"x_{i}"]
+            x_all[f"x{i}_0"] = data[f"x_{i}"].float()
 
         # For each hop t=1,...,T
         for t in range(1, T + 1):

@@ -50,7 +50,7 @@ class H36MDataset(OnDiskDataset):
 
     RAW_FILE_NAMES: ClassVar = {}
 
-    SUBJ_NAMES: ClassVar = ["S1", "S5", "S6", "S7", "S8", "S9"]
+    SUBJ_NAMES: ClassVar = ["S1", "S5", "S6", "S7", "S8", "S9", "S11"]
     VAL_SUBJ: ClassVar = "S11"
     TEST_SUBJ: ClassVar = "S5"
     N_FRAMES: ClassVar = 50
@@ -596,7 +596,7 @@ class H36MDataset(OnDiskDataset):
     def process_input_target_pairs(
         self,
         raw_xyz_motion_matrices,
-        sample_rate=2,
+        sample_rate=4,  # space issues
         debug=False,
     ):
         r"""Create input-target pairs from raw motion matrices.

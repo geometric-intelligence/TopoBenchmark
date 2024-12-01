@@ -270,6 +270,7 @@ class OnDiskPreProcessor(OnDiskDataset):
                 "Non-inductive splits are not yet implemented for OnDiskDatasets."
             )
 
+        print(self.split_idx)
         if split_params.split_type != "fixed" or not hasattr(
             self, "split_idx"
         ):

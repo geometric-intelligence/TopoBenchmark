@@ -13,9 +13,10 @@ feature_encoder:
 backbone:
   _target_: topobenchmarkx.nn.backbones.graph.GCNext
   config:
-    motion:
-      h36m_input_length_dct: 50
-      dim: 66
+    motion_dataset:
+      n_frames: 50 # there has to be a better way to do this
+      n_joints: 22
+      n_channels: 3
     motion_mlp:
       hidden_dim: 66
       seq_len: 50
@@ -23,7 +24,7 @@ backbone:
       with_normalization: True
       spatial_fc_only: False
       norm_axis: 'spatial'
-  dyna_idx: False
+  dyna_idx: [2, 10]
 
 backbone_wrapper:
   _target_: topobenchmarkx.nn.wrappers.GNNWrapper

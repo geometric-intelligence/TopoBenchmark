@@ -140,7 +140,10 @@ def run(cfg: DictConfig) -> tuple[dict[str, Any], dict[str, Any]]:
             dataset, dataset_dir, transform_config
         )
 
-        keep_things_on_disk = False  # faster to load but slower to run
+        # True is good for early debugging of model; gets it to run
+        # False is good for when you want to train the whole shebang
+        keep_things_on_disk = True  # faster to load but slower to run
+
         if keep_things_on_disk:  # SLOOOOW
             # TODO: Make load_dataset_splits use OnDiskDataset
             # TODO: currently not really using preprocessor ... alas

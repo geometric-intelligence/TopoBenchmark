@@ -20,6 +20,8 @@ from .identity_gnn import (
     IdentitySAGE,
 )
 
+from .gcnext import GCNext
+
 __all__ = [
     "IdentityGCN",
     "IdentityGIN",
@@ -35,4 +37,5 @@ __all__ = [
     "MetaLayer",
     "Node2Vec",
     "DeepGraphInfomax",
+    "GCNext",
 ]

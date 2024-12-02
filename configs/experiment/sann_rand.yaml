@@ -19,3 +19,4 @@ dataset:
     batch_size: 64
   split_params:
     split_type: k-fold
+    

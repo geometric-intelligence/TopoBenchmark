@@ -1,6 +1,7 @@
 """Readout function for the SANN model."""
 
 import torch
+import topomodelx
 import torch_geometric
 from torch_scatter import scatter
 
@@ -26,21 +27,36 @@ class SANNReadout(AbstractZeroCellReadOut):
 
         self.complex_dim = kwargs["complex_dim"]
         self.max_hop = kwargs["max_hop"]
+        self.task_level = kwargs["task_level"]
         hidden_dim = kwargs["hidden_dim"]
         out_channels = kwargs["out_channels"]
         pooling_type = kwargs["pooling_type"]
+        self.dimensions = range(kwargs["complex_dim"] - 1, 0, -1)
 
-        self.linear = torch.nn.Sequential(
-            torch.nn.Linear(
-                self.complex_dim * self.max_hop * hidden_dim, hidden_dim
-            ),
-            torch.nn.LeakyReLU(),
-            torch.nn.Linear(hidden_dim, hidden_dim),
-            torch.nn.LeakyReLU(),
-            torch.nn.Linear(hidden_dim, hidden_dim),
-            torch.nn.LeakyReLU(),
-            torch.nn.Linear(hidden_dim, out_channels),
-        )
+        if self.task_level == "node":
+            self._node_level_task_inits(hidden_dim)
+            self.linear = torch.nn.Sequential(
+                torch.nn.Linear(hidden_dim, hidden_dim),
+                torch.nn.LeakyReLU(),
+                torch.nn.Linear(hidden_dim, hidden_dim),
+                torch.nn.LeakyReLU(),
+                torch.nn.Linear(hidden_dim, hidden_dim),
+                torch.nn.LeakyReLU(),
+                torch.nn.Linear(hidden_dim, out_channels),
+            )
+
+        elif self.task_level == "graph":
+            self.linear = torch.nn.Sequential(
+                torch.nn.Linear(
+                    self.complex_dim * self.max_hop * hidden_dim, hidden_dim
+                ),
+                torch.nn.LeakyReLU(),
+                torch.nn.Linear(hidden_dim, hidden_dim),
+                torch.nn.LeakyReLU(),
+                torch.nn.Linear(hidden_dim, hidden_dim),
+                torch.nn.LeakyReLU(),
+                torch.nn.Linear(hidden_dim, out_channels),
+            )
         assert pooling_type in ["max", "sum", "mean"], "Invalid pooling_type"
         self.pooling_type = pooling_type
 
@@ -105,39 +121,82 @@ class SANNReadout(AbstractZeroCellReadOut):
         max_dim = self.complex_dim
         max_hop = self.max_hop
 
-        x_all = []
-        # For i-cells
-        for i in range(max_dim):
-            # For j-hops
-            x_i_all = []
-            for j in range(max_hop):
-                # (dim_i_j, batch_size)
-                # print(i, j)
-                # print(model_out[f'x_{i}'][j].shape)
-                # print(model_out[f'batch_{i}'].shape)
-                x_i_j_batched = scatter(
-                    model_out[f"x_{i}"][j],
-                    batch[f"batch_{i}"],
-                    dim=0,
-                    reduce=self.pooling_type,
-                )
-                # print('Batch shape: ', batch[f'batch_{i}'].shape)
-                # print('Batch Max node: ', batch[f'batch_{i}'].max())
-                # print('Output scatter shape: ', x_i_j_batched.shape)
-                x_i_all.append(x_i_j_batched)
+        if self.task_level == "graph":
+            x_all = []
+            # For i-cells
+            for i in range(max_dim):
+                # For j-hops
+                x_i_all = []
+                for j in range(max_hop):
+                    x_i_j_batched = scatter(
+                        model_out[f"x_{i}_{j}"],
+                        batch[f"batch_{i}"],
+                        dim=0,
+                        reduce=self.pooling_type,
+                    )
+                    x_i_all.append(x_i_j_batched)
 
-            # (dim_i_0 + dim_i_1 + dim_i_2, batch_size)
+                x_i_all_cat = torch.cat(x_i_all, dim=1)
+                x_all.append(x_i_all_cat)
 
-            x_i_all_cat = torch.cat(x_i_all, dim=1)
+            # # TODO: Is this fix valid ?
+            # lengths = set([x_i_all.shape[0] for x_i_all in x_all])
+            # if len(lengths) > 1:
+            #     x_all[-1] = torch.nn.functional.pad(
+            #         x_all[-1], (0, 0, 0, max(lengths) - x_all[-1].shape[0])
+            #     )
+            x_all_cat = torch.cat(x_all, dim=1)
 
-            x_all.append(x_i_all_cat)
+        elif self.task_level == "node":
+            for i in self.dimensions:
+                for j in range(max_hop - 1, 0, -1):
+                    x_i = getattr(self, f"agg_conv_{i}")(
+                        model_out[f"x_{i}_{j}"], batch[f"incidence_{i}"]
+                    )
+                    x_i = getattr(self, f"ln_{i}")(x_i)
+                    model_out[f"x_{i-1}_{j}"] = getattr(
+                        self, f"projector_{i}"
+                    )(torch.cat([x_i, model_out[f"x_{i-1}_{j}"]], dim=1))
 
-        # TODO: Is this fix valid ?
-        lengths = set([x_i_all.shape[0] for x_i_all in x_all])
-        if len(lengths) > 1:
-            x_all[-1] = torch.nn.functional.pad(
-                x_all[-1], (0, 0, 0, max(lengths) - x_all[-1].shape[0])
-            )
-        x_all_cat = torch.cat(x_all, dim=1)
-        model_out["x_all"] = x_all_cat
+            # x_all = []
+            # # For i-cells
+            # for i in range(max_dim):
+            #     # For j-hops
+            #     x_i_all = []
+            #     for j in range(max_hop):
+            #         x_i_all.append(model_out[f"x_{i}_{j}"])
+
+            #     x_i_all_cat = torch.cat(x_i_all, dim=1)
+            #     x_all.append(x_i_all_cat)
+
+            # x_all_cat = torch.cat(x_all, dim=1)
+
+        model_out["x_all"] = model_out[f"x_0_0"]
+
         return model_out
+
+    def _node_level_task_inits(self, hidden_dim: int):
+        """Initialize the node-level task.
+
+        Parameters
+        ----------
+        hidden_dim : int
+            Dimension of the embeddings.
+        """
+
+        for i in self.dimensions:
+            setattr(
+                self,
+                f"agg_conv_{i}",
+                topomodelx.base.conv.Conv(
+                    hidden_dim, hidden_dim, aggr_norm=False
+                ),
+            )
+
+            setattr(self, f"ln_{i}", torch.nn.LayerNorm(hidden_dim))
+
+            setattr(
+                self,
+                f"projector_{i}",
+                torch.nn.Linear(2 * hidden_dim, hidden_dim),
+            )

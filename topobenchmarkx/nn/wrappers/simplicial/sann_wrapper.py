@@ -64,8 +64,15 @@ class SANNWrapper(AbstractWrapper):
             "batch_2": batch.batch_2,
         }
 
-        model_out["x_0"] = x_out[0]
-        model_out["x_1"] = x_out[1]
-        model_out["x_2"] = x_out[2]
+        for cell_idx in range(max_simplex_dim + 1):
+            for hop_idx in range(max_hop_dim + 1):
+                model_out[f"x_{cell_idx}_{hop_idx}"] = x_out[cell_idx][hop_idx]
+
+        # model_out['max_simplex_dim'] = max_simplex_dim
+        # model_out['max_hop_dim'] = max_hop_dim
+
+        # model_out["x_0"] = x_out[0]
+        # model_out["x_1"] = x_out[1]
+        # model_out["x_2"] = x_out[2]
 
         return model_out

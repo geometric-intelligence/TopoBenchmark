@@ -216,49 +216,9 @@ class H36MDataset(OnDiskDataset):
         Data
             The loaded graph.
         """
-        # print("MAKING IT HERE>!>>!>!>!>")
-        # print(idx)
-
-        # self.cursor.execute("SELECT idx FROM data ORDER BY idx LIMIT 5")
-        # indices = self.cursor.fetchall()
-        # print("First 5 indices in database:", indices)
-
         # Query the database to get the filename for this index
         self.cursor.execute("SELECT file_name FROM data WHERE idx = ?", (idx,))
         result = self.cursor.fetchone()
-        # print(result)
-
-        # # Debug the query directly
-        # self.cursor.execute("SELECT COUNT(*) FROM data WHERE idx = ?", (idx,))
-        # count = self.cursor.fetchone()
-        # print(f"Number of records with idx {idx}:", count[0])
-
-        # # Show actual data for first few rows
-        # self.cursor.execute("SELECT * FROM data LIMIT 5")
-        # rows = self.cursor.fetchall()
-        # print("First 5 complete rows:", rows)
-
-        # # Check if there's a type mismatch
-        # print("Type of idx parameter:", type(idx))
-        # self.cursor.execute("SELECT typeof(idx) FROM data LIMIT 1")
-        # idx_type = self.cursor.fetchone()
-        # print("Database idx type:", idx_type)
-
-        # # Try different query formats
-        # self.cursor.execute("SELECT * FROM data WHERE idx = ? LIMIT 1", (int(idx),))
-        # result1 = self.cursor.fetchone()
-        # print("Query with cast to int:", result1)
-
-        # self.cursor.execute("SELECT * FROM data WHERE idx = ? LIMIT 1", (str(idx),))
-        # result2 = self.cursor.fetchone()
-        # print("Query with cast to str:", result2)
-
-        # if result is None:
-        #     # More debug info
-        #     self.cursor.execute("SELECT MIN(idx), MAX(idx) FROM data")
-        #     min_max = self.cursor.fetchone()
-        #     print(f"Database index range: {min_max}")
-        #     raise IndexError(f"No data found for index {idx}")
 
         if result is None:
             raise IndexError(f"No data found for index {idx}")
@@ -266,6 +226,8 @@ class H36MDataset(OnDiskDataset):
         filename = result[0]
         filepath = os.path.join(self.processed_dir, filename)
 
+        # Add train/val/test mask to data object.
+        # This probably isn't the best place to do it.
         data = torch.load(filepath, weights_only=False)
         if idx in self.train_idx:
             data.train_mask = torch.Tensor([1]).long()
@@ -350,12 +312,6 @@ class H36MDataset(OnDiskDataset):
         """
         print("Loading and processing data...")
 
-        # We must do this piecemeal due to memory constraints! This big.
-        # if train:
-        #     subj_names = ["S1", "S6", "S7", "S8", "S9"]
-        # else:
-        #     subj_names = ["S5"]
-
         for subj_name in self.SUBJ_NAMES:
             print(f"Processing subject {subj_name}")
             # Step 1: extract the data
@@ -383,24 +339,9 @@ class H36MDataset(OnDiskDataset):
                 )
             print(f"\tDone with {subj_name}.")
 
-            # OLD ATTEMPT:
-            # # Step 4: collate the graphs (using InMemoryDataset)
-            # print(f"\tCollating {subj_name}...")
-            # self.data, self.slices = self.collate(motions)
-            # self._data_list = None  # Reset cache.
-
-            # # Step 5: save processed data to separate files due to MEMORY ISSUES
-            # print(f"\tSaving {subj_name}... (might take a hot sec)")
-
-            # fs.torch_save(
-            #     (self._data.to_dict(), self.slices, {}, self._data.__class__),
-            #     self.get_processed_path_for_subj(subj_name),
-            # )
-
         # Step 4: Create database.
         print("Creating database...")
         self._create_database()
-
         print("Done processing.")
 
     def _create_database(self) -> None:
@@ -454,14 +395,16 @@ class H36MDataset(OnDiskDataset):
         list[Data]
             List of graph objects.
         """
-        # this implementation is kinda sketchy but we ignore...
-        skl = H36MSkeleton()
-        time_edges = skl.generate_time_edges(self.N_FRAMES)
+        # Step 1: Create edges. These are the same for all graphs.
+        #       We want a superset of all possible edge indices
+        #       so the model can choose which to care about.
+        # For efficiency, though, perhaps could be good to prune this...
+        fully_connected_edges = torch.combinations(
+            torch.arange(self.N_FRAMES * 22 * 3), r=2
+        ).t()  # Shape: [2, num_edges] where num_edges = (n*(n-1))/2
+        empty_edges = torch.zeros((2, 0), dtype=torch.long)  # Shape: [2, 0]
 
-        # print(adj_mat)
-        # print(edges)
-
-        # Step 3: turn them into torch_geometric.data Data objects
+        # Step 2: turn them into torch_geometric.data Data objects
         print("\tConverting to graph objects...")
         motions = []
 
@@ -491,7 +434,7 @@ class H36MDataset(OnDiskDataset):
             #   ]
             # just read this in order!
 
-            # Step 1: Flatten motion_matrix; node for each time, joint, channel combo.
+            # Step 3: Flatten motion_matrix; node for each time, joint, channel combo.
             flat_input = torch.reshape(
                 input_motion_matrix, (-1,)
             )  # shape 50*22*3 = 3300
@@ -499,43 +442,11 @@ class H36MDataset(OnDiskDataset):
                 target_motion_matrix, (-1,)
             )  # shape 50*22*3 = 3300
 
-            # Step 2: Create superset of all possible edge indices.
-
-            # Edges according to skeleton bones.
-            # TODO Do we want self-loops?
-            # t, j, c = motion_matrix.shape
-            # small_bones = [(n1 * c, n2 * c) for (n1, n2) in edges]
-            # all_channel_bones = [
-            #     (n1 + cc, n2 + cc)
-            #     for (n1, n2) in small_bones
-            #     for cc in range(c)
-            # ]
-            all_channel_all_time_bones = []
-            #     (n1 + tt * (j * c), n2 + tt * (j * c))
-            #     for (n1, n2) in all_channel_bones
-            #     for tt in range(t)
-            # ]
-
-            # TODO Edges according to time.
-
-            # TODO Edges according to channel.
-            channel_edges = []
-
-            # TODO Edges last.
-            space_channel_edges = []
-
-            # edge_index = [
-            #     all_channel_all_time_bones
-            #     + time_edges
-            #     + channel_edges
-            #     + space_channel_edges
-            # ]
-
-            # Step 3: Create graph Data objects.
+            # Step 4: Create fully-conencted graph Data objects.
             motion_graph = Data(
                 x=flat_input.unsqueeze(1),
                 y=flat_target,
-                edge_index=time_edges,
+                edge_index=empty_edges,
             )
             motions.append(motion_graph)
         return motions
@@ -596,7 +507,7 @@ class H36MDataset(OnDiskDataset):
     def process_input_target_pairs(
         self,
         raw_xyz_motion_matrices,
-        sample_rate=4,  # space issues
+        sample_rate=2,  # space issues
         debug=False,
     ):
         r"""Create input-target pairs from raw motion matrices.

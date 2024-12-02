@@ -1,10 +1,11 @@
-"""Class implementing the GCNext model."""
+"""Class implementing the GCNext model (https://ojs.aaai.org/index.php/AAAI/article/view/28375)."""
 
-import torch
-from torch import nn
+from typing import ClassVar
+
 import numpy as np
-
+import torch
 from einops.layers.torch import Rearrange
+from torch import nn
 
 
 class GCNext(nn.Module):
@@ -44,7 +45,7 @@ class GCNext(nn.Module):
         self.arr0 = Rearrange("b n d -> b d n")
         self.arr1 = Rearrange("b d n -> b n d")
 
-        self.dynamic_layers = build_dynamic_layers(config.motion_mlp)
+        self.dynamic_layers = TransGraphConvolution(config.motion_mlp)
 
         self.temporal_fc_in = False  # config.motion_fc_in.temporal_fc
         self.temporal_fc_out = False  # config.motion_fc_out.temporal_fc
@@ -58,6 +59,8 @@ class GCNext(nn.Module):
             )  # nn.Linear(66,66)
             # then this?
             self.in_weight = nn.Parameter(torch.eye(50, 50))
+            # initialised as identity, ie, no temporal relationships
+            # then model can learn to mix info from diff frames
 
         if self.temporal_fc_out:
             self.motion_fc_out = nn.Linear(
@@ -92,7 +95,7 @@ class GCNext(nn.Module):
         x : torch.Tensor
             Input of shape [batch*frames*joints*channels, 1].
         edge_index : torch.Tensor
-            Edge indices.
+            Edge indices; this implementation assumes fully connected & doesn't care.
 
         Returns
         -------
@@ -108,26 +111,28 @@ class GCNext(nn.Module):
             batch_size, self.n_frames, self.n_nodes_per_frame
         )
 
-        # Create sparse adjacency matrix for use in GCBlock
-        N = batch_size * self.n_nodes
-        self.skl_mask = torch.sparse_coo_tensor(
-            edge_index,
-            torch.ones(edge_index.size(1), device=edge_index.device),
-            (N, N),
-        ).to(self.mlp.device)
+        # We don't care about edge_index at all.
+        # This is sketchy, but fine.
 
         # Original processing
+
+        # Step 1:
+        # Processes the raw input motion sequence
+        # Helps learn initial feature representations
+        # Applied before the graph convolution layers
+
         if self.temporal_fc_in:
             motion_feats = self.arr0(motion_input)
-            # this means it's 50x50
+            # Transform across time, this means it's 50x50
             motion_feats = self.motion_fc_in(motion_feats)
         else:
+            # Transform across features (66×66) with temporal weighting
             # this means it's 66x66
             motion_feats = self.motion_fc_in(motion_input)
-            motion_feats = self.arr0(motion_feats)
+            motion_feats = self.arr0(motion_feats)  # now its (bs, 66, 50)
             motion_feats = torch.einsum(
                 "bvt,tj->bvj", motion_feats, self.in_weight
-            )
+            )  # now it;s [batch_size, 66, 50]
 
         # Process through dynamic layers
         for i in range(len(self.dynamic_layers.layers)):
@@ -282,7 +287,7 @@ class Temporal_FC(nn.Module):
     """
 
     def __init__(self, dim):
-        super(Temporal_FC, self).__init__()
+        super().__init__()
         self.fc = nn.Linear(dim, dim)
 
     def forward(self, x):
@@ -331,7 +336,8 @@ class GCBlock(nn.Module):
         super().__init__()
 
         # Initialize different convolution types
-        # self.skeletal_conv = SkeletalConvolution(dim, seq_len,)
+        # Skeletal not working yet...
+        self.skeletal_conv = SkeletalConvolution(dim, seq_len)
         self.temporal_conv = TemporalConvolution(dim, seq_len)
         self.coordinate_conv = JointCoordinateConvolution(dim, seq_len)
         self.temp_joint_conv = TemporalJointConvolution(dim, seq_len)
@@ -410,7 +416,7 @@ class GCBlock(nn.Module):
             Updated node features.
         """
         # Apply different convolution types
-        x1 = self.temporal_conv(x)  # self.skeletal_conv(x)#, self.skl_mask)
+        x1 = self.skeletal_conv(x)
         x2 = self.temporal_conv(x)
         x3 = self.coordinate_conv(x)
         x4 = self.temp_joint_conv(x)
@@ -427,6 +433,8 @@ class GCBlock(nn.Module):
         )
 
         # Combine convolution results
+        # Kinda sketchily looks like they're always including x1...???
+        # Biases model towards skeletal convolution
         x_opts = torch.stack([torch.zeros_like(x1), x2, x3, x4], dim=1)
         x_combined = torch.einsum("bj,bjvt->bvt", gate, x_opts)
 
@@ -434,165 +442,8 @@ class GCBlock(nn.Module):
         x_out = self.update(x1 + x_combined)
         x_out = self.norm(x_out)
 
+        # Residual connection
         return x + x_out
-
-
-class OldGCBlock(nn.Module):
-    """Blah.
-
-    Blah.
-
-    Parameters
-    ----------
-    dim : idk
-        Idk.
-    seq : idk
-        Idk.
-    use_norm : idk
-        Idk.
-    use_spatial_fc : idk
-        Idk.
-    layernorm_axis : idk
-        Idk.
-    """
-
-    def __init__(
-        self,
-        dim,
-        seq,
-        use_norm=True,
-        use_spatial_fc=False,
-        layernorm_axis="spatial",
-    ):
-        super().__init__()
-
-        if not use_spatial_fc:
-            # define update step
-            self.update = Temporal_FC(seq)
-
-            # Initialize learnable parameters
-            self.adj_j = nn.Parameter(torch.eye(22, 22))
-
-            self.traj_mask = (
-                torch.tril(torch.ones(seq, seq, requires_grad=False), 1)
-                * torch.triu(torch.ones(seq, seq, requires_grad=False), -1)
-            ).cuda()  # tridiagonal matrix
-            for j in range(seq):
-                self.traj_mask[j, j] = 0.0
-            self.adj_t = nn.Parameter(torch.zeros(seq, seq))
-
-            self.adj_jc = nn.Parameter(torch.zeros(22, 3, 3))
-            self.adj_tj = nn.Parameter(torch.zeros(dim, seq, seq))
-        else:
-            self.update = Spatial_FC(dim)
-
-        # Normalization layers remain the same
-        if use_norm:
-            if layernorm_axis == "spatial":
-                self.norm0 = LN(dim)
-            elif layernorm_axis == "temporal":
-                self.norm0 = LN_v2(seq)
-            elif layernorm_axis == "all":
-                self.norm0 = nn.LayerNorm([dim, seq])
-            else:
-                raise NotImplementedError
-        else:
-            self.norm0 = nn.Identity()
-
-        self.reset_parameters()
-
-    def reset_parameters(self):
-        """Blah."""
-        nn.init.xavier_uniform_(self.update.fc.weight, gain=1e-8)
-
-        nn.init.constant_(self.update.fc.bias, 0)
-
-    def forward(self, x, mlp, if_make_dynamic, tau):
-        """Much summary.
-
-        Parameters
-        ----------
-        x : torch.Tensor
-            Shape [batch_size, features, seq_len].
-        mlp : torch.Tensor
-            MLP weights.
-        if_make_dynamic : bool
-            Whether to use dynamic routing.
-        tau : float
-            Temperature for Gumbel softmax.
-
-        Returns
-        -------
-        torch.Tensor
-            Output node features.
-        """
-        b, v, t = x.shape
-        x1 = x.reshape(b, v // 3, 3, t)
-
-        # Use sparse matrix multiplication for skeletal connections
-        if hasattr(self, "skl_mask") and isinstance(
-            self.skl_mask, torch.Tensor
-        ):
-            if self.skl_mask.is_sparse:
-                # Handle sparse skeletal mask
-                x1_flat = x1.reshape(b, -1, t)  # [b, v, t]
-                x1_flat = torch.sparse.mm(
-                    self.skl_mask, x1_flat.reshape(-1, t)
-                ).reshape(b, -1, t)
-                x1 = x1_flat.reshape(b, v // 3, 3, t)
-            else:
-                # Fallback to dense multiplication if mask is dense
-                x1 = torch.einsum(
-                    "vj,bjct->bvct", self.adj_j.mul(self.skl_mask), x1
-                )
-        else:
-            # Default behavior if no mask is provided
-            x1 = torch.einsum("vj,bjct->bvct", self.adj_j, x1)
-
-        x1 = x1.reshape(b, v, t)
-
-        # Temporal connections remain the same
-        traj_mask = self.traj_mask
-        x2 = torch.einsum("ft,bnt->bnf", self.adj_t.mul(traj_mask), x)
-
-        # Joint-coordinate connections
-        x3 = x.reshape(b, v // 3, 3, t)
-        x3 = torch.einsum("jkc,bjct->bjkt", self.adj_jc, x3)
-        x3 = x3.reshape(b, v, t)
-
-        # Temporal-joint connections
-        x4 = torch.einsum(
-            "nft,bnt->bnf", self.adj_tj.mul(traj_mask.unsqueeze(0)), x
-        )
-
-        # Dynamic routing
-        prob = torch.einsum("bj,jk->bk", x.mean(1), mlp)
-        if if_make_dynamic:
-            gate = nn.functional.gumbel_softmax(prob, tau=tau, hard=True)
-        else:
-            gate = (
-                torch.tensor([1.0, 0.0, 0.0, 0.0])
-                .unsqueeze(0)
-                .expand(x.shape[0], -1)
-                .cuda()
-            )
-
-        # Combine different graph convolution results
-        x2 = x2.unsqueeze(1)
-        x3 = x3.unsqueeze(1)
-        x4 = x4.unsqueeze(1)
-        x_opts = torch.cat(
-            [torch.zeros_like(x1).cuda().unsqueeze(1), x2, x3, x4], dim=1
-        )
-
-        x_ = torch.einsum("bj,bjvt->bvt", gate, x_opts)
-
-        # Update and normalize
-        x_ = self.update(x1 + x_)
-        x_ = self.norm0(x_)
-        x = x + x_
-
-        return x
 
 
 class TransGraphConvolution(nn.Module):
@@ -602,28 +453,28 @@ class TransGraphConvolution(nn.Module):
 
     Parameters
     ----------
-    dim : str
-        Idk.
-    seq : str
-        Idk.
-    use_norm : str
-        Idk.
-    use_spatial_fc : str
-        Idk.
-    num_layers : str
-        Idk.
-    layernorm_axis : str
-        Idk.
+    config : dict
+        Configuration containing:
+        - dim: blaj
+        - seq: blah
+        - use_norm: blah
+        - use_spatial_fc: blah
+        - num_layers: blah
+        - layernorm_axis: blah
     """
 
-    def __init__(
-        self, dim, seq, use_norm, use_spatial_fc, num_layers, layernorm_axis
-    ):
+    def __init__(self, config):
         super().__init__()
         self.layers = nn.Sequential(
             *[
-                GCBlock(dim, seq, use_norm, use_spatial_fc, layernorm_axis)
-                for i in range(num_layers)
+                GCBlock(
+                    dim=config.hidden_dim,
+                    seq_len=config.seq_len if "seq_len" in config else None,
+                    use_norm=config.with_normalization,
+                    use_spatial_fc=config.spatial_fc_only,
+                    layernorm_axis=config.norm_axis,
+                )
+                for i in range(config.num_layers)
             ]
         )
 
@@ -648,33 +499,6 @@ class TransGraphConvolution(nn.Module):
         """
         x = self.layers(x, mlp, if_make_dynamic, tau)
         return x
-
-
-def build_dynamic_layers(args):
-    """Blah.
-
-    Parameters
-    ----------
-    args : idk
-        Blah.
-
-    Returns
-    -------
-    TransGraphConvolution
-        Blah.
-    """
-    if "seq_len" in args:
-        seq_len = args.seq_len
-    else:
-        seq_len = None
-    return TransGraphConvolution(
-        dim=args.hidden_dim,
-        seq=seq_len,
-        use_norm=args.with_normalization,
-        use_spatial_fc=args.spatial_fc_only,
-        num_layers=args.num_layers,
-        layernorm_axis=args.norm_axis,
-    )
 
 
 def _get_activation_fn(activation):
@@ -728,129 +552,6 @@ def _get_norm_fn(norm):
     if norm == "instancenorm":
         return nn.InstanceNorm1d
     raise RuntimeError(f"norm should be batchnorm/layernorm, not {norm}.")
-
-
-class Skeleton:
-    """Blah.
-
-    Blah.
-
-    Parameters
-    ----------
-    skl_type : idk
-        Idk.
-    joint_n : idk
-        Idk.
-    """
-
-    def __init__(self, skl_type="h36m", joint_n=22):
-        self.joint_n = joint_n
-        self.get_bone(skl_type)
-        self.get_skeleton()
-
-    def get_bone(self, skl_type):
-        """Blah.
-
-        Parameters
-        ----------
-        skl_type : str
-            Blah.
-        """
-        self_link = [(i, i) for i in range(self.joint_n)]
-        if skl_type == "h36m":
-            if self.joint_n == 22:
-                joint_link_ = [
-                    (1, 2),
-                    (2, 3),
-                    (3, 4),
-                    (5, 6),
-                    (6, 7),
-                    (7, 8),
-                    (1, 9),
-                    (5, 9),
-                    (9, 10),
-                    (10, 11),
-                    (11, 12),
-                    (10, 13),
-                    (13, 14),
-                    (14, 15),
-                    (15, 16),
-                    (15, 17),
-                    (10, 18),
-                    (18, 19),
-                    (19, 20),
-                    (20, 21),
-                    (20, 22),
-                ]
-            if self.joint_n == 17:
-                joint_link_ = [
-                    (1, 2),
-                    (2, 3),
-                    (4, 5),
-                    (5, 6),
-                    (1, 7),
-                    (4, 7),
-                    (7, 8),
-                    (8, 9),
-                    (8, 10),
-                    (10, 11),
-                    (11, 12),
-                    (11, 13),
-                    (8, 14),
-                    (14, 15),
-                    (15, 16),
-                    (15, 17),
-                ]
-            if self.joint_n == 11:
-                joint_link_ = [
-                    (1, 2),
-                    (3, 4),
-                    (5, 1),
-                    (5, 3),
-                    (5, 6),
-                    (6, 7),
-                    (6, 8),
-                    (8, 9),
-                    (6, 10),
-                    (10, 11),
-                    (3, 10),
-                    (1, 8),
-                ]
-            if self.joint_n == 9:
-                joint_link_ = [
-                    (1, 3),
-                    (2, 3),
-                    (3, 4),
-                    (4, 5),
-                    (4, 6),
-                    (6, 7),
-                    (4, 8),
-                    (8, 9),
-                    (1, 8),
-                    (2, 6),
-                ]
-            if self.joint_n == 6:
-                joint_link_ = [
-                    (1, 3),
-                    (2, 3),
-                    (3, 4),
-                    (3, 5),
-                    (3, 6),
-                    (1, 6),
-                    (2, 5),
-                ]
-            if self.joint_n == 2:
-                joint_link_ = [(1, 2)]
-        joint_link = [(i - 1, j - 1) for (i, j) in joint_link_]
-        self.bone = self_link + joint_link
-
-    def get_skeleton(self):
-        """Blah."""
-        skl = np.zeros((self.joint_n, self.joint_n))
-        for i, j in self.bone:
-            skl[j, i] = 1
-            skl[i, j] = 1
-        self.skeleton = skl
 
 
 ###############################################################
@@ -907,27 +608,11 @@ class SkeletalConvolution(BaseGraphConvolution):
         super().__init__(dim, seq_len)
         self.adj_j = nn.Parameter(torch.eye(num_joints, num_joints))
 
-        batch_size = 256
-        # Create batched edge indices
-        skl = Skeleton()
-        base_edge_index = torch.tensor(skl.bone).t()  # [2, num_edges]
-        # num_nodes_per_graph = self.n_joints
-
-        # # Create offsets for each graph in the batch
-        # batch_offsets = torch.arange(
-        #     0,
-        #     batch_size * self.n_frames * num_nodes_per_graph,
-        #     num_nodes_per_graph,
-        #     # device=edge_index.device
-        # )
-
-        # # Repeat edge indices for each graph and add appropriate offsets
-        # batched_edge_index = base_edge_index.unsqueeze(1).expand(-1, len(batch_offsets), -1)
-        # batched_edge_index = batched_edge_index + batch_offsets.view(1, -1, 1)
-        # batched_edge_index = batched_edge_index.permute(0, 2, 1).reshape(2, -1)
+        self.skl = H36MSkeleton()
+        base_edge_index = self.skl.generate_bone_edges(50)
 
         # Create sparse adjacency matrix
-        N = 256 * 50 * 22 * 3
+        N = 50 * 22 * 3
         self.skl_mask = torch.sparse_coo_tensor(
             base_edge_index,
             torch.ones(base_edge_index.size(1), device=base_edge_index.device),
@@ -949,23 +634,17 @@ class SkeletalConvolution(BaseGraphConvolution):
         torch.Tensor [batch, vertices, time]
             Features after skeletal convolution.
         """
-        self.skl_mask = self.skl_mask.to(x.device)
+        # self.skl_mask = self.skl_mask.to(x.device) # (3300, 3300)
 
-        b, v, t = x.shape
-        x1 = x.reshape(b, v // 3, 3, t)
+        b, v, t = x.shape  # torch.Size([256, 66, 50])
+        # x1 = x.reshape(b, v // 3, 3, t) # torch.Size([256, 22, 3, 50])
 
-        if self.skl_mask.is_sparse:
-            x1_flat = x1.reshape(b, -1, t)
-            x1_flat = torch.sparse.mm(
-                self.skl_mask.to(x.device), x1_flat.reshape(-1, t)
-            ).reshape(b, -1, t)
-            x1 = x1_flat.reshape(b, v // 3, 3, t)
-        else:
-            x1 = torch.einsum(
-                "vj,bjct->bvct", self.adj_j.mul(self.skl_mask), x1
-            )
+        x1_flat = x.reshape(b, -1)  # [batch, 3300]
+        x1_flat = torch.sparse.mm(
+            x1_flat, self.skl_mask.to(x.device)
+        )  # [batch, 3300]
 
-        return x1.reshape(b, v, t)
+        return x1_flat.reshape(b, v, t)  # [batch, 66, 50]
 
 
 class TemporalConvolution(BaseGraphConvolution):
@@ -1093,3 +772,159 @@ class TemporalJointConvolution(BaseGraphConvolution):
         return torch.einsum(
             "nft,bnt->bnf", self.adj_tj.mul(self.traj_mask.unsqueeze(0)), x
         )
+
+
+class H36MSkeleton:
+    r"""Class for connections in Human3.6M Skeleton.
+
+    Attributes
+    ----------
+    NUM_JOINTS (int): Number of joints in skeleton.
+    NUM_CHANNELS (int): Number of channels per joint.
+    USED_JOINT_INDICES (np.array[np.int64]): Numpy array containing relevant joint indices.
+    """
+
+    NUM_JOINTS: ClassVar = 22
+    NUM_CHANNELS: ClassVar = 3
+
+    USED_JOINT_INDICES: ClassVar = np.array(
+        [
+            2,
+            3,
+            4,
+            5,
+            7,
+            8,
+            9,
+            10,
+            12,
+            13,
+            14,
+            15,
+            17,
+            18,
+            19,
+            21,
+            22,
+            25,
+            26,
+            27,
+            29,
+            30,
+        ]
+    ).astype(np.int64)
+
+    def __init__(self):
+        r"""H36M skeleton with 22 joints."""
+
+        self.bone_list = self.generate_bone_list()
+
+    def compute_flat_index(self, t, j, c):
+        r"""Compute flat index for motion matrix of shape (T,J,C).
+
+        Parameters
+        ----------
+        t : int
+            Time index in 3d matrix.
+        j : int
+            Joint index in 3d matrix.
+        c : int
+            Channel index in 3d matrix.
+
+        Returns
+        -------
+        int
+            Flat index in T*J*C vector.
+        """
+        return (
+            t * self.NUM_JOINTS * self.NUM_CHANNELS + j * self.NUM_CHANNELS + c
+        )
+
+    def generate_bone_list(self):
+        r"""Generate bones in H36M skeleton with 22 joints.
+
+        Returns
+        -------
+        list[tup[int]]
+            Edge list with bone links and self links.
+        """
+        self_links = [(i, i) for i in range(self.NUM_JOINTS)]
+        joint_links = [
+            (1, 2),
+            (2, 3),
+            (3, 4),
+            (5, 6),
+            (6, 7),
+            (7, 8),
+            (1, 9),
+            (5, 9),
+            (9, 10),
+            (10, 11),
+            (11, 12),
+            (10, 13),
+            (13, 14),
+            (14, 15),
+            (15, 16),
+            (15, 17),
+            (10, 18),
+            (18, 19),
+            (19, 20),
+            (20, 21),
+            (20, 22),
+        ]
+
+        return self_links + [(i - 1, j - 1) for (i, j) in joint_links]
+
+    def generate_time_edges(self, n_times):
+        r"""Generate list of edges only through time.
+
+        Parameters
+        ----------
+        n_times : int
+            Number of frames to consider.
+
+        Returns
+        -------
+        torch.tensor
+            Time edges.
+        """
+        time_edges = []
+        for c in range(self.NUM_CHANNELS):
+            for j in range(self.NUM_JOINTS):
+                for t1 in range(n_times):
+                    for t2 in range(n_times):
+                        edge = [
+                            self.compute_flat_index(t1, j, c),
+                            self.compute_flat_index(t2, j, c),
+                        ]
+                        time_edges.append(edge)
+        return torch.tensor(time_edges).T
+
+    def generate_bone_edges(self, n_times):
+        """Generate list of edges along bones across all frames.
+
+        Parameters
+        ----------
+        n_times : int
+            Number of frames to consider.
+
+        Returns
+        -------
+        torch.tensor
+            Bone edges spanning all frames, shape [2, num_edges].
+        """
+        bone_edges = []
+
+        # For each frame
+        for t in range(n_times):
+            # For each channel
+            for c in range(self.NUM_CHANNELS):
+                # For each bone connection
+                for j1, j2 in self.bone_list:
+                    edge = [
+                        self.compute_flat_index(t, j1, c),
+                        self.compute_flat_index(t, j2, c),
+                    ]
+                    bone_edges.append(edge)
+
+        return torch.tensor(bone_edges).T

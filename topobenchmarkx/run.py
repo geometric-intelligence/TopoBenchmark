@@ -144,7 +144,7 @@ def run(cfg: DictConfig) -> tuple[dict[str, Any], dict[str, Any]]:
         # False is good for when you want to train the whole shebang
         keep_things_on_disk = True  # faster to load but slower to run
 
-        if keep_things_on_disk:  # SLOOOOW
+        if keep_things_on_disk:
             # TODO: Make load_dataset_splits use OnDiskDataset
             # TODO: currently not really using preprocessor ... alas
             print(

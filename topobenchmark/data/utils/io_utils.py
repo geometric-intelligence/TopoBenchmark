@@ -212,8 +212,10 @@ def load_hypergraph_pickle_dataset(data_dir, data_name):
 
     Parameters
     ----------
-    cfg : DictConfig
-        Configuration parameters.
+    data_dir : str
+        Path to data.
+    data_name : str
+        Name of the dataset.
 
     Returns
     -------

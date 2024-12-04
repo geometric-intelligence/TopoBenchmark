@@ -337,7 +337,9 @@ class GCBlock(nn.Module):
 
         # Initialize different convolution types
         # Skeletal not working yet...
-        self.skeletal_conv = SkeletalConvolution(dim, seq_len)
+        self.skeletal_conv = (
+            SkeletalConvolution()
+        )  # Don't need these?? dim, seq_len)
         self.temporal_conv = TemporalConvolution(dim, seq_len)
         self.coordinate_conv = JointCoordinateConvolution(dim, seq_len)
         self.temp_joint_conv = TemporalJointConvolution(dim, seq_len)
@@ -591,37 +593,18 @@ class BaseGraphConvolution(nn.Module):
         raise NotImplementedError
 
 
-class SkeletalConvolution(BaseGraphConvolution):
-    """Convolution along skeletal connections between joints.
+class SkeletalConvolution(nn.Module):
+    """Convolution along skeletal connections between joints in H36MSkeleton."""
 
-    Parameters
-    ----------
-    dim : str
-        Blah.
-    seq_len : str
-        Blah.
-    num_joints : str
-        Blah.
-    """
-
-    def __init__(self, dim: int, seq_len: int, num_joints: int = 22):
-        super().__init__(dim, seq_len)
-        self.adj_j = nn.Parameter(torch.eye(num_joints, num_joints))
+    def __init__(self):
+        super().__init__()
 
         self.skl = H36MSkeleton()
-        base_edge_index = self.skl.generate_bone_edges(50)
-
-        # Create sparse adjacency matrix
-        N = 50 * 22 * 3
-        self.skl_mask = torch.sparse_coo_tensor(
-            base_edge_index,
-            torch.ones(base_edge_index.size(1), device=base_edge_index.device),
-            (N, N),
+        self.weights = nn.Parameter(
+            torch.eye(self.skl.NUM_JOINTS, self.skl.NUM_JOINTS)
         )
 
-    def forward(
-        self, x: torch.Tensor
-    ) -> torch.Tensor:  # , skl_mask: torch.Tensor
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Apply skeletal graph convolution.
 
         Parameters
@@ -634,17 +617,19 @@ class SkeletalConvolution(BaseGraphConvolution):
         torch.Tensor [batch, vertices, time]
             Features after skeletal convolution.
         """
-        # self.skl_mask = self.skl_mask.to(x.device) # (3300, 3300)
+        b, v, t = x.shape  # (batch, 66, 50)
 
-        b, v, t = x.shape  # torch.Size([256, 66, 50])
-        # x1 = x.reshape(b, v // 3, 3, t) # torch.Size([256, 22, 3, 50])
+        assert v == (self.skl.NUM_CHANNELS * self.skl.NUM_JOINTS)
+        reshaped_x = x.reshape(
+            b, self.skl.NUM_JOINTS, self.skl.NUM_CHANNELS, t
+        )  # (batch, 22, 3, 50)
 
-        x1_flat = x.reshape(b, -1)  # [batch, 3300]
-        x1_flat = torch.sparse.mm(
-            x1_flat, self.skl_mask.to(x.device)
-        )  # [batch, 3300]
+        masked_weights = self.weights.mul(self.skl.skl_mask)  # (22,22)
+        processed_x = torch.einsum(
+            "vj, bjct->bvct", masked_weights, reshaped_x
+        )  # (22,22) x (batch,22,3,50) -> (batch,22,3,50)
 
-        return x1_flat.reshape(b, v, t)  # [batch, 66, 50]
+        return processed_x.reshape(b, v, t)  # (batch, 66, 50)
 
 
 class TemporalConvolution(BaseGraphConvolution):
@@ -818,6 +803,7 @@ class H36MSkeleton:
         r"""H36M skeleton with 22 joints."""
 
         self.bone_list = self.generate_bone_list()
+        self.skl_mask = self.generate_skl_mask()
 
     def compute_flat_index(self, t, j, c):
         r"""Compute flat index for motion matrix of shape (T,J,C).
@@ -874,6 +860,23 @@ class H36MSkeleton:
         ]
 
         return self_links + [(i - 1, j - 1) for (i, j) in joint_links]
+
+    def generate_skl_mask(self):
+        r"""Get skeleton mask for H36M skeleton with 22 joints.
+
+        Returns
+        -------
+        list[tup[int]]
+            Edge list with bone links and self links.
+        """
+        # Create adjacency matrix
+        skl_mask = torch.zeros(
+            self.NUM_JOINTS, self.NUM_JOINTS, requires_grad=False
+        )
+        for i, j in self.bone_list:
+            skl_mask[i, j] = 1
+            skl_mask[j, i] = 1
+        return skl_mask
 
     def generate_time_edges(self, n_times):
         r"""Generate list of edges only through time.

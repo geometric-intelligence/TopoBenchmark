@@ -2,8 +2,8 @@
 
 from omegaconf import DictConfig
 
-from topobenchmarkx.data.datasets import CitationHypergraphDataset
-from topobenchmarkx.data.loaders.base import AbstractLoader
+from topobenchmark.data.datasets import CitationHypergraphDataset
+from topobenchmark.data.loaders.base import AbstractLoader
 
 
 class CitationHypergraphDatasetLoader(AbstractLoader):

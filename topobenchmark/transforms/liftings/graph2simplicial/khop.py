@@ -7,7 +7,7 @@ from typing import Any
 import torch_geometric
 from toponetx.classes import SimplicialComplex
 
-from topobenchmarkx.transforms.liftings.graph2simplicial.base import (
+from topobenchmark.transforms.liftings.graph2simplicial.base import (
     Graph2SimplicialLifting,
 )
 

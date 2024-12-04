@@ -4,7 +4,7 @@ import networkx as nx
 import torch_geometric
 from torch_geometric.utils.undirected import is_undirected, to_undirected
 
-from topobenchmarkx.transforms.liftings import AbstractLifting
+from topobenchmark.transforms.liftings import AbstractLifting
 
 
 class GraphLifting(AbstractLifting):

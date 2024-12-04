@@ -6,7 +6,7 @@ import torch
 import torch.nn.functional as F
 from torch_geometric.data import Data
 
-from topobenchmarkx.data.utils import get_routes_from_neighborhoods
+from topobenchmark.data.utils import get_routes_from_neighborhoods
 
 
 class TopoTune(torch.nn.Module):

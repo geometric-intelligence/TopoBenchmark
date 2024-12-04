@@ -67,7 +67,7 @@ latex_elements = {}
 latex_documents = [
     (
         master_doc,
-        "topobenchmarkx.tex",
+        "topobenchmark.tex",
         "TopoBenchmarkX Documentation",
         "PyT-Team",
         "manual",
@@ -75,16 +75,16 @@ latex_documents = [
 ]
 
 man_pages = [
-    (master_doc, "topobenchmarkx", "TopoBenchmarkX Documentation", [author], 1)
+    (master_doc, "topobenchmark", "TopoBenchmarkX Documentation", [author], 1)
 ]
 
 texinfo_documents = [
     (
         master_doc,
-        "topobenchmarkx",
+        "topobenchmark",
         "TopoBenchmarkX Documentation",
         author,
-        "topobenchmarkx",
+        "topobenchmark",
         "One line description of project.",
         "Miscellaneous",
     ),

@@ -56,7 +56,7 @@ If you do not have conda on your machine, please follow [their guide](https://do
 First, clone the `TopoBenchmark` repository and set up a conda environment `tbx` with python 3.11.3. 
 
 ```
-git clone git@github.com:geometric-intelligence/topobenchmarkx.git
+git clone git@github.com:geometric-intelligence/topobenchmark.git
 cd TopoBenchmark
 conda create -n tbx python=3.11.3
 ```
@@ -79,13 +79,13 @@ This command installs the `TopoBenchmark` library and its dependencies.
 Next, train the neural networks by running the following command:
 
 ```
-python -m topobenchmarkx 
+python -m topobenchmark 
 ```
 
 Thanks to `hydra` implementation, one can easily override the default experiment configuration through the command line. For instance, the model and dataset can be selected as:
 
 ```
-python -m topobenchmarkx model=cell/cwn dataset=graph/MUTAG
+python -m topobenchmark model=cell/cwn dataset=graph/MUTAG
 ```
 
 **Remark:** By default, our pipeline identifies the source and destination topological domains, and applies a default lifting between them if required.
@@ -160,7 +160,7 @@ To implement and train a GCCN, run the following command line with the desired c
 
 
 ```
-python -m topobenchmarkx \
+python -m topobenchmark \
     dataset=graph/PROTEINS \
     dataset.split_params.data_seed=1 \
     model=cell/topotune\
@@ -284,25 +284,25 @@ For ease of use, TopoBenchmark employs <img src="https://github.com/wesbos/Font-
 
 First, clone the repository and navigate to the correct folder.
 ```
-git clone git@github.com:geometric-intelligence/topobenchmarkx.git
+git clone git@github.com:geometric-intelligence/topobenchmark.git
 cd TopoBenchmark
 ```
 
 Then, build the Docker image.
 ```
-docker build -t topobenchmarkx:new .
+docker build -t topobenchmark:new .
 ```
 
 Depending if you want to use GPUs or not, these are the commands to run the Docker image and mount the current directory.
 
 With GPUs
 ```
-docker run -it -d --gpus all --volume $(pwd):/TopoBenchmark topobenchmarkx:new
+docker run -it -d --gpus all --volume $(pwd):/TopoBenchmark topobenchmark:new
 ```
 
 With CPU
 ```
-docker run -it -d --volume $(pwd):/TopoBenchmark topobenchmarkx:new
+docker run -it -d --volume $(pwd):/TopoBenchmark topobenchmark:new
 ```
 
 Happy development!

@@ -1,14 +1,14 @@
-"""This module contains the transforms for the topobenchmarkx package."""
+"""This module contains the transforms for the topobenchmark package."""
 
 from typing import Any
 
-from topobenchmarkx.transforms.data_manipulations import DATA_MANIPULATIONS
-from topobenchmarkx.transforms.feature_liftings import FEATURE_LIFTINGS
-from topobenchmarkx.transforms.liftings.graph2cell import GRAPH2CELL_LIFTINGS
-from topobenchmarkx.transforms.liftings.graph2hypergraph import (
+from topobenchmark.transforms.data_manipulations import DATA_MANIPULATIONS
+from topobenchmark.transforms.feature_liftings import FEATURE_LIFTINGS
+from topobenchmark.transforms.liftings.graph2cell import GRAPH2CELL_LIFTINGS
+from topobenchmark.transforms.liftings.graph2hypergraph import (
     GRAPH2HYPERGRAPH_LIFTINGS,
 )
-from topobenchmarkx.transforms.liftings.graph2simplicial import (
+from topobenchmark.transforms.liftings.graph2simplicial import (
     GRAPH2SIMPLICIAL_LIFTINGS,
 )
 

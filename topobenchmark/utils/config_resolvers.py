@@ -1,4 +1,4 @@
-"""Configuration resolvers for the topobenchmarkx package."""
+"""Configuration resolvers for the topobenchmark package."""
 
 import os
 

@@ -1,10 +1,10 @@
-"""Loss module for the topobenchmarkx package."""
+"""Loss module for the topobenchmark package."""
 
 import torch
 import torch_geometric
 
-from topobenchmarkx.loss.base import AbstractLoss
-from topobenchmarkx.loss.dataset import DatasetLoss
+from topobenchmark.loss.base import AbstractLoss
+from topobenchmark.loss.dataset import DatasetLoss
 
 
 class TBXLoss(AbstractLoss):

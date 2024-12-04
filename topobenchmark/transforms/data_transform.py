@@ -2,7 +2,7 @@
 
 import torch_geometric
 
-from topobenchmarkx.transforms import TRANSFORMS
+from topobenchmark.transforms import TRANSFORMS
 
 
 class DataTransform(torch_geometric.transforms.BaseTransform):

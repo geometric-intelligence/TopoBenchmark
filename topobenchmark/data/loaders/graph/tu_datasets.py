@@ -4,7 +4,7 @@ from omegaconf import DictConfig
 from torch_geometric.data import Dataset
 from torch_geometric.datasets import TUDataset
 
-from topobenchmarkx.data.loaders.base import AbstractLoader
+from topobenchmark.data.loaders.base import AbstractLoader
 
 
 class TUDatasetLoader(AbstractLoader):

@@ -1,16 +1,16 @@
 """This module implements the wrappers for the neural networks."""
 
-from topobenchmarkx.nn.wrappers.base import AbstractWrapper
-from topobenchmarkx.nn.wrappers.cell import (
+from topobenchmark.nn.wrappers.base import AbstractWrapper
+from topobenchmark.nn.wrappers.cell import (
     CANWrapper,
     CCCNWrapper,
     CCXNWrapper,
     CWNWrapper,
 )
-from topobenchmarkx.nn.wrappers.combinatorial import TuneWrapper
-from topobenchmarkx.nn.wrappers.graph import GNNWrapper, GraphMLPWrapper
-from topobenchmarkx.nn.wrappers.hypergraph import HypergraphWrapper
-from topobenchmarkx.nn.wrappers.simplicial import (
+from topobenchmark.nn.wrappers.combinatorial import TuneWrapper
+from topobenchmark.nn.wrappers.graph import GNNWrapper, GraphMLPWrapper
+from topobenchmark.nn.wrappers.hypergraph import HypergraphWrapper
+from topobenchmark.nn.wrappers.simplicial import (
     SANWrapper,
     SCCNNWrapper,
     SCCNWrapper,
@@ -19,8 +19,8 @@ from topobenchmarkx.nn.wrappers.simplicial import (
 
 # ... import other readout classes here
 # For example:
-# from topobenchmarkx.nn.wrappers.other_wrapper_1 import OtherWrapper1
-# from topobenchmarkx.nn.wrappers.other_wrapper_2 import OtherWrapper2
+# from topobenchmark.nn.wrappers.other_wrapper_1 import OtherWrapper1
+# from topobenchmark.nn.wrappers.other_wrapper_2 import OtherWrapper2
 
 
 # Export all wrappers

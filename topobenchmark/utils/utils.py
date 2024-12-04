@@ -7,7 +7,7 @@ from typing import Any
 
 from omegaconf import DictConfig
 
-from topobenchmarkx.utils import pylogger, rich_utils
+from topobenchmark.utils import pylogger, rich_utils
 
 log = pylogger.RankedLogger(__name__, rank_zero_only=True)
 

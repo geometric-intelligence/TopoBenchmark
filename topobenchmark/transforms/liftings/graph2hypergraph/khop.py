@@ -3,7 +3,7 @@
 import torch
 import torch_geometric
 
-from topobenchmarkx.transforms.liftings.graph2hypergraph import (
+from topobenchmark.transforms.liftings.graph2hypergraph import (
     Graph2HypergraphLifting,
 )
 

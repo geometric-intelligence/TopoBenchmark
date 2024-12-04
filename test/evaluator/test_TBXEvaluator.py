@@ -1,7 +1,7 @@
 """ Test the TBXEvaluator class."""
 import pytest
 
-from topobenchmarkx.evaluator import TBXEvaluator
+from topobenchmark.evaluator import TBXEvaluator
 
 class TestTBXEvaluator:
     """ Test the TBXEvaluator class."""

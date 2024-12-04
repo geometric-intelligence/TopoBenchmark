@@ -1,6 +1,6 @@
 """Wrapper for the hypergraph models."""
 
-from topobenchmarkx.nn.wrappers.base import AbstractWrapper
+from topobenchmark.nn.wrappers.base import AbstractWrapper
 
 
 class HypergraphWrapper(AbstractWrapper):

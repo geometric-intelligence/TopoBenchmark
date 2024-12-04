@@ -1,17 +1,17 @@
 # numpydoc ignore=GL08
-from topobenchmarkx.utils.instantiators import (
+from topobenchmark.utils.instantiators import (
     instantiate_callbacks,
     instantiate_loggers,
 )
-from topobenchmarkx.utils.logging_utils import (
+from topobenchmark.utils.logging_utils import (
     log_hyperparameters,
 )
-from topobenchmarkx.utils.pylogger import RankedLogger
-from topobenchmarkx.utils.rich_utils import (
+from topobenchmark.utils.pylogger import RankedLogger
+from topobenchmark.utils.rich_utils import (
     enforce_tags,
     print_config_tree,
 )
-from topobenchmarkx.utils.utils import (
+from topobenchmark.utils.utils import (
     extras,
     get_metric_value,
     task_wrapper,

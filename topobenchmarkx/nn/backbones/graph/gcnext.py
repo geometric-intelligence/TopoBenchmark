@@ -338,7 +338,7 @@ class GCBlock(nn.Module):
         # Initialize different convolution types
         self.skeletal_conv = SkeletalConvolution()
         self.temporal_conv = TemporalConvolution(n_frames=seq_len)
-        self.coordinate_conv = JointCoordinateConvolution(dim, seq_len)
+        self.coordinate_conv = JointCoordinateConvolution()
         self.temp_joint_conv = TemporalJointConvolution(dim, seq_len)
 
         # Update and normalization layers
@@ -589,7 +589,9 @@ class SkeletalConvolution(nn.Module):
             b, self.skl.NUM_JOINTS, self.skl.NUM_CHANNELS, t
         )  # (batch, 22, 3, 50)
 
-        masked_weights = self.weights.mul(self.skl.skl_mask)  # (22,22)
+        masked_weights = self.weights.mul(
+            self.skl.skl_mask.to(x.device)
+        )  # (22,22)
         processed_x = torch.einsum(
             "vj, bjct->bvct", masked_weights, reshaped_x
         )  # (22,22) x (batch,22,3,50) -> (batch,22,3,50)
@@ -648,7 +650,7 @@ class TemporalConvolution(nn.Module):
         # (n_frames, n_frames) x (batch, joint*channel, n_frames) -> (batch, joint*channel, n_frames)
         # (50, 50) x (256, 66, 50) -> (256, 66, 50)
         return torch.einsum(
-            "ft,bnt->bnf", self.weights.mul(self.temporal_mask), x
+            "ft,bnt->bnf", self.weights.mul(self.temporal_mask.to(x.device)), x
         )
 
 

@@ -601,32 +601,33 @@ class H36MSkeleton:
     NUM_JOINTS: ClassVar = 22
     NUM_CHANNELS: ClassVar = 3
 
+    # Labels from here: https://github.com/qxcv/pose-prediction/blob/master/H36M-NOTES.md
     USED_JOINT_INDICES: ClassVar = np.array(
         [
-            2,
-            3,
-            4,
-            5,
-            7,
-            8,
-            9,
-            10,
-            12,
-            13,
-            14,
-            15,
-            17,
-            18,
-            19,
-            21,
-            22,
-            25,
-            26,
-            27,
-            29,
-            30,
+            2,  # RHip
+            3,  # RKnee
+            4,  # RAnkle
+            5,  # RFoot
+            7,  # LHip
+            8,  # LKnee
+            9,  # LAnkle
+            10,  # LFoot
+            12,  # Pelvis?
+            13,  # Torso
+            14,  # Base of neck (same as 17, 25?)
+            15,  # Head low
+            17,  # Base of neck (same as 14, 25?)
+            18,  # LShoulder
+            19,  # LElbow
+            21,  # LWrist
+            22,  # LHand
+            25,  # Base of neck (same as 14, 17?)
+            26,  # RShoulder
+            27,  # RElbow
+            29,  # RWrist
+            30,  # RHand
         ]
-    ).astype(np.int64)
+    )
 
     def __init__(self):
         r"""H36M skeleton with 22 joints."""

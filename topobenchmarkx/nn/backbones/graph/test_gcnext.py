@@ -12,109 +12,101 @@ from topobenchmarkx.nn.backbones.graph.gcnext import (
     TemporalJointConvolution,
 )
 
+BATCH_SIZE = 4
+N_JOINTS = 22
+N_CHANNELS = 3
+N_NODES_PER_FRAME = N_JOINTS * N_CHANNELS
+N_FRAMES = 50
+
 
 def test_temporal_joint_convolution_equivalence():
     """Test that TemporalJointConvolution forward pass matches reference implementation."""
-    # Setup test parameters
-    batch_size = 4
-    num_joints = 22
-    channels = 3
-    seq_len = 50
-    vertices = num_joints * channels
-    dim = vertices
-
     # Create random input tensor
-    x = torch.randn(batch_size, vertices, seq_len)
+    x = torch.randn(BATCH_SIZE, N_JOINTS, N_CHANNELS, N_FRAMES)
 
     # Current implementation output
-    model = TemporalJointConvolution(n_nodes_per_frame=dim, n_frames=seq_len)
+    model = TemporalJointConvolution(
+        n_joints=N_JOINTS, n_channels=N_CHANNELS, n_frames=N_FRAMES
+    )
     output_current = model(x)
 
     # Reference implementation
     traj_mask = torch.tril(
-        torch.ones(seq_len, seq_len, requires_grad=False), 1
-    ) * torch.triu(torch.ones(seq_len, seq_len, requires_grad=False), -1)
+        torch.ones(N_FRAMES, N_FRAMES, requires_grad=False), 1
+    ) * torch.triu(torch.ones(N_FRAMES, N_FRAMES, requires_grad=False), -1)
     traj_mask.diagonal().fill_(0)
 
+    # Input and output shapes differ, check to make sure that it's fine.
+    reshaped_x = x.reshape(BATCH_SIZE, N_NODES_PER_FRAME, N_FRAMES)
     output_reference = torch.einsum(
-        "nft,bnt->bnf", model.weights.mul(traj_mask.unsqueeze(0)), x
+        "nft,bnt->bnf", model.weights.mul(traj_mask.unsqueeze(0)), reshaped_x
+    )
+    reshaped_output_reference = output_reference.reshape(
+        BATCH_SIZE, N_JOINTS, N_CHANNELS, N_FRAMES
     )
 
     # Check outputs match
     assert torch.allclose(
-        output_current, output_reference, rtol=1e-5, atol=1e-5
+        output_current, reshaped_output_reference, rtol=1e-5, atol=1e-5
     ), "Current and reference implementations produce different outputs"
 
 
 def test_joint_coordinate_convolution_equivalence():
     """Test that JointCoordinateConvolution forward pass matches reference implementation."""
-    # Setup test parameters
-    batch_size = 4
-    num_joints = 22
-    channels = 3
-    seq_len = 50
-    vertices = num_joints * channels
-
     # Create random input tensor
-    x = torch.randn(batch_size, vertices, seq_len)
+    x = torch.randn(BATCH_SIZE, N_JOINTS, N_CHANNELS, N_FRAMES)
 
     # Current implementation output
     model = JointCoordinateConvolution()
     output_current = model(x)
 
     # Reference implementation
-    b, v, t = x.shape
-    x3 = x.reshape(b, v // 3, 3, t)
+    reshaped_x = x.reshape(BATCH_SIZE, N_NODES_PER_FRAME, N_FRAMES)
+    b, v, t = reshaped_x.shape
+    x3 = reshaped_x.reshape(b, v // 3, 3, t)
     x3 = torch.einsum("jkc,bjct->bjkt", model.weights, x3)
     output_reference = x3.reshape(b, v, t)
+    reshaped_output_reference = output_reference.reshape(
+        BATCH_SIZE, N_JOINTS, N_CHANNELS, N_FRAMES
+    )
 
     # Check outputs match
     assert torch.allclose(
-        output_current, output_reference, rtol=1e-5, atol=1e-5
+        output_current, reshaped_output_reference, rtol=1e-5, atol=1e-5
     ), "Current and reference implementations produce different outputs"
 
 
 def test_temporal_convolution_equivalence():
     """Test that TemporalConvolution forward pass matches reference implementation."""
-    # Setup test parameters
-    batch_size = 4
-    num_joints = 22
-    channels = 3
-    seq_len = 50
-    vertices = num_joints * channels
-
     # Create random input tensor
-    x = torch.randn(batch_size, vertices, seq_len)
+    x = torch.randn(BATCH_SIZE, N_JOINTS, N_CHANNELS, N_FRAMES)
 
     # Current implementation output
-    model = TemporalConvolution(n_frames=seq_len)
+    model = TemporalConvolution(n_frames=N_FRAMES)
     output_current = model(x)
 
     # Reference implementation
+    reshaped_x = x.reshape(BATCH_SIZE, N_NODES_PER_FRAME, N_FRAMES)
     traj_mask = torch.tril(
-        torch.ones(seq_len, seq_len, requires_grad=False), 1
-    ) * torch.triu(torch.ones(seq_len, seq_len, requires_grad=False), -1)
+        torch.ones(N_FRAMES, N_FRAMES, requires_grad=False), 1
+    ) * torch.triu(torch.ones(N_FRAMES, N_FRAMES, requires_grad=False), -1)
     output_reference = torch.einsum(
-        "ft,bnt->bnf", model.weights.mul(traj_mask), x
+        "ft,bnt->bnf", model.weights.mul(traj_mask), reshaped_x
+    )
+    reshaped_output_reference = output_reference.reshape(
+        BATCH_SIZE, N_JOINTS, N_CHANNELS, N_FRAMES
     )
 
     # Check outputs match
     assert torch.allclose(
-        output_current, output_reference, rtol=1e-5, atol=1e-5
+        output_current, reshaped_output_reference, rtol=1e-5, atol=1e-5
     ), "Current and reference implementations produce different outputs"
 
 
 def test_skeletal_convolution_equivalence():
     """Test that SkeletalConvolution forward pass matches reference implementation."""
-    # Setup test parameters
-    batch_size = 4
-    num_joints = 22
-    channels = 3
-    seq_len = 50
-    vertices = num_joints * channels
-
     # Create random input tensor
-    x = torch.randn(batch_size, vertices, seq_len)
+    x = torch.randn(BATCH_SIZE, N_JOINTS, N_CHANNELS, N_FRAMES)
 
     # Current implementation output
     model = SkeletalConvolution()
@@ -127,12 +119,16 @@ def test_skeletal_convolution_equivalence():
     skl_mask = bi_skl
 
     # Reference implementation
-    b, v, t = x.shape
-    x1 = x.reshape(b, v // 3, 3, t)
+    reshaped_x = x.reshape(BATCH_SIZE, N_NODES_PER_FRAME, N_FRAMES)
+    b, v, t = reshaped_x.shape
+    x1 = reshaped_x.reshape(b, v // 3, 3, t)
     x1 = torch.einsum("vj,bjct->bvct", model.weights.mul(skl_mask), x1)
     output_reference = x1.reshape(b, v, t)
+    reshaped_output_reference = output_reference.reshape(
+        BATCH_SIZE, N_JOINTS, N_CHANNELS, N_FRAMES
+    )
 
     # Check outputs match
     assert torch.allclose(
-        output_current, output_reference, rtol=1e-5, atol=1e-5
+        output_current, reshaped_output_reference, rtol=1e-5, atol=1e-5
     ), "Current and reference implementations produce different outputs"

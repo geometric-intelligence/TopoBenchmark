@@ -1,4 +1,4 @@
-"""Dataset class compatible with TBXDataloader."""
+"""Dataset class compatible with TBDataloader."""
 
 import torch_geometric
 

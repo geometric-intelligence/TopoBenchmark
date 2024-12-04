@@ -1,4 +1,4 @@
-_target_: topobenchmark.model.TBXModel
+_target_: topobenchmark.model.TBModel
 
 model_name: topotune_onehasse
 model_domain: simplicial

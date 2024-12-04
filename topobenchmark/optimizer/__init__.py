@@ -1,7 +1,7 @@
 """Init file for optimizer module."""
 
-from .optimizer import TBXOptimizer
+from .optimizer import TBOptimizer
 
 __all__ = [
-    "TBXOptimizer",
+    "TBOptimizer",
 ]

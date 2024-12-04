@@ -11,7 +11,7 @@ TORCH_OPTIMIZERS = torch.optim.__dict__
 TORCH_SCHEDULERS = torch.optim.lr_scheduler.__dict__
 
 
-class TBXOptimizer(AbstractOptimizer):
+class TBOptimizer(AbstractOptimizer):
     """Optimizer class that manage both optimizer and scheduler, fully compatible with `torch.optim` classes.
 
     Parameters
@@ -48,7 +48,7 @@ class TBXOptimizer(AbstractOptimizer):
         """Configure the optimizer and scheduler.
 
         Act as a wrapper to provide the LightningTrainer module the required config dict
-        when it calls `TBXModel`'s `configure_optimizers()` method.
+        when it calls `TBModel`'s `configure_optimizers()` method.
 
         Parameters
         ----------

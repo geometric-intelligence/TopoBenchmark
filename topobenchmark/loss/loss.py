@@ -7,7 +7,7 @@ from topobenchmark.loss.base import AbstractLoss
 from topobenchmark.loss.dataset import DatasetLoss
 
 
-class TBXLoss(AbstractLoss):
+class TBLoss(AbstractLoss):
     r"""Defines the default model loss for the given task.
 
     Parameters

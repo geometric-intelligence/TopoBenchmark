@@ -1,7 +1,7 @@
-"""TBX model module."""
+"""TB model module."""
 
-from .model import TBXModel
+from .model import TBModel
 
 __all__ = [
-    "TBXModel",
+    "TBModel",
 ]

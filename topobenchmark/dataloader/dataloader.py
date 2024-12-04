@@ -1,4 +1,4 @@
-"TBXDataloader class."
+"TBDataloader class."
 
 from typing import Any
 
@@ -9,7 +9,7 @@ from topobenchmark.dataloader.dataload_dataset import DataloadDataset
 from topobenchmark.dataloader.utils import collate_fn
 
 
-class TBXDataloader(LightningDataModule):
+class TBDataloader(LightningDataModule):
     r"""This class takes care of returning the dataloaders for the training, validation, and test datasets.
 
     It also handles the collate function. The class is designed to work with the `torch` dataloaders.

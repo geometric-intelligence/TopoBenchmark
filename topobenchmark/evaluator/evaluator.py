@@ -5,7 +5,7 @@ from torchmetrics import MetricCollection
 from topobenchmark.evaluator import METRICS, AbstractEvaluator
 
 
-class TBXEvaluator(AbstractEvaluator):
+class TBEvaluator(AbstractEvaluator):
     r"""Evaluator class that is responsible for computing the metrics.
 
     Parameters

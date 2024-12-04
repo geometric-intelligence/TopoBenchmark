@@ -1,4 +1,4 @@
-"""This module defines the `TBXModel` class."""
+"""This module defines the `TBModel` class."""
 
 from typing import Any
 
@@ -8,7 +8,7 @@ from torch_geometric.data import Data
 from torchmetrics import MeanMetric
 
 
-class TBXModel(LightningModule):
+class TBModel(LightningModule):
     r"""A `LightningModule` to define a network.
 
     Parameters

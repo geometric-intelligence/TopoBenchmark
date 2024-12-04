@@ -1,14 +1,44 @@
 """Unit tests for gcnext."""
 
+import numpy as np
 import pytest
 import torch
 
 from topobenchmarkx.nn.backbones.graph.gcnext import (
-    SkeletalConvolution,
     H36MSkeleton,
+    SkeletalConvolution,
+    TemporalConvolution,
 )
 
-import numpy as np
+
+def test_temporal_convolution_equivalence():
+    """Test that TemporalConvolution forward pass matches reference implementation."""
+    # Setup test parameters
+    batch_size = 4
+    num_joints = 22
+    channels = 3
+    seq_len = 50
+    vertices = num_joints * channels
+
+    # Create random input tensor
+    x = torch.randn(batch_size, vertices, seq_len)
+
+    # Current implementation output
+    model = TemporalConvolution(n_frames=seq_len)
+    output_current = model(x)
+
+    # Reference implementation
+    traj_mask = torch.tril(
+        torch.ones(seq_len, seq_len, requires_grad=False), 1
+    ) * torch.triu(torch.ones(seq_len, seq_len, requires_grad=False), -1)
+    output_reference = torch.einsum(
+        "ft,bnt->bnf", model.weights.mul(traj_mask), x
+    )
+
+    # Check outputs match
+    assert torch.allclose(
+        output_current, output_reference, rtol=1e-5, atol=1e-5
+    ), "Current and reference implementations produce different outputs"
 
 
 def test_skeletal_convolution_equivalence():

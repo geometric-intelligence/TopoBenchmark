@@ -336,11 +336,8 @@ class GCBlock(nn.Module):
         super().__init__()
 
         # Initialize different convolution types
-        # Skeletal not working yet...
-        self.skeletal_conv = (
-            SkeletalConvolution()
-        )  # Don't need these?? dim, seq_len)
-        self.temporal_conv = TemporalConvolution(dim, seq_len)
+        self.skeletal_conv = SkeletalConvolution()
+        self.temporal_conv = TemporalConvolution(n_frames=seq_len)
         self.coordinate_conv = JointCoordinateConvolution(dim, seq_len)
         self.temp_joint_conv = TemporalJointConvolution(dim, seq_len)
 
@@ -632,41 +629,37 @@ class SkeletalConvolution(nn.Module):
         return processed_x.reshape(b, v, t)  # (batch, 66, 50)
 
 
-class TemporalConvolution(BaseGraphConvolution):
+class TemporalConvolution(nn.Module):
     """Convolution along temporal connections.
 
     Parameters
     ----------
-    dim : str
-        Blah.
-    seq_len : str
-        Blah.
+    n_frames : int
+        Number of frames, length of time dimension.
     """
 
-    def __init__(self, dim: int, seq_len: int):
-        super().__init__(dim, seq_len)
-        self.adj_t = nn.Parameter(torch.zeros(seq_len, seq_len))
-        # Create tridiagonal mask
-        self.register_buffer(
-            "traj_mask", self._create_tridiagonal_mask(seq_len)
-        )
+    def __init__(self, n_frames: int):
+        super().__init__()
+
+        self.weights = nn.Parameter(torch.zeros(n_frames, n_frames))
+        self.temporal_mask = self._create_tridiagonal_mask(n_frames)
 
     @staticmethod
-    def _create_tridiagonal_mask(seq_len: int) -> torch.Tensor:
+    def _create_tridiagonal_mask(n_frames: int) -> torch.Tensor:
         """Create a tridiagonal mask matrix.
 
         Parameters
         ----------
-        seq_len : str
-            Blah.
+        n_frames : int
+            Number of frames, length of time dimension.
 
         Returns
         -------
-        blah
-            Blan.
+        torch.tensor
+            Temporal mask so you only look backwards in time, shape (num_frames, num_frames).
         """
-        mask = torch.tril(torch.ones(seq_len, seq_len), 1) * torch.triu(
-            torch.ones(seq_len, seq_len), -1
+        mask = torch.tril(torch.ones(n_frames, n_frames), 1) * torch.triu(
+            torch.ones(n_frames, n_frames), -1
         )
         mask.diagonal().fill_(0)
         return mask
@@ -684,7 +677,11 @@ class TemporalConvolution(BaseGraphConvolution):
         torch.Tensor [batch, vertices, time]
             Features after temporal convolution.
         """
-        return torch.einsum("ft,bnt->bnf", self.adj_t.mul(self.traj_mask), x)
+        # (n_frames, n_frames) x (batch, joint*channel, n_frames) -> (batch, joint*channel, n_frames)
+        # (50, 50) x (256, 66, 50) -> (256, 66, 50)
+        return torch.einsum(
+            "ft,bnt->bnf", self.weights.mul(self.temporal_mask), x
+        )
 
 
 class JointCoordinateConvolution(BaseGraphConvolution):
@@ -878,56 +875,56 @@ class H36MSkeleton:
             skl_mask[j, i] = 1
         return skl_mask
 
-    def generate_time_edges(self, n_times):
-        r"""Generate list of edges only through time.
+    # def generate_time_edges(self, n_times):
+    #     r"""Generate list of edges only through time.
 
-        Parameters
-        ----------
-        n_times : int
-            Number of frames to consider.
+    #     Parameters
+    #     ----------
+    #     n_times : int
+    #         Number of frames to consider.
 
-        Returns
-        -------
-        torch.tensor
-            Time edges.
-        """
-        time_edges = []
-        for c in range(self.NUM_CHANNELS):
-            for j in range(self.NUM_JOINTS):
-                for t1 in range(n_times):
-                    for t2 in range(n_times):
-                        edge = [
-                            self.compute_flat_index(t1, j, c),
-                            self.compute_flat_index(t2, j, c),
-                        ]
-                        time_edges.append(edge)
-        return torch.tensor(time_edges).T
+    #     Returns
+    #     -------
+    #     torch.tensor
+    #         Time edges.
+    #     """
+    #     time_edges = []
+    #     for c in range(self.NUM_CHANNELS):
+    #         for j in range(self.NUM_JOINTS):
+    #             for t1 in range(n_times):
+    #                 for t2 in range(n_times):
+    #                     edge = [
+    #                         self.compute_flat_index(t1, j, c),
+    #                         self.compute_flat_index(t2, j, c),
+    #                     ]
+    #                     time_edges.append(edge)
+    #     return torch.tensor(time_edges).T
 
-    def generate_bone_edges(self, n_times):
-        """Generate list of edges along bones across all frames.
+    # def generate_bone_edges(self, n_times):
+    #     """Generate list of edges along bones across all frames.
 
-        Parameters
-        ----------
-        n_times : int
-            Number of frames to consider.
+    #     Parameters
+    #     ----------
+    #     n_times : int
+    #         Number of frames to consider.
 
-        Returns
-        -------
-        torch.tensor
-            Bone edges spanning all frames, shape [2, num_edges].
-        """
-        bone_edges = []
+    #     Returns
+    #     -------
+    #     torch.tensor
+    #         Bone edges spanning all frames, shape [2, num_edges].
+    #     """
+    #     bone_edges = []
 
-        # For each frame
-        for t in range(n_times):
-            # For each channel
-            for c in range(self.NUM_CHANNELS):
-                # For each bone connection
-                for j1, j2 in self.bone_list:
-                    edge = [
-                        self.compute_flat_index(t, j1, c),
-                        self.compute_flat_index(t, j2, c),
-                    ]
-                    bone_edges.append(edge)
+    #     # For each frame
+    #     for t in range(n_times):
+    #         # For each channel
+    #         for c in range(self.NUM_CHANNELS):
+    #             # For each bone connection
+    #             for j1, j2 in self.bone_list:
+    #                 edge = [
+    #                     self.compute_flat_index(t, j1, c),
+    #                     self.compute_flat_index(t, j2, c),
+    #                 ]
+    #                 bone_edges.append(edge)
 
-        return torch.tensor(bone_edges).T
+    #     return torch.tensor(bone_edges).T

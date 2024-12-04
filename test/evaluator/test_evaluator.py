@@ -3,7 +3,7 @@ import pytest
 
 from topobenchmark.evaluator import TBEvaluator
 
-def test_evaluator(self):
+def test_evaluator():
     """ Setup the test."""
     evaluator_multilable = TBEvaluator(task="multilabel classification")
     evaluator_regression = TBEvaluator(task="regression")

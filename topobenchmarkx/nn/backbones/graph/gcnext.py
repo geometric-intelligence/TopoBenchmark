@@ -45,9 +45,9 @@ class GCNext(nn.Module):
         self.arr0 = Rearrange("b n d -> b d n")
         self.arr1 = Rearrange("b d n -> b n d")
 
-        self.dynamic_layers = TransGraphConvolution(config.motion_mlp)
+        self.dynamic_layers = TransGraphConvolution(config)
 
-        self.temporal_fc_in = False  # config.motion_fc_in.temporal_fc
+        self.temporal_fc_in = True  # False  # config.motion_fc_in.temporal_fc
         self.temporal_fc_out = False  # config.motion_fc_out.temporal_fc
         if self.temporal_fc_in:
             # if true then layer is 50x50
@@ -123,16 +123,21 @@ class GCNext(nn.Module):
 
         if self.temporal_fc_in:
             motion_feats = self.arr0(motion_input)
-            # Transform across time, this means it's 50x50
+            # Transform across time
             motion_feats = self.motion_fc_in(motion_feats)
         else:
-            # Transform across features (66×66) with temporal weighting
-            # this means it's 66x66
+            # Transform across features (66,66) with temporal weighting
             motion_feats = self.motion_fc_in(motion_input)
             motion_feats = self.arr0(motion_feats)  # now its (bs, 66, 50)
             motion_feats = torch.einsum(
                 "bvt,tj->bvj", motion_feats, self.in_weight
-            )  # now it;s [batch_size, 66, 50]
+            )
+
+        # Shape of motion_feats is now (batch_size, 66, 50)
+        # Reshape to be batch 3D blocks (bs, 22, 3, 50)
+        motion_feats = motion_feats.reshape(
+            batch_size, self.n_joints, self.n_channels, self.n_frames
+        )
 
         # Process through dynamic layers
         for i in range(len(self.dynamic_layers.layers)):
@@ -140,6 +145,11 @@ class GCNext(nn.Module):
             motion_feats = self.dynamic_layers.layers[i](
                 motion_feats, self.mlp, if_make_dynamic, tau
             )
+
+        # Reshape to be batch old way (bs, 22*3, 50)
+        motion_feats = motion_feats.reshape(
+            batch_size, self.n_nodes_per_frame, self.n_frames
+        )
 
         if self.temporal_fc_out:
             motion_feats = self.motion_fc_out(motion_feats)
@@ -157,237 +167,99 @@ class GCNext(nn.Module):
         return motion_feats
 
 
-class LN(nn.Module):
-    """Blah.
-
-    Blah.
-
-    Parameters
-    ----------
-    dim : idk
-        Idk.
-    epsilon : idk
-        Idk.
-    """
-
-    def __init__(self, dim, epsilon=1e-5):
-        super().__init__()
-        self.epsilon = epsilon
-
-        self.alpha = nn.Parameter(torch.ones([1, dim, 1]), requires_grad=True)
-        self.beta = nn.Parameter(torch.zeros([1, dim, 1]), requires_grad=True)
-
-    def forward(self, x):
-        """Forward pass.
-
-        Parameters
-        ----------
-        x : torch.Tensor
-            Input of shape [batch*frames*joints*channels, 1].
-
-        Returns
-        -------
-        torch.Tensor
-            Output node features.
-        """
-        mean = x.mean(axis=1, keepdim=True)
-        var = ((x - mean) ** 2).mean(dim=1, keepdim=True)
-        std = (var + self.epsilon).sqrt()
-        y = (x - mean) / std
-        y = y * self.alpha + self.beta
-        return y
-
-
-class LN_v2(nn.Module):
-    """Blah v2.
-
-    Blah.
-
-    Parameters
-    ----------
-    dim : idk
-        Idk.
-    epsilon : idk
-        Idk.
-    """
-
-    def __init__(self, dim, epsilon=1e-5):
-        super().__init__()
-        self.epsilon = epsilon
-
-        self.alpha = nn.Parameter(torch.ones([1, 1, dim]), requires_grad=True)
-        self.beta = nn.Parameter(torch.zeros([1, 1, dim]), requires_grad=True)
-
-    def forward(self, x):
-        """Forward pass.
-
-        Parameters
-        ----------
-        x : torch.Tensor
-            Input of shape [batch*frames*joints*channels, 1].
-
-        Returns
-        -------
-        torch.Tensor
-            Output node features.
-        """
-        mean = x.mean(axis=-1, keepdim=True)
-        var = ((x - mean) ** 2).mean(dim=-1, keepdim=True)
-        std = (var + self.epsilon).sqrt()
-        y = (x - mean) / std
-        y = y * self.alpha + self.beta
-        return y
-
-
-class Spatial_FC(nn.Module):
-    """Blah.
-
-    Blah.
-
-    Parameters
-    ----------
-    dim : idk
-        Idk.
-    """
-
-    def __init__(self, dim):
-        super(Spatial_FC, self).__init__()
-        self.fc = nn.Linear(dim, dim)
-        self.arr0 = Rearrange("b n d -> b d n")
-        self.arr1 = Rearrange("b d n -> b n d")
-
-    def forward(self, x):
-        """Forward pass.
-
-        Parameters
-        ----------
-        x : torch.Tensor
-            Input of shape [batch*frames*joints*channels, 1].
-
-        Returns
-        -------
-        torch.Tensor
-            Output node features.
-        """
-        x = self.arr0(x)
-        x = self.fc(x)
-        x = self.arr1(x)
-        return x
-
-
-class Temporal_FC(nn.Module):
-    """Blah.
-
-    Blah.
-
-    Parameters
-    ----------
-    dim : idk
-        Idk.
-    """
-
-    def __init__(self, dim):
-        super().__init__()
-        self.fc = nn.Linear(dim, dim)
-
-    def forward(self, x):
-        """Forward pass.
-
-        Parameters
-        ----------
-        x : torch.Tensor
-            Input of shape [batch*frames*joints*channels, 1].
-
-        Returns
-        -------
-        torch.Tensor
-            Output node features.
-        """
-
-        x = self.fc(x)
-        return x
-
-
 class GCBlock(nn.Module):
     """Graph convolution block combining multiple types of convolutions.
 
     Parameters
     ----------
-    dim : idk
-        Idk.
-    seq_len : idk
-        Idk.
-    use_norm : idk
-        Idk.
-    use_spatial_fc : idk
-        Idk.
-    layernorm_axis : idk
-        Idk.
+    n_joints : int
+        Number of joints (dim1).
+    n_channels : int
+        Number of chanels (dim2).
+    n_frames : int
+        Number of frames (dim3).
+    use_norm : bool
+        Whether to use normalisation layer.
+    use_spatial_fc : bool
+        Whether to use spatial fully connected layer or temporal.
+    layernorm_axis : str
+        Which axis to normalize over ('spatial', 'temporal', or 'all').
     """
 
     def __init__(
         self,
-        dim: int,
-        seq_len: int,
+        n_joints: int,
+        n_channels: int,
+        n_frames: int,
         use_norm: bool = True,
         use_spatial_fc: bool = False,
         layernorm_axis: str = "spatial",
     ):
         super().__init__()
 
+        self.n_joints = n_joints
+        self.n_channels = n_channels
+        self.n_frames = n_frames
+
         # Initialize different convolution types
         self.skeletal_conv = SkeletalConvolution()
-        self.temporal_conv = TemporalConvolution(n_frames=seq_len)
+        self.temporal_conv = TemporalConvolution(n_frames=n_frames)
         self.coordinate_conv = JointCoordinateConvolution()
         self.temp_joint_conv = TemporalJointConvolution(
-            n_nodes_per_frame=dim, n_frames=seq_len
+            n_joints=n_joints, n_channels=n_channels, n_frames=n_frames
         )
 
-        # Update and normalization layers
-        self.update = (
-            Spatial_FC(dim) if use_spatial_fc else Temporal_FC(seq_len)
-        )
-        self.norm = self._create_norm_layer(
-            use_norm, layernorm_axis, dim, seq_len
+        # Update layer - either spatial or temporal fully-connected
+        if use_spatial_fc:
+            self.fc = nn.Linear(n_joints * n_channels, n_joints * n_channels)
+            self.arr0 = Rearrange("b j c t -> b t (j c)")
+            self.arr1 = Rearrange(
+                "b t (j c) -> b j c t", j=n_joints, c=n_channels
+            )
+        else:
+            self.fc = nn.Linear(n_frames, n_frames)
+            self.arr0 = Rearrange("b j c t -> b (j c) t")
+            self.arr1 = Rearrange(
+                "b (j c) t -> b j c t", j=n_joints, c=n_channels
+            )
+
+        self.norm = (
+            self._create_norm_layer(layernorm_axis)
+            if use_norm
+            else nn.Identity()
         )
 
         self.reset_parameters()
 
     def reset_parameters(self):
-        """Blah."""
-        nn.init.xavier_uniform_(self.update.fc.weight, gain=1e-8)
-        nn.init.constant_(self.update.fc.bias, 0)
+        """Reset parameters."""
+        nn.init.xavier_uniform_(self.fc.weight, gain=1e-8)
+        nn.init.constant_(self.fc.bias, 0)
 
-    def _create_norm_layer(
-        self, use_norm: bool, axis: str, dim: int, seq_len: int
-    ) -> nn.Module:
-        """Create appropriate normalization layer.
+    def _create_norm_layer(self, axis: str) -> nn.Module:
+        """Create appropriate normalisation layer.
 
         Parameters
         ----------
-        use_norm : bool
-            Idk.
-        axis : bool
-            Idk.
-        dim : bool
-            Idk.
-        seq_len : bool
-            Idk.
+        axis : str
+            Which axis to normalize over ('spatial', 'temporal', or 'all').
 
         Returns
         -------
-        blah
-            Blah.
+        nn.Module
+            Normalisation layer.
         """
-        if not use_norm:
-            return nn.Identity()
-
         if axis == "spatial":
-            return LN(dim)
+            # Normalise each frame independently
+            return nn.GroupNorm(num_groups=1, num_channels=self.n_joints)
         elif axis == "temporal":
-            return LN_v2(seq_len)
+            # Normalise each joint-channel pair independently
+            return nn.LayerNorm([self.n_frames])
         elif axis == "all":
-            return nn.LayerNorm([dim, seq_len])
+            # Normalise everything
+            return nn.LayerNorm(
+                [self.n_joints, self.n_channels, self.n_frames]
+            )
         else:
             raise ValueError(f"Unknown normalization axis: {axis}")
 
@@ -423,7 +295,9 @@ class GCBlock(nn.Module):
         x4 = self.temp_joint_conv(x)
 
         # Dynamic routing
-        prob = torch.einsum("bj,jk->bk", x.mean(1), mlp)
+        b, j, c, t = x.shape
+        x_reshaped = x.reshape(b, j * c, t)
+        prob = torch.einsum("bj,jk->bk", x_reshaped.mean(1), mlp)
         gate = (
             nn.functional.gumbel_softmax(prob, tau=tau, hard=True)
             if if_make_dynamic
@@ -437,10 +311,12 @@ class GCBlock(nn.Module):
         # Kinda sketchily looks like they're always including x1...???
         # Biases model towards skeletal convolution
         x_opts = torch.stack([torch.zeros_like(x1), x2, x3, x4], dim=1)
-        x_combined = torch.einsum("bj,bjvt->bvt", gate, x_opts)
+        x_combined = torch.einsum("bo,bojct->bjct", gate, x_opts)
 
-        # Update and normalize
-        x_out = self.update(x1 + x_combined)
+        # Send through fully connected layer and normalise
+        squished_x = self.arr0(x1 + x_combined)
+        squished_x = self.fc(squished_x)
+        x_out = self.arr1(squished_x)
         x_out = self.norm(x_out)
 
         # Residual connection
@@ -456,12 +332,15 @@ class TransGraphConvolution(nn.Module):
     ----------
     config : dict
         Configuration containing:
-        - dim: blaj
-        - seq: blah
-        - use_norm: blah
-        - use_spatial_fc: blah
-        - num_layers: blah
-        - layernorm_axis: blah
+        - motion_dataset:
+            - n_joints
+            - n_channels
+            - n_frames
+        - motion_mlp:
+            - use_norm: blah
+            - use_spatial_fc: blah
+            - num_layers: blah
+            - layernorm_axis: blah
     """
 
     def __init__(self, config):
@@ -469,13 +348,14 @@ class TransGraphConvolution(nn.Module):
         self.layers = nn.Sequential(
             *[
                 GCBlock(
-                    dim=config.hidden_dim,
-                    seq_len=config.seq_len if "seq_len" in config else None,
-                    use_norm=config.with_normalization,
-                    use_spatial_fc=config.spatial_fc_only,
-                    layernorm_axis=config.norm_axis,
+                    n_joints=config.motion_dataset.n_joints,
+                    n_channels=config.motion_dataset.n_channels,
+                    n_frames=config.motion_dataset.n_frames,
+                    use_norm=config.motion_mlp.with_normalization,
+                    use_spatial_fc=config.motion_mlp.spatial_fc_only,
+                    layernorm_axis=config.motion_mlp.norm_axis,
                 )
-                for i in range(config.num_layers)
+                for i in range(config.motion_mlp.num_layers)
             ]
         )
 
@@ -500,59 +380,6 @@ class TransGraphConvolution(nn.Module):
         """
         x = self.layers(x, mlp, if_make_dynamic, tau)
         return x
-
-
-def _get_activation_fn(activation):
-    """Return an activation function given a string.
-
-    Parameters
-    ----------
-    activation : str
-        Blah.
-
-    Returns
-    -------
-    Activation function
-        Blah.
-    """
-    if activation == "relu":
-        return nn.ReLU
-    if activation == "gelu":
-        return nn.GELU
-    if activation == "glu":
-        return nn.GLU
-    if activation == "silu":
-        return nn.SiLU
-    # if activation == 'swish':
-    #    return nn.Hardswish
-    if activation == "softplus":
-        return nn.Softplus
-    if activation == "tanh":
-        return nn.Tanh
-    raise RuntimeError(f"activation should be relu/gelu, not {activation}.")
-
-
-def _get_norm_fn(norm):
-    """Return a norm given a string.
-
-    Parameters
-    ----------
-    norm : str
-        Blah.
-
-    Returns
-    -------
-    Norm
-        Blah.
-    """
-
-    if norm == "batchnorm":
-        return nn.BatchNorm1d
-    if norm == "layernorm":
-        return nn.LayerNorm
-    if norm == "instancenorm":
-        return nn.InstanceNorm1d
-    raise RuntimeError(f"norm should be batchnorm/layernorm, not {norm}.")
 
 
 ###############################################################
@@ -604,6 +431,8 @@ class SkeletalConvolution(nn.Module):
         super().__init__()
 
         self.skl = H36MSkeleton()
+        self.register_buffer("skl_mask", self.skl.skl_mask)
+
         self.weights = nn.Parameter(
             torch.eye(self.skl.NUM_JOINTS, self.skl.NUM_JOINTS)
         )
@@ -621,21 +450,10 @@ class SkeletalConvolution(nn.Module):
         torch.Tensor [batch, n_joints, n_channels, n_frames]
             Features after spatial convolution with skeleton mask.
         """
-        b, v, t = x.shape  # (batch, 66, 50)
+        masked_weights = self.weights.mul(self.skl_mask)  # (22,22)
 
-        assert v == (self.skl.NUM_CHANNELS * self.skl.NUM_JOINTS)
-        reshaped_x = x.reshape(
-            b, self.skl.NUM_JOINTS, self.skl.NUM_CHANNELS, t
-        )  # (batch, 22, 3, 50)
-
-        masked_weights = self.weights.mul(
-            self.skl.skl_mask.to(x.device)
-        )  # (22,22)
-        processed_x = torch.einsum(
-            "vj, bjct->bvct", masked_weights, reshaped_x
-        )  # (22,22) x (batch,22,3,50) -> (batch,22,3,50)
-
-        return processed_x.reshape(b, v, t)  # (batch, 66, 50)
+        # (22,22) x (batch,22,3,50) -> (batch,22,3,50)
+        return torch.einsum("vj, bjct->bvct", masked_weights, x)
 
 
 class TemporalConvolution(nn.Module):
@@ -653,31 +471,39 @@ class TemporalConvolution(nn.Module):
         self.weights = nn.Parameter(torch.zeros(n_frames, n_frames))
 
         # Only allows connections to adjacent time frames while preventing self-connections
-        self.local_temporal_mask = torch.tril(
+        local_temporal_mask = torch.tril(
             torch.ones(n_frames, n_frames), 1
         ) * torch.triu(torch.ones(n_frames, n_frames), -1)
-        self.local_temporal_mask.diagonal().fill_(0)
+        local_temporal_mask.diagonal().fill_(0)
+        self.register_buffer("local_temporal_mask", local_temporal_mask)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Apply temporal graph convolution.
 
         Parameters
         ----------
-        x : torch.Tensor [batch, vertices, time]
+        x : torch.Tensor [batch, n_joints, n_channels, n_frames]
             Input features.
 
         Returns
         -------
-        torch.Tensor [batch, vertices, time]
+        torch.Tensor [batch, n_joints, n_channels, n_frames]
             Features after temporal convolution.
         """
+        b, j, c, t = x.shape
+
+        x = x.reshape(b, j * c, t)
+
+        masked_weights = self.weights.mul(self.local_temporal_mask)
+
         # (n_frames, n_frames) x (batch, joint*channel, n_frames) -> (batch, joint*channel, n_frames)
-        # (50, 50) x (256, 66, 50) -> (256, 66, 50)
-        return torch.einsum(
+        # (50, 50) x (256, 22, 3, 50) -> (256, 66, 50)
+        x_out = torch.einsum(
             "ft,bnt->bnf",
-            self.weights.mul(self.local_temporal_mask.to(x.device)),
+            masked_weights,
             x,
         )
+        return x_out.reshape(b, j, c, t)
 
 
 class JointCoordinateConvolution(nn.Module):
@@ -699,24 +525,15 @@ class JointCoordinateConvolution(nn.Module):
 
         Parameters
         ----------
-        x : torch.Tensor [batch, vertices, time]
+        x : torch.Tensor [batch, n_joints, n_channels, n_frames]
             Input features.
 
         Returns
         -------
-        torch.Tensor [batch, vertices, time]
+        torch.Tensor [batch, n_joints, n_channels, n_frames]
             Features after joint-coordinate convolution.
         """
-        b, v, t = x.shape
-
-        assert v == (self.skl.NUM_CHANNELS * self.skl.NUM_JOINTS)
-        reshaped_x = x.reshape(
-            b, self.skl.NUM_JOINTS, self.skl.NUM_CHANNELS, t
-        )
-
-        x_out = torch.einsum("jkc,bjct->bjkt", self.weights, reshaped_x)
-
-        return x_out.reshape(b, v, t)
+        return torch.einsum("jkc,bjct->bjkt", self.weights, x)
 
 
 class TemporalJointConvolution(nn.Module):
@@ -724,42 +541,51 @@ class TemporalJointConvolution(nn.Module):
 
     Parameters
     ----------
-    n_nodes_per_frame : int
-        Number of nodes per frame, n_joints * n_channels.
+    n_joints : int
+        Number of joints (22).
+    n_channels : int
+        Number of channels per joint (3).
     n_frames : int
         Number of frames, length of time dimension.
     """
 
-    def __init__(self, n_nodes_per_frame: int, n_frames: int):
+    def __init__(self, n_joints: int, n_channels: int, n_frames: int):
         super().__init__()
         self.weights = nn.Parameter(
-            torch.zeros(n_nodes_per_frame, n_frames, n_frames)
+            torch.zeros(n_joints * n_channels, n_frames, n_frames)
         )
 
-        self.local_temporal_mask = torch.tril(
+        # Add this to the base class!!
+        local_temporal_mask = torch.tril(
             torch.ones(n_frames, n_frames), 1
         ) * torch.triu(torch.ones(n_frames, n_frames), -1)
-        self.local_temporal_mask.diagonal().fill_(0)
+        local_temporal_mask.diagonal().fill_(0)
+        self.register_buffer("local_temporal_mask", local_temporal_mask)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Apply temporal-joint graph convolution.
 
         Parameters
         ----------
-        x : torch.Tensor [batch, vertices, time]
+        x : torch.Tensor [batch, n_joints, n_channels, n_frames]
             Input features.
 
         Returns
         -------
-        torch.Tensor [batch, vertices, time]
+        torch.Tensor [batch, n_joints, n_channels, n_frames]
             Features after temporal-joint convolution.
         """
+        b, j, c, t = x.shape
+
+        x = x.reshape(b, j * c, t)
+
         # (66, 50, 50) x (50, 50) -> # (66, 50, 50)
         masked_weights = self.weights.mul(self.local_temporal_mask)
 
-        # (66, n_frames, n_frames) x (batch, n_frames, n_frames) -> (batch, n_frames, 66)
-        # (66, 50, 50) x (batch, 50, 50) -> (batch, 50, 66)
-        return torch.einsum("nft,bnt->bnf", masked_weights, x)
+        # (66, n_frames, n_frames) x (batch, 66, n_frames) -> (batch, n_frames, 66)
+        # (66, 50, 50) x (batch, 66, 50) -> (batch, 50, 66)
+        x_out = torch.einsum("nft,bnt->bnf", masked_weights, x)
+        return x_out.reshape(b, j, c, t)
 
 
 class H36MSkeleton:

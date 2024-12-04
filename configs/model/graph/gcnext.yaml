@@ -18,8 +18,6 @@ backbone:
       n_joints: 22
       n_channels: 3
     motion_mlp:
-      hidden_dim: 66
-      seq_len: 50
       num_layers: 48
       with_normalization: True
       spatial_fc_only: False

@@ -558,38 +558,6 @@ def _get_norm_fn(norm):
 ###############################################################
 
 
-class BaseGraphConvolution(nn.Module):
-    """Base class for all graph convolution types.
-
-    Parameters
-    ----------
-    dim : str
-        Blah.
-    seq_len : str
-        Blah.
-    """
-
-    def __init__(self, dim: int, seq_len: int):
-        super().__init__()
-        self.dim = dim
-        self.seq_len = seq_len
-
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        """Apply skeletal graph convolution.
-
-        Parameters
-        ----------
-        x : torch.Tensor [batch, vertices, time]
-            Input features.
-
-        Returns
-        -------
-        torch.Tensor [batch, vertices, time]
-            Features after skeletal convolution.
-        """
-        raise NotImplementedError
-
-
 class SkeletalConvolution(nn.Module):
     """Convolution along skeletal connections between joints in H36MSkeleton."""
 
@@ -684,22 +652,19 @@ class TemporalConvolution(nn.Module):
         )
 
 
-class JointCoordinateConvolution(BaseGraphConvolution):
-    """Convolution between joint coordinates.
+class JointCoordinateConvolution(nn.Module):
+    """Convolution between joints and coordinates."""
 
-    Parameters
-    ----------
-    dim : str
-        Blah.
-    seq_len : str
-        Blah.
-    num_joints : int
-        Bla.
-    """
-
-    def __init__(self, dim: int, seq_len: int, num_joints: int = 22):
-        super().__init__(dim, seq_len)
-        self.adj_jc = nn.Parameter(torch.zeros(num_joints, 3, 3))
+    def __init__(self):
+        super().__init__()
+        self.skl = H36MSkeleton()
+        self.weights = nn.Parameter(
+            torch.zeros(
+                self.skl.NUM_JOINTS,
+                self.skl.NUM_CHANNELS,
+                self.skl.NUM_CHANNELS,
+            )
+        )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Apply joint-coordinate graph convolution.
@@ -715,12 +680,18 @@ class JointCoordinateConvolution(BaseGraphConvolution):
             Features after joint-coordinate convolution.
         """
         b, v, t = x.shape
-        x3 = x.reshape(b, v // 3, 3, t)
-        x3 = torch.einsum("jkc,bjct->bjkt", self.adj_jc, x3)
-        return x3.reshape(b, v, t)
+
+        assert v == (self.skl.NUM_CHANNELS * self.skl.NUM_JOINTS)
+        reshaped_x = x.reshape(
+            b, self.skl.NUM_JOINTS, self.skl.NUM_CHANNELS, t
+        )
+
+        x_out = torch.einsum("jkc,bjct->bjkt", self.weights, reshaped_x)
+
+        return x_out.reshape(b, v, t)
 
 
-class TemporalJointConvolution(BaseGraphConvolution):
+class TemporalJointConvolution(nn.Module):
     """Convolution combining temporal and joint relationships.
 
     Parameters
@@ -732,7 +703,7 @@ class TemporalJointConvolution(BaseGraphConvolution):
     """
 
     def __init__(self, dim: int, seq_len: int):
-        super().__init__(dim, seq_len)
+        super().__init__()
         self.adj_tj = nn.Parameter(torch.zeros(dim, seq_len, seq_len))
         self.register_buffer(
             "traj_mask", TemporalConvolution._create_tridiagonal_mask(seq_len)

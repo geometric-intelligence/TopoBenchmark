@@ -6,9 +6,70 @@ import torch
 
 from topobenchmarkx.nn.backbones.graph.gcnext import (
     H36MSkeleton,
+    JointCoordinateConvolution,
     SkeletalConvolution,
     TemporalConvolution,
+    TemporalJointConvolution,
 )
+
+
+def test_temporal_joint_convolution_equivalence():
+    """Test that TemporalJointConvolution forward pass matches reference implementation."""
+    # Setup test parameters
+    batch_size = 4
+    num_joints = 22
+    channels = 3
+    seq_len = 50
+    vertices = num_joints * channels
+    dim = vertices
+
+    # Create random input tensor
+    x = torch.randn(batch_size, vertices, seq_len)
+
+    # Current implementation output
+    model = TemporalJointConvolution(dim=dim, seq_len=seq_len)
+    output_current = model(x)
+
+    # Reference implementation
+    traj_mask = torch.tril(
+        torch.ones(seq_len, seq_len, requires_grad=False), 1
+    ) * torch.triu(torch.ones(seq_len, seq_len, requires_grad=False), -1)
+    output_reference = torch.einsum(
+        "nft,bnt->bnf", model.adj_tj.mul(traj_mask.unsqueeze(0)), x
+    )
+
+    # Check outputs match
+    assert torch.allclose(
+        output_current, output_reference, rtol=1e-5, atol=1e-5
+    ), "Current and reference implementations produce different outputs"
+
+
+def test_joint_coordinate_convolution_equivalence():
+    """Test that JointCoordinateConvolution forward pass matches reference implementation."""
+    # Setup test parameters
+    batch_size = 4
+    num_joints = 22
+    channels = 3
+    seq_len = 50
+    vertices = num_joints * channels
+
+    # Create random input tensor
+    x = torch.randn(batch_size, vertices, seq_len)
+
+    # Current implementation output
+    model = JointCoordinateConvolution()
+    output_current = model(x)
+
+    # Reference implementation
+    b, v, t = x.shape
+    x3 = x.reshape(b, v // 3, 3, t)
+    x3 = torch.einsum("jkc,bjct->bjkt", model.weights, x3)
+    output_reference = x3.reshape(b, v, t)
+
+    # Check outputs match
+    assert torch.allclose(
+        output_current, output_reference, rtol=1e-5, atol=1e-5
+    ), "Current and reference implementations produce different outputs"
 
 
 def test_temporal_convolution_equivalence():

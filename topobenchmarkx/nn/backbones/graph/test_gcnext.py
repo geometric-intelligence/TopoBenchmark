@@ -27,15 +27,17 @@ def test_temporal_joint_convolution_equivalence():
     x = torch.randn(batch_size, vertices, seq_len)
 
     # Current implementation output
-    model = TemporalJointConvolution(dim=dim, seq_len=seq_len)
+    model = TemporalJointConvolution(n_nodes_per_frame=dim, n_frames=seq_len)
     output_current = model(x)
 
     # Reference implementation
     traj_mask = torch.tril(
         torch.ones(seq_len, seq_len, requires_grad=False), 1
     ) * torch.triu(torch.ones(seq_len, seq_len, requires_grad=False), -1)
+    traj_mask.diagonal().fill_(0)
+
     output_reference = torch.einsum(
-        "nft,bnt->bnf", model.adj_tj.mul(traj_mask.unsqueeze(0)), x
+        "nft,bnt->bnf", model.weights.mul(traj_mask.unsqueeze(0)), x
     )
 
     # Check outputs match

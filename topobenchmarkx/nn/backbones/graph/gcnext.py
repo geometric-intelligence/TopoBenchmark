@@ -339,7 +339,9 @@ class GCBlock(nn.Module):
         self.skeletal_conv = SkeletalConvolution()
         self.temporal_conv = TemporalConvolution(n_frames=seq_len)
         self.coordinate_conv = JointCoordinateConvolution()
-        self.temp_joint_conv = TemporalJointConvolution(dim, seq_len)
+        self.temp_joint_conv = TemporalJointConvolution(
+            n_nodes_per_frame=dim, n_frames=seq_len
+        )
 
         # Update and normalization layers
         self.update = (
@@ -556,6 +558,43 @@ def _get_norm_fn(norm):
 ###############################################################
 #### Different types of graph convolutions used in GCNext. ####
 ###############################################################
+class BaseGraphConvolution(nn.Module):
+    """Base class for all 3D convolution types.
+
+    Parameters
+    ----------
+    n_dim1 : int
+        Size of first dimension (ie, n_joints).
+    n_dim2 : int
+        Size of second dimension (ie, n_channels).
+    n_dim3 : int
+        Size of third dimension (ie, n_frames).
+    """
+
+    def __init__(self, n_dim1: int, n_dim2: int, n_dim3: int):
+        super().__init__()
+
+        self.n_dim1 = n_dim1
+        self.n_dim2 = n_dim2
+        self.n_dim3 = n_dim3
+
+        self.weights = None
+        self.mask = None
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """Apply convolution along desired dimensions.
+
+        Parameters
+        ----------
+        x : torch.Tensor [batch, dim1, dim2, dim3]
+            Input features.
+
+        Returns
+        -------
+        torch.Tensor [batch, dim1, dim2, dim3]
+            Features after convolution.
+        """
+        raise NotImplementedError
 
 
 class SkeletalConvolution(nn.Module):
@@ -570,17 +609,17 @@ class SkeletalConvolution(nn.Module):
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        """Apply skeletal graph convolution.
+        """Apply spatial convolution with skeleton mask.
 
         Parameters
         ----------
-        x : torch.Tensor [batch, vertices, time]
+        x : torch.Tensor [batch, n_joints, n_channels, n_frames]
             Input features.
 
         Returns
         -------
-        torch.Tensor [batch, vertices, time]
-            Features after skeletal convolution.
+        torch.Tensor [batch, n_joints, n_channels, n_frames]
+            Features after spatial convolution with skeleton mask.
         """
         b, v, t = x.shape  # (batch, 66, 50)
 
@@ -612,27 +651,12 @@ class TemporalConvolution(nn.Module):
         super().__init__()
 
         self.weights = nn.Parameter(torch.zeros(n_frames, n_frames))
-        self.temporal_mask = self._create_tridiagonal_mask(n_frames)
 
-    @staticmethod
-    def _create_tridiagonal_mask(n_frames: int) -> torch.Tensor:
-        """Create a tridiagonal mask matrix.
-
-        Parameters
-        ----------
-        n_frames : int
-            Number of frames, length of time dimension.
-
-        Returns
-        -------
-        torch.tensor
-            Temporal mask so you only look backwards in time, shape (num_frames, num_frames).
-        """
-        mask = torch.tril(torch.ones(n_frames, n_frames), 1) * torch.triu(
-            torch.ones(n_frames, n_frames), -1
-        )
-        mask.diagonal().fill_(0)
-        return mask
+        # Only allows connections to adjacent time frames while preventing self-connections
+        self.local_temporal_mask = torch.tril(
+            torch.ones(n_frames, n_frames), 1
+        ) * torch.triu(torch.ones(n_frames, n_frames), -1)
+        self.local_temporal_mask.diagonal().fill_(0)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Apply temporal graph convolution.
@@ -650,7 +674,9 @@ class TemporalConvolution(nn.Module):
         # (n_frames, n_frames) x (batch, joint*channel, n_frames) -> (batch, joint*channel, n_frames)
         # (50, 50) x (256, 66, 50) -> (256, 66, 50)
         return torch.einsum(
-            "ft,bnt->bnf", self.weights.mul(self.temporal_mask.to(x.device)), x
+            "ft,bnt->bnf",
+            self.weights.mul(self.local_temporal_mask.to(x.device)),
+            x,
         )
 
 
@@ -698,18 +724,22 @@ class TemporalJointConvolution(nn.Module):
 
     Parameters
     ----------
-    dim : str
-        Blah.
-    seq_len : str
-        Blah.
+    n_nodes_per_frame : int
+        Number of nodes per frame, n_joints * n_channels.
+    n_frames : int
+        Number of frames, length of time dimension.
     """
 
-    def __init__(self, dim: int, seq_len: int):
+    def __init__(self, n_nodes_per_frame: int, n_frames: int):
         super().__init__()
-        self.adj_tj = nn.Parameter(torch.zeros(dim, seq_len, seq_len))
-        self.register_buffer(
-            "traj_mask", TemporalConvolution._create_tridiagonal_mask(seq_len)
+        self.weights = nn.Parameter(
+            torch.zeros(n_nodes_per_frame, n_frames, n_frames)
         )
+
+        self.local_temporal_mask = torch.tril(
+            torch.ones(n_frames, n_frames), 1
+        ) * torch.triu(torch.ones(n_frames, n_frames), -1)
+        self.local_temporal_mask.diagonal().fill_(0)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Apply temporal-joint graph convolution.
@@ -724,9 +754,12 @@ class TemporalJointConvolution(nn.Module):
         torch.Tensor [batch, vertices, time]
             Features after temporal-joint convolution.
         """
-        return torch.einsum(
-            "nft,bnt->bnf", self.adj_tj.mul(self.traj_mask.unsqueeze(0)), x
-        )
+        # (66, 50, 50) x (50, 50) -> # (66, 50, 50)
+        masked_weights = self.weights.mul(self.local_temporal_mask)
+
+        # (66, n_frames, n_frames) x (batch, n_frames, n_frames) -> (batch, n_frames, 66)
+        # (66, 50, 50) x (batch, 50, 50) -> (batch, 50, 66)
+        return torch.einsum("nft,bnt->bnf", masked_weights, x)
 
 
 class H36MSkeleton:

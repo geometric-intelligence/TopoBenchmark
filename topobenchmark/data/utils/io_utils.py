@@ -13,6 +13,7 @@ from torch_geometric.data import Data
 from torch_sparse import coalesce
 
 
+# Function to extract file ID from Google Drive URL
 def get_file_id_from_url(url):
     """Extract the file ID from a Google Drive file URL.
 
@@ -46,6 +47,7 @@ def get_file_id_from_url(url):
     return file_id
 
 
+# Function to download file from Google Drive
 def download_file_from_drive(
     file_link, path_to_save, dataset_name, file_format="tar.gz"
 ):

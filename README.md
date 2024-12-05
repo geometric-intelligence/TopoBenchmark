@@ -166,7 +166,7 @@ python -m topobenchmark \
     model=cell/topotune\
     model.tune_gnn=GCN \
     model.backbone.GNN.num_layers=2 \
-    model.backbone.routes=\[\[\[0,0\],up_laplacian\],\[\[2,1\],boundary\]\] \
+    model.backbone.neighborhoods=\[1-up_laplacian-0,1-down_incidence-2\] \
     model.backbone.layers=4 \
     model.feature_encoder.out_channels=32 \
     model.feature_encoder.proj_dropout=0.3 \

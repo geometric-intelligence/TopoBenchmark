@@ -153,9 +153,16 @@ def select_neighborhoods_of_interest(connectivity, neighborhoods):
     for neighborhood in neighborhoods:
         src_rank = int(neighborhood.split("-")[-1])
         try:
-            if len(neighborhood.split("-")) == 2:
+            if (
+                len(neighborhood.split("-")) == 2
+                or neighborhood.split("-")[0] == "1"
+            ):
                 r = 1
-                neighborhood_type = neighborhood.split("-")[0]
+                neighborhood_type = (
+                    neighborhood.split("-")[0]
+                    if neighborhood.split("-")[0] != "1"
+                    else neighborhood.split("-")[1]
+                )
                 if "adjacency" in neighborhood_type:
                     useful_connectivity[neighborhood] = (
                         connectivity[f"adjacency_{src_rank}"]

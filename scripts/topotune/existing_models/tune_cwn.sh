@@ -2,7 +2,7 @@ python -m topobenchmark \
     model=cell/topotune_onehasse,cell/topotune \
     model.tune_gnn=GCN,GIN,GAT,GraphSAGE \
     model.backbone.GNN.num_layers=1 \
-    model.backbone.routes=\[\[\[0,1\],coboundary\],\[\[1,1\],adjacency\],\[\[2,1\],boundary\]\] \
+    model.backbone.neighborhoods=\[1-up_incidence-0,1-up_adjacency-1,1-down_incidence-2\] \
     logger.wandb.project=TopoTune_CWN \
     dataset=graph/MUTAG \
     optimizer.parameters.lr=0.001 \
@@ -24,7 +24,7 @@ python -m topobenchmark \
     model=cell/topotune_onehasse,cell/topotune \
     model.tune_gnn=GCN,GIN,GAT,GraphSAGE \
     model.backbone.GNN.num_layers=1 \
-    model.backbone.routes=\[\[\[0,1\],coboundary\],\[\[1,1\],adjacency\],\[\[2,1\],boundary\]\] \
+    model.backbone.neighborhoods=\[1-up_incidence-0,1-up_adjacency-1,1-down_incidence-2\] \
     logger.wandb.project=TopoTune_CWN \
     dataset=graph/NCI1 \
     optimizer.parameters.lr=0.001 \
@@ -45,7 +45,7 @@ python -m topobenchmark \
     model=cell/topotune_onehasse,cell/topotune \
     model.tune_gnn=GCN,GIN,GAT,GraphSAGE \
     model.backbone.GNN.num_layers=1 \
-    model.backbone.routes=\[\[\[0,1\],coboundary\],\[\[1,1\],adjacency\],\[\[2,1\],boundary\]\] \
+    model.backbone.neighborhoods=\[1-up_incidence-0,1-up_adjacency-1,1-down_incidence-2\] \
     logger.wandb.project=TopoTune_CWN \
     dataset=graph/NCI109 \
     optimizer.parameters.lr=0.001 \
@@ -65,7 +65,7 @@ python -m topobenchmark \
     model=cell/topotune_onehasse,cell/topotune \
     model.tune_gnn=GCN,GIN,GAT,GraphSAGE \
     model.backbone.GNN.num_layers=1 \
-    model.backbone.routes=\[\[\[0,1\],coboundary\],\[\[1,1\],adjacency\],\[\[2,1\],boundary\]\] \
+    model.backbone.neighborhoods=\[1-up_incidence-0,1-up_adjacency-1,1-down_incidence-2\] \
     logger.wandb.project=TopoTune_CWN \
     dataset=graph/ZINC \
     optimizer.parameters.lr=0.001 \
@@ -90,7 +90,7 @@ python -m topobenchmark \
     model=cell/topotune_onehasse,cell/topotune \
     model.tune_gnn=GCN,GIN,GAT,GraphSAGE \
     model.backbone.GNN.num_layers=1 \
-    model.backbone.routes=\[\[\[0,1\],coboundary\],\[\[1,1\],adjacency\],\[\[2,1\],boundary\]\] \
+    model.backbone.neighborhoods=\[1-up_incidence-0,1-up_adjacency-1,1-down_incidence-2\] \
     logger.wandb.project=TopoTune_CWN \
     dataset=graph/cocitation_citeseer \
     optimizer.parameters.lr=0.001 \
@@ -111,7 +111,7 @@ python -m topobenchmark \
     model=cell/topotune_onehasse,cell/topotune \
     model.tune_gnn=GCN,GIN,GAT,GraphSAGE \
     model.backbone.GNN.num_layers=1 \
-    model.backbone.routes=\[\[\[0,1\],coboundary\],\[\[1,1\],adjacency\],\[\[2,1\],boundary\]\] \
+    model.backbone.neighborhoods=\[1-up_incidence-0,1-up_adjacency-1,1-down_incidence-2\] \
     logger.wandb.project=TopoTune_CWN \
     dataset=graph/cocitation_pubmed \
     optimizer.parameters.lr=0.01 \
@@ -134,7 +134,7 @@ python -m topobenchmark \
     model=cell/topotune_onehasse,cell/topotune \
     model.tune_gnn=GCN,GIN,GAT,GraphSAGE \
     model.backbone.GNN.num_layers=1 \
-    model.backbone.routes=\[\[\[0,1\],coboundary\],\[\[1,1\],adjacency\],\[\[2,1\],boundary\]\] \
+    model.backbone.neighborhoods=\[1-up_incidence-0,1-up_adjacency-1,1-down_incidence-2\] \
     logger.wandb.project=TopoTune_CWN \
     dataset=graph/PROTEINS,graph/cocitation_cora \
     optimizer.parameters.lr=0.001 \

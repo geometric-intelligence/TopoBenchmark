@@ -1,5 +1,5 @@
 # SCCN
-python -m topobenchmarkx \
+python -m topobenchmark \
     dataset=graph/MUTAG \
     model=simplicial/topotune_onehasse,simplicial/topotune \
     model.feature_encoder.out_channels=128 \
@@ -22,7 +22,7 @@ python -m topobenchmarkx \
     --multirun &
 
 
-python -m topobenchmarkx \
+python -m topobenchmark \
     dataset=graph/NCI1 \
     model=simplicial/topotune_onehasse,simplicial/topotune \
     model.feature_encoder.out_channels=64 \
@@ -45,7 +45,7 @@ python -m topobenchmarkx \
     --multirun &
 
 
-python -m topobenchmarkx \
+python -m topobenchmark \
     dataset=graph/NCI109 \
     model=simplicial/topotune_onehasse,simplicial/topotune \
     model.feature_encoder.out_channels=64 \
@@ -69,7 +69,7 @@ python -m topobenchmarkx \
 
 
 
-python -m topobenchmarkx \
+python -m topobenchmark \
     model=simplicial/topotune_onehasse,simplicial/topotune \
     model.tune_gnn=GCN,GIN,GAT,GraphSAGE \
     model.backbone.routes=\[\[\[0,0\],up_laplacian\],\[\[0,1\],coboundary\],\[\[1,0\],boundary\],\[\[1,1\],down_laplacian\],\[\[1,1\],up_laplacian\],\[\[1,2\],coboundary\],\[\[2,1\],boundary\],\[\[2,2\],down_laplacian\]\] \
@@ -91,7 +91,7 @@ python -m topobenchmarkx \
     --multirun &
 
 
-python -m topobenchmarkx \
+python -m topobenchmark \
     model=simplicial/topotune_onehasse,simplicial/topotune \
     dataset=graph/ZINC \
     model.tune_gnn=GCN,GIN,GAT,GraphSAGE \
@@ -114,7 +114,7 @@ python -m topobenchmarkx \
     trainer.devices=\[0\] \
     --multirun &
 
-python -m topobenchmarkx \
+python -m topobenchmark \
     model=simplicial/topotune_onehasse,simplicial/topotune \
     model.tune_gnn=GCN,GIN,GAT,GraphSAGE \
     model.backbone.routes=\[\[\[0,0\],up_laplacian\],\[\[0,1\],coboundary\],\[\[1,0\],boundary\],\[\[1,1\],down_laplacian\],\[\[1,1\],up_laplacian\],\[\[1,2\],coboundary\],\[\[2,1\],boundary\],\[\[2,2\],down_laplacian\]\] \
@@ -135,10 +135,10 @@ python -m topobenchmarkx \
     trainer.devices=\[0\] \
     --multirun &
 
-python -m topobenchmarkx \
+python -m topobenchmark \
     model=simplicial/topotune_onehasse,simplicial/topotune \
     model.tune_gnn=GCN,GIN,GAT,GraphSAGE \
-    model.backbone.GNN._target_=topobenchmarkx.nn.backbones.graph.IdentityGCN \
+    model.backbone.GNN._target_=topobenchmark.nn.backbones.graph.IdentityGCN \
     model.backbone.routes=\[\[\[0,0\],up_laplacian\],\[\[0,1\],coboundary\],\[\[1,0\],boundary\],\[\[1,1\],down_laplacian\],\[\[1,1\],up_laplacian\],\[\[1,2\],coboundary\],\[\[2,1\],boundary\],\[\[2,2\],down_laplacian\]\] \
     dataset=graph/cocitation_cora \
     optimizer.parameters.lr=0.01 \
@@ -157,7 +157,7 @@ python -m topobenchmarkx \
     trainer.devices=\[1\] \
     --multirun &
 
-python -m topobenchmarkx \
+python -m topobenchmark \
     model=simplicial/topotune_onehasse,simplicial/topotune \
     model.tune_gnn=GCN,GIN,GAT,GraphSAGE \
     model.backbone.routes=\[\[\[0,0\],up_laplacian\],\[\[0,1\],coboundary\],\[\[1,0\],boundary\],\[\[1,1\],down_laplacian\],\[\[1,1\],up_laplacian\],\[\[1,2\],coboundary\],\[\[2,1\],boundary\],\[\[2,2\],down_laplacian\]\] \

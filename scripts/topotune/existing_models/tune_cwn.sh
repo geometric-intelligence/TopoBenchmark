@@ -1,4 +1,4 @@
-python -m topobenchmarkx \
+python -m topobenchmark \
     model=cell/topotune_onehasse,cell/topotune \
     model.tune_gnn=GCN,GIN,GAT,GraphSAGE \
     model.backbone.GNN.num_layers=1 \
@@ -20,7 +20,7 @@ python -m topobenchmarkx \
     trainer.devices=\[1\] \
     --multirun &
 
-python -m topobenchmarkx \
+python -m topobenchmark \
     model=cell/topotune_onehasse,cell/topotune \
     model.tune_gnn=GCN,GIN,GAT,GraphSAGE \
     model.backbone.GNN.num_layers=1 \
@@ -41,7 +41,7 @@ python -m topobenchmarkx \
     --multirun &
 
 
-python -m topobenchmarkx \
+python -m topobenchmark \
     model=cell/topotune_onehasse,cell/topotune \
     model.tune_gnn=GCN,GIN,GAT,GraphSAGE \
     model.backbone.GNN.num_layers=1 \
@@ -61,7 +61,7 @@ python -m topobenchmarkx \
     trainer.devices=\[2\] \
     --multirun &
 
-python -m topobenchmarkx \
+python -m topobenchmark \
     model=cell/topotune_onehasse,cell/topotune \
     model.tune_gnn=GCN,GIN,GAT,GraphSAGE \
     model.backbone.GNN.num_layers=1 \
@@ -86,7 +86,7 @@ python -m topobenchmarkx \
     --multirun &
 
 
-python -m topobenchmarkx \
+python -m topobenchmark \
     model=cell/topotune_onehasse,cell/topotune \
     model.tune_gnn=GCN,GIN,GAT,GraphSAGE \
     model.backbone.GNN.num_layers=1 \
@@ -107,7 +107,7 @@ python -m topobenchmarkx \
     trainer.devices=\[3\] \
     --multirun &
 
-python -m topobenchmarkx \
+python -m topobenchmark \
     model=cell/topotune_onehasse,cell/topotune \
     model.tune_gnn=GCN,GIN,GAT,GraphSAGE \
     model.backbone.GNN.num_layers=1 \
@@ -130,7 +130,7 @@ python -m topobenchmarkx \
     --multirun &
 
 
-python -m topobenchmarkx \
+python -m topobenchmark \
     model=cell/topotune_onehasse,cell/topotune \
     model.tune_gnn=GCN,GIN,GAT,GraphSAGE \
     model.backbone.GNN.num_layers=1 \

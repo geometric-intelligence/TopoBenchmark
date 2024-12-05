@@ -1,5 +1,6 @@
 """A transform that adds positional information to the graph."""
 
+import os
 import torch
 import torch_geometric
 import torch_geometric.data
@@ -40,9 +41,10 @@ class AddGPSEInformation(torch_geometric.transforms.BaseTransform):
         self.model = create_model(
             dim_in=cfg.dim_in, dim_out=self.parameters["dim_out"]
         )
+
         model_state_dict = torch.load(
-            f"data/pretrained_models/gpse_{self.parameters['pretrain_model'].lower()}.pt",
-            map_location=torch.device("cpu"),
+            f"{os.getcwd()}/data/pretrained_models/gpse_{self.parameters['pretrain_model'].lower()}.pt",
+            map_location=torch.device("cuda:0"),
         )
 
         # remove_keys = [s for s in model_state_dict["model_state"] if s.startswith("model.post_mp")]
@@ -73,7 +75,8 @@ class AddGPSEInformation(torch_geometric.transforms.BaseTransform):
         load_cfg(cfg, params)
         cfg.share.num_node_targets = self.parameters["dim_target_node"]
         cfg.share.num_graph_targets = self.parameters["dim_target_graph"]
-        cfg.accelerator = "gpu" if torch.cuda.is_available() else "cpu"
+        # TODO: fix this row to define a particular cuda
+        cfg.accelerator = "cuda:0" if torch.cuda.is_available() else "cpu"
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}(type={self.type!r}, parameters={self.parameters!r})"

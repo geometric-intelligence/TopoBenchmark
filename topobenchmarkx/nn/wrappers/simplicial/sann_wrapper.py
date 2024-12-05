@@ -65,7 +65,9 @@ class SANNWrapper(AbstractWrapper):
         }
 
         for cell_idx in range(max_simplex_dim + 1):
-            for hop_idx in range(max_hop_dim + 1):
+            for hop_idx in range(
+                max_hop_dim + 1
+            ):  # when I run sann_classic range(max_hop_dim) but when I run sann_zero range(max_hop_dim + 1)
                 model_out[f"x_{cell_idx}_{hop_idx}"] = x_out[cell_idx][hop_idx]
 
         # model_out['max_simplex_dim'] = max_simplex_dim

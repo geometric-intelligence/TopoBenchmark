@@ -140,11 +140,11 @@ class SANNReadout(AbstractZeroCellReadOut):
                 x_all.append(x_i_all_cat)
 
             # # TODO: Is this fix valid ?
-            # lengths = set([x_i_all.shape[0] for x_i_all in x_all])
-            # if len(lengths) > 1:
-            #     x_all[-1] = torch.nn.functional.pad(
-            #         x_all[-1], (0, 0, 0, max(lengths) - x_all[-1].shape[0])
-            #     )
+            lengths = set([x_i_all.shape[0] for x_i_all in x_all])
+            if len(lengths) > 1:
+                x_all[-1] = torch.nn.functional.pad(
+                    x_all[-1], (0, 0, 0, max(lengths) - x_all[-1].shape[0])
+                )
             x_all_cat = torch.cat(x_all, dim=1)
 
         elif self.task_level == "node":
@@ -157,6 +157,8 @@ class SANNReadout(AbstractZeroCellReadOut):
                     model_out[f"x_{i-1}_{j}"] = getattr(
                         self, f"projector_{i}"
                     )(torch.cat([x_i, model_out[f"x_{i-1}_{j}"]], dim=1))
+
+            x_all_cat = model_out[f"x_0_0"]
 
             # x_all = []
             # # For i-cells
@@ -171,7 +173,7 @@ class SANNReadout(AbstractZeroCellReadOut):
 
             # x_all_cat = torch.cat(x_all, dim=1)
 
-        model_out["x_all"] = model_out[f"x_0_0"]
+        model_out["x_all"] = x_all_cat  # model_out[f"x_0_0"]
 
         return model_out
 

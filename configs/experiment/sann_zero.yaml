@@ -1,6 +1,8 @@
+# @package _global_
 defaults:
-  - /dataset: graph/PROTEINS
-  - /model: simplicial/sann
+  - override /dataset: graph/PROTEINS
+  - override /model: simplicial/sann
+  - override /transforms/data_manipulations@transforms.sann_encoding: different_zero_features_sann
 
 tags: ["simplicial", "PROTEINS"]
 
@@ -17,6 +19,4 @@ dataset:
     batch_size: 64
   split_params:
     split_type: k-fold
-transforms:
-  sann_encoding:
-    max_hop: 1
+    

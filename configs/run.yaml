@@ -5,7 +5,7 @@
 defaults:
   - _self_
   - dataset: graph/H36MDataset
-  - model: graph/gat
+  - model: graph/gcnext
   - transforms: ${get_default_transform:${dataset},${model}} #no_transform
   - optimizer: default
   - loss: default
@@ -16,6 +16,7 @@ defaults:
   - paths: default
   - extras: default
   - hydra: default
+  # - trainer.max_epochs=500
 
   # experiment configs allow for version control of specific hyperparameters
   # e.g. best hyperparameters for given model and datamodule

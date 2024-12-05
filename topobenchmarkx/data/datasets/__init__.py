@@ -5,7 +5,7 @@ from importlib import util
 from pathlib import Path
 from typing import ClassVar
 
-from torch_geometric.data import InMemoryDataset
+from torch_geometric.data import InMemoryDataset, OnDiskDataset
 
 
 class DatasetManager:
@@ -47,7 +47,7 @@ class DatasetManager:
     @classmethod
     def discover_datasets(
         cls, package_path: str
-    ) -> dict[str, type[InMemoryDataset]]:
+    ) -> dict[str, type[InMemoryDataset | OnDiskDataset]]:
         """Dynamically discover all dataset classes in the package.
 
         Parameters
@@ -57,7 +57,7 @@ class DatasetManager:
 
         Returns
         -------
-        Dict[str, Type[InMemoryDataset]]
+        Dict[str, Type[InMemoryDataset | OnDiskDataset]]
             Dictionary mapping class names to their corresponding class objects.
         """
         datasets = {}
@@ -83,8 +83,11 @@ class DatasetManager:
                         inspect.isclass(obj)
                         and obj.__module__ == module.__name__
                         and not name.startswith("_")
-                        and issubclass(obj, InMemoryDataset)
-                        and obj != InMemoryDataset
+                        and (
+                            issubclass(obj, InMemoryDataset)
+                            or issubclass(obj, OnDiskDataset)
+                        )
+                        and obj not in (InMemoryDataset, OnDiskDataset)
                     ):
                         datasets[name] = obj  # noqa: PERF403
 

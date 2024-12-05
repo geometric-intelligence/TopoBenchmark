@@ -1,20 +1,19 @@
 """Dataset class for Human3.6M dataset (http://vision.imar.ro/human3.6m/description.php)."""
 
-import numpy as np
 import os
 import os.path as osp
 import shutil
+import sqlite3
 from typing import ClassVar
 
 import numpy as np
 import torch
 from omegaconf import DictConfig
-from torch_geometric.data import Data, InMemoryDataset, extract_zip
-from torch_geometric.io import fs
+from torch_geometric.data import Data, OnDiskDataset, extract_zip
 
 
-class H36MDataset(InMemoryDataset):
-    r"""Dataset class for Human3.6M dataset.
+class H36MDataset(OnDiskDataset):
+    r"""Dataset class for Human3.6M dataset. Maybe use on disk dataset?.
 
     Parameters
     ----------
@@ -24,12 +23,18 @@ class H36MDataset(InMemoryDataset):
         Name of the dataset.
     parameters : DictConfig
         Configuration parameters for the dataset.
+    force_reload : bool
+        Whether to re-process the dataset. Default is False.
 
     Attributes
     ----------
     URLS (dict): Dictionary containing the URLs for downloading the dataset.
     FILE_FORMAT (dict): Dictionary containing the file formats for the dataset.
     RAW_FILE_NAMES (dict): Dictionary containing the raw file names for the dataset.
+    SUBJ_NAMES (list[str]): List of subjects to consider.
+    VAL_SUBJ (str): Default subject for validation.
+    TEST_SUBJ (str): Default subject for test.
+    N_FRAMES (int): How many frames long to make each input and output.
     """
 
     # Taken from siMLPe paper: https://github.com/dulucas/siMLPe/tree/c92c537e833443aa55554e4f7956838746550187
@@ -45,63 +50,103 @@ class H36MDataset(InMemoryDataset):
 
     RAW_FILE_NAMES: ClassVar = {}
 
+    SUBJ_NAMES: ClassVar = ["S1", "S5", "S6", "S7", "S8", "S9", "S11"]
+    VAL_SUBJ: ClassVar = "S11"
+    TEST_SUBJ: ClassVar = "S5"
+    N_FRAMES: ClassVar = 50
+
     def __init__(
         self,
         root: str,
         name: str,
         parameters: DictConfig,
+        force_reload: bool = False,
     ) -> None:
         self.name = name
         self.parameters = parameters
-        self.used_joint_indexes = np.array(
-            [
-                2,
-                3,
-                4,
-                5,
-                7,
-                8,
-                9,
-                10,
-                12,
-                13,
-                14,
-                15,
-                17,
-                18,
-                19,
-                21,
-                22,
-                25,
-                26,
-                27,
-                29,
-                30,
-            ]
-        ).astype(np.int64)
+        self.force_reload = force_reload
+
+        db_root = osp.join(root, name)
+        proc_db = osp.join(db_root, "processed")
+
+        os.makedirs(proc_db, exist_ok=True)
+
+        # Initialize SQLite connection and cursor
+        self.db_path = osp.join(proc_db, "metadata.db")
+        self.connection = sqlite3.connect(self.db_path)
+        self.cursor = self.connection.cursor()
+
+        # Create table if it doesn't exist
+        self.cursor.execute("""
+            CREATE TABLE IF NOT EXISTS data (
+                idx INTEGER PRIMARY KEY,
+                file_name TEXT NOT NULL,
+                size INTEGER NOT NULL
+            )
+        """)
+        self.connection.commit()
 
         super().__init__(
             root,
-            force_reload=True,
         )
 
-        out = fs.torch_load(self.processed_paths[0])
-        # print(out)
-        # print(len(out))
-        assert len(out) == 3 or len(out) == 4
+        self.split_idx = self.generate_default_split_idx()
+        self.train_idx = set(self.split_idx["train"])
+        self.val_idx = set(self.split_idx["valid"])
+        self.test_idx = set(self.split_idx["test"])
 
-        if len(out) == 3:  # Backward compatibility.
-            data, self.slices, self.sizes = out
-            data_cls = Data
-        else:
-            data, self.slices, self.sizes, data_cls = out
+    def generate_default_split_idx(self):
+        """Return the default split index for H3.6M Dataset.
 
-        if not isinstance(data, dict):  # Backward compatibility.
-            self.data = data
-        else:
-            self.data = data_cls.from_dict(data)
+        Returns
+        -------
+        dict:
+            Dictionary containing the train, validation and test indices with keys "train", "valid", and "test".
+        """
+        print("Generating split index...")
 
-        assert isinstance(self._data, Data)
+        # Get all filenames and indices from database
+        self.cursor.execute("SELECT idx, file_name FROM data")
+        rows = self.cursor.fetchall()
+
+        # Initialize empty lists for each split
+        train_idx = []
+        val_idx = []
+        test_idx = []
+
+        # Iterate through rows and assign to splits based on subject
+        for idx, filename in rows:
+            # Extract subject name from filename (e.g. "S8" from "S8_graph_12229.pt")
+            subject = filename.split("_")[0]
+
+            if subject == self.TEST_SUBJ:
+                test_idx.append(idx)
+            elif subject == self.VAL_SUBJ:
+                val_idx.append(idx)
+            elif subject in self.SUBJ_NAMES:
+                train_idx.append(idx)
+            else:
+                print(f"AAAAAAAAAAAA unknown subject {filename}")
+
+        # Convert to numpy arrays
+        split_idx = {
+            "train": np.array(train_idx),
+            "valid": np.array(val_idx),
+            "test": np.array(test_idx),
+        }
+
+        return split_idx
+
+    def __len__(self) -> int:
+        """Return the number of graphs in the dataset.
+
+        Returns
+        -------
+        int
+            The number of graphs in the dataset.
+        """
+        self.cursor.execute("SELECT COUNT(*) FROM data")
+        return self.cursor.fetchone()[0]
 
     def __repr__(self) -> str:
         return f"{self.name}(self.root={self.root}, self.name={self.name}, self.force_reload={self.force_reload})"
@@ -144,15 +189,64 @@ class H36MDataset(InMemoryDataset):
         return []
 
     @property
-    def processed_file_names(self) -> str:
-        """Return the processed file name for the dataset.
+    def processed_file_names(self) -> list[str]:
+        """Return all processed file names.
 
         Returns
         -------
-        str
-            Processed file name.
+        list[str]
+            List of all processed file names.
         """
-        return "data.pt"
+        return [
+            filename
+            for filename in os.listdir(self.processed_dir)
+            if filename.endswith(".pt")
+        ]
+
+    def get(self, idx: int) -> Data:
+        """Load a single graph from disk using the database.
+
+        Parameters
+        ----------
+        idx : int
+            Index of the graph to load.
+
+        Returns
+        -------
+        Data
+            The loaded graph.
+        """
+        # Query the database to get the filename for this index
+        self.cursor.execute("SELECT file_name FROM data WHERE idx = ?", (idx,))
+        result = self.cursor.fetchone()
+
+        if result is None:
+            raise IndexError(f"No data found for index {idx}")
+
+        filename = result[0]
+        filepath = os.path.join(self.processed_dir, filename)
+
+        # Add train/val/test mask to data object.
+        # This probably isn't the best place to do it.
+        data = torch.load(filepath, weights_only=False)
+
+        n_nodes = data.x.shape[0]
+        if idx in self.train_idx:
+            data.train_mask = torch.ones(n_nodes).long()
+            data.val_mask = torch.zeros(n_nodes).long()
+            data.test_mask = torch.zeros(n_nodes).long()
+
+        if idx in self.val_idx:
+            data.train_mask = torch.zeros(n_nodes).long()
+            data.val_mask = torch.ones(n_nodes).long()
+            data.test_mask = torch.zeros(n_nodes).long()
+
+        if idx in self.test_idx:
+            data.train_mask = torch.zeros(n_nodes).long()
+            data.val_mask = torch.zeros(n_nodes).long()
+            data.test_mask = torch.ones(n_nodes).long()
+
+        return data
 
     def download(self) -> None:
         r"""Download the dataset from a URL and saves it to the raw directory.
@@ -162,12 +256,11 @@ class H36MDataset(InMemoryDataset):
         """
         # Step 1: download data from the source
         # self.url = self.URLS[self.name]
-        self.file_format = self.FILE_FORMAT[self.name]
         # download_file_from_drive(
         #     file_link=self.url,
         #     path_to_save=self.raw_dir,
         #     dataset_name=self.name,
-        #     file_format=self.file_format,
+        #     file_format=self.FILE_FORMAT[self.name],
         # )
 
         # Step 1 isn't working because it is downloading html with the Antivirus Scan Warning instead.
@@ -176,15 +269,15 @@ class H36MDataset(InMemoryDataset):
         #       As per siMPLE paper (https://github.com/dulucas/siMLPe/tree/c92c537e833443aa55554e4f7956838746550187)
         #   2) Rename to be H36MDataset.zip
         #   3) Manually plop the zip in the right folder.
-        #       scp H36MDataset.zip [your path]/TopoBenchmark/topobenchmarkx/data/datasets/graph/motion/H36MDataset/raw
+        #       scp H36MDataset.zip [your path]/TopoBenchmark/datasets/graph/motion/H36MDataset/raw
 
         folder = self.raw_dir
-        compressed_data_filename = f"{self.name}.{self.file_format}"
+        compressed_data_filename = f"{self.name}.{self.FILE_FORMAT[self.name]}"
         compressed_data_path = osp.join(folder, compressed_data_filename)
 
         if os.path.isfile(compressed_data_path):
             # Step 2: extract file
-            print("Extracting data zip...")
+            print("Zip file exists. Extracting data zip...")
             extract_zip(compressed_data_path, folder)
             os.unlink(compressed_data_path)  # Delete zip file
 
@@ -193,8 +286,8 @@ class H36MDataset(InMemoryDataset):
             for subject_dir in os.listdir(
                 osp.join(
                     folder, "h36m"
-                )  # hard coded here because this is the name in the google drive folder
-            ):  # self.name)):
+                )  # hard coded here because this is the name in the google drive folder; should be self.name
+            ):
                 for file in os.listdir(osp.join(folder, "h36m", subject_dir)):
                     if file.endswith("ipynb"):
                         continue
@@ -205,39 +298,121 @@ class H36MDataset(InMemoryDataset):
 
             # Delete osp.join(folder, self.name) dir
             shutil.rmtree(osp.join(folder, "h36m"))
+            print("Done. Zip file removed.")
+        else:
+            print("Data already extracted. Skipping extraction.")
 
     def process(self) -> None:
         r"""Handle the data for the dataset.
 
         This method loads the Human3.6M dataset,
-        loads it into basic graph form,
-        and saves this preprocessed data.
+        loads it into basic graph form, and saves this preprocessed data.
+
+        Will not run if self.force_reload is False and files exist.
 
         A lot of this is using functions copied from the siMLPe paper.
         """
-        # Step 1: extract the data
-        h36m_raw_xyz_motion_matrices = self.load_raw_xyz_motion_matrices()
-        motion_inputs, motion_targets = self.process_input_target_pairs(
-            h36m_raw_xyz_motion_matrices
+        print("Loading and processing data...")
+
+        for subj_name in self.SUBJ_NAMES:
+            print(f"Processing subject {subj_name}")
+            # Step 1: extract the data
+            h36m_raw_xyz_motion_matrices = self.load_raw_xyz_motion_matrices(
+                subj_name
+            )
+            motion_inputs, motion_targets = self.process_input_target_pairs(
+                h36m_raw_xyz_motion_matrices, debug=False
+            )
+
+            # Step 2: define connections and transform into graphs
+            motions = self.transform_into_graph_data_objects(
+                motion_inputs, motion_targets
+            )
+
+            # Step 3: save each graph individually
+            print(f"\tSaving {subj_name} graphs...")
+            for idx, data in enumerate(motions):
+                # Step 3b: save data to file
+                torch.save(
+                    data,
+                    os.path.join(
+                        self.processed_dir, f"{subj_name}_graph_{idx}.pt"
+                    ),
+                )
+            print(f"\tDone with {subj_name}.")
+
+        # Step 4: Create database.
+        print("Creating database...")
+        self._create_database()
+        print("Done processing.")
+
+    def _create_database(self) -> None:
+        """Create the SQLite database with metadata for all saved .pt files."""
+        # Get list of all .pt files
+        files = sorted(
+            [f for f in os.listdir(self.processed_dir) if f.endswith(".pt")]
         )
 
-        # Step 2: define connections
-        # this implementation is kinda sketchy but we ignore...
-        skl = H36MSkeleton()
-        adj_mat = skl.get_bone_adj_mat()
-        edges = skl.get_bone_list()
+        # Create database entries
+        data = []
+        for idx, filename in enumerate(files):
+            filepath = os.path.join(self.processed_dir, filename)
+            size = os.path.getsize(filepath)
+            data.append((idx, filename, size))
 
-        # print(adj_mat)
-        # print(edges)
+        # Store in database
+        self.cursor.executemany(
+            "INSERT INTO data(idx, file_name, size) VALUES (?, ?, ?)", data
+        )
+        self.connection.commit()
 
-        # Step 3: turn them into torch_geometric.data Data objects
+    def get_processed_path_for_subj(self, subj_name):
+        r"""Get path where processed subject-wise data is stored.
+
+        Parameters
+        ----------
+        subj_name : str
+            Subject name.
+
+        Returns
+        -------
+        str
+            Path where subj_name's graph data is stored.
+        """
+        path_parts = self.processed_paths[0].split(".")
+        return "".join([path_parts[0], subj_name, ".", path_parts[1]])
+
+    def transform_into_graph_data_objects(self, motion_inputs, motion_targets):
+        r"""Get path where processed subject-wise data is stored.
+
+        Parameters
+        ----------
+        motion_inputs : list[torch.tensor]
+            List of motion matrix inputs of shape (input_length, n_joints, n_channels).
+        motion_targets : list[torch.tensor]
+            List of motion matrix labels of shape (target_length, n_joints, n_channels).
+
+        Returns
+        -------
+        list[Data]
+            List of graph objects.
+        """
+        # Step 1: Create edges. These are the same for all graphs.
+        #       We want a superset of all possible edge indices
+        #       so the model can choose which to care about.
+        # For efficiency, though, perhaps could be good to prune this...
+        fully_connected_edges = torch.combinations(
+            torch.arange(self.N_FRAMES * 22 * 3), r=2
+        ).t()  # Shape: [2, num_edges] where num_edges = (n*(n-1))/2
+        empty_edges = torch.zeros((2, 0), dtype=torch.long)  # Shape: [2, 0]
+
+        # Step 2: turn them into torch_geometric.data Data objects
+        print("\tConverting to graph objects...")
         motions = []
-        for input_motion_matrix, target_motion_matrix in zip(
-            motion_inputs, motion_targets
-        ):
-            # input_motion_matrix.shape =  [50, 22, 3]
-            # target_motion_matrix.shape = [10, 22, 3]
-            #       time, joints*channels
+
+        for i in range(len(motion_inputs)):
+            input_motion_matrix = motion_inputs[i]  # shape = [50, 22, 3]
+            target_motion_matrix = motion_targets[i]  # shape = [50, 22, 3]
 
             # need to flatten so we have: large(time), med(joints), small(channels)
             # so if there are 3 times and 4 joints and 2 channels (ignore the brackets)
@@ -261,124 +436,53 @@ class H36MDataset(InMemoryDataset):
             #   ]
             # just read this in order!
 
-            # Step 1: Flatten motion_matrix; node for each time, joint, channel combo.
+            # Step 3: Flatten motion_matrix; node for each time, joint, channel combo.
             flat_input = torch.reshape(
                 input_motion_matrix, (-1,)
             )  # shape 50*22*3 = 3300
             flat_target = torch.reshape(
                 target_motion_matrix, (-1,)
-            )  # shape 10*22*3 = 660
+            )  # shape 50*22*3 = 3300
 
-            # Step 2: Create superset of all possible edge indices.
-            n_times_i, n_joints, n_channels = input_motion_matrix.shape
-
-            # Edges according to skeleton bones.
-            # TODO Do we want self-loops?
-            # t, j, c = motion_matrix.shape
-            # small_bones = [(n1 * c, n2 * c) for (n1, n2) in edges]
-            # all_channel_bones = [
-            #     (n1 + cc, n2 + cc)
-            #     for (n1, n2) in small_bones
-            #     for cc in range(c)
-            # ]
-            all_channel_all_time_bones = []
-            #     (n1 + tt * (j * c), n2 + tt * (j * c))
-            #     for (n1, n2) in all_channel_bones
-            #     for tt in range(t)
-            # ]
-
-            # print("SMOL:", small_bones)
-            # print("ALLC", all_channel_bones)
-            # print("AJLKDJKFA", all_channel_all_time_bones)
-            # break
-            def compute_flat_index(t, j, c, n_joints=4, n_channels=2):
-                return t * n_joints * n_channels + j * n_channels + c
-
-            # TODO Edges according to time.
-            time_edges = []
-            for c in range(n_channels):
-                for j in range(n_joints):
-                    for t1 in range(n_times_i):
-                        for t2 in range(n_times_i):
-                            edge = [
-                                compute_flat_index(
-                                    t1,
-                                    j,
-                                    c,
-                                    n_joints=n_joints,
-                                    n_channels=n_channels,
-                                ),
-                                compute_flat_index(
-                                    t2,
-                                    j,
-                                    c,
-                                    n_joints=n_joints,
-                                    n_channels=n_channels,
-                                ),
-                            ]
-                            time_edges.append(edge)
-
-            # TODO Edges according to channel.
-            channel_edges = []
-
-            # TODO Edges last.
-            space_channel_edges = []
-
-            edge_index = [
-                all_channel_all_time_bones
-                + time_edges
-                + channel_edges
-                + space_channel_edges
-            ]
-
-            # Step 3: Create graph Data objects.
+            # Step 4: Create fully-conencted graph Data objects.
             motion_graph = Data(
                 x=flat_input.unsqueeze(1),
-                y=flat_target,  # .unsqueeze(1),
-                edge_index=torch.tensor(
-                    time_edges
-                ).T,  # need to make this into a tensor of size 2x num edges!
+                y=flat_target,
+                edge_index=empty_edges,
             )
             motions.append(motion_graph)
+        return motions
 
-        # Step 4: collate the graphs (using InMemoryDataset)
-        self.data, self.slices = self.collate(motions)
-        self._data_list = None  # Reset cache.
-
-        # Step 5: save processed data
-        fs.torch_save(
-            (self._data.to_dict(), self.slices, {}, self._data.__class__),
-            self.processed_paths[0],
-        )
-
-    def load_raw_xyz_motion_matrices(self):
+    def load_raw_xyz_motion_matrices(self, subj_name):
         r"""Load raw motion data.
 
         This method loads the Human3.6M dataset.
 
         A lot of this is using functions copied from the siMLPe paper.
 
+        Parameters
+        ----------
+        subj_name : str
+            Subject name.
+
         Returns
         -------
         torch.tensor
             Raw motion matrices from files TODO WHAT IS THIS.
         """
-        # Get train / test split
-        # if train:
-        #     subj_names = ["S1", "S6", "S7", "S8", "S9"]
-        # else:
-        #     subj_names = ["S5"]
-        subj_names = ["S1", "S5", "S6", "S7", "S8", "S9"]
+        # Relevant data files for processing. There are -1 and -2 ones
+        # and I don't know why. Using the first for fun?
+        file_list = [
+            osp.join(self.raw_dir, filename)
+            for filename in os.listdir(self.raw_dir)
+            if filename.startswith(subj_name) and filename.endswith("1.txt")
+        ]
 
-        file_list = []
-        for subj in subj_names:
-            for filename in os.listdir(self.raw_dir):
-                if filename.startswith(subj):
-                    file_list.append(osp.join(self.raw_dir, filename))
-
+        # Read and process each text file; copied from GCNext code.
         raw_motion_matrices = []
         for path in file_list:
-            info = open(path, "r").readlines()
+            with open(path) as f:
+                info = f.readlines()
 
             pose_info = []
             for line in info:
@@ -396,7 +500,7 @@ class H36MDataset(InMemoryDataset):
             ).reshape(T, 32, 3, 3)
 
             xyz_info = rotmat2xyz_torch(pose_info)
-            xyz_info = xyz_info[:, self.used_joint_indexes, :]
+            xyz_info = xyz_info[:, H36MSkeleton.USED_JOINT_INDICES, :]
 
             raw_motion_matrices.append(xyz_info)
 
@@ -405,9 +509,8 @@ class H36MDataset(InMemoryDataset):
     def process_input_target_pairs(
         self,
         raw_xyz_motion_matrices,
-        sample_rate=2,
-        input_length=50,
-        target_length=10,
+        sample_rate=2,  # space issues
+        debug=False,
     ):
         r"""Create input-target pairs from raw motion matrices.
 
@@ -416,11 +519,9 @@ class H36MDataset(InMemoryDataset):
         raw_xyz_motion_matrices : list[torch.tensor]
             GA.
         sample_rate : int
-            Sample rate to reduce temporal resolution.
-        input_length : int
-            Desired length of input to neural network.
-        target_length : int
-            Desired length of label for neural network.
+            Sample rate to reduce temporal resolution; should be 2 to get 25 frames per second.
+        debug : bool
+            Debug setting. If True will only return the first 150 input/target pairs for SPEED.
 
         Returns
         -------
@@ -429,13 +530,12 @@ class H36MDataset(InMemoryDataset):
         Y : list[torch.tensor]
             List of motion matrix labels of shape (target_length, n_joints, n_channels).
         """
-
-        # TODO deal with this processing step later; might change the reshape / edges
+        input_length, target_length = self.N_FRAMES, self.N_FRAMES
 
         X = []
         Y = []
 
-        idx = 0
+        debug_count = 0
         for h36m_motion_poses in raw_xyz_motion_matrices:
             n_frames = h36m_motion_poses.shape[0]
             frame_span_of_sample = (input_length + target_length) * sample_rate
@@ -460,8 +560,10 @@ class H36MDataset(InMemoryDataset):
 
                 X.append(motion_input)
                 Y.append(motion_target)
-                idx += 1
-                if idx == 150:
+
+                # Leave early to verify things and spare my soul.
+                debug_count += 1
+                if debug and debug_count == 150:
                     return X, Y
 
         return X, Y
@@ -473,14 +575,71 @@ class H36MDataset(InMemoryDataset):
 
 
 class H36MSkeleton:
-    r"""Dataset class for Human3.6M Skeleton."""
+    r"""Dataset class for Human3.6M Skeleton.
+
+    Attributes
+    ----------
+    NUM_JOINTS (int): Number of joints in skeleton.
+    NUM_CHANNELS (int): Number of channels per joint.
+    USED_JOINT_INDICES (np.array[np.int64]): Numpy array containing relevant joint indices.
+    """
+
+    NUM_JOINTS: ClassVar = 22
+    NUM_CHANNELS: ClassVar = 3
+
+    USED_JOINT_INDICES: ClassVar = np.array(
+        [
+            2,
+            3,
+            4,
+            5,
+            7,
+            8,
+            9,
+            10,
+            12,
+            13,
+            14,
+            15,
+            17,
+            18,
+            19,
+            21,
+            22,
+            25,
+            26,
+            27,
+            29,
+            30,
+        ]
+    ).astype(np.int64)
 
     def __init__(self):
         r"""H36M skeleton with 22 joints."""
-        self.NUM_JOINTS = 22
 
         self.bone_list = self.generate_bone_list()
         self.bone_adj_mat = self.generate_bone_adj_mat()
+
+    def compute_flat_index(self, t, j, c):
+        r"""Compute flat index for motion matrix of shape (T,J,C).
+
+        Parameters
+        ----------
+        t : int
+            Time index in 3d matrix.
+        j : int
+            Joint index in 3d matrix.
+        c : int
+            Channel index in 3d matrix.
+
+        Returns
+        -------
+        int
+            Flat index in T*J*C vector.
+        """
+        return (
+            t * self.NUM_JOINTS * self.NUM_CHANNELS + j * self.NUM_CHANNELS + c
+        )
 
     def generate_bone_list(self):
         r"""Generate bones in H36M skeleton with 22 joints.
@@ -516,6 +675,31 @@ class H36MSkeleton:
         ]
 
         return self_links + [(i - 1, j - 1) for (i, j) in joint_links]
+
+    def generate_time_edges(self, n_times):
+        r"""Generate list of edges only through time.
+
+        Parameters
+        ----------
+        n_times : int
+            Number of frames to consider.
+
+        Returns
+        -------
+        torch.tensor
+            Time edges.
+        """
+        time_edges = []
+        for c in range(self.NUM_CHANNELS):
+            for j in range(self.NUM_JOINTS):
+                for t1 in range(n_times):
+                    for t2 in range(n_times):
+                        edge = [
+                            self.compute_flat_index(t1, j, c),
+                            self.compute_flat_index(t2, j, c),
+                        ]
+                        time_edges.append(edge)
+        return torch.tensor(time_edges).T
 
     def generate_bone_adj_mat(self):
         r"""Generate adj matrix for H36M skeleton with 22 joints.
@@ -873,11 +1057,12 @@ if __name__ == "__main__":
     # print(A)
     # print(A.reshape(4*3*2, order="C"))
     # print(A.shape)
-    root_data_dir = "/home/abby/code/TopoBenchmark/topobenchmarkx/data/datasets/graph/motion"
+    root_data_dir = "/home/abby/code/TopoBenchmark/datasets/graph/motion"
     name = "H36MDataset"
     dataset = H36MDataset(
         root=root_data_dir,
         name=name,  # self.parameters["data_name"],
         parameters=None,
+        force_reload=True,
     )  # self.parameters,
     # print(dataset)

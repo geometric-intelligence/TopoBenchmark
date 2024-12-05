@@ -229,20 +229,22 @@ class H36MDataset(OnDiskDataset):
         # Add train/val/test mask to data object.
         # This probably isn't the best place to do it.
         data = torch.load(filepath, weights_only=False)
+
+        n_nodes = data.x.shape[0]
         if idx in self.train_idx:
-            data.train_mask = torch.Tensor([1]).long()
-            data.val_mask = torch.Tensor([0]).long()
-            data.test_mask = torch.Tensor([0]).long()
+            data.train_mask = torch.ones(n_nodes).long()
+            data.val_mask = torch.zeros(n_nodes).long()
+            data.test_mask = torch.zeros(n_nodes).long()
 
         if idx in self.val_idx:
-            data.train_mask = torch.Tensor([0]).long()
-            data.val_mask = torch.Tensor([1]).long()
-            data.test_mask = torch.Tensor([0]).long()
+            data.train_mask = torch.zeros(n_nodes).long()
+            data.val_mask = torch.ones(n_nodes).long()
+            data.test_mask = torch.zeros(n_nodes).long()
 
         if idx in self.test_idx:
-            data.train_mask = torch.Tensor([0]).long()
-            data.val_mask = torch.Tensor([0]).long()
-            data.test_mask = torch.Tensor([1]).long()
+            data.train_mask = torch.zeros(n_nodes).long()
+            data.val_mask = torch.zeros(n_nodes).long()
+            data.test_mask = torch.ones(n_nodes).long()
 
         return data
 

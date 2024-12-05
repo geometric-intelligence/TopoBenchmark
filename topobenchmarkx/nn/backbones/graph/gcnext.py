@@ -31,6 +31,7 @@ class GCNext(nn.Module):
         super().__init__()
 
         self.config = config
+        self.out_channels = 7
 
         self.n_frames = config.motion_dataset.n_frames
         self.n_joints = config.motion_dataset.n_joints
@@ -82,6 +83,11 @@ class GCNext(nn.Module):
         # idk this
         self.dyna_idx = dyna_idx
 
+        print("################################")
+        print("GCNext structure:")
+        for name, module in self.named_children():
+            print(f"Module {name}:", module)
+
     def reset_parameters(self):
         """Idk."""
         nn.init.xavier_uniform_(self.motion_fc_out.weight, gain=1e-8)
@@ -102,6 +108,11 @@ class GCNext(nn.Module):
         torch.Tensor
             Output node features.
         """
+        # Debug input at top level
+        print("GCNext input magnitude:", torch.norm(x))
+        print("GCNext input requires_grad:", x.requires_grad)
+        print("GCNext input grad_fn:", x.grad_fn)
+
         tau = 1
 
         batch_size = x.size(0) // self.n_nodes
@@ -121,17 +132,18 @@ class GCNext(nn.Module):
         # Helps learn initial feature representations
         # Applied before the graph convolution layers
 
-        if self.temporal_fc_in:
-            motion_feats = self.arr0(motion_input)
-            # Transform across time
-            motion_feats = self.motion_fc_in(motion_feats)
-        else:
-            # Transform across features (66,66) with temporal weighting
-            motion_feats = self.motion_fc_in(motion_input)
-            motion_feats = self.arr0(motion_feats)  # now its (bs, 66, 50)
-            motion_feats = torch.einsum(
-                "bvt,tj->bvj", motion_feats, self.in_weight
-            )
+        # if self.temporal_fc_in:
+        #     motion_feats = self.arr0(motion_input)
+        #     # Transform across time
+        #     motion_feats = self.motion_fc_in(motion_feats)
+        # else:
+        #     # Transform across features (66,66) with temporal weighting
+        #     motion_feats = self.motion_fc_in(motion_input)
+        #     motion_feats = self.arr0(motion_feats)  # now its (bs, 66, 50)
+        #     motion_feats = torch.einsum(
+        #         "bvt,tj->bvj", motion_feats, self.in_weight
+        #     )
+        motion_feats = motion_input
 
         # Shape of motion_feats is now (batch_size, 66, 50)
         # Reshape to be batch 3D blocks (bs, 22, 3, 50)
@@ -140,29 +152,50 @@ class GCNext(nn.Module):
         )
 
         # Process through dynamic layers
+        # Process through dynamic layers
         for i in range(len(self.dynamic_layers.layers)):
             if_make_dynamic = self.dyna_idx[0] <= i <= self.dyna_idx[1]
             motion_feats = self.dynamic_layers.layers[i](
                 motion_feats, self.mlp, if_make_dynamic, tau
             )
+            # Debug after each layer
+            print(f"Layer {i} output magnitude:", torch.norm(motion_feats))
+            print(f"Layer {i} grad_fn:", motion_feats.grad_fn)
 
-        # Reshape to be batch old way (bs, 22*3, 50)
-        motion_feats = motion_feats.reshape(
-            batch_size, self.n_nodes_per_frame, self.n_frames
-        )
+        # for i in range(len(self.dynamic_layers.layers)):
+        #     if_make_dynamic = self.dyna_idx[0] <= i <= self.dyna_idx[1]
+        #     motion_feats = self.dynamic_layers.layers[i](
+        #         motion_feats, self.mlp, if_make_dynamic, tau
+        #     )
 
-        if self.temporal_fc_out:
-            motion_feats = self.motion_fc_out(motion_feats)
-            motion_feats = self.arr1(motion_feats)
-        else:
-            motion_feats = self.arr1(motion_feats)
-            motion_feats = self.motion_fc_out(motion_feats)
-            motion_feats = torch.einsum(
-                "btv,tj->bjv", motion_feats, self.out_weight
-            )
+        # # Reshape to be batch old way (bs, 22*3, 50)
+        # motion_feats = motion_feats.reshape(
+        #     batch_size, self.n_nodes_per_frame, self.n_frames
+        # )
+
+        # if self.temporal_fc_out:
+        #     motion_feats = self.motion_fc_out(motion_feats)
+        #     motion_feats = self.arr1(motion_feats)
+        # else:
+        #     motion_feats = self.arr1(motion_feats)
+        #     motion_feats = self.motion_fc_out(motion_feats)
+        #     motion_feats = torch.einsum(
+        #         "btv,tj->bjv", motion_feats, self.out_weight
+        #     )
 
         # Reshape back to torch_geometric format [batch*num_nodes, features]
         motion_feats = motion_feats.reshape(-1, 1)
+        print("Final output magnitude:", torch.norm(motion_feats))
+        print("Final output grad_fn:", motion_feats.grad_fn)
+
+        def final_hook(grad):
+            print(
+                "Gradient at GCNext output:",
+                torch.norm(grad) if grad is not None else None,
+            )
+            return grad
+
+        motion_feats.register_hook(final_hook)
 
         return motion_feats
 
@@ -184,6 +217,8 @@ class GCBlock(nn.Module):
         Whether to use spatial fully connected layer or temporal.
     layernorm_axis : str
         Which axis to normalize over ('spatial', 'temporal', or 'all').
+    use_skeletal_hyperedges : bool
+            Whether to include limb hyperedges in skeletal convolution.
     """
 
     def __init__(
@@ -194,6 +229,7 @@ class GCBlock(nn.Module):
         use_norm: bool = True,
         use_spatial_fc: bool = False,
         layernorm_axis: str = "spatial",
+        use_skeletal_hyperedges: bool = False,
     ):
         super().__init__()
 
@@ -202,7 +238,9 @@ class GCBlock(nn.Module):
         self.n_frames = n_frames
 
         # Initialize different convolution types
-        self.skeletal_conv = SkeletalConvolution()
+        self.skeletal_conv = SkeletalConvolution(
+            use_hyperedges=use_skeletal_hyperedges
+        )
         self.temporal_conv = TemporalConvolution(n_frames=n_frames)
         self.coordinate_conv = JointCoordinateConvolution()
         self.temp_joint_conv = TemporalJointConvolution(
@@ -288,8 +326,45 @@ class GCBlock(nn.Module):
         torch.Tensor
             Updated node features.
         """
+        # Debug input
+        print("Input magnitude:", torch.norm(x))
+        print("Input requires_grad:", x.requires_grad)
+
+        x1 = self.skeletal_conv(x)
+
+        # Register hooks to track gradient flow
+        def hook_fn(name):
+            def hook(grad):
+                print(
+                    f"******************GCBlock {name} gradient:",
+                    torch.norm(grad) if grad is not None else None,
+                )
+                return grad
+
+            return hook
+
+        x.register_hook(hook_fn("input"))
+        x1.register_hook(hook_fn("x1"))
+
+        # Debug intermediate values
+        print("******************")
+        print("GCBlock input magnitude:", torch.norm(x))
+        print("GCBlock x1 magnitude:", torch.norm(x1))
+        print("GCBlock input requires_grad:", x.requires_grad)
+        print("GCBlock x1 requires_grad:", x1.requires_grad)
+        print("GCBlock input grad_fn:", x.grad_fn)
+        print("GCBlock x1 grad_fn:", x1.grad_fn)
+
+        return x1
+
         # Apply different convolution types
         x1 = self.skeletal_conv(x)
+
+        print("x1 magnitude:", torch.norm(x1))
+        print("x1 requires_grad:", x1.requires_grad)
+
+        return x1
+
         x2 = self.temporal_conv(x)
         x3 = self.coordinate_conv(x)
         x4 = self.temp_joint_conv(x)
@@ -341,6 +416,7 @@ class TransGraphConvolution(nn.Module):
             - use_spatial_fc: blah
             - num_layers: blah
             - layernorm_axis: blah
+            - use_skeletal_hyperedges: blkah
     """
 
     def __init__(self, config):
@@ -354,6 +430,7 @@ class TransGraphConvolution(nn.Module):
                     use_norm=config.motion_mlp.with_normalization,
                     use_spatial_fc=config.motion_mlp.spatial_fc_only,
                     layernorm_axis=config.motion_mlp.norm_axis,
+                    use_skeletal_hyperedges=config.motion_mlp.use_skeletal_hyperedges,
                 )
                 for i in range(config.motion_mlp.num_layers)
             ]
@@ -425,16 +502,26 @@ class BaseGraphConvolution(nn.Module):
 
 
 class SkeletalConvolution(nn.Module):
-    """Convolution along skeletal connections between joints in H36MSkeleton."""
+    """Convolution along skeletal connections between joints in H36MSkeleton.
 
-    def __init__(self):
+    Parameters
+    ----------
+    use_hyperedges : bool
+        Whether to include limb hyperedges in convolution.
+    """
+
+    def __init__(self, use_hyperedges=False):
         super().__init__()
 
         self.skl = H36MSkeleton()
-        self.register_buffer("skl_mask", self.skl.skl_mask)
+        if use_hyperedges:
+            self.register_buffer("skl_mask", self.skl.skl_mask_hyper)
+        else:
+            self.register_buffer("skl_mask", self.skl.skl_mask)
 
         self.weights = nn.Parameter(
-            torch.eye(self.skl.NUM_JOINTS, self.skl.NUM_JOINTS)
+            torch.randn(self.skl.NUM_JOINTS, self.skl.NUM_JOINTS),
+            requires_grad=True,
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -450,10 +537,72 @@ class SkeletalConvolution(nn.Module):
         torch.Tensor [batch, n_joints, n_channels, n_frames]
             Features after spatial convolution with skeleton mask.
         """
-        masked_weights = self.weights.mul(self.skl_mask)  # (22,22)
+
+        masked_weights = self.weights.mul(self.skl_mask)
+
+        # Debug gradient flow through each operation
+        def weight_hook(grad):
+            print("Weight gradient in backward:", torch.norm(grad))
+            return grad
+
+        def masked_hook(grad):
+            print("Masked weights gradient in backward:", torch.norm(grad))
+            return grad
+
+        def output_hook(grad):
+            print("Output gradient in backward:", torch.norm(grad))
+            return grad
+
+        self.weights.register_hook(weight_hook)
+        masked_weights.register_hook(masked_hook)
+        output = torch.einsum("vj, bjct->bvct", masked_weights, x)
+        output.register_hook(output_hook)
+
+        return output
+
+        # Debug each step
+        print("weights grad_fn:", self.weights.grad_fn)
+
+        # Register hooks to track gradient flow
+        self.weights.register_hook(
+            lambda grad: print(
+                "Weight gradient:",
+                torch.norm(grad) if grad is not None else None,
+            )
+        )
+
+        masked_weights = self.weights.mul(self.skl_mask)
+        masked_weights.register_hook(
+            lambda grad: print(
+                "Masked weights gradient:",
+                torch.norm(grad) if grad is not None else None,
+            )
+        )
+
+        output = torch.einsum("vj, bjct->bvct", masked_weights, x)
+        output.register_hook(
+            lambda grad: print(
+                "Output gradient:",
+                torch.norm(grad) if grad is not None else None,
+            )
+        )
+
+        return output
+
+        self.masked_weights = self.weights.mul(self.skl_mask)  # (22,22)
+        # print("Unique values in masked_weights:", torch.unique(masked_weights))
+        # print("Sum of masked_weights:", torch.sum(masked_weights))
+
+        print("Gradient exists:", self.weights.grad is not None)
+        if self.weights.grad is not None:
+            print("Gradient magnitude:", torch.norm(self.weights.grad))
+
+        # # Debug gradients
+        # self.masked_weights.register_hook(lambda grad: print("Gradient at masked_weights:", torch.norm(grad)))
+        # self.weights.register_hook(lambda grad: print("Gradient at weights:", torch.norm(grad)))
 
         # (22,22) x (batch,22,3,50) -> (batch,22,3,50)
-        return torch.einsum("vj, bjct->bvct", masked_weights, x)
+        return torch.einsum("vj, bjct->bvct", self.masked_weights, x)
 
 
 class TemporalConvolution(nn.Module):
@@ -596,6 +745,8 @@ class H36MSkeleton:
     NUM_JOINTS (int): Number of joints in skeleton.
     NUM_CHANNELS (int): Number of channels per joint.
     USED_JOINT_INDICES (np.array[np.int64]): Numpy array containing relevant joint indices.
+    BONE_LINKS (list[tup[int]]): ONE-INDEXED list defining bone connections.
+    LIMB_LINKS (list[list[int]]): List defining limbs.
     """
 
     NUM_JOINTS: ClassVar = 22
@@ -604,36 +755,70 @@ class H36MSkeleton:
     # Labels from here: https://github.com/qxcv/pose-prediction/blob/master/H36M-NOTES.md
     USED_JOINT_INDICES: ClassVar = np.array(
         [
-            2,  # RHip
-            3,  # RKnee
-            4,  # RAnkle
-            5,  # RFoot
-            7,  # LHip
-            8,  # LKnee
-            9,  # LAnkle
-            10,  # LFoot
-            12,  # Pelvis?
-            13,  # Torso
-            14,  # Base of neck (same as 17, 25?)
-            15,  # Head low
+            2,  # RHip 1
+            3,  # RKnee 2
+            4,  # RAnkle 3
+            5,  # RFoot 4
+            7,  # LHip 5
+            8,  # LKnee 6
+            9,  # LAnkle 7
+            10,  # LFoot 8
+            12,  # Pelvis? 9
+            13,  # Torso 10
+            14,  # Base of neck (same as 17, 25?) 11
+            15,  # Head low 12
             17,  # Base of neck (same as 14, 25?)
-            18,  # LShoulder
-            19,  # LElbow
-            21,  # LWrist
-            22,  # LHand
+            18,  # LShoulder 14
+            19,  # LElbow 15
+            21,  # LWrist 16
+            22,  # LHand 17
             25,  # Base of neck (same as 14, 17?)
-            26,  # RShoulder
-            27,  # RElbow
-            29,  # RWrist
-            30,  # RHand
+            26,  # RShoulder 19
+            27,  # RElbow 20
+            29,  # RWrist 21
+            30,  # RHand 22
         ]
     )
+
+    BONE_LINKS: ClassVar = [
+        (1, 2),  # WHY IS THIS ONE INDEXED!??!?!??!?!
+        (2, 3),
+        (3, 4),
+        (5, 6),
+        (6, 7),
+        (7, 8),
+        (1, 9),
+        (5, 9),
+        (9, 10),
+        (10, 11),
+        (11, 12),
+        (10, 13),
+        (13, 14),
+        (14, 15),
+        (15, 16),
+        (15, 17),
+        (10, 18),
+        (18, 19),
+        (19, 20),
+        (20, 21),
+        (20, 22),
+    ]
+
+    LIMB_LINKS: ClassVar = [
+        [1, 2, 3, 4],  # Right leg?
+        [5, 6, 7, 8],  # Left leg?
+        [9, 10, 11, 12, 13],  # torso?
+        [14, 15, 16, 17],  # Left arm?
+        [19, 20, 21, 22],  # Right arm?
+    ]
 
     def __init__(self):
         r"""H36M skeleton with 22 joints."""
 
         self.bone_list = self.generate_bone_list()
         self.skl_mask = self.generate_skl_mask()
+
+        self.skl_mask_hyper = self.generate_skl_mask_hyper()
 
     def compute_flat_index(self, t, j, c):
         r"""Compute flat index for motion matrix of shape (T,J,C).
@@ -665,31 +850,7 @@ class H36MSkeleton:
             Edge list with bone links and self links.
         """
         self_links = [(i, i) for i in range(self.NUM_JOINTS)]
-        joint_links = [
-            (1, 2),
-            (2, 3),
-            (3, 4),
-            (5, 6),
-            (6, 7),
-            (7, 8),
-            (1, 9),
-            (5, 9),
-            (9, 10),
-            (10, 11),
-            (11, 12),
-            (10, 13),
-            (13, 14),
-            (14, 15),
-            (15, 16),
-            (15, 17),
-            (10, 18),
-            (18, 19),
-            (19, 20),
-            (20, 21),
-            (20, 22),
-        ]
-
-        return self_links + [(i - 1, j - 1) for (i, j) in joint_links]
+        return self_links + [(i - 1, j - 1) for (i, j) in self.BONE_LINKS]
 
     def generate_skl_mask(self):
         r"""Get skeleton mask for H36M skeleton with 22 joints.
@@ -706,6 +867,34 @@ class H36MSkeleton:
         for i, j in self.bone_list:
             skl_mask[i, j] = 1
             skl_mask[j, i] = 1
+        return skl_mask
+
+    def generate_skl_mask_hyper(self):
+        r"""Get hyperedge skeleton mask for H36M skeleton with 22 joints.
+
+        Returns
+        -------
+        list[tup[int]]
+            Edge list with limb links, bone links and self links.
+        """
+        # Create adjacency matrix
+        skl_mask = torch.zeros(
+            self.NUM_JOINTS, self.NUM_JOINTS, requires_grad=False
+        )
+        for i, j in self.bone_list:
+            skl_mask[i, j] = 1
+            skl_mask[j, i] = 1
+
+        for limb in self.LIMB_LINKS:
+            # Connect all joints within each limb to each other
+            for i in limb:
+                for j in limb:
+                    if (
+                        i != j
+                    ):  # Skip self connections as they're already handled
+                        skl_mask[i - 1, j - 1] = (
+                            1  # -1 since joints are 1-indexed in LIMB_LINKS
+                        )
         return skl_mask
 
     # def generate_time_edges(self, n_times):

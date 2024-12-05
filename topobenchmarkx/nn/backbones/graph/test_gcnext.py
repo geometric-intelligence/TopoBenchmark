@@ -109,7 +109,7 @@ def test_skeletal_convolution_equivalence():
     x = torch.randn(BATCH_SIZE, N_JOINTS, N_CHANNELS, N_FRAMES)
 
     # Current implementation output
-    model = SkeletalConvolution()
+    model = SkeletalConvolution(use_hyperedges=False)
     output_current = model(x)
 
     ## COPIED FROM GCNEXT ##
@@ -132,3 +132,33 @@ def test_skeletal_convolution_equivalence():
     assert torch.allclose(
         output_current, reshaped_output_reference, rtol=1e-5, atol=1e-5
     ), "Current and reference implementations produce different outputs"
+
+
+def test_hyper_skeletal_convolution_nonequivalence():
+    """Test that SkeletalConvolution forward pass matches reference implementation."""
+    # Create random input tensor
+    x = torch.randn(BATCH_SIZE, N_JOINTS, N_CHANNELS, N_FRAMES)
+
+    # need to set up weights so not eye...
+    weights = torch.nn.Parameter(torch.randn(N_JOINTS, N_JOINTS))
+
+    # Current implementation output
+    model = SkeletalConvolution(use_hyperedges=False)
+    model.weights = weights
+    output_current = model(x)
+
+    hyperedge_model = SkeletalConvolution(use_hyperedges=True)
+    hyperedge_model.weights = weights
+    output_hyper = hyperedge_model(x)
+
+    # print(model.skl_mask)
+    # print(hyperedge_model.skl_mask)
+    # Check masks differ
+    assert not torch.allclose(
+        model.skl_mask, hyperedge_model.skl_mask, rtol=1e-5, atol=1e-5
+    ), "Skl and hyperskl masks are the same"
+
+    # Check outputs differ
+    assert not torch.allclose(
+        output_current, output_hyper, rtol=1e-5, atol=1e-5
+    ), "Current and reference implementations produce the same output"

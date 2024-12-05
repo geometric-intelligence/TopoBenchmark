@@ -18,11 +18,12 @@ backbone:
       n_joints: 22
       n_channels: 3
     motion_mlp:
-      num_layers: 48
+      num_layers: 3
       with_normalization: True
       spatial_fc_only: False
       norm_axis: 'spatial'
-  dyna_idx: [2, 10]
+      use_skeletal_hyperedges: True
+  dyna_idx: [1, 2]
 
 backbone_wrapper:
   _target_: topobenchmarkx.nn.wrappers.GNNWrapper
@@ -38,7 +39,7 @@ readout:
   hidden_dim: ${model.feature_encoder.out_channels}
   out_channels: ${dataset.parameters.num_classes}
   task_level: ${dataset.parameters.task_level}
-  pooling_type: sum
+  # pooling_type: sum
 
 # compile model for faster training with pytorch 2.0
 compile: false

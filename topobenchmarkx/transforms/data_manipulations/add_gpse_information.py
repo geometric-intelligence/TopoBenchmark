@@ -41,10 +41,10 @@ class AddGPSEInformation(torch_geometric.transforms.BaseTransform):
         self.model = create_model(
             dim_in=cfg.dim_in, dim_out=self.parameters["dim_out"]
         )
-
+        cpu_or_gpu = "cpu" if kwargs["device"] == "cpu" else "cuda:0"
         model_state_dict = torch.load(
             f"{os.getcwd()}/data/pretrained_models/gpse_{self.parameters['pretrain_model'].lower()}.pt",
-            map_location=torch.device("cuda:0"),
+            map_location=torch.device(cpu_or_gpu),  # "cuda:0"),
         )
 
         # remove_keys = [s for s in model_state_dict["model_state"] if s.startswith("model.post_mp")]

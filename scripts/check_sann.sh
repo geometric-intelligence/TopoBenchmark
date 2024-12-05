@@ -13,7 +13,6 @@ python -m topobenchmarkx \
     trainer.max_epochs=200 \
     trainer.min_epochs=50 \
     trainer.devices=1 \
-    trainer.accelerator=default \
     trainer.check_val_every_n_epoch=1 \
     callbacks.early_stopping.patience=25\
     logger.wandb.project=SANN_CHECK_SWEEP\

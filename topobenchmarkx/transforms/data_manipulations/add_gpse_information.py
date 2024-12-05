@@ -41,10 +41,10 @@ class AddGPSEInformation(torch_geometric.transforms.BaseTransform):
         self.model = create_model(
             dim_in=cfg.dim_in, dim_out=self.parameters["dim_out"]
         )
-        cpu_or_gpu = "cpu" if kwargs["device"] == "cpu" else "cuda:0"
+        self.device = "cpu" if kwargs["device"] == "cpu" else "cuda:0"
         model_state_dict = torch.load(
             f"{os.getcwd()}/data/pretrained_models/gpse_{self.parameters['pretrain_model'].lower()}.pt",
-            map_location=torch.device(cpu_or_gpu),  # "cuda:0"),
+            map_location=torch.device(self.device),  # "cuda:0"),
         )
 
         # remove_keys = [s for s in model_state_dict["model_state"] if s.startswith("model.post_mp")]
@@ -296,7 +296,7 @@ class AddGPSEInformation(torch_geometric.transforms.BaseTransform):
                 y=torch.ones(batch_route.x.shape[0], 51),
                 y_graph=torch.ones(1, self.parameters["dim_out"]),
                 batch=torch.zeros(batch_route.x.shape[0], dtype=torch.int64),
-            )
+            ).to(self.device)
             self.model.eval()
             with torch.inference_mode():
                 x_out, _ = self.model(input_graph)
@@ -345,7 +345,7 @@ class AddGPSEInformation(torch_geometric.transforms.BaseTransform):
             y=torch.ones(batch_route.x.shape[0], 51),
             y_graph=torch.ones(1, self.parameters["dim_out"]),
             batch=torch.zeros(batch_route.x.shape[0], dtype=torch.int64),
-        )
+        ).to(self.device)
         self.model.eval()
         with torch.inference_mode():
             expanded_out, _ = self.model.forward(input_graph)
@@ -385,6 +385,7 @@ class AddGPSEInformation(torch_geometric.transforms.BaseTransform):
 
             if src_rank == dst_rank:
                 x_out = self.forward_intrarank(src_rank, route_index, data)
+
                 # TODO: How to go arround this condition ?
                 if x_out is None:
                     return None

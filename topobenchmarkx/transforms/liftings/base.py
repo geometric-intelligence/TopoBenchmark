@@ -4,7 +4,7 @@ import abc
 
 import torch_geometric
 
-from topobenchmarkx.transforms.converters import IdentityConverter
+from topobenchmarkx.transforms.converters import IdentityAdapter
 from topobenchmarkx.transforms.feature_liftings import FEATURE_LIFTINGS
 from topobenchmarkx.transforms.feature_liftings.identity import (
     Identity,
@@ -44,7 +44,7 @@ class LiftingTransform(torch_geometric.transforms.BaseTransform):
             feature_lifting = Identity()
 
         if domain2domain is None:
-            domain2domain = IdentityConverter()
+            domain2domain = IdentityAdapter()
 
         self.data2domain = data2domain
         self.domain2domain = domain2domain

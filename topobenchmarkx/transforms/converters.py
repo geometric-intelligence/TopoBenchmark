@@ -7,38 +7,38 @@ import torch_geometric
 from topomodelx.utils.sparse import from_sparse
 from torch_geometric.utils.undirected import is_undirected, to_undirected
 
-from topobenchmarkx.complex import PlainComplex
-from topobenchmarkx.data.utils.utils import (
+from topobenchmarkx.complex import Complex
+from topobenchmarkx.data.utils import (
     generate_zero_sparse_connectivity,
     select_neighborhoods_of_interest,
 )
 
 
-class Converter(abc.ABC):
-    """Convert between data structures representing the same domain."""
+class Adapter(abc.ABC):
+    """Adapt between data structures representing the same domain."""
 
     def __call__(self, domain):
-        """Convert domain's data structure."""
-        return self.convert(domain)
+        """Adapt domain's data structure."""
+        return self.adapt(domain)
 
     @abc.abstractmethod
-    def convert(self, domain):
-        """Convert domain's data structure."""
+    def adapt(self, domain):
+        """Adapt domain's data structure."""
 
 
-class IdentityConverter(Converter):
-    """Identity conversion.
+class IdentityAdapter(Adapter):
+    """Identity adaptation.
 
     Retrieves same data structure for domain.
     """
 
-    def convert(self, domain):
-        """Convert domain."""
+    def adapt(self, domain):
+        """Adapt domain."""
         return domain
 
 
-class Data2NxGraph(Converter):
-    """Data to nx.Graph conversion.
+class Data2NxGraph(Adapter):
+    """Data to nx.Graph adaptation.
 
     Parameters
     ----------
@@ -64,7 +64,7 @@ class Data2NxGraph(Converter):
         """
         return hasattr(data, "edge_attr") and data.edge_attr is not None
 
-    def convert(self, domain: torch_geometric.data.Data) -> nx.Graph:
+    def adapt(self, domain: torch_geometric.data.Data) -> nx.Graph:
         r"""Generate a NetworkX graph from the input data object.
 
         Parameters
@@ -114,10 +114,10 @@ class Data2NxGraph(Converter):
         return graph
 
 
-class Complex2PlainComplex(Converter):
-    """toponetx.Complex to PlainComplex conversion.
+class TnxComplex2Complex(Adapter):
+    """toponetx.Complex to Complex adaptation.
 
-    NB: order of features plays a crucial role, as ``PlainComplex``
+    NB: order of features plays a crucial role, as ``Complex``
     simply stores them as lists (i.e. the reference to the indices
     of the simplex are lost).
 
@@ -146,8 +146,8 @@ class Complex2PlainComplex(Converter):
         self.signed = signed
         self.transfer_features = transfer_features
 
-    def convert(self, domain):
-        """Convert toponetx.Complex to PlainComplex.
+    def adapt(self, domain):
+        """Adapt toponetx.Complex to Complex.
 
         Parameters
         ----------
@@ -155,7 +155,7 @@ class Complex2PlainComplex(Converter):
 
         Returns
         -------
-        PlainComplex
+        Complex
         """
         # NB: just a slightly rewriting of get_complex_connectivity
 
@@ -227,14 +227,14 @@ class Complex2PlainComplex(Converter):
                     rank_features = None
                 data["features"].append(rank_features)
 
-        return PlainComplex(**data)
+        return Complex(**data)
 
 
-class PlainComplex2Dict(Converter):
-    """PlainComplex to dict conversion."""
+class Complex2Dict(Adapter):
+    """Complex to dict adaptation."""
 
-    def convert(self, domain):
-        """Convert PlainComplex to dict.
+    def adapt(self, domain):
+        """Adapt Complex to dict.
 
         Parameters
         ----------
@@ -268,21 +268,21 @@ class PlainComplex2Dict(Converter):
         return data
 
 
-class ConverterComposition(Converter):
-    def __init__(self, converters):
+class AdapterComposition(Adapter):
+    def __init__(self, adapters):
         super().__init__()
-        self.converters = converters
+        self.adapters = adapters
 
-    def convert(self, domain):
-        """Convert domain"""
-        for converter in self.converters:
-            domain = converter(domain)
+    def adapt(self, domain):
+        """Adapt domain"""
+        for adapter in self.adapters:
+            domain = adapter(domain)
 
         return domain
 
 
-class Complex2Dict(ConverterComposition):
-    """Complex to dict conversion.
+class TnxComplex2Dict(AdapterComposition):
+    """toponetx.Complex to dict adaptation.
 
     Parameters
     ----------
@@ -303,11 +303,11 @@ class Complex2Dict(ConverterComposition):
         signed=False,
         transfer_features=True,
     ):
-        complex2plain = Complex2PlainComplex(
+        complex2plain = TnxComplex2Complex(
             max_rank=max_rank,
             neighborhoods=neighborhoods,
             signed=signed,
             transfer_features=transfer_features,
         )
-        plain2dict = PlainComplex2Dict()
-        super().__init__(converters=(complex2plain, plain2dict))
+        plain2dict = Complex2Dict()
+        super().__init__(adapters=(complex2plain, plain2dict))

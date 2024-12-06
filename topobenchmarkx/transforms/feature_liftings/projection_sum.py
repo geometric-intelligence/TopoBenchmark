@@ -1,5 +1,7 @@
 """ProjectionSum class."""
 
+import torch
+
 from .base import FeatureLiftingMap
 
 
@@ -23,8 +25,12 @@ class ProjectionSum(FeatureLiftingMap):
             if domain.features[rank + 1] is not None:
                 continue
 
-            domain.features[rank + 1] = domain.propagate_values(
-                rank, domain.features[rank]
+            domain.update_features(
+                rank + 1,
+                torch.matmul(
+                    torch.abs(domain.incidence[rank + 1].t()),
+                    domain.features[rank],
+                ),
             )
 
         return domain

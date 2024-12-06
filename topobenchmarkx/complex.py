@@ -1,7 +1,4 @@
-import torch
-
-
-class PlainComplex:
+class Complex:
     def __init__(
         self,
         incidence,
@@ -70,16 +67,3 @@ class PlainComplex:
     def reset_features(self):
         """Reset features."""
         self.features = [None for _ in self.features]
-
-    def propagate_values(self, rank, values):
-        """Propagate features from a rank to an upper one.
-
-        Parameters
-        ----------
-        rank : int
-            Rank of the simplices the values belong to.
-        values : array-like
-            Features for the rank-simplices.
-        """
-        # TODO: can be made much better
-        return torch.matmul(torch.abs(self.incidence[rank + 1].t()), values)

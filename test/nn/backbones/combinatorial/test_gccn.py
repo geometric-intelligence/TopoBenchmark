@@ -4,7 +4,7 @@ import pytest
 import torch
 from torch_geometric.data import Data
 from test._utils.nn_module_auto_test import NNModuleAutoTest
-from topobenchmarkx.nn.backbones.combinatorial.gccn import TopoTune, interrank_boundary_index, get_activation
+from topobenchmark.nn.backbones.combinatorial.gccn import TopoTune, interrank_boundary_index, get_activation
 from torch_geometric.nn import GCNConv
 from omegaconf import OmegaConf
 
@@ -56,6 +56,8 @@ def create_mock_complex_batch():
     x_0 = torch.randn(3, 16)  # 3 nodes
     x_1 = torch.randn(3, 16)  # 3 edges
     x_2 = torch.randn(1, 16)  # 1 face
+    
+    batch = Data(x_0=x_0, x_1=x_1, x_2=x_2)
 
     # Incidence matrices
     incidence_1 = torch.sparse_coo_tensor(
@@ -64,6 +66,7 @@ def create_mock_complex_batch():
         values=torch.ones(6),
         size=(3, 3)  # (num_nodes, num_edges)
     ).coalesce()
+    batch["down_incidence-1"] = incidence_1
 
     incidence_2 = torch.sparse_coo_tensor(
         indices=torch.tensor([[0, 1, 2],  # edge indices
@@ -71,6 +74,7 @@ def create_mock_complex_batch():
         values=torch.ones(3),
         size=(3, 1)  # (num_edges, num_faces)
     ).coalesce()
+    batch["down_incidence-2"] = incidence_2
 
     # Adjacency matrices (remain unchanged)
     adjacency_0 = torch.sparse_coo_tensor(
@@ -79,6 +83,7 @@ def create_mock_complex_batch():
         values=torch.ones(6),
         size=(3, 3)  # (num_nodes, num_nodes)
     ).coalesce()
+    batch["up_adjacency-0"] = adjacency_0
 
     adjacency_1 = torch.sparse_coo_tensor(
         indices=torch.tensor([[0, 0, 1, 1, 2, 2],
@@ -86,19 +91,17 @@ def create_mock_complex_batch():
         values=torch.ones(6),
         size=(3, 3)  # (num_edges, num_edges)
     ).coalesce()
+    batch["up_adjacency-1"] = adjacency_1
 
     adjacency_2 = torch.sparse_coo_tensor(
         indices=torch.tensor([[0], [0]]),
         values=torch.ones(1),
         size=(1, 1)  # (num_faces, num_faces)
     ).coalesce()
+    batch["up_adjacency-2"] = adjacency_2
 
     cell_statistics = torch.tensor([[3, 3, 1]]) 
-    
-    batch = Data(x_0=x_0, x_1=x_1, x_2=x_2,
-                 incidence_1=incidence_1, incidence_2=incidence_2,
-                 adjacency_0=adjacency_0, adjacency_1=adjacency_1, adjacency_2=adjacency_2,
-                 cell_statistics=cell_statistics)
+    batch["cell_statistics"] = cell_statistics
     return batch
 
 class ModifiedNNModuleAutoTest(NNModuleAutoTest):
@@ -143,14 +146,14 @@ def test_topotune():
     """Test the TopoTune module using ModifiedNNModuleAutoTest."""
     batch = create_mock_complex_batch()
     gnn = MockGNN(16, 32, 16)
-    routes = OmegaConf.create([[[0, 0], "adjacency"], [[1, 1], "adjacency"], [[1, 0], "boundary"], [[2, 1], "boundary"]])
+    neighborhoods = OmegaConf.create(["up_adjacency-0", "up_adjacency-1", "down_incidence-1", "down_incidence-2"])#[[[0, 0], "adjacency"], [[1, 1], "adjacency"], [[1, 0], "boundary"], [[2, 1], "boundary"]])
     
     auto_test = ModifiedNNModuleAutoTest([
         {
             "module": TopoTune,
             "init": {
                 "GNN": gnn,
-                "routes": routes,
+                "neighborhoods": neighborhoods,
                 "layers": 2,
                 "use_edge_attr": False,
                 "activation": "relu"
@@ -164,8 +167,8 @@ def test_topotune_methods():
     """Test individual methods of the TopoTune module."""
     batch = create_mock_complex_batch()
     gnn = MockGNN(16, 32, 16)
-    routes = OmegaConf.create([[[0, 0], "adjacency"], [[1, 0], "boundary"]])
-    topotune = TopoTune(gnn, routes, 2, False, "relu")
+    neighborhoods = OmegaConf.create(["up_adjacency-0", "down_incidence-1"])#[[[0, 0], "adjacency"], [[1, 0], "boundary"]])
+    topotune = TopoTune(GNN=gnn, neighborhoods=neighborhoods, layers=2, use_edge_attr=False, activation="relu")
 
     # Test generate_membership_vectors
     membership = topotune.generate_membership_vectors(batch)
@@ -181,7 +184,7 @@ def test_topotune_methods():
     assert len(nbhd_cache[(1, 0)]) == 2
 
     # Test intrarank_expand
-    expanded = topotune.intrarank_expand(batch, 0, "adjacency")
+    expanded = topotune.intrarank_expand(batch, 0, "up_adjacency-0")
     assert isinstance(expanded, Data)
     assert expanded.x.shape == (3, 16)
     assert expanded.edge_index.shape[0] == 2
@@ -206,11 +209,6 @@ def test_topotune_methods():
     aggregated = topotune.aggregate_inter_nbhd(x_out_per_route)
     assert 0 in aggregated
     assert aggregated[0].shape == (3, 16)
-
-    # Test readout
-    x = torch.randn(3, 16)
-    output = topotune.readout(x)
-    assert output.shape == (16,)
 
 def test_interrank_boundary_index():
     """Test the interrank_boundary_index function."""

@@ -4,7 +4,7 @@ import pytest
 import torch
 from torch_geometric.data import Data
 from test._utils.nn_module_auto_test import NNModuleAutoTest
-from topobenchmarkx.nn.backbones.combinatorial.gccn_onehasse import TopoTune_OneHasse, get_activation
+from topobenchmark.nn.backbones.combinatorial.gccn_onehasse import TopoTune_OneHasse, get_activation
 from torch_geometric.nn import GCNConv
 from omegaconf import OmegaConf
 
@@ -52,9 +52,12 @@ def create_mock_complex_batch():
     Data
         A PyTorch Geometric Data object representing a mock complex batch.
     """
+    # 3 nodes, 3 edges, 1 face
     x_0 = torch.randn(3, 16)  # 3 nodes
     x_1 = torch.randn(3, 16)  # 3 edges
     x_2 = torch.randn(1, 16)  # 1 face
+    
+    batch = Data(x_0=x_0, x_1=x_1, x_2=x_2)
 
     # Incidence matrices
     incidence_1 = torch.sparse_coo_tensor(
@@ -63,6 +66,7 @@ def create_mock_complex_batch():
         values=torch.ones(6),
         size=(3, 3)  # (num_nodes, num_edges)
     ).coalesce()
+    batch["down_incidence-1"] = incidence_1
 
     incidence_2 = torch.sparse_coo_tensor(
         indices=torch.tensor([[0, 1, 2],  # edge indices
@@ -70,14 +74,16 @@ def create_mock_complex_batch():
         values=torch.ones(3),
         size=(3, 1)  # (num_edges, num_faces)
     ).coalesce()
+    batch["down_incidence-2"] = incidence_2
 
-    # Adjacency matrices
+    # Adjacency matrices (remain unchanged)
     adjacency_0 = torch.sparse_coo_tensor(
         indices=torch.tensor([[0, 0, 1, 1, 2, 2],
                               [1, 2, 0, 2, 0, 1]]),
         values=torch.ones(6),
         size=(3, 3)  # (num_nodes, num_nodes)
     ).coalesce()
+    batch["up_adjacency-0"] = adjacency_0
 
     adjacency_1 = torch.sparse_coo_tensor(
         indices=torch.tensor([[0, 0, 1, 1, 2, 2],
@@ -85,26 +91,17 @@ def create_mock_complex_batch():
         values=torch.ones(6),
         size=(3, 3)  # (num_edges, num_edges)
     ).coalesce()
+    batch["up_adjacency-1"] = adjacency_1
 
     adjacency_2 = torch.sparse_coo_tensor(
         indices=torch.tensor([[0], [0]]),
         values=torch.ones(1),
         size=(1, 1)  # (num_faces, num_faces)
     ).coalesce()
+    batch["up_adjacency-2"] = adjacency_2
 
-    down_laplacian_2 = torch.sparse_coo_tensor(
-        indices=torch.tensor([[0], [0]]),
-        values=torch.ones(1),
-        size=(1, 1)  # (num_faces, num_faces)
-    ).coalesce()
-
-    cell_statistics = torch.tensor([[3, 3, 1]])
-    
-    batch = Data(x_0=x_0, x_1=x_1, x_2=x_2,
-                 incidence_1=incidence_1, incidence_2=incidence_2,
-                 adjacency_0=adjacency_0, adjacency_1=adjacency_1, adjacency_2=adjacency_2, 
-                 down_laplacian_2=down_laplacian_2,
-                 cell_statistics=cell_statistics)
+    cell_statistics = torch.tensor([[3, 3, 1]]) 
+    batch["cell_statistics"] = cell_statistics
     return batch
 
 class ModifiedNNModuleAutoTest(NNModuleAutoTest):
@@ -149,14 +146,14 @@ def test_topotune_onehasse():
     """Test the TopoTune_OneHasse module using ModifiedNNModuleAutoTest."""
     batch = create_mock_complex_batch()
     gnn = MockGNN(16, 32, 16)
-    routes = OmegaConf.create([[[0, 0], "adjacency"], [[1, 1], "adjacency"], [[1, 0], "boundary"], [[2, 1], "boundary"], [[2,2], "down_laplacian"]])
+    neighborhoods = OmegaConf.create(["up_adjacency-0", "up_adjacency-1", "down_incidence-1", "down_incidence-2"])#[[[0, 0], "adjacency"], [[1, 1], "adjacency"], [[1, 0], "boundary"], [[2, 1], "boundary"]])
     
     auto_test = ModifiedNNModuleAutoTest([
         {
             "module": TopoTune_OneHasse,
             "init": {
                 "GNN": gnn,
-                "routes": routes,
+                "neighborhoods": neighborhoods,
                 "layers": 2,
                 "use_edge_attr": False,
                 "activation": "relu"
@@ -170,8 +167,8 @@ def test_topotune_onehasse_methods():
     """Test individual methods of the TopoTune_OneHasse module."""
     batch = create_mock_complex_batch()
     gnn = MockGNN(16, 32, 16)
-    routes = OmegaConf.create([[[0, 0], "adjacency"], [[1, 0], "boundary"]])
-    topotune = TopoTune_OneHasse(gnn, routes, 2, False, "relu")
+    neighborhoods = OmegaConf.create(["up_adjacency-0", "down_incidence-1"])#[[[0, 0], "adjacency"], [[1, 0], "boundary"]])
+    topotune = TopoTune_OneHasse(GNN=gnn, neighborhoods=neighborhoods, layers=2, use_edge_attr=False, activation="relu")
 
     # Test generate_membership_vectors
     membership = topotune.generate_membership_vectors(batch)

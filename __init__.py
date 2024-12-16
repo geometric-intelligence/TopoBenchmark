@@ -1,13 +1,12 @@
 # numpydoc ignore=GL08
-import test
-
 import configs
-import topobenchmarkx
+import test
+import topobenchmark
 
 __all__ = [
-    "topobenchmarkx",
     "configs",
     "test",
+    "topobenchmark",
 ]
 
 __version__ = "0.0.1"

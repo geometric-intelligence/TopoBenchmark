@@ -3,7 +3,7 @@
 import pytest
 from omegaconf import OmegaConf
 import hydra
-from topobenchmarkx.utils.config_resolvers import (
+from topobenchmark.utils.config_resolvers import (
     infer_in_channels,
     infere_num_cell_dimensions,
     get_default_metrics,
@@ -117,6 +117,9 @@ class TestConfigResolvers:
         
     def test_get_default_metrics(self):
         """Test get_default_metrics."""
+        out = get_default_metrics("classification", ["accuracy", "precision"])
+        assert out == ["accuracy", "precision"]
+        
         out = get_default_metrics("classification")
         assert out == ["accuracy", "precision", "recall", "auroc"]
 

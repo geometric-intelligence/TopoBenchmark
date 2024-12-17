@@ -92,6 +92,8 @@ python -m topobenchmark model=cell/cwn dataset=graph/MUTAG
 
 The same CLI override mechanism also applies when modifying more finer configurations within a `CONFIG GROUP`. Please, refer to the official [`hydra`documentation](https://hydra.cc/docs/intro/) for further details.
 
+
+
 ## :bike: Experiments Reproducibility
 To reproduce Table 1 from the [`TopoBenchmark: A Framework for Benchmarking Topological Deep Learning`](https://arxiv.org/pdf/2406.06642) paper, please run the following command:
 
@@ -116,6 +118,7 @@ We list the neural networks trained and evaluated by `TopoBenchmark`, organized 
 | GAT | [Graph Attention Networks](https://openreview.net/pdf?id=rJXMpikCZ) |
 | GIN | [How Powerful are Graph Neural Networks?](https://openreview.net/pdf?id=ryGs6iA5Km) |
 | GCN | [Semi-Supervised Classification with Graph Convolutional Networks](https://arxiv.org/pdf/1609.02907v4) |
+| GraphMLP | [Graph-MLP: Node Classification without Message Passing in Graph](https://arxiv.org/pdf/2106.04051) |
 
 ### Simplicial complexes
 | Model | Reference |
@@ -145,7 +148,7 @@ We list the neural networks trained and evaluated by `TopoBenchmark`, organized 
 ### Combinatorial complexes
 | Model | Reference |
 | --- | --- |
-| GCCN | [Generalized Combinatorial Complex Neural Networks](https://arxiv.org/pdf/2410.06530) |
+| GCCN | [TopoTune: A Framework for Generalized Combinatorial Complex Neural Networks](https://arxiv.org/pdf/2410.06530) |
 
 ## :bulb: TopoTune
 
@@ -178,12 +181,17 @@ python -m topobenchmark \
 
 To use a single augmented Hasse graph expansion, use `model={domain}/topotune_onehasse` instead of `model={domain}/topotune`.
 
-To specify a set of neighborhoods (routes) on the complex, use a list of neighborhoods each specified as `\[\[{source_rank}, {destination_rank}\], {neighborhood}\]`. Currently, the following options for `{neighborhood}` are supported:
-- `up_laplacian`, from rank $r$ to $r$
-- `down_laplacian`, from rank $r$ to $r$
-- `boundary`, from rank $r$ to $r-1$
-- `coboundary`, from rank $r$ to $r+1$
-- `adjacency`, from rank $r$ to $r$ (stand-in for `up_adjacency`, as `down_adjacency` not yet supported in TopoBenchmark)
+To specify a set of neighborhoods on the complex, use a list of neighborhoods each specified as a string of the form 
+`r-{neighborhood}-k`, where $k$ represents the source cell rank, and $r$ is the number of ranks up or down that the selected `{neighborhood}` considers. Currently, the following options for `{neighborhood}` are supported:
+- `up_laplacian`, between cells of rank $k$ through $k+r$ cells.
+- `down_laplacian`, between cells of rank $k$ through $k-r$ cells.
+- `hodge_laplacian`, between cells of rank $k$ through both $k-r$ and $k+r$ cells.
+- `up_adjacency`, between cells of rank $k$ through $k+r$ cells.
+- `down_adjacency`, between cells of rank $k$ through $k-r$ cells.
+- `up_incidence`, from rank $k$ to $k+r$.
+- `down_incidence`, from rank $k$ to $k-r$.
+
+The number $r$ can be omitted, in which case $r=1$ by default (e.g. `up_incidence-k` represents the incidence from rank $k$ to $k+1$).
 
 
 ### Using backbone models from any package
@@ -235,16 +243,18 @@ We list the liftings used in `TopoBenchmark` to transform datasets. Here, a _lif
 
 </details>
 
-## Data Transformations
+<details>
+  <summary><b> Data Transformations <b></summary>
 
 | Transform | Description | Reference |
 | --- | --- | --- |
 | Message Passing Homophily | Higher-order homophily measure for hypergraphs | [Source](https://arxiv.org/abs/2310.07684) |
 | Group Homophily | Higher-order homophily measure for hypergraphs that considers groups of predefined sizes  | [Source](https://arxiv.org/abs/2103.11818) |
+</details>
 
 ## :books: Datasets
 
-
+### Graphs
 | Dataset | Task | Description | Reference |
 | --- | --- | --- | --- |
 | Cora | Classification | Cocitation dataset. | [Source](https://link.springer.com/article/10.1023/A:1009953814988) |
@@ -264,14 +274,14 @@ We list the liftings used in `TopoBenchmark` to transform datasets. Here, a _lif
 | US-county-demos | Regression | In turn each node attribute is used as the target label. | [Source](https://arxiv.org/pdf/2002.08274) |
 | ZINC | Regression | Graph-level regression. | [Source](https://pubs.acs.org/doi/10.1021/ci3001277) |
 
-
-
-
-## :hammer_and_wrench: Development
-
-To join the development of `TopoBenchmark`, you should install the library in dev mode. 
-
-For this, you can create an environment using conda or docker. Please, follow the steps in <a href="#jigsaw-get-started">:jigsaw: Get Started</a>.
+### Hypergraphs
+| Dataset | Task | Description | Reference |
+| --- | --- | --- | --- |
+| Cora-Cocitation | Classification | Cocitation dataset. | [Source](https://proceedings.neurips.cc/paper_files/paper/2019/file/1efa39bcaec6f3900149160693694536-Paper.pdf) |
+| Citeseer-Cocitation | Classification | Cocitation dataset. | [Source](https://proceedings.neurips.cc/paper_files/paper/2019/file/1efa39bcaec6f3900149160693694536-Paper.pdf) |
+| PubMed-Cocitation | Classification | Cocitation dataset. | [Source](https://proceedings.neurips.cc/paper_files/paper/2019/file/1efa39bcaec6f3900149160693694536-Paper.pdf) |
+| Cora-Coauthorship | Classification | Cocitation dataset. | [Source](https://proceedings.neurips.cc/paper_files/paper/2019/file/1efa39bcaec6f3900149160693694536-Paper.pdf) |
+| DBLP-Coauthorship | Classification | Cocitation dataset. | [Source](https://proceedings.neurips.cc/paper_files/paper/2019/file/1efa39bcaec6f3900149160693694536-Paper.pdf) |
 
 
 

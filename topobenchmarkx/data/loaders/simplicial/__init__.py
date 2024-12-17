@@ -1,4 +1,4 @@
-"""Init file for hypergraph load module with automated loader discovery."""
+"""Init file for simplicial dataset load module with automated loader discovery."""
 
 import inspect
 from importlib import util
@@ -6,26 +6,25 @@ from pathlib import Path
 from typing import Any, ClassVar
 
 
-class HypergraphLoaderManager:
-    """Manages automatic discovery and registration of hypergraph loader classes."""
+class SimplicialLoaderManager:
+    """Manages automatic discovery and registration of simplicial dataset loader classes."""
 
-    # Base class that all hypergraph loaders should inherit from (assuming there is one)
-    # You may need to adjust this based on your actual base loader class
+    # Base class that all simplicial loaders should inherit from (adjust based on your actual base class)
     BASE_LOADER_CLASS: ClassVar[type] = object
 
     @staticmethod
     def is_loader_class(obj: Any) -> bool:
-        """Check if an object is a valid hypergraph loader class.
+        """Check if an object is a valid simplicial dataset loader class.
 
         Parameters
         ----------
         obj : Any
-            The object to check if it's a valid hypergraph loader class.
+            The object to check if it's a valid simplicial dataset loader class.
 
         Returns
         -------
         bool
-            True if the object is a valid hypergraph loader class (non-private class
+            True if the object is a valid simplicial dataset loader class (non-private class
             with 'DatasetLoader' in name), False otherwise.
         """
         return (
@@ -36,7 +35,7 @@ class HypergraphLoaderManager:
 
     @classmethod
     def discover_loaders(cls, package_path: str) -> dict[str, type[Any]]:
-        """Dynamically discover all hypergraph loader classes in the package.
+        """Dynamically discover all simplicial dataset loader classes in the package.
 
         Parameters
         ----------
@@ -65,7 +64,7 @@ class HypergraphLoaderManager:
                 module = util.module_from_spec(spec)
                 spec.loader.exec_module(module)
 
-                # Find all hypergraph loader classes in the module
+                # Find all simplicial dataset loader classes in the module
                 for name, obj in inspect.getmembers(module):
                     if (
                         cls.is_loader_class(obj)
@@ -77,21 +76,21 @@ class HypergraphLoaderManager:
 
 
 # Create the loader manager
-manager = HypergraphLoaderManager()
+manager = SimplicialLoaderManager()
 
 # Automatically discover and populate loaders
-HYPERGRAPH_LOADERS = manager.discover_loaders(__file__)
+SIMPLICIAL_LOADERS = manager.discover_loaders(__file__)
 
-HYPERGRAPH_LOADERS_list = list(HYPERGRAPH_LOADERS.keys())
+SIMPLICIAL_LOADERS_list = list(SIMPLICIAL_LOADERS.keys())
 
 # Automatically generate __all__
 __all__ = [
     # Loader collections
-    "HYPERGRAPH_LOADERS",
-    "HYPERGRAPH_LOADERS_list",
+    "SIMPLICIAL_LOADERS",
+    "SIMPLICIAL_LOADERS_list",
     # Individual loader classes
-    *HYPERGRAPH_LOADERS.keys(),
+    *SIMPLICIAL_LOADERS.keys(),
 ]
 
 # For backwards compatibility, create individual imports
-locals().update(**HYPERGRAPH_LOADERS)
+locals().update(**SIMPLICIAL_LOADERS)

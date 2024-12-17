@@ -38,6 +38,7 @@ class ManualGraphDatasetLoader(AbstractLoader):
 
         # Load the graph data using the manual graph loader function
         data = load_manual_graph()
+        data["num_classes"] = 2
 
         # Create and return the dataset object
         dataset = DataloadDataset([data])

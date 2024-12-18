@@ -9,6 +9,7 @@ from topobenchmark.dataloader.dataload_dataset import DataloadDataset
 from topobenchmark.dataloader.utils import collate_fn
 from topobenchmark.data.batching import NeighborCellsLoader
 
+
 class TBDataloader(LightningDataModule):
     r"""This class takes care of returning the dataloaders for the training, validation, and test datasets.
 
@@ -83,26 +84,26 @@ class TBDataloader(LightningDataModule):
         return f"{self.__class__.__name__}(dataset_train={self.dataset_train}, dataset_val={self.dataset_val}, dataset_test={self.dataset_test}, batch_size={self.batch_size})"
 
     def _get_dataloader(self, split: str) -> DataLoader | NeighborCellsLoader:
-        r""" Create and return the dataloader for the specified split.
-        
+        r"""Create and return the dataloader for the specified split.
+
         Parameters
         ----------
         split : str
             The split to create the dataloader for.
-        
+
         Returns
         -------
         torch.utils.data.DataLoader | NeighborCellsLoader
             The dataloader for the specified split.
         """
-        shuffle = (split == "train")
-        
+        shuffle = split == "train"
+
         if not self.transductive or self.batch_size == -1:
             if self.batch_size == -1:
                 batch_size = 1
             else:
                 batch_size = self.batch_size
-            
+
             return DataLoader(
                 dataset=getattr(self, f"dataset_{split}"),
                 batch_size=batch_size,
@@ -113,7 +114,7 @@ class TBDataloader(LightningDataModule):
                 persistent_workers=self.persistent_workers,
                 **self.kwargs,
             )
-        mask_idx = self.dataset_train[0][1].index(f'{split}_mask')
+        mask_idx = self.dataset_train[0][1].index(f"{split}_mask")
         mask = self.dataset_train[0][0][mask_idx]
         return NeighborCellsLoader(
             data=getattr(self, f"dataset_{split}"),
@@ -124,7 +125,7 @@ class TBDataloader(LightningDataModule):
             shuffle=shuffle,
             **self.kwargs,
         )
-        
+
     def train_dataloader(self) -> DataLoader:
         r"""Create and return the train dataloader.
 

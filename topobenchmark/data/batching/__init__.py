@@ -1,4 +1,4 @@
-""" Init file for batching module. """
+"""Init file for batching module."""
 
 from .neighbor_cells_loader import NeighborCellsLoader
 

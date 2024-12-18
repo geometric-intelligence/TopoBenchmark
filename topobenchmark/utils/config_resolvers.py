@@ -234,7 +234,7 @@ def infer_in_channels(dataset, transforms):
             return [dataset.parameters.num_features[0]]
 
 
-def infere_num_cell_dimensions(selected_dimensions, in_channels):
+def infer_num_cell_dimensions(selected_dimensions, in_channels):
     r"""Infer the length of a list.
 
     Parameters

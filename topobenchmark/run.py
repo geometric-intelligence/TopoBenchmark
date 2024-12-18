@@ -30,7 +30,7 @@ from topobenchmark.utils.config_resolvers import (
     get_monitor_mode,
     get_required_lifting,
     infer_in_channels,
-    infere_num_cell_dimensions,
+    infer_num_cell_dimensions,
 )
 
 rootutils.setup_root(__file__, indicator=".project-root", pythonpath=True)
@@ -71,7 +71,7 @@ OmegaConf.register_new_resolver(
     "infer_in_channels", infer_in_channels, replace=True
 )
 OmegaConf.register_new_resolver(
-    "infere_num_cell_dimensions", infere_num_cell_dimensions, replace=True
+    "infer_num_cell_dimensions", infer_num_cell_dimensions, replace=True
 )
 OmegaConf.register_new_resolver(
     "parameter_multiplication", lambda x, y: int(int(x) * int(y)), replace=True

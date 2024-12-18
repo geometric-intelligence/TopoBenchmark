@@ -36,8 +36,7 @@ class TestLoaders:
         """
         config_files = []
         config_base_dir = base_dir / "configs/dataset"
-        exclude_datasets = {"karate_club.yaml",
-                            # Below the datasets that have some default transforms with we manually overriten with no_transform,
+        exclude_datasets = {# Below the datasets that have some default transforms manually overriten with no_transform,
                             # due to lack of default transform for domain2domain
                             "REDDIT-BINARY.yaml", "IMDB-MULTI.yaml", "IMDB-BINARY.yaml", #"ZINC.yaml"
                             }

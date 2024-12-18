@@ -2,6 +2,7 @@ from typing import Callable, Dict, List, Optional, Tuple, Union
 
 from topobenchmark.data.batching.cell_loader import CellLoader
 from topobenchmark.data.batching.utils import get_sampled_neighborhood
+from topobenchmark.dataloader import DataloadDataset
 
 from torch_geometric.data import Data, FeatureStore, GraphStore, HeteroData
 
@@ -121,7 +122,7 @@ class NeighborCellsLoader(CellLoader):
         is_sorted: bool = False,
         filter_per_worker: Optional[bool] = None,
         neighbor_sampler: Optional[NeighborSampler] = None,
-        directed: bool = True,  # Deprecated.
+        directed: bool = True,
         **kwargs,
     ):
         if input_time is not None and time_attr is None:
@@ -129,16 +130,22 @@ class NeighborCellsLoader(CellLoader):
                              "'time_attr' arguments: 'input_time' is set "
                              "while 'time_attr' is not set.")
         
-        is_hypergraph = hasattr(data, 'incidence_hyperedges')
+        data_obj = Data()
+        if isinstance(data, DataloadDataset):
+            for tensor, name in zip(data[0][0], data[0][1]):
+                setattr(data_obj, name, tensor)
+        else:
+            data_obj = data
+        is_hypergraph = hasattr(data_obj, 'incidence_hyperedges')
         n_hops = len(num_neighbors)
-        data = get_sampled_neighborhood(data, rank, n_hops, is_hypergraph)
+        data_obj = get_sampled_neighborhood(data_obj, rank, n_hops, is_hypergraph)
         self.rank = rank
         if self.rank != 0:
             # When rank is different than 0 get_sampled_neighborhood connects cells that are up to n_hops away, meaning that the NeighborhoodSampler needs to consider only one hop. 
             num_neighbors = [num_neighbors[0]]
         if neighbor_sampler is None:
             neighbor_sampler = NeighborSampler(
-                data,
+                data_obj,
                 num_neighbors=num_neighbors,
                 replace=replace,
                 subgraph_type=subgraph_type,
@@ -152,7 +159,7 @@ class NeighborCellsLoader(CellLoader):
             )
 
         super().__init__(
-            data=data,
+            data=data_obj,
             cell_sampler=neighbor_sampler,
             input_cells=input_nodes,
             input_time=input_time,

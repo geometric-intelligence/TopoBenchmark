@@ -43,7 +43,10 @@ def reduce_higher_ranks_incidences(batch, cells_ids, rank, max_rank, is_hypergra
         incidence = torch.index_select(incidence, 0, cells_ids[i-1])
         cells_ids[i] = torch.where(torch.sum(incidence, dim=0).to_dense() > 1)[0]
         incidence = torch.index_select(incidence, 1, cells_ids[i])
-        batch[f"incidence_{i}"] = incidence
+        if is_hypergraph:
+            batch.incidence_hyperedges = incidence
+        else:
+            batch[f"incidence_{i}"] = incidence
     
     return batch, cells_ids
 
@@ -76,7 +79,10 @@ def reduce_lower_ranks_incidences(batch, cells_ids, rank, is_hypergraph=False):
         incidence = torch.index_select(incidence, 1, cells_ids[i])
         cells_ids[i-1] = torch.where(torch.sum(incidence, dim=1).to_dense() > 0)[0]
         incidence = torch.index_select(incidence, 0, cells_ids[i-1])
-        batch[f"incidence_{i}"] = incidence
+        if is_hypergraph:
+            batch.incidence_hyperedges = incidence
+        else:
+            batch[f"incidence_{i}"] = incidence
         
     if not is_hypergraph:
         incidence = batch[f"incidence_0"]
@@ -275,8 +281,8 @@ def get_sampled_neighborhood(data, rank=0, n_hops=1, is_hypergraph=False):
         #     P = torch.sparse.mm(data[f"incidence_{i}"], P)
         #     Q = torch.sparse.mm(P.T,P)
         #     edges = torch.cat((edges, Q.indices()), dim=1)
-            
-    edges = A_sum.coalesce().indices()
+        
+        edges = A_sum.coalesce().indices()
     # Remove self edges
     mask = edges[0, :] != edges[1, :]
     edges = edges[:, mask]

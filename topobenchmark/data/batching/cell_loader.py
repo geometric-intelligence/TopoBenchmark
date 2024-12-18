@@ -165,7 +165,7 @@ class CellLoader(
             out = self.transform_sampler_output(out)
 
         if isinstance(out, SamplerOutput) and isinstance(self.data, Data):
-            data = filter_data(  #
+            data = filter_data(
                 self.data, out.node, self.rank)
         else:
             raise TypeError(f"'{self.__class__.__name__}'' found invalid "

@@ -1,3 +1,4 @@
+""" Test for the NeighborCellsLoader class."""
 import os
 import shutil
 import rootutils
@@ -11,7 +12,7 @@ from topobenchmark.run import initialize_hydra
 
 initialize_hydra()
 
-path = "/temp/graph2simplicial_lifting/"
+path = "./graph2simplicial_lifting/"
 if os.path.isdir(path):
     shutil.rmtree(path)
 cfg = compose(config_name="run.yaml", 
@@ -71,7 +72,7 @@ for i in range(n_train):
 shutil.rmtree(path)
 
 
-path = "/temp/graph2hypergraph_lifting/"
+path = "./graph2hypergraph_lifting/"
 if os.path.isdir(path):
     shutil.rmtree(path)
 cfg = compose(config_name="run.yaml", 

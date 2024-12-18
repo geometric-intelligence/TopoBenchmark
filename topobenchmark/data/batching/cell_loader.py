@@ -1,10 +1,10 @@
 """Cell Loader module from PyTorch Geometric with custom filter_data function."""
 
-from typing import Any, Callable, Iterator, List, Optional, Tuple, Union
+from collections.abc import Callable, Iterator
+from typing import Any
 
 import torch
 from torch import Tensor
-
 from torch_geometric.data import Data, FeatureStore, GraphStore, HeteroData
 from torch_geometric.loader.base import DataLoaderIterator
 from torch_geometric.loader.mixin import (
@@ -12,13 +12,7 @@ from torch_geometric.loader.mixin import (
     LogMemoryMixin,
     MultithreadingMixin,
 )
-
-from topobenchmark.data.batching.utils import filter_data
-
 from torch_geometric.loader.utils import (
-    filter_custom_hetero_store,
-    filter_custom_store,
-    filter_hetero_data,
     get_input_nodes,
     infer_filter_per_worker,
 )
@@ -29,6 +23,8 @@ from torch_geometric.sampler import (
     SamplerOutput,
 )
 from torch_geometric.typing import InputNodes, OptTensor
+
+from topobenchmark.data.batching.utils import filter_data
 
 
 class CellLoader(
@@ -103,14 +99,14 @@ class CellLoader(
 
     def __init__(
         self,
-        data: Union[Data, HeteroData, Tuple[FeatureStore, GraphStore]],
+        data: Data | HeteroData | tuple[FeatureStore, GraphStore],
         cell_sampler: BaseSampler,
         input_cells: InputNodes = None,
         input_time: OptTensor = None,
-        transform: Optional[Callable] = None,
-        transform_sampler_output: Optional[Callable] = None,
-        filter_per_worker: Optional[bool] = None,
-        custom_cls: Optional[HeteroData] = None,
+        transform: Callable | None = None,
+        transform_sampler_output: Callable | None = None,
+        filter_per_worker: bool | None = None,
+        custom_cls: HeteroData | None = None,
         input_id: OptTensor = None,
         **kwargs,
     ):
@@ -147,8 +143,8 @@ class CellLoader(
 
     def __call__(
         self,
-        index: Union[Tensor, List[int]],
-    ) -> Union[Data, HeteroData]:
+        index: Tensor | list[int],
+    ) -> Data | HeteroData:
         r"""Sample a subgraph from a batch of input cells.
 
         Parameters
@@ -166,7 +162,7 @@ class CellLoader(
             out = self.filter_fn(out)
         return out
 
-    def collate_fn(self, index: Union[Tensor, List[int]]) -> Any:
+    def collate_fn(self, index: Tensor | list[int]) -> Any:
         r"""Sample a subgraph from a batch of input cells.
 
         Parameters
@@ -190,8 +186,8 @@ class CellLoader(
 
     def filter_fn(
         self,
-        out: Union[SamplerOutput, HeteroSamplerOutput],
-    ) -> Union[Data, HeteroData]:
+        out: SamplerOutput | HeteroSamplerOutput,
+    ) -> Data | HeteroData:
         r"""Join the sampled cells with their corresponding features.
 
         It returns the resulting :class:`~torch_geometric.data.Data`

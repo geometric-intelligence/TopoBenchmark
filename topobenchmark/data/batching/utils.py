@@ -1,15 +1,10 @@
 """Utility functions for batching cells of different ranks."""
 
 import copy
-import logging
-import math
-from typing import Any, Dict, Optional, Tuple, Union
 
-import numpy as np
 import torch
-from torch import Tensor
-
 import torch_geometric.typing
+from torch import Tensor
 from torch_geometric.data import Data
 
 
@@ -95,9 +90,9 @@ def reduce_lower_ranks_incidences(batch, cells_ids, rank, is_hypergraph=False):
             batch[f"incidence_{i}"] = incidence
 
     if not is_hypergraph:
-        incidence = batch[f"incidence_0"]
+        incidence = batch["incidence_0"]
         incidence = torch.index_select(incidence, 1, cells_ids[0])
-        batch[f"incidence_0"] = incidence
+        batch["incidence_0"] = incidence
     return batch, cells_ids
 
 
@@ -124,7 +119,7 @@ def reduce_matrices(batch, cells_ids, names, max_rank):
     """
     for i in range(max_rank + 1):
         for name in names:
-            if f"{name}{i}" in batch.keys():
+            if f"{name}{i}" in batch.keys():  # noqa
                 matrix = batch[f"{name}{i}"]
                 matrix = torch.index_select(matrix, 0, cells_ids[i])
                 matrix = torch.index_select(matrix, 1, cells_ids[i])
@@ -156,7 +151,7 @@ def reduce_neighborhoods(batch, node, rank=0, remove_self_loops=True):
         is_hypergraph = True
         max_rank = 1
     else:
-        max_rank = len([key for key in batch.keys() if "incidence" in key]) - 1
+        max_rank = len([key for key in batch.keys() if "incidence" in key]) - 1  # noqa
 
     if rank > max_rank:
         raise ValueError(
@@ -184,13 +179,12 @@ def reduce_neighborhoods(batch, node, rank=0, remove_self_loops=True):
             "hodge_laplacian_",
             "adjacency_",
         ],
-        rank=rank,
         max_rank=max_rank,
     )
 
     # reduce the feature matrices
     for i in range(max_rank + 1):
-        if f"x_{i}" in batch.keys():
+        if f"x_{i}" in batch.keys():  # noqa
             batch[f"x_{i}"] = batch[f"x_{i}"][cells_ids[i]]
 
     # fix edge_index
@@ -202,7 +196,7 @@ def reduce_neighborhoods(batch, node, rank=0, remove_self_loops=True):
         batch.edge_index = edge_index
 
     # fix x
-    batch.x = batch[f"x_0"]
+    batch.x = batch["x_0"]
     if hasattr(batch, "num_nodes"):
         batch.num_nodes = batch.x.shape[0]
 
@@ -270,17 +264,17 @@ def get_sampled_neighborhood(data, rank=0, n_hops=1, is_hypergraph=False):
                 "Hypergraphs are not supported for ranks greater than 1."
             )
         if rank == 1:
-            I = data.incidence_hyperedges
-            A = torch.sparse.mm(I, I.T)  # lower adj matrix
+            incidence = data.incidence_hyperedges
+            A = torch.sparse.mm(incidence, incidence.T)  # lower adj matrix
         else:
-            I = data.incidence_hyperedges
-            A = torch.sparse.mm(I.T, I)
+            incidence = data.incidence_hyperedges
+            A = torch.sparse.mm(incidence.T, incidence)
         for _ in range(n_hops - 1):
             A = torch.sparse.mm(A, A)
         edges = A.indices()
     else:
         # get number of incidences
-        max_rank = len([key for key in data.keys() if "incidence" in key]) - 1
+        max_rank = len([key for key in data.keys() if "incidence" in key]) - 1  # noqa
         if rank > max_rank:
             raise ValueError(
                 f"Rank {rank} is greater than the maximum rank {max_rank} in the data."
@@ -292,8 +286,8 @@ def get_sampled_neighborhood(data, rank=0, n_hops=1, is_hypergraph=False):
         if rank == max_rank:
             edges = torch.empty((2, 0), dtype=torch.long)
         else:
-            I = data[f"incidence_{rank+1}"]
-            A = torch.sparse.mm(I, I.T)
+            incidence = data[f"incidence_{rank+1}"]
+            A = torch.sparse.mm(incidence, incidence.T)
             for _ in range(n_hops - 1):
                 A = torch.sparse.mm(A, A)
             A_sum += A
@@ -306,8 +300,8 @@ def get_sampled_neighborhood(data, rank=0, n_hops=1, is_hypergraph=False):
 
         # This considers the lower adjacencies
         if rank != 0:
-            I = data[f"incidence_{rank}"]
-            A = torch.sparse.mm(I.T, I)
+            incidence = data[f"incidence_{rank}"]
+            A = torch.sparse.mm(incidence.T, incidence)
             for _ in range(n_hops - 1):
                 A = torch.sparse.mm(A, A)
             A_sum += A

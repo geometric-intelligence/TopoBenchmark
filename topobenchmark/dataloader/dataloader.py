@@ -5,9 +5,9 @@ from typing import Any
 from lightning import LightningDataModule
 from torch.utils.data import DataLoader
 
+from topobenchmark.data.batching import NeighborCellsLoader
 from topobenchmark.dataloader.dataload_dataset import DataloadDataset
 from topobenchmark.dataloader.utils import collate_fn
-from topobenchmark.data.batching import NeighborCellsLoader
 
 
 class TBDataloader(LightningDataModule):
@@ -49,7 +49,7 @@ class TBDataloader(LightningDataModule):
         dataset_test: DataloadDataset = None,
         batch_size: int = 1,
         rank: int = 0,
-        num_neighbors: list[int] = [-1],
+        num_neighbors: list[int] | None = None,
         num_workers: int = 0,
         pin_memory: bool = False,
         **kwargs: Any,
@@ -66,7 +66,9 @@ class TBDataloader(LightningDataModule):
         self.batch_size = batch_size
         self.transductive = False
         self.rank = rank
-        self.num_neighbors = num_neighbors
+        self.num_neighbors = (
+            num_neighbors if num_neighbors is not None else [-1]
+        )
         if dataset_val is None and dataset_test is None:
             # Transductive setting
             self.dataset_val = dataset_train
@@ -99,10 +101,7 @@ class TBDataloader(LightningDataModule):
         shuffle = split == "train"
 
         if not self.transductive or self.batch_size == -1:
-            if self.batch_size == -1:
-                batch_size = 1
-            else:
-                batch_size = self.batch_size
+            batch_size = self.batch_size if self.batch_size != -1 else 1
 
             return DataLoader(
                 dataset=getattr(self, f"dataset_{split}"),

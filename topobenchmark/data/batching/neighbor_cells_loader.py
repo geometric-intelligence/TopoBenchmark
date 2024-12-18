@@ -1,16 +1,15 @@
 """NeighborCellsLoader class to batch in the transductive setting when working with topological domains."""
 
-from typing import Callable, Dict, List, Optional, Tuple, Union
+from collections.abc import Callable
+
+from torch_geometric.data import Data, FeatureStore, GraphStore, HeteroData
+from torch_geometric.sampler import NeighborSampler
+from torch_geometric.sampler.base import SubgraphType
+from torch_geometric.typing import EdgeType, InputNodes, OptTensor
 
 from topobenchmark.data.batching.cell_loader import CellLoader
 from topobenchmark.data.batching.utils import get_sampled_neighborhood
 from topobenchmark.dataloader import DataloadDataset
-
-from torch_geometric.data import Data, FeatureStore, GraphStore, HeteroData
-
-from torch_geometric.sampler import NeighborSampler
-from torch_geometric.sampler.base import SubgraphType
-from torch_geometric.typing import EdgeType, InputNodes, OptTensor
 
 
 class NeighborCellsLoader(CellLoader):
@@ -115,22 +114,22 @@ class NeighborCellsLoader(CellLoader):
 
     def __init__(
         self,
-        data: Union[Data, HeteroData, Tuple[FeatureStore, GraphStore]],
+        data: Data | HeteroData | tuple[FeatureStore, GraphStore],
         rank: int,
-        num_neighbors: Union[List[int], Dict[EdgeType, List[int]]],
+        num_neighbors: list[int] | dict[EdgeType, list[int]],
         input_nodes: InputNodes = None,
         input_time: OptTensor = None,
         replace: bool = False,
-        subgraph_type: Union[SubgraphType, str] = "directional",
+        subgraph_type: SubgraphType | str = "directional",
         disjoint: bool = False,
         temporal_strategy: str = "uniform",
-        time_attr: Optional[str] = None,
-        weight_attr: Optional[str] = None,
-        transform: Optional[Callable] = None,
-        transform_sampler_output: Optional[Callable] = None,
+        time_attr: str | None = None,
+        weight_attr: str | None = None,
+        transform: Callable | None = None,
+        transform_sampler_output: Callable | None = None,
         is_sorted: bool = False,
-        filter_per_worker: Optional[bool] = None,
-        neighbor_sampler: Optional[NeighborSampler] = None,
+        filter_per_worker: bool | None = None,
+        neighbor_sampler: NeighborSampler | None = None,
         directed: bool = True,
         **kwargs,
     ):
@@ -143,7 +142,7 @@ class NeighborCellsLoader(CellLoader):
 
         data_obj = Data()
         if isinstance(data, DataloadDataset):
-            for tensor, name in zip(data[0][0], data[0][1]):
+            for tensor, name in zip(data[0][0], data[0][1], strict=False):
                 setattr(data_obj, name, tensor)
         else:
             data_obj = data

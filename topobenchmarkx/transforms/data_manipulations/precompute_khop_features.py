@@ -28,7 +28,9 @@ class PrecomputeKHopFeatures(torch_geometric.transforms.BaseTransform):
         super().__init__()
         self.type = "precompute_khop_features"
         self.complex_dim = complex_dim
-        self.max_hop = max_hop - 1
+        self.max_hop = (
+            max_hop - 1
+        )  # The 0-th hop is always the features themselves
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}(type={self.type!r}, max_hop={self.max_hop})"
@@ -57,17 +59,12 @@ class PrecomputeKHopFeatures(torch_geometric.transforms.BaseTransform):
         Bs_new = Bc  # [torch.ones_like(Bs[0])] * len(Bs)
         Bc_new = Bs  # [torch.ones_like(Bc[0])] * len(Bc)
 
-        N0 = (UP[0].size())[0]  # (number of 0-simplices)
-        N1 = (UP[1].size())[0]  # Number of 1-simplices
-        N2 = (DOWN[1].size())[0]  # Number of 2-simplices
-        N3 = (DOWN[2].size())[0]  # Number of 3-simplices
-
-        x_is = [
-            torch.ones((N0, 1)),
-            torch.ones((N1, 1)),
-            torch.ones((N2, 1)),
-            torch.ones((N3, 1)),
-        ]
+        x_is = {}
+        for i in range(K):
+            if i == 0:
+                x_is[i] = torch.ones((UP[i].size())[0], 1)
+            else:
+                x_is[i] = torch.ones((DOWN[i - 1].size())[0], 1)
 
         # Create a dictionary that stores the i-simplices, the
         # j-th hop features matrix

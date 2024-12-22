@@ -1,6 +1,7 @@
 """A transform that adds positional information to the graph."""
 
 import os
+
 import torch
 import torch_geometric
 import torch_geometric.data
@@ -8,7 +9,7 @@ from torch_geometric.data import Data
 from torch_geometric.graphgym.config import cfg, load_cfg, set_cfg
 from torch_geometric.graphgym.model_builder import create_model
 
-from topobenchmarkx.data.utils import get_routes_from_neighborhoods
+from topobenchmarkx.data.utils import get_routes_from_neighborhoods_simplex
 
 
 class dotdict(dict):
@@ -44,7 +45,7 @@ class AddGPSEInformation(torch_geometric.transforms.BaseTransform):
         self.device = "cpu" if kwargs["device"] == "cpu" else "cuda:0"
         model_state_dict = torch.load(
             f"{os.getcwd()}/data/pretrained_models/gpse_{self.parameters['pretrain_model'].lower()}.pt",
-            map_location=torch.device(self.device),  # "cuda:0"),
+            map_location=torch.device(self.device),
         )
 
         # remove_keys = [s for s in model_state_dict["model_state"] if s.startswith("model.post_mp")]
@@ -68,14 +69,13 @@ class AddGPSEInformation(torch_geometric.transforms.BaseTransform):
         # TODO Fix this configuration parameters
         params = dotdict(
             {
-                "cfg_file": f"configs/extras/{self.parameters['pretrain_model'].lower()}_gpse_pretrain.yaml",
+                "cfg_file": f"configs/extras/gpse_{self.parameters['pretrain_model'].lower()}.yaml",
                 "opts": [],
             }
         )
         load_cfg(cfg, params)
         cfg.share.num_node_targets = self.parameters["dim_target_node"]
         cfg.share.num_graph_targets = self.parameters["dim_target_graph"]
-        # TODO: fix this row to define a particular cuda
         cfg.accelerator = "cuda:0" if torch.cuda.is_available() else "cpu"
 
     def __repr__(self) -> str:
@@ -166,6 +166,10 @@ class AddGPSEInformation(torch_geometric.transforms.BaseTransform):
         x_out_per_rank = {}
         for route_index, (_, dst_rank) in enumerate(self.routes):
             if dst_rank not in x_out_per_rank:
+                # This happens when there are not destination cells for a route
+                # In this case, we do not need to aggregate
+                if route_index not in x_out_per_route:
+                    continue
                 x_out_per_rank[dst_rank] = x_out_per_route[route_index]
             else:
                 x_out_per_rank[dst_rank] += x_out_per_route[route_index]
@@ -238,6 +242,10 @@ class AddGPSEInformation(torch_geometric.transforms.BaseTransform):
             src_rank, dst_rank = route
             if src_rank != dst_rank and (src_rank, dst_rank) not in nbhd_cache:
                 n_dst_nodes = getattr(params, f"x_{dst_rank}").shape[0]
+                # If destination nodes is 0 then messages cannot be passed to
+                # non existent node
+                if n_dst_nodes == 0:
+                    continue
                 if src_rank > dst_rank:
                     boundary = getattr(params, neighborhood).coalesce()
                     nbhd_cache[(src_rank, dst_rank)] = (
@@ -248,10 +256,6 @@ class AddGPSEInformation(torch_geometric.transforms.BaseTransform):
                         )
                     )
                 elif src_rank < dst_rank:
-                    if "up_incidence" in neighborhood:
-                        neighborhood = (
-                            f'incidence_{neighborhood.split("-")[-1]}'
-                        )
                     coboundary = getattr(params, neighborhood).coalesce()
                     nbhd_cache[(src_rank, dst_rank)] = (
                         interrank_boundary_index(
@@ -285,7 +289,7 @@ class AddGPSEInformation(torch_geometric.transforms.BaseTransform):
         batch_route = self.intrarank_expand(data, src_rank, nbhd)
 
         if batch_route.x.shape[0] < 2:
-            return None
+            return batch_route["x"]
         else:
             input_nodes = torch.normal(
                 0, 1, size=(batch_route.x.shape[0], cfg.dim_in)
@@ -315,7 +319,7 @@ class AddGPSEInformation(torch_geometric.transforms.BaseTransform):
             Destinatino rank of the transmitting cell.
         nbhd_cache : dict
             Cache of the neighbourhood information.
-        data : torch_geometric.data.Data
+        data : toch_geometric.data.Data
             The input data.
 
         Returns
@@ -323,16 +327,13 @@ class AddGPSEInformation(torch_geometric.transforms.BaseTransform):
         data
             The data object with messages passed.
         """
-        # This has the boundary index
+        # This has the boudary index
         nbhd = nbhd_cache[(src_rank, dst_rank)]
 
         # The actual data to pass to the GNN
         batch_route = self.interrank_expand(data, src_rank, dst_rank, nbhd)
         # The number of destination cells
         n_dst_cells = data[f"x_{dst_rank}"].shape[0]
-
-        if n_dst_cells == 0:
-            return None
 
         input_nodes = torch.normal(
             0, 1, size=(batch_route.x.shape[0], cfg.dim_in)
@@ -350,7 +351,10 @@ class AddGPSEInformation(torch_geometric.transforms.BaseTransform):
         with torch.inference_mode():
             expanded_out, _ = self.model.forward(input_graph)
         # Only grab the cells we are interested in
-        x_out = expanded_out[:n_dst_cells]
+        if n_dst_cells == 0:
+            x_out = expanded_out
+        else:
+            x_out = expanded_out[:n_dst_cells]
 
         return x_out
 
@@ -368,13 +372,12 @@ class AddGPSEInformation(torch_geometric.transforms.BaseTransform):
             The transformed data.
         """
 
-        # if self.copy_initial:
-        data.x0_0 = data.x_0.float()
-        data.x1_0 = data.x_1.float()
-        data.x2_0 = data.x_2.float()
+        # Copy initial values as first hop
+        for i in range(self.max_rank + 1):
+            x_i = getattr(data, f"x_{i}").float()
+            setattr(data, f"x{i}_0", x_i)
 
-        # self.neighborhoods = ['up_incidence-1', 'up_incidence-0', '0-up_incidence-0' '0-up_incidence-1', '0-up_incidence-2']
-        self.routes = get_routes_from_neighborhoods(self.neighborhoods)
+        self.routes = get_routes_from_neighborhoods_simplex(self.neighborhoods)
 
         nbhd_cache = self.get_nbhd_cache(data)
 
@@ -385,21 +388,16 @@ class AddGPSEInformation(torch_geometric.transforms.BaseTransform):
 
             if src_rank == dst_rank:
                 x_out = self.forward_intrarank(src_rank, route_index, data)
-
-                # TODO: How to go arround this condition ?
-                if x_out is None:
-                    return None
                 x_out_per_route[route_index] = x_out
 
             elif src_rank != dst_rank:
+                # If there are no destination cells, then there is no need to forward
+                if data[f"x_{dst_rank}"].shape[0] == 0:
+                    continue
+
                 x_out = self.forward_interank(
                     src_rank, dst_rank, nbhd_cache, data
                 )
-
-                # TODO: How to go arround this condition ?
-                if x_out is None:
-                    return None
-
                 # Outputs of this particular route
                 x_out_per_route[route_index] = x_out
 
@@ -408,12 +406,21 @@ class AddGPSEInformation(torch_geometric.transforms.BaseTransform):
         with torch.inference_mode():
             x_out_per_rank = self.aggregate_inter_nbhd(x_out_per_route)
 
+        # If no information was passed to a rank, then we initialize an empty vector
+        # with the output dimension of the pre-trained model
+        # and set the features as 1
+        hidden_dim = (
+            self.parameters["dim_target_node"]
+            + self.parameters["dim_target_graph"]
+        )
         for rank in range(self.max_rank + 1):
             if rank not in x_out_per_rank:
-                x_out_per_rank[rank] = getattr(data, f"x_{rank}")
+                x_out_per_rank[rank] = torch.ones(
+                    (data[f"x_{rank}"].shape[0], hidden_dim), dtype=torch.float
+                )
 
         for key, value in x_out_per_rank.items():
-            setattr(data, f"x{key}_1", value)
+            setattr(data, f"x{key}_1", value.float())
 
         return data
 

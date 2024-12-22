@@ -14,8 +14,8 @@ from omegaconf import DictConfig, OmegaConf
 
 from topobenchmarkx.data.preprocessor import PreProcessor
 from topobenchmarkx.dataloader import TBXDataloader
-from topobenchmarkx.nn.layers.gated_gcn import *
 from topobenchmarkx.nn.heads.gnn_inductive import *
+from topobenchmarkx.nn.layers.gated_gcn import *
 from topobenchmarkx.utils import (
     RankedLogger,
     extras,
@@ -33,8 +33,8 @@ from topobenchmarkx.utils.config_resolvers import (
     get_monitor_mode,
     get_required_lifting,
     infer_in_channels,
-    infer_in_khop_feature_dim,
     infer_in_hasse_graph_agg_dim,
+    infer_in_khop_feature_dim,
     infere_num_cell_dimensions,
     set_preserve_edge_attr,
 )

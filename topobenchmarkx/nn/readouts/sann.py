@@ -1,7 +1,7 @@
 """Readout function for the SANN model."""
 
-import torch
 import topomodelx
+import torch
 import torch_geometric
 from torch_scatter import scatter
 
@@ -158,7 +158,7 @@ class SANNReadout(AbstractZeroCellReadOut):
                         self, f"projector_{i}"
                     )(torch.cat([x_i, model_out[f"x_{i-1}_{j}"]], dim=1))
 
-            x_all_cat = model_out[f"x_0_0"]
+            x_all_cat = model_out["x_0_0"]
 
             # x_all = []
             # # For i-cells

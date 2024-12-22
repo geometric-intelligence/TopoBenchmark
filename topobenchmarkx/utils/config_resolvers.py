@@ -396,26 +396,9 @@ def infer_in_hasse_graph_agg_dim(
     results = np.zeros(shape=(complex_dim + 1, 2))
     # First dimension is always the input dimension
     results.fill(dim_in)
+    for i in range(complex_dim + 1):
+        results[i][1] = dim_hidden
 
-    for nhbd in neighborhoods:
-        nhbd_args = nhbd.split("-")
-        # This means that it's an up or down incidence
-        up_or_down = len(nhbd_args) <= 2
-
-        # If it's same rank then fill
-        if not up_or_down:
-            dst_rank = int(nhbd_args[-1])
-            results[dst_rank][1] = dim_hidden
-
-        elif "up" in nhbd:
-            dst_rank = (int(nhbd_args[-1])) + 1
-            if dst_rank <= complex_dim:
-                results[dst_rank][1] = dim_hidden
-        # TODO not sure if it's okay
-        elif "down" in nhbd:
-            dst_rank = (int(nhbd_args[-1])) - 1
-            if dst_rank >= 0:
-                results[dst_rank][1] = dim_hidden
     return results.astype(np.int32).tolist()
 
 

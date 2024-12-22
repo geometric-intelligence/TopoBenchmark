@@ -4,13 +4,12 @@ transform_type: "data manipulation"
 max_rank: 2
 copy_initial: True
 neighborhoods:  
-  - 'up_incidence-1'
-  - '0-up_incidence-0'
+  - 'incidence_1'
 dim_out: 11
 max_hop: 2
 dim_target_node: 51
 dim_target_graph: 11
-pretrain_model: ZINC
+pretrain_model: PCQM4MV2
 in_channels: ${infer_in_hasse_graph_agg_dim:${.neighborhoods}, ${.max_rank},${oc.select:dataset.parameters.num_features},${.dim_target_graph}, ${.dim_target_node}}
 device: ${trainer.accelerator}
 #complex_dim: ${oc.select:dataset.parameters.max_dim_if_lifted,3}

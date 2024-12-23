@@ -39,7 +39,7 @@ class TestLoaders:
         # Below the datasets that have some default transforms manually overriten with no_transform,
         exclude_datasets = {"karate_club.yaml",
                             # Below the datasets that takes quite some time to load and process
-                            "mantra_name.yaml", "mantra_orientation.yaml",  "mantra_genus.yaml",  "mantra_betti_numbers.yaml", 
+                            "mantra_name.yaml", "mantra_orientation.yaml", # "mantra_betti_numbers.yaml", "mantra_genus.yaml",
                             # Below the datasets that have some default transforms with we manually overriten with no_transform,
                             # due to lack of default transform for domain2domain
                             "REDDIT-BINARY.yaml", "IMDB-MULTI.yaml", "IMDB-BINARY.yaml", #"ZINC.yaml"

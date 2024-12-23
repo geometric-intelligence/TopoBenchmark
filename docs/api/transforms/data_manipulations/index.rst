@@ -11,10 +11,10 @@ Data Manipulations
 .. automodule:: topobenchmark.transforms.data_manipulations.identity_transform
     :members:
 
-.. automodule:: topobenchmark.transforms.data_manipulations.infere_knn_connectivity
+.. automodule:: topobenchmark.transforms.data_manipulations.infer_knn_connectivity
     :members:
 
-.. automodule:: topobenchmark.transforms.data_manipulations.infere_radius_connectivity
+.. automodule:: topobenchmark.transforms.data_manipulations.infer_radius_connectivity
     :members:
 
 .. automodule:: topobenchmark.transforms.data_manipulations.keep_only_connected_component

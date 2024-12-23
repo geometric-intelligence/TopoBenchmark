@@ -36,6 +36,7 @@ class TestLoaders:
         """
         config_files = []
         config_base_dir = base_dir / "configs/dataset"
+        # Below the datasets that have some default transforms manually overriten with no_transform,
         exclude_datasets = {"karate_club.yaml",
                             # Below the datasets that takes quite some time to load and process
                             "mantra_name.yaml", "mantra_orientation.yaml",

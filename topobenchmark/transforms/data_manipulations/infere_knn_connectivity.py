@@ -17,7 +17,7 @@ class InfereKNNConnectivity(torch_geometric.transforms.BaseTransform):
 
     def __init__(self, **kwargs):
         super().__init__()
-        self.type = "infere_knn_connectivity"
+        self.type = "infer_knn_connectivity"
         self.parameters = kwargs
 
     def __repr__(self) -> str:

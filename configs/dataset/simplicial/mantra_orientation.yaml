@@ -1,5 +1,5 @@
 loader:
-  _target_: topobenchmarkx.data.loaders.MantraSimplicialDatasetLoader
+  _target_: topobenchmark.data.loaders.MantraSimplicialDatasetLoader
   parameters: 
     data_domain: simplicial
     data_type: topological 

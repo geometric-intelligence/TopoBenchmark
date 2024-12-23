@@ -234,6 +234,8 @@ def infer_in_channels(dataset, transforms):
     elif not there_is_complex_lifting:
         # Check if dataset and model are from the same domain and data_domain is higher-order
 
+        # TODO: Does this if statement ever execute? model_domain == data_domain and data_domain in ["simplicial", "cell", "combinatorial", "hypergraph"]
+        # BUT get_default_transform() returns "no_transform" when model_domain == data_domain
         if (
             dataset.loader.parameters.get("model_domain", "graph")
             == dataset.loader.parameters.data_domain
@@ -256,6 +258,7 @@ def infer_in_channels(dataset, transforms):
         else:
             return [dataset.parameters.num_features[0]]
 
+    # This else is never executed
     else:
         raise ValueError(
             "There is a problem with the complex lifting. Please check the configuration file."

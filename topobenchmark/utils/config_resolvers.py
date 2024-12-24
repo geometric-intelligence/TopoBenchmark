@@ -2,6 +2,8 @@
 
 import os
 
+import omegaconf
+
 
 def get_default_transform(dataset, model):
     r"""Get default transform for a given data domain and model.
@@ -227,11 +229,40 @@ def infer_in_channels(dataset, transforms):
                     transforms[lifting].complex_dim
                     - len(dataset.parameters.num_features)
                 )
-    else:
-        if isinstance(dataset.parameters.num_features, int):
+
+    # Case when there is no lifting
+    elif not there_is_complex_lifting:
+        # Check if dataset and model are from the same domain and data_domain is higher-order
+
+        # TODO: Does this if statement ever execute? model_domain == data_domain and data_domain in ["simplicial", "cell", "combinatorial", "hypergraph"]
+        # BUT get_default_transform() returns "no_transform" when model_domain == data_domain
+        if (
+            dataset.loader.parameters.get("model_domain", "graph")
+            == dataset.loader.parameters.data_domain
+            and dataset.loader.parameters.data_domain
+            in ["simplicial", "cell", "combinatorial", "hypergraph"]
+        ):
+            if isinstance(
+                dataset.parameters.num_features,
+                omegaconf.listconfig.ListConfig,
+            ):
+                return list(dataset.parameters.num_features)
+            else:
+                raise ValueError(
+                    "The dataset and model are from the same domain but the data_domain is not higher-order."
+                )
+
+        elif isinstance(dataset.parameters.num_features, int):
             return [dataset.parameters.num_features]
+
         else:
             return [dataset.parameters.num_features[0]]
+
+    # This else is never executed
+    else:
+        raise ValueError(
+            "There is a problem with the complex lifting. Please check the configuration file."
+        )
 
 
 def infer_num_cell_dimensions(selected_dimensions, in_channels):

@@ -25,6 +25,8 @@ class MantraDataset(InMemoryDataset):
         Name of the dataset.
     parameters : DictConfig
         Configuration parameters for the dataset.
+    **kwargs : dict
+        Additional keyword arguments.
 
     Attributes
     ----------
@@ -50,6 +52,7 @@ class MantraDataset(InMemoryDataset):
         root: str,
         name: str,
         parameters: DictConfig,
+        **kwargs,
     ) -> None:
         self.parameters = parameters
         self.manifold_dim = parameters.manifold_dim
@@ -58,7 +61,10 @@ class MantraDataset(InMemoryDataset):
         self.name = "_".join(
             [name, str(self.version), f"manifold_dim_{self.manifold_dim}"]
         )
-
+        if kwargs.get("slice", None):
+            self.slice = 100
+        else:
+            self.slice = None
         super().__init__(
             root,
         )
@@ -183,6 +189,7 @@ class MantraDataset(InMemoryDataset):
             osp.join(self.raw_dir, self.raw_file_names[0]),
             self.manifold_dim,
             self.task_variable,
+            self.slice,
         )
 
         data_list = data

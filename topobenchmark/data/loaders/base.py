@@ -45,15 +45,20 @@ class AbstractLoader(ABC):
         """
         raise NotImplementedError
 
-    def load(self) -> tuple[torch_geometric.data.Data, str]:
+    def load(self, **kwargs) -> tuple[torch_geometric.data.Data, str]:
         """Load data.
+
+        Parameters
+        ----------
+        **kwargs : dict
+            Additional keyword arguments.
 
         Returns
         -------
         tuple[torch_geometric.data.Data, str]
             Tuple containing the loaded data and the data directory.
         """
-        dataset = self.load_dataset()
+        dataset = self.load_dataset(**kwargs)
         data_dir = self.get_data_dir()
 
         return dataset, data_dir

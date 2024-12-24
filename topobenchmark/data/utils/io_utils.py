@@ -115,7 +115,7 @@ def download_file_from_link(
         print("Failed to download the file.")
 
 
-def read_ndim_manifolds(path, dim, y_val="betti_numbers"):
+def read_ndim_manifolds(path, dim, y_val="betti_numbers", slice=None):
     """Load MANTRA dataset.
 
     Parameters
@@ -127,6 +127,8 @@ def read_ndim_manifolds(path, dim, y_val="betti_numbers"):
     y_val : str, optional
         The triangulation information to use as label. Can be one of ['betti_numbers', 'torsion_coefficients',
         'name', 'genus', 'orientable'] (default: "orientable").
+    slice : int, optional
+        Slice of the dataset to load. If None, load the entire dataset (default: None). Used for testing.
 
     Returns
     -------
@@ -171,7 +173,7 @@ def read_ndim_manifolds(path, dim, y_val="betti_numbers"):
 
     data_list = []
     # For each manifold
-    for manifold in manifold_list:
+    for manifold in manifold_list[:slice]:
         n_vertices = manifold["n_vertices"]
         x = torch.ones(n_vertices, 1)
         y_value = manifold[y_val]

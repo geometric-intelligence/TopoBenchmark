@@ -61,7 +61,7 @@ class MantraDataset(InMemoryDataset):
         self.name = "_".join(
             [name, str(self.version), f"manifold_dim_{self.manifold_dim}"]
         )
-        if kwargs.get("slice", None):
+        if kwargs.get("slice"):
             self.slice = 100
         else:
             self.slice = None

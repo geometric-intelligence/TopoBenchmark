@@ -1,6 +1,23 @@
 # Train rest of the TU graph datasets
+if [ ! -d "data/pretrained_models" ]; then
+    mkdir data/pretrained_models
+fi
+if [ ! -f "pretrained_models/gpse_zinc.pt" ]; then
+    wget https://zenodo.org/record/8145095/files/gpse_model_zinc_1.0.pt -O data/pretrained_models/gpse_zinc.pt
+fi
+if [ ! -f "pretrained_models/gpse_geom.pt" ]; then
+    wget https://zenodo.org/record/8145095/files/gpse_model_geom_1.0.pt -O data/pretrained_models/gpse_geom.pt
+fi
+
+if [ ! -f "pretrained_models/gpse_molpcba.pt" ]; then
+    wget https://zenodo.org/record/8145095/files/gpse_model_molpcba_1.0.pt -O data/pretrained_models/gpse_molpcba.pt
+fi
+
+if [ ! -f "pretrained_models/gpse_pcqm4mv2.pt" ]; then
+    wget https://zenodo.org/record/8145095/files/gpse_model_pcqm4mv2_1.0.pt -O data/pretrained_models/gpse_pcqm4mv2.pt
+fi
 datasets=('ZINC')
-neighborhoods=( '[incidence_1, incidence_0]' '[incidence_0]' '[incidence_1, 0_incidence_1, incidence_0]')
+neighborhoods=( '[incidence_1,incidence_0]' '[incidence_0]' '[incidence_1,0_incidence_1,incidence_0]')
 batchsizes=(32 64 128)
 
 for batch_size in ${batchsizes[*]}
@@ -8,6 +25,7 @@ do
   for dataset in ${datasets[*]}
   do
     for neighborhood in ${neighborhoods[*]}
+    do
         python topobenchmarkx/run.py \
             dataset=graph/$dataset \
             model=simplicial/sann \
@@ -33,14 +51,13 @@ do
 done
 
 datasets=('MUTAG')
-neighborhoods=( '[incidence_1, incidence_0]' '[incidence_0]' '[incidence_1, 0_incidence_1, incidence_0]')
-batchsizes=(32 64 128)
 
 for batch_size in ${batchsizes[*]}
 do 
   for dataset in ${datasets[*]}
   do
     for neighborhood in ${neighborhoods[*]}
+    do
         python topobenchmarkx/run.py \
             dataset=graph/$dataset \
             model=simplicial/sann \
@@ -66,14 +83,13 @@ do
 done
 
 datasets=('NCI1')
-neighborhoods=( '[incidence_1, incidence_0]' '[incidence_0]' '[incidence_1, 0_incidence_1, incidence_0]')
-batchsizes=(32 64 128)
 
 for batch_size in ${batchsizes[*]}
 do 
   for dataset in ${datasets[*]}
   do
     for neighborhood in ${neighborhoods[*]}
+    do
         python topobenchmarkx/run.py \
             dataset=graph/$dataset \
             model=simplicial/sann \
@@ -99,14 +115,13 @@ do
 done
 
 datasets=('NCI109')
-neighborhoods=( '[incidence_1, incidence_0]' '[incidence_0]' '[incidence_1, 0_incidence_1, incidence_0]')
-batchsizes=(32 64 128)
 
 for batch_size in ${batchsizes[*]}
 do 
   for dataset in ${datasets[*]}
   do
     for neighborhood in ${neighborhoods[*]}
+    do
         python topobenchmarkx/run.py \
             dataset=graph/$dataset \
             model=simplicial/sann \

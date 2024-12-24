@@ -68,7 +68,9 @@ class InferKNNConnectivitySKLEARN(torch_geometric.transforms.BaseTransform):
         edge_index = self.get_kneighbors(X=query_data, n_neighbors=n_neighbors)
 
         # Add the inferred edges to the data
-        data["inferred_edge_index"] = edge_index
+        # Commente out on Dec 24/24
+        # data["inferred_edge_index"] = edge_index
+        data["edge_index"] = edge_index
         return data
 
     def get_kneighbors(self, X, n_neighbors, source_node_idx=None):
@@ -127,4 +129,5 @@ class InferKNNConnectivitySKLEARN(torch_geometric.transforms.BaseTransform):
         # Remove self-loops and make edges undirected
         edge_index = torch_geometric.utils.remove_self_loops(edge_index)[0]
         edge_index = torch_geometric.utils.to_undirected(edge_index)
+        edge_index = torch_geometric.utils.coalesce(edge_index)
         return edge_index

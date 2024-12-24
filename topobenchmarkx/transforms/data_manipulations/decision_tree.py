@@ -26,7 +26,7 @@ class TuneDecisionTree(torch_geometric.transforms.BaseTransform):
         The random state for reproducibility.
     """
 
-    def __init__(self, param_grid=None, random_state=42):
+    def __init__(self, param_grid=None, random_state=42, **kwargs):
         super().__init__()
         self.type = "tune_decision_tree"
         self.param_grid = (
@@ -50,6 +50,7 @@ class TuneDecisionTree(torch_geometric.transforms.BaseTransform):
         self.best_tree = None
         self.best_params = None
         self.validation_accuracy = None
+        self.overfit_tree = kwargs.get("overfit_tree", False)
 
     def __repr__(self) -> str:
         return (
@@ -73,41 +74,46 @@ class TuneDecisionTree(torch_geometric.transforms.BaseTransform):
             - `data.best_tree` (DecisionTreeClassifier): The best classifier.
             - `data.validation_accuracy` (float): Accuracy on validation data.
         """
+
+            
         # Split training and validation data
         x_train = data.x[data.train_mask].numpy()
         y_train = data.y[data.train_mask].numpy()
         x_val = data.x[data.val_mask].numpy()
         y_val = data.y[data.val_mask].numpy()
 
-        # Initialize GridSearchCV for hyperparameter tuning
-        dtree = DecisionTreeClassifier(random_state=self.random_state)
-        grid_search = GridSearchCV(
-            estimator=dtree,
-            param_grid=self.param_grid,
-            scoring="accuracy",
-            cv=2,  # 5-fold cross-validation
-            n_jobs=-1,  # Use all available CPU cores
-            verbose=1,  # Display progress
-        )
-        grid_search.fit(x_train, y_train)
+        if self.overfit_tree == False:
+            # Initialize GridSearchCV for hyperparameter tuning
+            dtree = DecisionTreeClassifier(random_state=self.random_state)
+            grid_search = GridSearchCV(
+                estimator=dtree,
+                param_grid=self.param_grid,
+                scoring="accuracy",
+                cv=2,  # 5-fold cross-validation
+                n_jobs=-1,  # Use all available CPU cores
+                verbose=1,  # Display progress
+            )
+            grid_search.fit(x_train, y_train)
 
-        # Save the best model and hyperparameters
-        self.best_tree = grid_search.best_estimator_
-        self.best_params = grid_search.best_params_
+            # Save the best model and hyperparameters
+            self.best_tree = grid_search.best_estimator_
+            self.best_params = grid_search.best_params_
+            
+            # Evaluate on the validation data
+            H_tree = torch.Tensor(self.best_tree.decision_path(data.x).todense())
+            data["H_tree"] = H_tree
 
-        # Evaluate on the validation data
+            # Add results to the data object
+            data["tree_model"] = self.best_tree
 
-        H_tree = torch.Tensor(self.best_tree.decision_path(data.x).todense())
-        data["H_tree"] = H_tree
+            y_pred = self.best_tree.predict(x_train)
+            print("Train score", accuracy_score(y_train, y_pred))
 
-        # Add results to the data object
-        data["tree_model"] = self.best_tree
-
-        y_pred = self.best_tree.predict(x_train)
-        print("Train score", accuracy_score(y_train, y_pred))
-
-        y_pred = self.best_tree.predict(x_val)
-        print("Validation score", accuracy_score(y_val, y_pred))
+            y_pred = self.best_tree.predict(x_val)
+            print("Validation score", accuracy_score(y_val, y_pred))
+        
+        else:
+            data = self.base_param_tree(data, random_state=self.random_state)
 
         return data
 

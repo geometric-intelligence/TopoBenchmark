@@ -1,0 +1,12 @@
+defaults:
+  - /transforms/data_manipulations@tree: decision_tree #infere_tree
+  - /transforms/data_manipulations@get_hypergraph: infere_hypergraph_tree 
+
+tree:
+  overfit_tree: True
+
+get_hypergraph:
+  max_hyperedge_size: 30
+
+
+  

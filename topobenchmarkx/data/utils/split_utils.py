@@ -215,8 +215,8 @@ def assing_train_val_test_mask_to_graphs(dataset, split_idx):
             assigned = True
         if not assigned:
             raise ValueError("Graph not in any split")
-    
-    return DataloadDataset(data_train_lst + data_train_lst + data_train_lst)
+
+    return data_train_lst + data_train_lst + data_train_lst
     # (
     #     DataloadDataset(data_train_lst),
     #     DataloadDataset(data_val_lst),
@@ -275,7 +275,7 @@ def load_transductive_splits(dataset, parameters):
             data.train_mask
         ].std(0)
 
-    return DataloadDataset([data])
+    return [data]
 
 
 def load_inductive_splits(dataset, parameters):
@@ -316,9 +316,7 @@ def load_inductive_splits(dataset, parameters):
             If 'fixed' is chosen, the dataset should have the attribute split_idx"
         )
 
-    dataset = (
-        assing_train_val_test_mask_to_graphs(dataset, split_idx)
-    )
+    dataset = assing_train_val_test_mask_to_graphs(dataset, split_idx)
 
     return dataset
 

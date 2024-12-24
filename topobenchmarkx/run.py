@@ -12,7 +12,11 @@ from lightning import Callback, LightningModule, Trainer
 from lightning.pytorch.loggers import Logger
 from omegaconf import DictConfig, OmegaConf
 
-from topobenchmarkx.data.preprocessor import PreProcessor, load_dataset_splits, get_train_val_test_datasets
+from topobenchmarkx.data.preprocessor import (
+    PreProcessor,
+    load_dataset_splits,
+    get_train_val_test_datasets,
+)
 from topobenchmarkx.dataloader import TBXDataloader
 from topobenchmarkx.utils import (
     RankedLogger,
@@ -135,10 +139,15 @@ def run(cfg: DictConfig) -> tuple[dict[str, Any], dict[str, Any]]:
     log.info("Instantiating preprocessor...")
     transform_config = cfg.get("transforms", None)
     dataset = load_dataset_splits(dataset, cfg.dataset.split_params)
-    preprocessor = PreProcessor(dataset, dataset_dir, transform_config, force_reload=True)
-
-    dataset_train, dataset_val, dataset_test = get_train_val_test_datasets(preprocessor)
     
+    preprocessor = PreProcessor(
+        dataset, dataset_dir, transform_config, force_reload=True
+    )
+
+    dataset_train, dataset_val, dataset_test = get_train_val_test_datasets(
+        preprocessor
+    )
+
     # Prepare datamodule
     log.info("Instantiating datamodule...")
     if cfg.dataset.parameters.task_level in ["node", "graph"]:

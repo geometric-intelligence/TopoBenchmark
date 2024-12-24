@@ -40,6 +40,8 @@ class PreProcessor(torch_geometric.data.InMemoryDataset):
             data_list = [dataset[idx] for idx in range(len(dataset))]
         elif isinstance(dataset, torch_geometric.data.Data):
             data_list = [dataset]
+        elif isinstance(dataset, list) and all([isinstance(data, torch_geometric.data.Data) for data in dataset]):
+            data_list = dataset
         self.data_list = data_list
         if transforms_config is not None:
             self.transforms_applied = True
@@ -203,9 +205,10 @@ class PreProcessor(torch_geometric.data.InMemoryDataset):
         else:
             self.data = data_cls.from_dict(data)
 
-def load_dataset_splits(dataset, split_params) -> tuple[
-    DataloadDataset, DataloadDataset | None, DataloadDataset | None
-]:
+
+def load_dataset_splits(
+    dataset, split_params
+) -> tuple[DataloadDataset, DataloadDataset | None, DataloadDataset | None]:
     """Load the dataset splits.
 
     Parameters
@@ -223,10 +226,10 @@ def load_dataset_splits(dataset, split_params) -> tuple[
 
     if split_params.learning_setting == "inductive":
         dataset = load_inductive_splits(dataset, split_params)
-    
+
     elif split_params.learning_setting == "transductive":
         dataset = load_transductive_splits(dataset, split_params)
-    
+
     else:
         raise ValueError(
             f"Invalid '{split_params.learning_setting}' learning setting.\
@@ -234,11 +237,12 @@ def load_dataset_splits(dataset, split_params) -> tuple[
         )
     return dataset
 
+
 def get_train_val_test_datasets(dataset):
     """Get the train, validation, and test datasets."""
     if len(dataset) == 1:
-        return dataset, None, None
-    else: 
+        return DataloadDataset(dataset), None, None
+    else:
         train, val, test = [], [], []
         for data in dataset:
             if data.train_mask == 1:
@@ -249,8 +253,8 @@ def get_train_val_test_datasets(dataset):
                 test.append(data)
             else:
                 raise ValueError("Graph not in any split")
-        return DataloadDataset(train), DataloadDataset(val), DataloadDataset(test)
-            
-
-
-
+        return (
+            DataloadDataset(train),
+            DataloadDataset(val),
+            DataloadDataset(test),
+        )

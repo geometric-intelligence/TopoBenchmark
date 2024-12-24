@@ -1,0 +1,9 @@
+defaults:
+  - /transforms/data_manipulations@tree: decision_tree #infere_tree
+  - /transforms/data_manipulations@get_graph: infere_knn_connectivity_sklearn 
+
+get_graph:
+  n_neighbors: 15
+
+tree:
+  overfit_tree: False

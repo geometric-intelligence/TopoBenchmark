@@ -5,14 +5,14 @@
 defaults:
   - _self_
   - dataset: graph/cocitation_cora
-  - model: graph/gcn
-  - transforms: tree #${get_default_transform:${dataset},${model}}  #tree #${get_default_transform:${dataset},${model}} #no_transform 
+  - model: graph/gcn #hypergraph/unignn2
+  - transforms: tree_graph #${get_default_transform:${dataset},${model}}  #tree_hypergraph #${get_default_transform:${dataset},${model}} #no_transform 
   - optimizer: default
   - loss: default
   - evaluator: default
   - callbacks: default
   - logger: wandb # set logger here or use command line (e.g. `python train.py logger=tensorboard`)
-  - trainer: cpu
+  - trainer: default
   - paths: default
   - extras: default
   - hydra: default

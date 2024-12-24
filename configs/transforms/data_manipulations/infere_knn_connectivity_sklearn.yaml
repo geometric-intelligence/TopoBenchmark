@@ -1,5 +1,4 @@
 _target_: topobenchmarkx.transforms.data_transform.DataTransform
-transform_name: "TuneDecisionTree"
+transform_name: "InferKNNConnectivitySKLEARN"
 transform_type: "data manipulation"
-param_grid: null
 

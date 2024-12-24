@@ -215,12 +215,13 @@ def assing_train_val_test_mask_to_graphs(dataset, split_idx):
             assigned = True
         if not assigned:
             raise ValueError("Graph not in any split")
-
-    return (
-        DataloadDataset(data_train_lst),
-        DataloadDataset(data_val_lst),
-        DataloadDataset(data_test_lst),
-    )
+    
+    return DataloadDataset(data_train_lst + data_train_lst + data_train_lst)
+    # (
+    #     DataloadDataset(data_train_lst),
+    #     DataloadDataset(data_val_lst),
+    #     DataloadDataset(data_test_lst),
+    # )
 
 
 def load_transductive_splits(dataset, parameters):
@@ -243,7 +244,7 @@ def load_transductive_splits(dataset, parameters):
         len(dataset) == 1
     ), "Dataset should have only one graph in a transductive setting."
 
-    data = dataset.data_list[0]
+    data = dataset[0]
     labels = data.y.numpy()
 
     # Ensure labels are one dimensional array
@@ -274,7 +275,7 @@ def load_transductive_splits(dataset, parameters):
             data.train_mask
         ].std(0)
 
-    return DataloadDataset([data]), None, None
+    return DataloadDataset([data])
 
 
 def load_inductive_splits(dataset, parameters):
@@ -315,11 +316,11 @@ def load_inductive_splits(dataset, parameters):
             If 'fixed' is chosen, the dataset should have the attribute split_idx"
         )
 
-    train_dataset, val_dataset, test_dataset = (
+    dataset = (
         assing_train_val_test_mask_to_graphs(dataset, split_idx)
     )
 
-    return train_dataset, val_dataset, test_dataset
+    return dataset
 
 
 def load_coauthorship_hypergraph_splits(data, parameters, train_prop=0.5):

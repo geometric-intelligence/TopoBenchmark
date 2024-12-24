@@ -5,8 +5,8 @@
 defaults:
   - _self_
   - dataset: graph/cocitation_cora
-  - model: graph/gcn_dgm
-  - transforms: ${get_default_transform:${dataset},${model}}  #tree #${get_default_transform:${dataset},${model}} #no_transform 
+  - model: graph/gcn
+  - transforms: tree #${get_default_transform:${dataset},${model}}  #tree #${get_default_transform:${dataset},${model}} #no_transform 
   - optimizer: default
   - loss: default
   - evaluator: default

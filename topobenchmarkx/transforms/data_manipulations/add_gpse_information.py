@@ -137,7 +137,7 @@ class AddGPSEInformation(torch_geometric.transforms.BaseTransform):
         batch_expanded = torch.cat([dst_batch, src_batch], dim=0)
 
         batch_route = Data(
-            x=x_in,
+            x=x_in.to(device),
             edge_index=edge_index.to(device),
             edge_attr=edge_attr.to(device),
             edge_weight=edge_attr.to(device),
@@ -214,7 +214,9 @@ class AddGPSEInformation(torch_geometric.transforms.BaseTransform):
         max_node_id = n_dst_nodes
         adjusted_edge_ids = edge_ids + max_node_id
 
-        edge_index = torch.zeros((2, node_ids.numel()), dtype=node_ids.dtype)
+        edge_index = torch.zeros(
+            (2, node_ids.numel()), dtype=node_ids.dtype, device=x_src.device
+        )
         edge_index[0, :] = node_ids
         edge_index[1, :] = adjusted_edge_ids
 
@@ -292,14 +294,23 @@ class AddGPSEInformation(torch_geometric.transforms.BaseTransform):
             return batch_route["x"]
         else:
             input_nodes = torch.normal(
-                0, 1, size=(batch_route.x.shape[0], cfg.dim_in)
+                0,
+                1,
+                size=(batch_route.x.shape[0], cfg.dim_in),
+                device=self.device,
             )
             input_graph = torch_geometric.data.Data(
                 x=input_nodes,
                 edge_index=batch_route.edge_index,
-                y=torch.ones(batch_route.x.shape[0], 51),
-                y_graph=torch.ones(1, self.parameters["dim_out"]),
-                batch=torch.zeros(batch_route.x.shape[0], dtype=torch.int64),
+                y=torch.ones(batch_route.x.shape[0], 51, device=self.device),
+                y_graph=torch.ones(
+                    1, self.parameters["dim_out"], device=self.device
+                ),
+                batch=torch.zeros(
+                    batch_route.x.shape[0],
+                    dtype=torch.int64,
+                    device=self.device,
+                ),
             ).to(self.device)
             self.model.eval()
             with torch.inference_mode():
@@ -336,16 +347,20 @@ class AddGPSEInformation(torch_geometric.transforms.BaseTransform):
         n_dst_cells = data[f"x_{dst_rank}"].shape[0]
 
         input_nodes = torch.normal(
-            0, 1, size=(batch_route.x.shape[0], cfg.dim_in)
+            0, 1, size=(batch_route.x.shape[0], cfg.dim_in), device=self.device
         )
 
         # Express everything in terms of an input graph
         input_graph = torch_geometric.data.Data(
             x=input_nodes,
             edge_index=batch_route.edge_index,
-            y=torch.ones(batch_route.x.shape[0], 51),
-            y_graph=torch.ones(1, self.parameters["dim_out"]),
-            batch=torch.zeros(batch_route.x.shape[0], dtype=torch.int64),
+            y=torch.ones(batch_route.x.shape[0], 51, device=self.device),
+            y_graph=torch.ones(
+                1, self.parameters["dim_out"], device=self.device
+            ),
+            batch=torch.zeros(
+                batch_route.x.shape[0], dtype=torch.int64, device=self.device
+            ),
         ).to(self.device)
         self.model.eval()
         with torch.inference_mode():
@@ -374,7 +389,7 @@ class AddGPSEInformation(torch_geometric.transforms.BaseTransform):
 
         # Copy initial values as first hop
         for i in range(self.max_rank + 1):
-            x_i = getattr(data, f"x_{i}").float()
+            x_i = getattr(data, f"x_{i}").float().to(self.device)
             setattr(data, f"x{i}_0", x_i)
 
         self.routes = get_routes_from_neighborhoods_simplex(self.neighborhoods)
@@ -416,7 +431,9 @@ class AddGPSEInformation(torch_geometric.transforms.BaseTransform):
         for rank in range(self.max_rank + 1):
             if rank not in x_out_per_rank:
                 x_out_per_rank[rank] = torch.ones(
-                    (data[f"x_{rank}"].shape[0], hidden_dim), dtype=torch.float
+                    (data[f"x_{rank}"].shape[0], hidden_dim),
+                    dtype=torch.float,
+                    device=self.device,
                 )
 
         for key, value in x_out_per_rank.items():

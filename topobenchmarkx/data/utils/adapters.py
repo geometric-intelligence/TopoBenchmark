@@ -7,8 +7,8 @@ import torch_geometric
 from topomodelx.utils.sparse import from_sparse
 from torch_geometric.utils.undirected import is_undirected, to_undirected
 
-from topobenchmarkx.complex import Complex
-from topobenchmarkx.data.utils import (
+from topobenchmarkx.data.utils.domain import Complex
+from topobenchmarkx.data.utils.utils import (
     generate_zero_sparse_connectivity,
     select_neighborhoods_of_interest,
 )

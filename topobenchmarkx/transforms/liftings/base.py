@@ -4,7 +4,7 @@ import abc
 
 import torch_geometric
 
-from topobenchmarkx.transforms.converters import IdentityAdapter
+from topobenchmarkx.data.utils import IdentityAdapter
 from topobenchmarkx.transforms.feature_liftings import FEATURE_LIFTINGS
 from topobenchmarkx.transforms.feature_liftings.identity import (
     Identity,

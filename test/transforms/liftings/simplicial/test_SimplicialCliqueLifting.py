@@ -2,11 +2,11 @@
 
 import torch
 
-from topobenchmarkx.transforms.liftings.graph2simplicial import (
+from topobenchmark.transforms.liftings.graph2simplicial import (
     SimplicialCliqueLifting
 )
-from topobenchmarkx.transforms.converters import Data2NxGraph, Complex2Dict
-from topobenchmarkx.transforms.liftings.base import LiftingTransform
+from topobenchmark.transforms.converters import Data2NxGraph, Complex2Dict
+from topobenchmark.transforms.liftings.base import LiftingTransform
 
 class TestSimplicialCliqueLifting:
     """Test the SimplicialCliqueLifting class."""

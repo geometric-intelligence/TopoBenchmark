@@ -24,4 +24,4 @@ python -m topobenchmarkx\
     transforms.sann_encoding.max_hop=1,2,3\
     transforms.sann_encoding.complex_dim=3\
     logger.wandb.project=$project_name\
-    --multirun 
+    --multirun &

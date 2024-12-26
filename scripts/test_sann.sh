@@ -3,7 +3,7 @@ neighborhoods=( '[incidence_1,incidence_0]' '[incidence_0]')
 for neighborhood in ${neighborhoods[*]}
 do 
     python topobenchmarkx/run.py \
-        dataset=graph/ZINC \
+        dataset=graph/MUTAG \
         model=simplicial/sann \
         model.backbone.n_layers=2 \
         model.feature_encoder.proj_dropout=0 \
@@ -18,6 +18,10 @@ do
         optimizer.parameters.lr=0.001 \
         optimizer.parameters.weight_decay=0.0001 \
         callbacks.early_stopping.patience=10 \
+        dataset.parameters.num_features=7 \
+        +dataset.parameters.max_node_degree=10 \
+        +transforms/data_manipulations@transforms.node_deg=node_degrees \
+        +transforms/data_manipulations@transforms.node_feat=one_hot_node_degree_features \
         transforms/data_manipulations@transforms.sann_encoding=add_gpse_information \
         transforms.sann_encoding.pretrain_model=ZINC \
         transforms.sann_encoding.neighborhoods=${neighborhood} \

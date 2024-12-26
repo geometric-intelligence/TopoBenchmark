@@ -2,13 +2,17 @@ dataset='NCI1'
 project_name="TBX_SANN_$dataset"
 CUDA=1
 
+
+seeds=(0 1 2 4)
+for seed in ${seeds[*]}
+do
 python topobenchmarkx/run.py\
     dataset=graph/$dataset\
     model=simplicial/sann\
     model.backbone.n_layers=1,2,3,4\
     model.feature_encoder.proj_dropout=0.25\
     model.feature_encoder.out_channels=64,128\
-    dataset.split_params.data_seed=0,1,2,4\
+    dataset.split_params.data_seed=$seed\
     dataset.dataloader_params.batch_size=128,256\
     transforms.sann_encoding.max_hop=1,2,3\
     transforms.sann_encoding.complex_dim=3\
@@ -22,5 +26,6 @@ python topobenchmarkx/run.py\
     callbacks.early_stopping.patience=10\
     logger.wandb.project=$project_name\
     --multirun &
+done
 
 # transforms.sann_encoding.neighborhoods='[incidence_1,incidence_0]','[incidence_0]','[incidence_1,0_incidence_1,incidence_0]'\

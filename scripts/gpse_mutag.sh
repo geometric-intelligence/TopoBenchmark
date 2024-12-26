@@ -14,6 +14,7 @@ do
         dataset.split_params.data_seed=0,1,2,4\
         dataset.dataloader_params.batch_size=128,256\
         +dataset.parameters.max_node_degree=10 \
+        dataset.parameters.num_features=7 \
         optimizer.parameters.weight_decay=0,0.0001\
         optimizer.parameters.lr=0.01,0.001\
         trainer.max_epochs=500\

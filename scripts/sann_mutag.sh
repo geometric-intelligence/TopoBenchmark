@@ -10,6 +10,7 @@ python -m topobenchmarkx\
     dataset.split_params.data_seed=0,1,2,3,4\
     dataset.dataloader_params.batch_size=128,256\
     +dataset.parameters.max_node_degree=10 \
+    dataset.parameters.num_features=7 \
     trainer.max_epochs=500\
     trainer.min_epochs=50\
     trainer.devices=\[$CUDA\]\

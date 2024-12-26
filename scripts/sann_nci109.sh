@@ -1,4 +1,4 @@
-dataset='NCI1'
+dataset='NCI109'
 project_name="TBX_SANN_$dataset"
 CUDA=2
 

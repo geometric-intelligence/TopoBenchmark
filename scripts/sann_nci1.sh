@@ -7,9 +7,9 @@ python topobenchmarkx/run.py\
     model=simplicial/sann\
     model.backbone.n_layers=1,2,3,4\
     model.feature_encoder.proj_dropout=0.25\
+    model.feature_encoder.out_channels=64,128\
     dataset.split_params.data_seed=0,1,2,4\
     dataset.dataloader_params.batch_size=128,256\
-    model.feature_encoder.out_channels=64,128\
     transforms.sann_encoding.max_hop=1,2,3\
     transforms.sann_encoding.complex_dim=3\
     optimizer.parameters.weight_decay=0,0.0001\

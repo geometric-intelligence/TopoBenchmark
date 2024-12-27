@@ -12,6 +12,7 @@ dim_target_graph: 11
 pretrain_model: PCQM4MV2
 in_channels: ${infer_in_hasse_graph_agg_dim:${.neighborhoods}, ${.max_rank},${oc.select:dataset.parameters.num_features},${.dim_target_graph}, ${.dim_target_node}}
 device: ${trainer.accelerator}
+cuda: ${trainer.devices}
 #complex_dim: ${oc.select:dataset.parameters.max_dim_if_lifted,3}
 #in_channels: ${infer_in_khop_feature_dim:${model.feature_encoder.dataset_in_channels},${.max_hop}} 
 # in_features: ${infer_in_sann_khop_feature_dim:${model},${3}} 

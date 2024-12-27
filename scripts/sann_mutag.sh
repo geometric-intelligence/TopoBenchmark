@@ -1,13 +1,18 @@
 dataset='MUTAG'
 project_name="TBX_SANN_$dataset"
 CUDA=5
+
+
+seeds=(0 1 2 4)
+for seed in ${seeds[*]}
+do
 python -m topobenchmarkx\
     dataset=graph/$dataset\
     model=simplicial/sann\
     model.backbone.n_layers=1,2,3,4\
     model.feature_encoder.proj_dropout=0.25\
     model.feature_encoder.out_channels=64,128 \
-    dataset.split_params.data_seed=0,1,2,3,4\
+    dataset.split_params.data_seed=$seed\
     dataset.dataloader_params.batch_size=128,256\
     +dataset.parameters.max_node_degree=10 \
     dataset.parameters.num_features=7 \
@@ -25,3 +30,4 @@ python -m topobenchmarkx\
     transforms.sann_encoding.complex_dim=3\
     logger.wandb.project=$project_name\
     --multirun &
+done

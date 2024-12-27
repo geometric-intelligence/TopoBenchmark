@@ -38,11 +38,13 @@ class AddGPSEInformation(torch_geometric.transforms.BaseTransform):
         self.copy_initial = kwargs["copy_initial"]
         self.neighborhoods = kwargs["neighborhoods"]
 
+        self.device = (
+            "cpu" if kwargs["device"] == "cpu" else f"cuda:{kwargs['cuda'][0]}"
+        )
         self.init_config()
         self.model = create_model(
             dim_in=cfg.dim_in, dim_out=self.parameters["dim_out"]
         )
-        self.device = "cpu" if kwargs["device"] == "cpu" else "cuda:0"
         model_state_dict = torch.load(
             f"{os.getcwd()}/data/pretrained_models/gpse_{self.parameters['pretrain_model'].lower()}.pt",
             map_location=torch.device(self.device),
@@ -76,7 +78,9 @@ class AddGPSEInformation(torch_geometric.transforms.BaseTransform):
         load_cfg(cfg, params)
         cfg.share.num_node_targets = self.parameters["dim_target_node"]
         cfg.share.num_graph_targets = self.parameters["dim_target_graph"]
-        cfg.accelerator = "cuda:0" if torch.cuda.is_available() else "cpu"
+        cfg.accelerator = (
+            self.device
+        )  # "cuda:0" if torch.cuda.is_available() else "cpu"
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}(type={self.type!r}, parameters={self.parameters!r})"

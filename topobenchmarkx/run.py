@@ -2,7 +2,9 @@
 
 import random
 from typing import Any
-
+import os
+import shutil
+import stat
 import hydra
 import lightning as L
 import numpy as np
@@ -246,6 +248,19 @@ def run(cfg: DictConfig) -> tuple[dict[str, Any], dict[str, Any]]:
             trainer.test(
                 model=model, datamodule=datamodule, ckpt_path=ckpt_path
             )
+
+        # Remove saved model (useful with sweeps)
+
+        # Get the directory containing the checkpoint
+
+        def handle_remove_readonly(func, path, exc_info):
+            """Handle read-only files by changing their permissions."""
+            os.chmod(path, stat.S_IWRITE)
+            func(path)
+
+        ckpt_folder_path = os.path.dirname(ckpt_path)
+        if os.path.exists(ckpt_folder_path):
+            shutil.rmtree(ckpt_folder_path, onerror=handle_remove_readonly)
 
     test_metrics = trainer.callback_metrics
 

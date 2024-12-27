@@ -1,6 +1,6 @@
 dataset='ZINC'
 project_name="TBX_SANN_$dataset"
-CUDA=0
+CUDA=4
 
 seeds=(0 1 2 4)
 for seed in ${seeds[*]}

@@ -1,6 +1,6 @@
 dataset='NCI109'
 project_name="TBX_SANN_$dataset"
-CUDA=2
+CUDA=0
 
 
 seeds=(0 1 2 4)
@@ -9,7 +9,7 @@ do
 python topobenchmarkx/run.py\
     dataset=graph/$dataset\
     model=simplicial/sann\
-    model.backbone.n_layers=1,2,3,4\
+    model.backbone.n_layers=2,4\
     model.feature_encoder.proj_dropout=0.25\
     dataset.split_params.data_seed=$seed\
     dataset.dataloader_params.batch_size=128,256\

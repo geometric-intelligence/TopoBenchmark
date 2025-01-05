@@ -367,7 +367,12 @@ def infer_in_khop_feature_dim(dataset_in_channels, max_hop):
 
 
 def infer_in_hasse_graph_agg_dim(
-    neighborhoods, complex_dim, dim_in, dim_hidden_graph, dim_hidden_node
+    neighborhoods,
+    complex_dim,
+    dim_in,
+    dim_hidden_graph,
+    dim_hidden_node,
+    copy_initial,
 ):
     """Compute which input dimensions need to changed based on if they are the output of a neighborhood.
 
@@ -385,6 +390,8 @@ def infer_in_hasse_graph_agg_dim(
         The output hidden dimension of the GNN over the Hasse Graph aggregation.
     dim_hidden_node : int
         The output hidden dimension of the GNN over the Hasse Graph for each node.
+    copy_initial : bool
+        If the initial features should be copied as the 0-th hop.
 
     Returns
     -------
@@ -393,11 +400,18 @@ def infer_in_hasse_graph_agg_dim(
     """
     # TODO, to my understanding this should never change
     dim_hidden = dim_hidden_graph + dim_hidden_node
-    results = np.zeros(shape=(complex_dim + 1, 2))
-    # First dimension is always the input dimension
-    results.fill(dim_in)
-    for i in range(complex_dim + 1):
-        results[i][1] = dim_hidden
+    hop_num = (
+        int(copy_initial) + 1
+    )  # If copy_intial the there are two hops, else just 1
+    results = np.zeros(shape=(complex_dim + 1, hop_num))
+    if copy_initial:
+        # First dimension is always the input dimension
+        results.fill(dim_in)
+
+        for i in range(complex_dim + 1):
+            results[i][1] = dim_hidden
+    else:
+        results.fill(dim_hidden)
 
     return results.astype(np.int32).tolist()
 

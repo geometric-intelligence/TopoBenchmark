@@ -392,9 +392,10 @@ class AddGPSEInformation(torch_geometric.transforms.BaseTransform):
         """
 
         # Copy initial values as first hop
-        for i in range(self.max_rank + 1):
-            x_i = getattr(data, f"x_{i}").float().to(self.device)
-            setattr(data, f"x{i}_0", x_i)
+        if self.copy_initial:
+            for i in range(self.max_rank + 1):
+                x_i = getattr(data, f"x_{i}").float().to(self.device)
+                setattr(data, f"x{i}_0", x_i)
 
         self.routes = get_routes_from_neighborhoods_simplex(self.neighborhoods)
 
@@ -440,8 +441,9 @@ class AddGPSEInformation(torch_geometric.transforms.BaseTransform):
                     device=self.device,
                 )
 
+        hop_num = int(self.copy_initial)
         for key, value in x_out_per_rank.items():
-            setattr(data, f"x{key}_1", value.float())
+            setattr(data, f"x{key}_{hop_num}", value.float())
 
         return data
 

@@ -2,9 +2,7 @@
 
 import random
 from typing import Any
-import os
-import shutil
-import stat
+
 import hydra
 import lightning as L
 import numpy as np
@@ -97,6 +95,13 @@ OmegaConf.register_new_resolver(
     infer_in_hasse_graph_agg_dim,
     replace=True,
 )
+OmegaConf.register_new_resolver(
+    "get_hop_num_gpse",
+    lambda x: int(x)
+    + 1,  # 2-hop if copy_initial = True else 1-hop (only GPSE info)
+    replace=True,
+)
+
 OmegaConf.register_new_resolver(
     "set_preserve_edge_attr",
     set_preserve_edge_attr,

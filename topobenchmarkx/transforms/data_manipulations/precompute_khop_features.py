@@ -15,6 +15,8 @@ class PrecomputeKHopFeatures(torch_geometric.transforms.BaseTransform):
         The maximum hop neighbourhood.
     complex_dim : int
         The maximum dimension of the complex to evaluate.
+    use_initial_features : bool
+        Whether to use the initial features as the 0-hop features.
     **kwargs : optional
         Additional arguments for the class.
     """
@@ -23,6 +25,7 @@ class PrecomputeKHopFeatures(torch_geometric.transforms.BaseTransform):
         self,
         max_hop: int,
         complex_dim: int,
+        use_initial_features: bool,
         **kwargs,
     ) -> None:
         super().__init__()
@@ -31,9 +34,10 @@ class PrecomputeKHopFeatures(torch_geometric.transforms.BaseTransform):
         self.max_hop = (
             max_hop - 1
         )  # The 0-th hop is always the features themselves
+        self.use_initial_features = use_initial_features
 
     def __repr__(self) -> str:
-        return f"{self.__class__.__name__}(type={self.type!r}, max_hop={self.max_hop})"
+        return f"{self.__class__.__name__}(type={self.type!r}, max_hop={self.max_hop}, complex_dim={self.complex_dim}, use_initial_features={self.use_initial_features})"
 
     def forward(self, data: torch_geometric.data.Data):
         r"""Apply the transform to the input data.
@@ -122,8 +126,13 @@ class PrecomputeKHopFeatures(torch_geometric.transforms.BaseTransform):
             UP[i] = torch.mm(torch.mm(D_i, UP[i]), D_i)
 
         # Set the information for the 0-hop embeddings
+        # if the initial features are not to be used
+        # then the normalization is done over one vectors
         for i in range(K):
-            x_all[f"x{i}_0"] = data[f"x_{i}"].float()
+            if self.use_initial_features:
+                x_all[f"x{i}_0"] = data[f"x_{i}"].float()
+            else:
+                x_all[f"x{i}_0"] = torch.ones_like(data[f"x_{i}"]).float()
 
         # For each hop t=1,...,T
         for t in range(1, T + 1):

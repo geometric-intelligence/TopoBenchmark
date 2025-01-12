@@ -44,5 +44,5 @@ for i in {0..3}; do
         --multirun &
     done
 done
-
+wait 
 # transforms.sann_encoding.neighborhoods='[incidence_1,incidence_0]','[incidence_0]','[incidence_1,0_incidence_1,incidence_0]'\

@@ -28,7 +28,7 @@ do
         transforms/data_manipulations@transforms.sann_encoding=add_gpse_information\
         transforms.sann_encoding.copy_initial=False\
         logger.wandb.project=$project_name\
-        transforms.sann_encoding.neighborhoods='[incidence_1,incidence_0]','[incidence_0]','[incidence_1,0_incidence_1,incidence_0]'\
+        transforms.sann_encoding.neighborhoods='[incidence_1,incidence_0,0_incidence_0]','[0_incidence_0,incidence_0]','[0_incidence_0,incidence_1,0_incidence_1,incidence_0]'\
         --multirun &
     done
 done

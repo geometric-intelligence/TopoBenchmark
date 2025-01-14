@@ -1,2 +1,2 @@
 defaults:
-  - /transforms/data_manipulations@knn: infere_knn_connectivity
+  - /transforms/data_manipulations@knn: infer_knn_connectivity

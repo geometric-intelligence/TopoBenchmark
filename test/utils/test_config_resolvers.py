@@ -47,6 +47,7 @@ class TestConfigResolvers:
         out = get_default_transform("graph/ZINC", "cell/can")
         assert out == "dataset_defaults/ZINC"
         
+        
     def test_get_required_lifting(self):
         """Test get_required_lifting."""
         out = get_required_lifting("graph", "graph/gat")
@@ -106,6 +107,15 @@ class TestConfigResolvers:
         in_channels = infer_in_channels(cfg.dataset, cfg.transforms)
         assert in_channels == [1433,1433,1433]
         
+        cfg = hydra.compose(config_name="run.yaml", overrides=["model=graph/gcn", "dataset=simplicial/mantra_orientation"], return_hydra_config=True)
+        in_channels = infer_in_channels(cfg.dataset, cfg.transforms)
+        assert in_channels == [1]
+
+        cfg = hydra.compose(config_name="run.yaml", overrides=["model=simplicial/scn", "dataset=graph/cocitation_cora"], return_hydra_config=True)
+        in_channels = infer_in_channels(cfg.dataset, cfg.transforms)
+        assert in_channels == [1433,1433,1433]
+
+
         
     def test_infer_num_cell_dimensions(self):
         """Test infer_num_cell_dimensions."""

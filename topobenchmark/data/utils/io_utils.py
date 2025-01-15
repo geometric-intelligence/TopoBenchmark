@@ -1,5 +1,6 @@
 """Data IO utilities."""
 
+import json
 import os.path as osp
 import pickle
 from urllib.parse import parse_qs, urlparse
@@ -9,8 +10,11 @@ import pandas as pd
 import requests
 import torch
 import torch_geometric
+from toponetx.classes import SimplicialComplex
 from torch_geometric.data import Data
 from torch_sparse import coalesce
+
+from topobenchmark.data.utils import get_complex_connectivity
 
 
 def get_file_id_from_url(url):
@@ -78,6 +82,137 @@ def download_file_from_drive(
         print("Download complete.")
     else:
         print("Failed to download the file.")
+
+
+def download_file_from_link(
+    file_link, path_to_save, dataset_name, file_format="tar.gz"
+):
+    """Download a file from a link and saves it to the specified path.
+
+    Parameters
+    ----------
+    file_link : str
+        The link of the file to download.
+    path_to_save : str
+        The path where the downloaded file will be saved.
+    dataset_name : str
+        The name of the dataset.
+    file_format : str, optional
+        The format of the downloaded file. Defaults to "tar.gz".
+
+    Raises
+    ------
+    None
+    """
+    response = requests.get(file_link)
+
+    output_path = f"{path_to_save}/{dataset_name}.{file_format}"
+    if response.status_code == 200:
+        with open(output_path, "wb") as f:
+            f.write(response.content)
+        print("Download complete.")
+    else:
+        print("Failed to download the file.")
+
+
+def read_ndim_manifolds(path, dim, y_val="betti_numbers", slice=None):
+    """Load MANTRA dataset.
+
+    Parameters
+    ----------
+    path : str
+        Path to the dataset.
+    dim : int
+        Dimension of the manifolds to load, required to make sanity checks.
+    y_val : str, optional
+        The triangulation information to use as label. Can be one of ['betti_numbers', 'torsion_coefficients',
+        'name', 'genus', 'orientable'] (default: "orientable").
+    slice : int, optional
+        Slice of the dataset to load. If None, load the entire dataset (default: None). Used for testing.
+
+    Returns
+    -------
+    torch_geometric.data.Data
+        Data object of the manifold for the MANTRA dataset.
+    """
+    # Assert that y_val is one of the valid options
+    # for each surface
+    if dim == 2:
+        assert y_val in [
+            "betti_numbers",
+            "torsion_coefficients",
+            "name",
+            "genus",
+            "orientable",
+        ]
+    elif dim == 3:
+        assert y_val in ["betti_numbers", "torsion_coefficients", "name"]
+    else:
+        raise ValueError("Invalid dimension. Only 2 and 3 are supported.")
+
+    TORSION_COEF_NAMES = ["", "Z_2"]
+    HOMEO_NAMES = [
+        "",
+        "Klein bottle",
+        "RP^2",
+        "S^2",
+        "T^2",
+        "S^2 twist S^1",
+        "S^2 x S^1",
+        "S^3",
+    ]
+
+    TORSION_COEF_NAME_TO_IDX = {
+        name: i for i, name in enumerate(TORSION_COEF_NAMES)
+    }
+    HOMEO_NAME_TO_IDX = {name: i for i, name in enumerate(HOMEO_NAMES)}
+
+    # Load file
+    with open(path) as f:
+        manifold_list = json.load(f)
+
+    data_list = []
+    # For each manifold
+    for manifold in manifold_list[:slice]:
+        n_vertices = manifold["n_vertices"]
+        x = torch.ones(n_vertices, 1)
+        y_value = manifold[y_val]
+
+        if y_val == "betti_numbers":
+            y = torch.tensor(y_value, dtype=torch.long).unsqueeze(dim=0)
+        elif y_val == "genus":
+            y = torch.tensor([y_value], dtype=torch.long).squeeze()
+        elif y_val == "torsion_coefficients":
+            y = torch.tensor(
+                [TORSION_COEF_NAME_TO_IDX[coef] for coef in y_value],
+                dtype=torch.long,
+            ).unsqueeze(dim=0)
+        elif y_val == "name":
+            y = torch.tensor(
+                [HOMEO_NAME_TO_IDX[y_value]], dtype=torch.long
+            ).unsqueeze(0)
+        elif y_val == "orientable":
+            y = torch.tensor([y_value], dtype=torch.long).squeeze()
+        else:
+            raise ValueError(f"Invalid y_val: {y_val}")
+
+        sc = SimplicialComplex()
+
+        # Insert all simplices
+        sc.add_simplices_from(manifold["triangulation"])
+
+        # Build the simplex tensors for features, having only a one
+        x_i = {
+            f"x_{i}": torch.ones(len(sc.skeleton(i)), 1)
+            for i in range(dim + 1)
+        }
+
+        # Construct the connectivity matrices
+        inc_dict = get_complex_connectivity(sc, dim, signed=False)
+
+        data = Data(x=x, y=y, **x_i, **inc_dict)
+        data_list.append(data)
+    return data_list
 
 
 def read_us_county_demos(path, year=2012, y_col="Election"):

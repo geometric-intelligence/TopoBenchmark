@@ -3,12 +3,10 @@
 import torch
 import torch_geometric
 
-from topobenchmark.transforms.liftings.graph2hypergraph import (
-    Graph2HypergraphLifting,
-)
+from topobenchmark.transforms.liftings.base import LiftingMap
 
 
-class HypergraphKHopLifting(Graph2HypergraphLifting):
+class HypergraphKHopLifting(LiftingMap):
     r"""Lift graph to hypergraphs by considering k-hop neighborhoods.
 
     The class transforms graphs to hypergraph domain by considering k-hop neighborhoods of
@@ -19,18 +17,16 @@ class HypergraphKHopLifting(Graph2HypergraphLifting):
     ----------
     k_value : int, optional
         The number of hops to consider. Default is 1.
-    **kwargs : optional
-        Additional arguments for the class.
     """
 
-    def __init__(self, k_value=1, **kwargs):
-        super().__init__(**kwargs)
-        self.k = k_value
+    def __init__(self, k_value=1):
+        super().__init__()
+        self.n_hops = k_value
 
     def __repr__(self) -> str:
-        return f"{self.__class__.__name__}(k={self.k!r})"
+        return f"{self.__class__.__name__}(k={self.n_hops!r})"
 
-    def lift_topology(self, data: torch_geometric.data.Data) -> dict:
+    def lift(self, data: torch_geometric.data.Data) -> dict:
         r"""Lift a graphs to hypergraphs by considering k-hop neighborhoods.
 
         Parameters
@@ -70,7 +66,7 @@ class HypergraphKHopLifting(Graph2HypergraphLifting):
 
         for n in range(num_nodes):
             neighbors, _, _, _ = torch_geometric.utils.k_hop_subgraph(
-                n, self.k, edge_index
+                n, self.n_hops, edge_index
             )
             incidence_1[n, neighbors] = 1
 

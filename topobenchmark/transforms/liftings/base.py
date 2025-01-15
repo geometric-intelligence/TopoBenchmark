@@ -32,14 +32,20 @@ class LiftingTransform(torch_geometric.transforms.BaseTransform):
     # NB: emulates previous AbstractLifting
     def __init__(
         self,
-        data2domain,
-        domain2dict,
         lifting,
+        data2domain=None,
+        domain2dict=None,
         domain2domain=None,
         feature_lifting=None,
     ):
         if feature_lifting is None:
             feature_lifting = Identity()
+
+        if data2domain is None:
+            data2domain = IdentityAdapter()
+
+        if domain2dict is None:
+            domain2dict = IdentityAdapter()
 
         if domain2domain is None:
             domain2domain = IdentityAdapter()

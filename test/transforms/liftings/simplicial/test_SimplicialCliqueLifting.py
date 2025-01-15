@@ -2,11 +2,19 @@
 
 import torch
 
-from topobenchmark.transforms.liftings.graph2simplicial import (
-    SimplicialCliqueLifting
+from topobenchmark.data.utils import (
+    Complex2Dict,
+    Data2NxGraph,
+    TnxComplex2Complex,
 )
-from topobenchmark.transforms.converters import Data2NxGraph, Complex2Dict
+from topobenchmark.transforms.feature_liftings.projection_sum import (
+    ProjectionSum,
+)
 from topobenchmark.transforms.liftings.base import LiftingTransform
+from topobenchmark.transforms.liftings.graph2simplicial.clique import (
+    SimplicialCliqueLifting,
+)
+
 
 class TestSimplicialCliqueLifting:
     """Test the SimplicialCliqueLifting class."""
@@ -14,13 +22,25 @@ class TestSimplicialCliqueLifting:
     def setup_method(self):
         # Initialise the SimplicialCliqueLifting class
         data2graph = Data2NxGraph()
-        simplicial2dict_signed = Complex2Dict(signed=True)
-        simplicial2dict_unsigned = Complex2Dict(signed=False)
 
         lifting_map = SimplicialCliqueLifting(complex_dim=3)
+        feature_lifting = ProjectionSum()
+        domain2dict = Complex2Dict()
 
-        self.lifting_signed = LiftingTransform(data2graph, simplicial2dict_signed, lifting_map)
-        self.lifting_unsigned  = LiftingTransform(data2graph, simplicial2dict_unsigned, lifting_map)
+        self.lifting_signed = LiftingTransform(
+            lifting=lifting_map,
+            feature_lifting=feature_lifting,
+            data2domain=data2graph,
+            domain2domain=TnxComplex2Complex(signed=True),
+            domain2dict=domain2dict,
+        )
+        self.lifting_unsigned = LiftingTransform(
+            lifting=lifting_map,
+            feature_lifting=feature_lifting,
+            data2domain=data2graph,
+            domain2domain=TnxComplex2Complex(signed=False),
+            domain2dict=domain2dict,
+        )
 
     def test_lift_topology(self, simple_graph_1):
         """Test the lift_topology method."""
@@ -207,6 +227,8 @@ class TestSimplicialCliqueLifting:
 
     def test_lifted_features_signed(self, simple_graph_1):
         """Test the lift_features method in signed incidence cases."""
+        # TODO: can be removed/moved; part of projection sum
+
         self.data = simple_graph_1
         # Test the lift_features method for signed case
         lifted_data = self.lifting_signed.forward(self.data)
@@ -249,6 +271,8 @@ class TestSimplicialCliqueLifting:
 
     def test_lifted_features_unsigned(self, simple_graph_1):
         """Test the lift_features method in unsigned incidence cases."""
+        # TODO: redundant. can be moved/removed
+
         self.data = simple_graph_1
         # Test the lift_features method for unsigned case
         lifted_data = self.lifting_unsigned.forward(self.data)

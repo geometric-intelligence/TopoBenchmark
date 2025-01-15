@@ -2,7 +2,9 @@
 
 import torch
 
-from topobenchmark.transforms.liftings.graph2cell import CellCycleLifting
+from topobenchmark.data.utils import Data2NxGraph, TnxComplex2Dict
+from topobenchmark.transforms.liftings.base import LiftingTransform
+from topobenchmark.transforms.liftings.graph2cell.cycle import CellCycleLifting
 
 
 class TestCellCycleLifting:
@@ -10,7 +12,11 @@ class TestCellCycleLifting:
 
     def setup_method(self):
         # Initialise the CellCycleLifting class
-        self.lifting = CellCycleLifting()
+        self.lifting = LiftingTransform(
+            CellCycleLifting(),
+            data2domain=Data2NxGraph(),
+            domain2dict=TnxComplex2Dict(),
+        )
 
     def test_lift_topology(self, simple_graph_1):
         # Test the lift_topology method

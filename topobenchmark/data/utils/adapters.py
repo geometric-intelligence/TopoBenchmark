@@ -123,8 +123,9 @@ class TnxComplex2Complex(Adapter):
 
     Parameters
     ----------
-    max_rank : int
-        Maximum rank of the complex.
+    complex_dim : int
+        Dimension of the desired subcomplex.
+        If ``None``, adapts the (full) complex.
     neighborhoods : list, optional
         List of neighborhoods of interest.
     signed : bool, optional
@@ -135,13 +136,13 @@ class TnxComplex2Complex(Adapter):
 
     def __init__(
         self,
-        max_rank=None,
+        complex_dim=None,
         neighborhoods=None,
         signed=False,
         transfer_features=True,
     ):
         super().__init__()
-        self.max_rank = max_rank
+        self.complex_dim = complex_dim
         self.neighborhoods = neighborhoods
         self.signed = signed
         self.transfer_features = transfer_features
@@ -159,7 +160,7 @@ class TnxComplex2Complex(Adapter):
         """
         # NB: just a slightly rewriting of get_complex_connectivity
 
-        max_rank = self.max_rank or domain.dim
+        dim = self.complex_dim or domain.dim
         signed = self.signed
         neighborhoods = self.neighborhoods
 
@@ -173,12 +174,12 @@ class TnxComplex2Complex(Adapter):
         ]
 
         practical_shape = list(
-            np.pad(list(domain.shape), (0, max_rank + 1 - len(domain.shape)))
+            np.pad(list(domain.shape), (0, dim + 1 - len(domain.shape)))
         )
         data = {
             connectivity_info: [] for connectivity_info in connectivity_infos
         }
-        for rank_idx in range(max_rank + 1):
+        for rank_idx in range(dim + 1):
             for connectivity_info in connectivity_infos:
                 try:
                     data[connectivity_info].append(
@@ -215,7 +216,7 @@ class TnxComplex2Complex(Adapter):
         ):
             # TODO: confirm features are in the right order; update this
             data["features"] = []
-            for rank in range(max_rank + 1):
+            for rank in range(dim + 1):
                 rank_features_dict = domain.get_simplex_attributes(
                     "features", rank
                 )
@@ -286,8 +287,9 @@ class TnxComplex2Dict(AdapterComposition):
 
     Parameters
     ----------
-    max_rank : int
-        Maximum rank of the complex.
+    complex_dim : int
+        Dimension of the desired subcomplex.
+        If ``None``, adapts the (full) complex.
     neighborhoods : list, optional
         List of neighborhoods of interest.
     signed : bool, optional
@@ -298,16 +300,16 @@ class TnxComplex2Dict(AdapterComposition):
 
     def __init__(
         self,
-        max_rank=None,
+        complex_dim=None,
         neighborhoods=None,
         signed=False,
         transfer_features=True,
     ):
-        complex2plain = TnxComplex2Complex(
-            max_rank=max_rank,
+        tnxcomplex2complex = TnxComplex2Complex(
+            complex_dim=complex_dim,
             neighborhoods=neighborhoods,
             signed=signed,
             transfer_features=transfer_features,
         )
-        plain2dict = Complex2Dict()
-        super().__init__(adapters=(complex2plain, plain2dict))
+        complex2dict = Complex2Dict()
+        super().__init__(adapters=(tnxcomplex2complex, complex2dict))

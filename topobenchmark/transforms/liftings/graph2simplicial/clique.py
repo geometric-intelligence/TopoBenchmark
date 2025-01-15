@@ -11,17 +11,17 @@ from topobenchmark.transforms.liftings.base import LiftingMap
 class SimplicialCliqueLifting(LiftingMap):
     r"""Lift graphs to simplicial complex domain.
 
-    The algorithm creates simplices by identifying the cliques and considering them as simplices of the same dimension.
+    The algorithm creates simplices by identifying the cliques
+    and considering them as simplices of the same dimension.
 
     Parameters
     ----------
     complex_dim : int
-        Maximum rank of the complex.
+        Dimension of the subcomplex.
     """
 
     def __init__(self, complex_dim=2):
         super().__init__()
-        # TODO: better naming
         self.complex_dim = complex_dim
 
     def lift(self, domain):
@@ -29,13 +29,13 @@ class SimplicialCliqueLifting(LiftingMap):
 
         Parameters
         ----------
-        data : torch_geometric.data.Data
-            The input data to be lifted.
+        domain : nx.Graph
+            Graph to be lifted.
 
         Returns
         -------
-        dict
-            The lifted topology.
+        toponetx.Complex
+            Lifted simplicial complex.
         """
         graph = domain
 
@@ -50,5 +50,4 @@ class SimplicialCliqueLifting(LiftingMap):
         for set_k_simplices in simplices:
             simplicial_complex.add_simplices_from(list(set_k_simplices))
 
-        # TODO: need to check for edge preservation
         return simplicial_complex

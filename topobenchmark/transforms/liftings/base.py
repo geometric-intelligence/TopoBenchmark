@@ -4,7 +4,12 @@ import abc
 
 import torch_geometric
 
-from topobenchmark.data.utils import IdentityAdapter
+from topobenchmark.data.utils import (
+    Complex2Dict,
+    Data2NxGraph,
+    IdentityAdapter,
+    TnxComplex2Complex,
+)
 from topobenchmark.transforms.feature_liftings.identity import Identity
 
 
@@ -13,14 +18,14 @@ class LiftingTransform(torch_geometric.transforms.BaseTransform):
 
     Parameters
     ----------
+    lifting : LiftingMap
+        Lifting map.
     data2domain : Converter
         Conversion between ``torch_geometric.Data`` into
         domain for consumption by lifting.
     domain2dict : Converter
         Conversion between output domain of feature lifting
         and ``torch_geometric.Data``.
-    lifting : LiftingMap
-        Lifting map.
     domain2domain : Converter
         Conversion between output domain of lifting
         and input domain for feature lifting.
@@ -90,6 +95,50 @@ class LiftingTransform(torch_geometric.transforms.BaseTransform):
         return torch_geometric.data.Data(
             **initial_data, **lifted_topology_dict
         )
+
+
+class Graph2ComplexLiftingTransform(LiftingTransform):
+    """Graph to complex lifting transform.
+
+    Parameters
+    ----------
+    lifting : LiftingMap
+        Lifting map.
+    feature_lifting : FeatureLiftingMap
+        Feature lifting map.
+    preserve_edge_attr : bool
+        Whether to preserve edge attributes.
+    neighborhoods : list, optional
+        List of neighborhoods of interest.
+    signed : bool, optional
+        If True, returns signed connectivity matrices.
+    transfer_features : bool, optional
+        Whether to transfer features.
+    """
+
+    def __init__(
+        self,
+        lifting,
+        feature_lifting="ProjectionSum",
+        preserve_edge_attr=False,
+        neighborhoods=None,
+        signed=False,
+        transfer_features=True,
+    ):
+        super().__init__(
+            lifting,
+            feature_lifting=feature_lifting,
+            data2domain=Data2NxGraph(preserve_edge_attr),
+            domain2domain=TnxComplex2Complex(
+                neighborhoods=neighborhoods,
+                signed=signed,
+                transfer_features=transfer_features,
+            ),
+            domain2dict=Complex2Dict(),
+        )
+
+
+Graph2SimplicialLiftingTransform = Graph2ComplexLiftingTransform
 
 
 class LiftingMap(abc.ABC):

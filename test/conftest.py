@@ -7,6 +7,8 @@ import torch_geometric
 
 from topobenchmark.transforms.liftings import (
     CellCycleLifting,
+    Graph2CellLiftingTransform,
+    Graph2SimplicialLiftingTransform,
     SimplicialCliqueLifting,
 )
 
@@ -148,7 +150,9 @@ def sg1_clique_lifted(simple_graph_1):
     torch_geometric.data.Data
         A simple graph data object with a clique lifting.
     """
-    lifting_signed = SimplicialCliqueLifting(complex_dim=3, signed=True)
+    lifting_signed = Graph2SimplicialLiftingTransform(
+        SimplicialCliqueLifting(complex_dim=3), signed=True
+    )
     data = lifting_signed(simple_graph_1)
     data.batch_0 = "null"
     return data
@@ -168,7 +172,7 @@ def sg1_cell_lifted(simple_graph_1):
     torch_geometric.data.Data
         A simple graph data object with a cell lifting.
     """
-    lifting = CellCycleLifting()
+    lifting = Graph2CellLiftingTransform(CellCycleLifting())
     data = lifting(simple_graph_1)
     data.batch_0 = "null"
     return data

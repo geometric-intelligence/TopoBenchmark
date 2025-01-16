@@ -36,8 +36,9 @@ def _map_lifting_name(lifting_name):
     return LiftingTransform
 
 
-def _route_lifting_kwargs(kwargs, LiftingMap):
+def _route_lifting_kwargs(kwargs, LiftingMap, Transform):
     lifting_map_sign = inspect.signature(LiftingMap)
+    transform_sign = inspect.signature(Transform)
 
     lifting_map_kwargs = {}
     transform_kwargs = {}
@@ -45,7 +46,7 @@ def _route_lifting_kwargs(kwargs, LiftingMap):
     for key, value in kwargs.items():
         if key in lifting_map_sign.parameters:
             lifting_map_kwargs[key] = value
-        else:
+        elif key in transform_sign.parameters:
             transform_kwargs[key] = value
 
     return lifting_map_kwargs, transform_kwargs
@@ -72,7 +73,7 @@ class DataTransform(torch_geometric.transforms.BaseTransform):
             LiftingMap_ = TRANSFORMS[transform_name]
             Transform = _map_lifting_name(transform_name)
             lifting_map_kwargs, transform_kwargs = _route_lifting_kwargs(
-                kwargs, LiftingMap_
+                kwargs, LiftingMap_, Transform
             )
 
             lifting_map = LiftingMap_(**lifting_map_kwargs)

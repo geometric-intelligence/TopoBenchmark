@@ -50,4 +50,7 @@ class SimplicialCliqueLifting(LiftingMap):
         for set_k_simplices in simplices:
             simplicial_complex.add_simplices_from(list(set_k_simplices))
 
+        # because Complex pads unexisting dimensions with empty matrices
+        simplicial_complex.practical_dim = self.complex_dim
+
         return simplicial_complex

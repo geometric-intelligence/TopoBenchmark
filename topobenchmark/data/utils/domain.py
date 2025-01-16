@@ -46,6 +46,9 @@ class Complex:
     def max_rank(self):
         """Maximum rank of the complex.
 
+        NB: may differ from mathematical definition due to empty
+        matrices.
+
         Returns
         -------
         int

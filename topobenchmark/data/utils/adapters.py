@@ -124,8 +124,9 @@ class TnxComplex2Complex(Adapter):
     Parameters
     ----------
     complex_dim : int
-        Dimension of the desired subcomplex.
+        Dimension of the (sub)complex.
         If ``None``, adapts the (full) complex.
+        If greater than dimension of complex, pads with empty matrices.
     neighborhoods : list, optional
         List of neighborhoods of interest.
     signed : bool, optional
@@ -136,13 +137,11 @@ class TnxComplex2Complex(Adapter):
 
     def __init__(
         self,
-        complex_dim=None,
         neighborhoods=None,
         signed=False,
         transfer_features=True,
     ):
         super().__init__()
-        self.complex_dim = complex_dim
         self.neighborhoods = neighborhoods
         self.signed = signed
         self.transfer_features = transfer_features
@@ -160,7 +159,13 @@ class TnxComplex2Complex(Adapter):
         """
         # NB: just a slightly rewriting of get_complex_connectivity
 
-        dim = self.complex_dim or domain.dim
+        practical_dim = (
+            domain.practical_dim
+            if hasattr(domain, "practical_dim")
+            else domain.dim
+        )
+        dim = domain.dim
+
         signed = self.signed
         neighborhoods = self.neighborhoods
 
@@ -174,18 +179,20 @@ class TnxComplex2Complex(Adapter):
         ]
 
         practical_shape = list(
-            np.pad(list(domain.shape), (0, dim + 1 - len(domain.shape)))
+            np.pad(
+                list(domain.shape), (0, practical_dim + 1 - len(domain.shape))
+            )
         )
         data = {
             connectivity_info: [] for connectivity_info in connectivity_infos
         }
-        for rank_idx in range(dim + 1):
+        for rank in range(practical_dim + 1):
             for connectivity_info in connectivity_infos:
                 try:
                     data[connectivity_info].append(
                         from_sparse(
                             getattr(domain, f"{connectivity_info}_matrix")(
-                                rank=rank_idx, signed=signed
+                                rank=rank, signed=signed
                             )
                         )
                     )
@@ -193,15 +200,15 @@ class TnxComplex2Complex(Adapter):
                     if connectivity_info == "incidence":
                         data[connectivity_info].append(
                             generate_zero_sparse_connectivity(
-                                m=practical_shape[rank_idx - 1],
-                                n=practical_shape[rank_idx],
+                                m=practical_shape[rank - 1],
+                                n=practical_shape[rank],
                             )
                         )
                     else:
                         data[connectivity_info].append(
                             generate_zero_sparse_connectivity(
-                                m=practical_shape[rank_idx],
-                                n=practical_shape[rank_idx],
+                                m=practical_shape[rank],
+                                n=practical_shape[rank],
                             )
                         )
 
@@ -227,6 +234,9 @@ class TnxComplex2Complex(Adapter):
                 else:
                     rank_features = None
                 data["features"].append(rank_features)
+
+            for _ in range(dim + 1, practical_dim + 1):
+                data["features"].append(None)
 
         return Complex(**data)
 
@@ -287,9 +297,6 @@ class TnxComplex2Dict(AdapterComposition):
 
     Parameters
     ----------
-    complex_dim : int
-        Dimension of the desired subcomplex.
-        If ``None``, adapts the (full) complex.
     neighborhoods : list, optional
         List of neighborhoods of interest.
     signed : bool, optional
@@ -300,13 +307,11 @@ class TnxComplex2Dict(AdapterComposition):
 
     def __init__(
         self,
-        complex_dim=None,
         neighborhoods=None,
         signed=False,
         transfer_features=True,
     ):
         tnxcomplex2complex = TnxComplex2Complex(
-            complex_dim=complex_dim,
             neighborhoods=neighborhoods,
             signed=signed,
             transfer_features=transfer_features,

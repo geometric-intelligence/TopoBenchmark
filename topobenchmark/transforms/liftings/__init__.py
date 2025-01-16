@@ -1,7 +1,9 @@
 """This module implements the liftings for the topological transforms."""
 
 from .base import (  # noqa: F401
+    Graph2CellLiftingTransform,
     Graph2ComplexLiftingTransform,
+    Graph2HypergraphLiftingTransform,
     Graph2SimplicialLiftingTransform,
     LiftingTransform,
 )

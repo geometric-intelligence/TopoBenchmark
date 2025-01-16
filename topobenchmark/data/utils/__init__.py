@@ -1,7 +1,7 @@
 """Init file for data/utils module."""
 
 from .adapters import *
-from .domain import Complex  # noqa: F401
+from .domain import ComplexData, HypergraphData  # noqa: F401
 from .utils import (
     ensure_serializable,  # noqa: F401
     generate_zero_sparse_connectivity,  # noqa: F401

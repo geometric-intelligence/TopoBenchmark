@@ -24,14 +24,13 @@ class Concatenation(FeatureLiftingMap):
         Complex
             Domain with the lifted features.
         """
-        for rank in range(domain.max_rank - 1):
-            if domain.features[rank + 1] is not None:
+        for key, next_key in zip(
+            domain.keys(), domain.keys()[1:], strict=False
+        ):
+            if domain.features[next_key] is not None:
                 continue
 
-            # TODO: different if hyperedges?
-            idx_to_project = rank
-
-            incidence = domain.incidence[rank + 1]
+            incidence = domain.incidence[next_key]
             _, n = incidence.shape
 
             if n != 0:
@@ -43,11 +42,12 @@ class Concatenation(FeatureLiftingMap):
                     idxs_list.append(torch.sort(idxs_for_feature)[0])
 
                 idxs = torch.stack(idxs_list, dim=0)
-                values = domain.features[idx_to_project][idxs].view(n, -1)
+                values = domain.features[key][idxs].view(n, -1)
             else:
-                m = domain.features[rank].shape[1] * (rank + 2)
+                # NB: only works if key represents rank
+                m = domain.features[key].shape[1] * (next_key + 1)
                 values = torch.zeros([0, m])
 
-            domain.update_features(rank + 1, values)
+            domain.update_features(next_key, values)
 
         return domain

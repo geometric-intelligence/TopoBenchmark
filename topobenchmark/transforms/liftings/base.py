@@ -5,12 +5,12 @@ import abc
 import torch_geometric
 
 from topobenchmark.data.utils import (
-    Complex2Dict,
+    ComplexData2Dict,
     Data2NxGraph,
+    HypergraphData2Dict,
     IdentityAdapter,
-    TnxComplex2Complex,
+    TnxComplex2ComplexData,
 )
-from topobenchmark.transforms.feature_liftings.identity import Identity
 
 
 class LiftingTransform(torch_geometric.transforms.BaseTransform):
@@ -39,11 +39,8 @@ class LiftingTransform(torch_geometric.transforms.BaseTransform):
         data2domain=None,
         domain2dict=None,
         domain2domain=None,
-        feature_lifting=None,
+        feature_lifting="ProjectionSum",
     ):
-        if feature_lifting is None:
-            feature_lifting = Identity()
-
         if data2domain is None:
             data2domain = IdentityAdapter()
 
@@ -129,16 +126,30 @@ class Graph2ComplexLiftingTransform(LiftingTransform):
             lifting,
             feature_lifting=feature_lifting,
             data2domain=Data2NxGraph(preserve_edge_attr),
-            domain2domain=TnxComplex2Complex(
+            domain2domain=TnxComplex2ComplexData(
                 neighborhoods=neighborhoods,
                 signed=signed,
                 transfer_features=transfer_features,
             ),
-            domain2dict=Complex2Dict(),
+            domain2dict=ComplexData2Dict(),
         )
 
 
 Graph2SimplicialLiftingTransform = Graph2ComplexLiftingTransform
+Graph2CellLiftingTransform = Graph2ComplexLiftingTransform
+
+
+class Graph2HypergraphLiftingTransform(LiftingTransform):
+    def __init__(
+        self,
+        lifting,
+        feature_lifting="ProjectionSum",
+    ):
+        super().__init__(
+            lifting,
+            feature_lifting=feature_lifting,
+            domain2dict=HypergraphData2Dict(),
+        )
 
 
 class LiftingMap(abc.ABC):

@@ -8,7 +8,7 @@ from topomodelx.utils.sparse import from_sparse
 from toponetx.classes import CellComplex, SimplicialComplex
 from torch_geometric.utils.undirected import is_undirected, to_undirected
 
-from topobenchmark.data.utils.domain import Complex
+from topobenchmark.data.utils.domain import ComplexData
 from topobenchmark.data.utils.utils import (
     generate_zero_sparse_connectivity,
     select_neighborhoods_of_interest,
@@ -115,7 +115,7 @@ class Data2NxGraph(Adapter):
         return graph
 
 
-class TnxComplex2Complex(Adapter):
+class TnxComplex2ComplexData(Adapter):
     """toponetx.Complex to Complex adaptation.
 
     NB: order of features plays a crucial role, as ``Complex``
@@ -236,18 +236,18 @@ class TnxComplex2Complex(Adapter):
             for _ in range(dim + 1, practical_dim + 1):
                 data["features"].append(None)
 
-        return Complex(**data)
+        return ComplexData(**data)
 
 
-class Complex2Dict(Adapter):
-    """Complex to dict adaptation."""
+class ComplexData2Dict(Adapter):
+    """ComplexData to dict adaptation."""
 
     def adapt(self, domain):
         """Adapt Complex to dict.
 
         Parameters
         ----------
-        domain : toponetx.Complex
+        domain : ComplexData
 
         Returns
         -------
@@ -275,6 +275,29 @@ class Complex2Dict(Adapter):
                 data[f"x_{index}"] = values
 
         return data
+
+
+class HypergraphData2Dict(Adapter):
+    """HypergraphData to dict adaptation."""
+
+    def adapt(self, domain):
+        """Adapt HypergraphData to dict.
+
+        Parameters
+        ----------
+        domain : HypergraphData
+
+        Returns
+        -------
+        dict
+        """
+        hyperedges_key = domain.keys()[-1]
+        return {
+            "incidence_hyperedges": domain.incidence[hyperedges_key],
+            "num_hyperedges": domain.num_hyperedges,
+            "x_0": domain.features[0],
+            "x_hyperedges": domain.features[hyperedges_key],
+        }
 
 
 class AdapterComposition(Adapter):
@@ -309,10 +332,10 @@ class TnxComplex2Dict(AdapterComposition):
         signed=False,
         transfer_features=True,
     ):
-        tnxcomplex2complex = TnxComplex2Complex(
+        tnxcomplex2complex = TnxComplex2ComplexData(
             neighborhoods=neighborhoods,
             signed=signed,
             transfer_features=transfer_features,
         )
-        complex2dict = Complex2Dict()
+        complex2dict = ComplexData2Dict()
         super().__init__(adapters=(tnxcomplex2complex, complex2dict))

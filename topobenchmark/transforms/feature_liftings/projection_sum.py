@@ -13,23 +13,25 @@ class ProjectionSum(FeatureLiftingMap):
 
         Parameters
         ----------
-        data : Complex
+        data : Data
             The input data to be lifted.
 
         Returns
         -------
-        Complex
+        Data
             Domain with the lifted features.
         """
-        for rank in range(domain.max_rank - 1):
-            if domain.features[rank + 1] is not None:
+        for key, next_key in zip(
+            domain.keys(), domain.keys()[1:], strict=False
+        ):
+            if domain.features[next_key] is not None:
                 continue
 
             domain.update_features(
-                rank + 1,
+                next_key,
                 torch.matmul(
-                    torch.abs(domain.incidence[rank + 1].t()),
-                    domain.features[rank],
+                    torch.abs(domain.incidence[next_key].t()),
+                    domain.features[key],
                 ),
             )
 

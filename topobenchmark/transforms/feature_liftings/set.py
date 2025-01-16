@@ -24,11 +24,13 @@ class Set(FeatureLiftingMap):
         Complex
             Domain with the lifted features.
         """
-        for rank in range(domain.max_rank - 1):
-            if domain.features[rank + 1] is not None:
+        for key, next_key in zip(
+            domain.keys(), domain.keys()[1:], strict=False
+        ):
+            if domain.features[next_key] is not None:
                 continue
 
-            incidence = domain.incidence[rank + 1]
+            incidence = domain.incidence[next_key]
             _, n = incidence.shape
 
             if n != 0:
@@ -40,14 +42,12 @@ class Set(FeatureLiftingMap):
                     idxs_list.append(torch.sort(idxs_for_feature)[0])
 
                 idxs = torch.stack(idxs_list, dim=0)
-                if rank == 0:
+                if key == 0:
                     values = idxs
                 else:
                     values = torch.sort(
                         torch.unique(
-                            domain.features[rank][idxs].view(
-                                idxs.shape[0], -1
-                            ),
+                            domain.features[key][idxs].view(idxs.shape[0], -1),
                             dim=1,
                         ),
                         dim=1,
@@ -55,6 +55,6 @@ class Set(FeatureLiftingMap):
             else:
                 values = torch.tensor([])
 
-            domain.update_features(rank + 1, values)
+            domain.update_features(next_key, values)
 
         return domain

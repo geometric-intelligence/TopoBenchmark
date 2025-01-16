@@ -3,6 +3,7 @@
 import torch
 import torch_geometric
 
+from topobenchmark.data.utils import HypergraphData
 from topobenchmark.transforms.liftings.base import LiftingMap
 
 
@@ -36,7 +37,7 @@ class HypergraphKHopLifting(LiftingMap):
 
         Returns
         -------
-        dict
+        HypergraphData
             The lifted topology.
         """
         # Check if data has instance x:
@@ -72,8 +73,8 @@ class HypergraphKHopLifting(LiftingMap):
 
         num_hyperedges = incidence_1.shape[1]
         incidence_1 = torch.Tensor(incidence_1).to_sparse_coo()
-        return {
-            "incidence_hyperedges": incidence_1,
-            "num_hyperedges": num_hyperedges,
-            "x_0": data.x,
-        }
+        return HypergraphData(
+            incidence_hyperedges=incidence_1,
+            num_hyperedges=num_hyperedges,
+            x_0=data.x,
+        )

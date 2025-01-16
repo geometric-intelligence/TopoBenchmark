@@ -3,8 +3,8 @@
 import torch
 
 from topobenchmark.transforms.liftings import (
+    Graph2HypergraphLiftingTransform,
     HypergraphKHopLifting,
-    LiftingTransform,
 )
 
 
@@ -14,15 +14,19 @@ class TestHypergraphKHopLifting:
     def setup_method(self):
         """Setup the test."""
         # Initialise the HypergraphKHopLifting class
-        self.lifting_k1 = LiftingTransform(HypergraphKHopLifting(k_value=1))
-        self.lifting_k2 = LiftingTransform(HypergraphKHopLifting(k_value=2))
+        self.lifting_k1 = Graph2HypergraphLiftingTransform(
+            HypergraphKHopLifting(k_value=1)
+        )
+        self.lifting_k2 = Graph2HypergraphLiftingTransform(
+            HypergraphKHopLifting(k_value=2)
+        )
 
         # TODO: delete?
         # NB: `preserve_edge_attr` is never used? therefore they're equivalent
         # self.lifting_edge_attr = HypergraphKHopLifting(
         #     k_value=1, preserve_edge_attr=True
         # )
-        self.lifting_edge_attr = LiftingTransform(
+        self.lifting_edge_attr = Graph2HypergraphLiftingTransform(
             HypergraphKHopLifting(k_value=1)
         )
 

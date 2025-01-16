@@ -4,7 +4,7 @@ import torch
 
 from topobenchmark.transforms.liftings import (
     CellCycleLifting,
-    Graph2ComplexLiftingTransform,
+    Graph2CellLiftingTransform,
 )
 
 
@@ -13,7 +13,7 @@ class TestCellCycleLifting:
 
     def setup_method(self):
         # Initialise the CellCycleLifting class
-        self.lifting = Graph2ComplexLiftingTransform(CellCycleLifting())
+        self.lifting = Graph2CellLiftingTransform(CellCycleLifting())
 
     def test_lift_topology(self, simple_graph_1):
         # Test the lift_topology method

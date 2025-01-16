@@ -1,6 +1,6 @@
 """Identity transform that does nothing to the input data."""
 
-from .base import FeatureLiftingMap
+from topobenchmark.transforms.feature_liftings.base import FeatureLiftingMap
 
 
 class Identity(FeatureLiftingMap):

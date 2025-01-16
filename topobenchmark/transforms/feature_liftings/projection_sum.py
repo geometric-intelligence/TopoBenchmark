@@ -2,7 +2,7 @@
 
 import torch
 
-from .base import FeatureLiftingMap
+from topobenchmark.transforms.feature_liftings.base import FeatureLiftingMap
 
 
 class ProjectionSum(FeatureLiftingMap):
@@ -13,12 +13,12 @@ class ProjectionSum(FeatureLiftingMap):
 
         Parameters
         ----------
-        data : PlainComplex
+        data : Complex
             The input data to be lifted.
 
         Returns
         -------
-        PlainComplex
+        Complex
             Domain with the lifted features.
         """
         for rank in range(domain.max_rank - 1):

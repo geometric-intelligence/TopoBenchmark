@@ -85,14 +85,14 @@ class Data2NxGraph(Adapter):
 
         if self.preserve_edge_attr and self._data_has_edge_attr(domain):
             # In case edge features are given, assign features to every edge
-            edge_index, edge_attr = (
-                domain.edge_index,
-                (
-                    domain.edge_attr
-                    if is_undirected(domain.edge_index, domain.edge_attr)
-                    else to_undirected(domain.edge_index, domain.edge_attr)
-                ),
-            )
+            # TODO: confirm this is the desired behavior
+            if is_undirected(domain.edge_index, domain.edge_attr):
+                edge_index, edge_attr = (domain.edge_index, domain.edge_attr)
+            else:
+                edge_index, edge_attr = to_undirected(
+                    domain.edge_index, domain.edge_attr
+                )
+
             edges = [
                 (i.item(), j.item(), dict(features=edge_attr[edge_idx], dim=1))
                 for edge_idx, (i, j) in enumerate(

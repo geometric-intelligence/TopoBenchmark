@@ -5,6 +5,7 @@ import numpy as np
 import torch
 import torch_geometric
 from topomodelx.utils.sparse import from_sparse
+from toponetx.classes import CellComplex, SimplicialComplex
 from torch_geometric.utils.undirected import is_undirected, to_undirected
 
 from topobenchmark.data.utils.domain import Complex
@@ -123,10 +124,6 @@ class TnxComplex2Complex(Adapter):
 
     Parameters
     ----------
-    complex_dim : int
-        Dimension of the (sub)complex.
-        If ``None``, adapts the (full) complex.
-        If greater than dimension of complex, pads with empty matrices.
     neighborhoods : list, optional
         List of neighborhoods of interest.
     signed : bool, optional
@@ -216,17 +213,18 @@ class TnxComplex2Complex(Adapter):
         if neighborhoods is not None:
             data = select_neighborhoods_of_interest(data, neighborhoods)
 
-        # TODO: simplex specific?
-        # TODO: how to do this for other?
-        if self.transfer_features and hasattr(
-            domain, "get_simplex_attributes"
-        ):
+        if self.transfer_features:
+            if isinstance(domain, SimplicialComplex):
+                get_features = domain.get_simplex_attributes
+            elif isinstance(domain, CellComplex):
+                get_features = domain.get_cell_attributes
+            else:
+                raise ValueError("Can't transfer features.")
+
             # TODO: confirm features are in the right order; update this
             data["features"] = []
             for rank in range(dim + 1):
-                rank_features_dict = domain.get_simplex_attributes(
-                    "features", rank
-                )
+                rank_features_dict = get_features("features", rank)
                 if rank_features_dict:
                     rank_features = torch.stack(
                         list(rank_features_dict.values())

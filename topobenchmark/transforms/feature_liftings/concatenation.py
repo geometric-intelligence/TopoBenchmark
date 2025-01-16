@@ -1,83 +1,53 @@
 """Concatenation feature lifting."""
 
 import torch
-import torch_geometric
+
+from topobenchmark.transforms.feature_liftings.base import FeatureLiftingMap
 
 
-class Concatenation(torch_geometric.transforms.BaseTransform):
-    r"""Lift r-cell features to r+1-cells by concatenation.
-
-    Parameters
-    ----------
-    **kwargs : optional
-        Additional arguments for the class.
-    """
-
-    def __init__(self, **kwargs):
-        super().__init__()
+class Concatenation(FeatureLiftingMap):
+    """Lift r-cell features to r+1-cells by concatenation."""
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}()"
 
-    def lift_features(
-        self, data: torch_geometric.data.Data | dict
-    ) -> torch_geometric.data.Data | dict:
+    def lift_features(self, domain):
         r"""Concatenate r-cell features to obtain r+1-cell features.
 
         Parameters
         ----------
-        data : torch_geometric.data.Data | dict
+        data : Complex
             The input data to be lifted.
 
         Returns
         -------
-        torch_geometric.data.Data | dict
-            The lifted data.
+        Complex
+            Domain with the lifted features.
         """
-        keys = sorted(
-            [
-                key.split("_")[1]
-                for key in data
-                if "incidence" in key and "-" not in key
-            ]
-        )
-        for elem in keys:
-            if f"x_{elem}" not in data:
-                idx_to_project = 0 if elem == "hyperedges" else int(elem) - 1
-                incidence = data["incidence_" + elem]
-                _, n = incidence.shape
+        for rank in range(domain.max_rank - 1):
+            if domain.features[rank + 1] is not None:
+                continue
 
-                if n != 0:
-                    idxs_list = []
-                    for n_feature in range(n):
-                        idxs_for_feature = incidence.indices()[
-                            0, incidence.indices()[1, :] == n_feature
-                        ]
-                        idxs_list.append(torch.sort(idxs_for_feature)[0])
+            # TODO: different if hyperedges?
+            idx_to_project = rank
 
-                    idxs = torch.stack(idxs_list, dim=0)
-                    values = data[f"x_{idx_to_project}"][idxs].view(n, -1)
-                else:
-                    m = data[f"x_{int(elem)-1}"].shape[1] * (int(elem) + 1)
-                    values = torch.zeros([0, m])
+            incidence = domain.incidence[rank + 1]
+            _, n = incidence.shape
 
-                data["x_" + elem] = values
-        return data
+            if n != 0:
+                idxs_list = []
+                for n_feature in range(n):
+                    idxs_for_feature = incidence.indices()[
+                        0, incidence.indices()[1, :] == n_feature
+                    ]
+                    idxs_list.append(torch.sort(idxs_for_feature)[0])
 
-    def forward(
-        self, data: torch_geometric.data.Data | dict
-    ) -> torch_geometric.data.Data | dict:
-        r"""Apply the lifting to the input data.
+                idxs = torch.stack(idxs_list, dim=0)
+                values = domain.features[idx_to_project][idxs].view(n, -1)
+            else:
+                m = domain.features[rank].shape[1] * (rank + 2)
+                values = torch.zeros([0, m])
 
-        Parameters
-        ----------
-        data : torch_geometric.data.Data | dict
-            The input data to be lifted.
+            domain.update_features(rank + 1, values)
 
-        Returns
-        -------
-        torch_geometric.data.Data | dict
-            The lifted data.
-        """
-        data = self.lift_features(data)
-        return data
+        return domain

@@ -2,7 +2,13 @@
 
 import torch
 
-from topobenchmark.transforms.liftings.graph2simplicial import (
+from topobenchmark.data.utils import (
+    Complex2Dict,
+    Data2NxGraph,
+    TnxComplex2Complex,
+)
+from topobenchmark.transforms.liftings import (
+    LiftingTransform,
     SimplicialCliqueLifting,
 )
 
@@ -13,13 +19,17 @@ class TestSetLifting:
     def setup_method(self):
         """Set up the test."""
         # Initialize a lifting class
-        self.lifting = SimplicialCliqueLifting(
-            feature_lifting="Set", complex_dim=3
+        self.lifting = LiftingTransform(
+            SimplicialCliqueLifting(complex_dim=3),
+            feature_lifting="Set",
+            data2domain=Data2NxGraph(),
+            domain2domain=TnxComplex2Complex(signed=False),
+            domain2dict=Complex2Dict(),
         )
 
     def test_lift_features(self, simple_graph_1):
         """Test the lift_features method.
-        
+
         Parameters
         ----------
         simple_graph_1 : torch_geometric.data.Data

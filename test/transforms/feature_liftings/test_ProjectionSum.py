@@ -2,7 +2,13 @@
 
 import torch
 
-from topobenchmark.transforms.liftings.graph2simplicial import (
+from topobenchmark.data.utils import (
+    Complex2Dict,
+    Data2NxGraph,
+    TnxComplex2Complex,
+)
+from topobenchmark.transforms.liftings import (
+    LiftingTransform,
     SimplicialCliqueLifting,
 )
 
@@ -13,13 +19,17 @@ class TestProjectionSum:
     def setup_method(self):
         """Set up the test."""
         # Initialize a lifting class
-        self.lifting = SimplicialCliqueLifting(
-            feature_lifting="ProjectionSum", complex_dim=3
+        self.lifting = LiftingTransform(
+            lifting=SimplicialCliqueLifting(complex_dim=3),
+            feature_lifting="ProjectionSum",
+            data2domain=Data2NxGraph(),
+            domain2domain=TnxComplex2Complex(),
+            domain2dict=Complex2Dict(),
         )
 
     def test_lift_features(self, simple_graph_1):
         """Test the lift_features method.
-        
+
         Parameters
         ----------
         simple_graph_1 : torch_geometric.data.Data
@@ -31,38 +41,27 @@ class TestProjectionSum:
 
         expected_x1 = torch.tensor(
             [
-                [   6.],
-                [  11.],
-                [ 101.],
-                [5001.],
-                [  15.],
-                [ 105.],
-                [  60.],
-                [ 110.],
-                [ 510.],
-                [5010.],
-                [1050.],
-                [1500.],
-                [5500.]
+                [6.0],
+                [11.0],
+                [101.0],
+                [5001.0],
+                [15.0],
+                [105.0],
+                [60.0],
+                [110.0],
+                [510.0],
+                [5010.0],
+                [1050.0],
+                [1500.0],
+                [5500.0],
             ]
         )
 
         expected_x2 = torch.tensor(
-            [
-                [   32.],
-                [  212.],
-                [  222.],
-                [10022.],
-                [  230.],
-                [11020.]
-            ]
+            [[32.0], [212.0], [222.0], [10022.0], [230.0], [11020.0]]
         )
 
-        expected_x3 = torch.tensor(
-            [
-                [696.]
-            ]
-        )
+        expected_x3 = torch.tensor([[696.0]])
 
         assert (
             expected_x1 == lifted_data.x_1

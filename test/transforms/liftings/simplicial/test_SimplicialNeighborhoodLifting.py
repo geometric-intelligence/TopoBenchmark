@@ -2,16 +2,11 @@
 
 import torch
 
-from topobenchmark.data.utils import (
-    Complex2Dict,
-    Data2NxGraph,
-    TnxComplex2Complex,
-)
 from topobenchmark.transforms.feature_liftings.projection_sum import (
     ProjectionSum,
 )
-from topobenchmark.transforms.liftings.base import LiftingTransform
-from topobenchmark.transforms.liftings.graph2simplicial.khop import (
+from topobenchmark.transforms.liftings import (
+    Graph2SimplicialLiftingTransform,
     SimplicialKHopLifting,
 )
 
@@ -23,25 +18,19 @@ class TestSimplicialKHopLifting:
 
     def setup_method(self):
         # Initialise the SimplicialKHopLifting class
-        data2graph = Data2NxGraph()
         feature_lifting = ProjectionSum()
-        domain2dict = Complex2Dict()
 
         lifting_map = SimplicialKHopLifting(complex_dim=3)
 
-        self.lifting_signed = LiftingTransform(
+        self.lifting_signed = Graph2SimplicialLiftingTransform(
             lifting=lifting_map,
             feature_lifting=feature_lifting,
-            data2domain=data2graph,
-            domain2domain=TnxComplex2Complex(signed=True),
-            domain2dict=domain2dict,
+            signed=True,
         )
-        self.lifting_unsigned = LiftingTransform(
+        self.lifting_unsigned = Graph2SimplicialLiftingTransform(
             lifting=lifting_map,
             feature_lifting=feature_lifting,
-            data2domain=data2graph,
-            domain2domain=TnxComplex2Complex(signed=False),
-            domain2dict=domain2dict,
+            signed=False,
         )
 
     def test_lift_topology(self, simple_graph_1):

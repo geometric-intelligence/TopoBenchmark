@@ -2,13 +2,8 @@
 
 import torch
 
-from topobenchmark.data.utils import (
-    Complex2Dict,
-    Data2NxGraph,
-    TnxComplex2Complex,
-)
 from topobenchmark.transforms.liftings import (
-    LiftingTransform,
+    Graph2SimplicialLiftingTransform,
     SimplicialCliqueLifting,
 )
 
@@ -19,12 +14,10 @@ class TestConcatenation:
     def setup_method(self):
         """Set up the test."""
         # Initialize a lifting class
-        self.lifting = LiftingTransform(
-            SimplicialCliqueLifting(complex_dim=3),
+
+        self.lifting = Graph2SimplicialLiftingTransform(
+            lifting=SimplicialCliqueLifting(complex_dim=3),
             feature_lifting="Concatenation",
-            data2domain=Data2NxGraph(),
-            domain2domain=TnxComplex2Complex(signed=False),
-            domain2dict=Complex2Dict(),
         )
 
     def test_lift_features(self, simple_graph_0, simple_graph_1):

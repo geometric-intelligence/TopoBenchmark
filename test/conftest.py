@@ -5,8 +5,8 @@ import pytest
 import torch
 import torch_geometric
 
-from topobenchmark.transforms.liftings.graph2cell.cycle import CellCycleLifting
-from topobenchmark.transforms.liftings.graph2simplicial.clique import (
+from topobenchmark.transforms.liftings import (
+    CellCycleLifting,
     SimplicialCliqueLifting,
 )
 

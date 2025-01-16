@@ -2,13 +2,8 @@
 
 import torch
 
-from topobenchmark.data.utils import (
-    Complex2Dict,
-    Data2NxGraph,
-    TnxComplex2Complex,
-)
 from topobenchmark.transforms.liftings import (
-    LiftingTransform,
+    Graph2SimplicialLiftingTransform,
     SimplicialCliqueLifting,
 )
 
@@ -19,12 +14,9 @@ class TestProjectionSum:
     def setup_method(self):
         """Set up the test."""
         # Initialize a lifting class
-        self.lifting = LiftingTransform(
+        self.lifting = Graph2SimplicialLiftingTransform(
             lifting=SimplicialCliqueLifting(complex_dim=3),
             feature_lifting="ProjectionSum",
-            data2domain=Data2NxGraph(),
-            domain2domain=TnxComplex2Complex(),
-            domain2dict=Complex2Dict(),
         )
 
     def test_lift_features(self, simple_graph_1):

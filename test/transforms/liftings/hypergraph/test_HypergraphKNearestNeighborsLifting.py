@@ -4,9 +4,7 @@ import pytest
 import torch
 from torch_geometric.data import Data
 
-from topobenchmark.transforms.liftings.graph2hypergraph.knn import (
-    HypergraphKNNLifting,
-)
+from topobenchmark.transforms.liftings import HypergraphKNNLifting
 
 
 class TestHypergraphKNNLifting:

@@ -3,16 +3,11 @@
 import torch
 from torch_geometric.data import Data
 
-from topobenchmark.data.utils import (
-    Complex2Dict,
-    Data2NxGraph,
-    TnxComplex2Complex,
-)
 from topobenchmark.transforms.data_manipulations import (
     CalculateSimplicialCurvature,
 )
 from topobenchmark.transforms.liftings import (
-    LiftingTransform,
+    Graph2SimplicialLiftingTransform,
     SimplicialCliqueLifting,
 )
 
@@ -30,11 +25,8 @@ class TestSimplicialCurvature:
         """
         simplicial_curvature = CalculateSimplicialCurvature()
 
-        lifting_unsigned = LiftingTransform(
-            lifting=SimplicialCliqueLifting(complex_dim=3),
-            data2domain=Data2NxGraph(),
-            domain2domain=TnxComplex2Complex(signed=False),
-            domain2dict=Complex2Dict(),
+        lifting_unsigned = Graph2SimplicialLiftingTransform(
+            lifting=SimplicialCliqueLifting(complex_dim=3)
         )
 
         data = lifting_unsigned(simple_graph_1)

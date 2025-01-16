@@ -48,6 +48,16 @@ class LiftingTransform(torch_geometric.transforms.BaseTransform):
         if domain2domain is None:
             domain2domain = IdentityAdapter()
 
+        if isinstance(lifting, str):
+            from topobenchmark.transforms import TRANSFORMS
+
+            lifting = TRANSFORMS[lifting]()
+
+        if isinstance(feature_lifting, str):
+            from topobenchmark.transforms import TRANSFORMS
+
+            feature_lifting = TRANSFORMS[feature_lifting]()
+
         self.data2domain = data2domain
         self.domain2domain = domain2domain
         self.domain2dict = domain2dict

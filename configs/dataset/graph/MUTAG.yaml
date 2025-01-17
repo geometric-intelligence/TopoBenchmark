@@ -6,6 +6,7 @@ loader:
     data_type: TUDataset
     data_name: MUTAG
     data_dir: ${paths.data_dir}/${dataset.loader.parameters.data_domain}/${dataset.loader.parameters.data_type}
+    process_on_disk: true # true loads faster, but runs slower
 
 # Dataset parameters
 parameters:

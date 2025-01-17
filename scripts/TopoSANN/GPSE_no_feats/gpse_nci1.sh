@@ -4,7 +4,7 @@ dataset='NCI1'
 project_name="TBX_GPSE_nofeat_$dataset"
 
 # Define available GPUs
-gpus=(1 2 3 5)
+gpus=(4 5 6 7)
 
 # Define all pretrain models
 #seeds=()
@@ -46,7 +46,7 @@ for i in {0..3}; do
     done
 done
 
-wait  
+wait
 # Wait for all background processes to complete
 
 

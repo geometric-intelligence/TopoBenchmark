@@ -2,7 +2,7 @@ dataset='PROTEINS'
 project_name="TBX_GPSE_$dataset"
 
 CUDA=3
-seeds=(0 1 2 4)
+gpus=(0 1 2 3)
 pretrain_models=('ZINC' 'GEOM')
 for pretrain_model in ${pretrain_models[*]}
 do
@@ -63,4 +63,6 @@ do
         --multirun &
     done
 done
+
+wait
 # transforms.sann_encoding.neighborhoods='[incidence_1,incidence_0]','[incidence_0]','[incidence_1,0_incidence_1,incidence_0]'\

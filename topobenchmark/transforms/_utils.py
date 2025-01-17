@@ -19,7 +19,9 @@ def discover_objs(package_path, condition=None):
         Dictionary mapping class names to their corresponding class objects.
     """
     if condition is None:
-        condition = lambda name, obj: True
+
+        def condition(name, obj):
+            return True
 
     objs = {}
 

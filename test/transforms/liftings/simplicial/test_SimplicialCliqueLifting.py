@@ -2,7 +2,11 @@
 
 import torch
 
-from topobenchmark.transforms.liftings.graph2simplicial import (
+from topobenchmark.transforms.feature_liftings.projection_sum import (
+    ProjectionSum,
+)
+from topobenchmark.transforms.liftings import (
+    Graph2SimplicialLiftingTransform,
     SimplicialCliqueLifting,
 )
 
@@ -12,11 +16,19 @@ class TestSimplicialCliqueLifting:
 
     def setup_method(self):
         # Initialise the SimplicialCliqueLifting class
-        self.lifting_signed = SimplicialCliqueLifting(
-            complex_dim=3, signed=True
+
+        lifting_map = SimplicialCliqueLifting(complex_dim=3)
+        feature_lifting = ProjectionSum()
+
+        self.lifting_signed = Graph2SimplicialLiftingTransform(
+            lifting=lifting_map,
+            feature_lifting=feature_lifting,
+            signed=True,
         )
-        self.lifting_unsigned = SimplicialCliqueLifting(
-            complex_dim=3, signed=False
+        self.lifting_unsigned = Graph2SimplicialLiftingTransform(
+            lifting=lifting_map,
+            feature_lifting=feature_lifting,
+            signed=False,
         )
 
     def test_lift_topology(self, simple_graph_1):
@@ -204,6 +216,8 @@ class TestSimplicialCliqueLifting:
 
     def test_lifted_features_signed(self, simple_graph_1):
         """Test the lift_features method in signed incidence cases."""
+        # TODO: can be removed/moved; part of projection sum
+
         self.data = simple_graph_1
         # Test the lift_features method for signed case
         lifted_data = self.lifting_signed.forward(self.data)
@@ -246,6 +260,8 @@ class TestSimplicialCliqueLifting:
 
     def test_lifted_features_unsigned(self, simple_graph_1):
         """Test the lift_features method in unsigned incidence cases."""
+        # TODO: redundant. can be moved/removed
+
         self.data = simple_graph_1
         # Test the lift_features method for unsigned case
         lifted_data = self.lifting_unsigned.forward(self.data)

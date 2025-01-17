@@ -3,7 +3,7 @@ project_name="TBX_GPSE_$dataset"
 #CUDA=2
 
 # Define available GPUs
-gpus=(2 3 5 6)
+gpus=(0 1 2 3)
 
 # Define all pretrain models
 #seeds=()
@@ -43,5 +43,7 @@ for i in {0..3}; do
         --multirun &
     done
 done
+
+wait
 
 # transforms.sann_encoding.neighborhoods='[incidence_1,incidence_0]','[incidence_0]','[incidence_1,0_incidence_1,incidence_0]'\

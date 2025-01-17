@@ -6,3 +6,14 @@ wait
 
 bash ./scripts/TopoSANN/GPSE_no_feats/gpse_nci109.sh
 wait
+
+bash ./scripts/TopoSANN/GPSE_no_feats/gpse_proteins.sh
+wait
+
+bash ./scripts/TopoSANN/GPSE_no_feats/gpse_mutag.sh
+wait
+
+
+
+
+

@@ -6,8 +6,8 @@ from .ondisk_dataload_dataset import OnDiskDataloadDataset
 from .ondisk_dataloader import OnDiskTBDataloader
 
 __all__ = [
-    "TBDataloader",
     "DataloadDataset",
-    "OnDiskTBDataloader",
     "OnDiskDataloadDataset",
+    "OnDiskTBDataloader",
+    "TBDataloader",
 ]

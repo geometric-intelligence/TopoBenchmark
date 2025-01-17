@@ -407,9 +407,9 @@ class H36MDataset(OnDiskDataset):
         #       so the model can choose which to care about.
         # For efficiency, though, perhaps could be good to prune this...
         # TODO: Make which edges are created a parameter to pass into config!
-        fully_connected_edges = torch.combinations(
-            torch.arange(self.N_FRAMES * 22 * 3), r=2
-        ).t()  # Shape: [2, num_edges] where num_edges = (n*(n-1))/2
+        # fully_connected_edges = torch.combinations(
+        #     torch.arange(self.N_FRAMES * 22 * 3), r=2
+        # ).t()  # Shape: [2, num_edges] where num_edges = (n*(n-1))/2
         empty_edges = torch.zeros((2, 0), dtype=torch.long)  # Shape: [2, 0]
 
         # Step 2: turn them into torch_geometric.data Data objects

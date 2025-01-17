@@ -4,34 +4,29 @@ import inspect
 
 import torch_geometric
 
-from topobenchmark.transforms import LIFTINGS, TRANSFORMS
+from topobenchmark.transforms import (
+    LIFTINGS,
+    TRANSFORMS,
+    _map_lifting_type_to_dict,
+)
 from topobenchmark.transforms.liftings import (
-    GRAPH2CELL_LIFTINGS,
-    GRAPH2HYPERGRAPH_LIFTINGS,
-    GRAPH2SIMPLICIAL_LIFTINGS,
     Graph2CellLiftingTransform,
     Graph2HypergraphLiftingTransform,
     Graph2SimplicialLiftingTransform,
     LiftingTransform,
 )
 
-_map_lifting_types = {
-    "graph2cell": (GRAPH2CELL_LIFTINGS, Graph2CellLiftingTransform),
-    "graph2hypergraph": (
-        GRAPH2HYPERGRAPH_LIFTINGS,
-        Graph2HypergraphLiftingTransform,
-    ),
-    "graph2simplicial": (
-        GRAPH2SIMPLICIAL_LIFTINGS,
-        Graph2SimplicialLiftingTransform,
-    ),
+_map_lifting_type_to_transform = {
+    "graph2cell": Graph2CellLiftingTransform,
+    "graph2hypergraph": Graph2HypergraphLiftingTransform,
+    "graph2simplicial": Graph2SimplicialLiftingTransform,
 }
 
 
-def _map_lifting_name(lifting_name):
-    for liftings_dict, Transform in _map_lifting_types.values():
+def _map_lifting_to_transform(lifting_name):
+    for key, liftings_dict in _map_lifting_type_to_dict.items():
         if lifting_name in liftings_dict:
-            return Transform
+            return _map_lifting_type_to_transform[key]
 
     return LiftingTransform
 
@@ -71,7 +66,7 @@ class DataTransform(torch_geometric.transforms.BaseTransform):
             transform = TRANSFORMS[transform_name](**kwargs)
         else:
             LiftingMap_ = TRANSFORMS[transform_name]
-            Transform = _map_lifting_name(transform_name)
+            Transform = _map_lifting_to_transform(transform_name)
             lifting_map_kwargs, transform_kwargs = _route_lifting_kwargs(
                 kwargs, LiftingMap_, Transform
             )

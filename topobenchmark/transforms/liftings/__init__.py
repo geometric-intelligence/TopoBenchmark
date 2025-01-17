@@ -5,6 +5,7 @@ from .base import (  # noqa: F401
     Graph2ComplexLiftingTransform,
     Graph2HypergraphLiftingTransform,
     Graph2SimplicialLiftingTransform,
+    LiftingMap,
     LiftingTransform,
 )
 from .graph2cell import GRAPH2CELL_LIFTINGS
